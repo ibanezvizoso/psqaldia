@@ -4,15 +4,18 @@
     <meta name="google-site-verification" content="BpHCi544mGO8TaOecGzGZpkH4wzaltHrdY4VqNhBEp4" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSQALDÍA | Recursos para Psiquiatría</title>
+    
+    <title>PSQALDÍA | Actualidad y recursos para psiquiatría</title>
+    <meta name="description" content="Plataforma de actualidad y recursos para psiquiatría. Encuentra escalas, guías clínicas y herramientas actualizadas para la práctica diaria.">
+    <meta name="keywords" content="psiquiatría, escalas, guías clínicas, salud mental, recursos médicos">
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4338ca">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="Logo.png">
-    
     <link rel="icon" type="image/png" href="Logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root {
             --bg: #f8fafc; --card: #ffffff; --primary: #4338ca; --whatsapp: #22c55e;
@@ -72,7 +75,7 @@
 <body>
 
 <header id="mainHeader">
-    <img src="Logo.png" alt="Logo" class="logo-img">
+    <img src="Logo.png" alt="Logo PSQALDÍA" class="logo-img">
 </header>
 
 <div class="container">
@@ -118,7 +121,6 @@
     let lastScrollY = window.scrollY;
     let deferredPrompt;
 
-    // Control de scroll
     window.addEventListener('scroll', () => {
         const header = document.getElementById('mainHeader');
         if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
@@ -126,22 +128,17 @@
         lastScrollY = window.scrollY;
     });
 
-    // Colores pastel por nombre
     function getPasteColor(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
         const h = Math.abs(hash) % 360;
-        return `background-color: hsl(${h}, 70%, 90%); color: hsl(${h}, 70%, 25%); border: 1px solid hsl(${h}, 70%, 80%);`;
+        return `background-color: hsl(${h}, 70%, 92%); color: hsl(${h}, 70%, 25%); border: 1px solid hsl(${h}, 70%, 80%);`;
     }
 
-    // Parser de fechas robusto
     function parseDate(dateStr) {
         if (!dateStr) return new Date(0);
         const parts = dateStr.split(/[/ -]/);
-        if (parts.length === 3) {
-            // Formato DD/MM/YYYY
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
+        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
         return new Date(dateStr) || new Date(0);
     }
 
@@ -158,10 +155,9 @@
                 link: row[3] || '', 
                 imagen: row[4] || '', 
                 categoria: (row[5] || 'Otros').trim().toUpperCase(), 
-                id: 'psq-' + row[1].replace(/\s+/g, '-').toLowerCase() // ID único basado en título
+                id: 'psq-' + row[1].replace(/\s+/g, '-').toLowerCase()
             }));
 
-            // ORDENAR POR FECHA (Últimos primero)
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
 
             createFilterButtons();
@@ -189,11 +185,7 @@
 
     function toggleFavorite(e, id) {
         e.stopPropagation();
-        if (favorites.includes(id)) {
-            favorites = favorites.filter(fav => fav !== id);
-        } else {
-            favorites.push(id);
-        }
+        favorites = favorites.includes(id) ? favorites.filter(fav => fav !== id) : [...favorites, id];
         localStorage.setItem('psq_favs', JSON.stringify(favorites));
         filter();
     }
@@ -207,8 +199,7 @@
         const favsList = dataToRender.filter(i => favorites.includes(i.id));
         const othersList = dataToRender.filter(i => !favorites.includes(i.id));
 
-        favsApp.innerHTML = '';
-        app.innerHTML = '';
+        favsApp.innerHTML = ''; app.innerHTML = '';
 
         if (favsList.length > 0 && currentCategory === 'TODOS') {
             favsTitle.style.display = 'block';
@@ -247,7 +238,7 @@
     }
 
     function filter() {
-        const q = document.getElementById('search').value.toLowerCase();
+        const q = document.getElementById('search').value.toLowerCase().trim();
         const filtered = db.filter(i => {
             const matchQ = i.titulo.toLowerCase().includes(q) || i.resumen.toLowerCase().includes(q);
             const matchC = currentCategory === 'TODOS' || i.categoria === currentCategory;
@@ -275,7 +266,6 @@
 
     function closeModal() { document.getElementById('modal').style.display = 'none'; document.body.style.overflow = 'auto'; }
     
-    // Detección iOS/PWA
     window.addEventListener('load', () => {
         const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
         const isStandalone = ('standalone' in window.navigator) && (window.navigator.standalone);
