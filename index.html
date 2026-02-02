@@ -8,7 +8,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4338ca">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="Logo.png">
     
     <link rel="icon" type="image/png" href="Logo.png">
@@ -16,7 +15,7 @@
     <style>
         :root {
             --bg: #f8fafc; --card: #ffffff; --primary: #4338ca; --whatsapp: #22c55e;
-            --text-main: #1e293b; --text-muted: #64748b;
+            --text-main: #1e293b; --text-muted: #64748b; --fav: #f59e0b;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; }
         
@@ -29,6 +28,7 @@
         .logo-img { max-height: 110px; width: auto; display: block; margin: 0 auto; }
         
         .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; }
+        
         .search-area { max-width: 600px; margin: 0 auto 2.5rem; text-align: center; }
         #search { width: 100%; padding: 1.1rem 1.5rem; border-radius: 50px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
@@ -36,11 +36,18 @@
         .f-btn { padding: 0.6rem 1.2rem; border-radius: 50px; border: 1px solid #e2e8f0; background: white; cursor: pointer; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; transition: 0.3s; color: var(--text-muted); }
         .f-btn.active { background: #1e293b; color: white; border-color: #1e293b; }
 
-        #app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; }
+        .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
+
+        #app, #favs-app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+        
+        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .card-img { width: 100%; height: 180px; object-fit: cover; background: #e2e8f0; }
         .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+
+        .fav-btn { position: absolute; top: 1rem; right: 1rem; background: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; font-size: 1.1rem; color: #cbd5e1; transition: 0.2s; }
+        .fav-btn.is-fav { color: var(--fav); }
+
         .tag { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; }
 
         .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: #0f172a; line-height: 1.2; }
@@ -51,23 +58,9 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 55px; font-size: 1.4rem; }
 
-        /* Botón Instalar Android */
-        #installBtn {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px;
-            font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none;
-            align-items: center; gap: 10px;
-        }
+        #installBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none; align-items: center; gap: 10px; }
 
-        /* Aviso Especial iPhone */
-        #iosAlert {
-            position: fixed; bottom: 20px; left: 10px; right: 10px;
-            background: white; border: 1px solid #e2e8f0; padding: 15px;
-            border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 1001; display: none; align-items: center; gap: 12px;
-            animation: slideUp 0.5s ease-out;
-        }
+        #iosAlert { position: fixed; bottom: 20px; left: 10px; right: 10px; background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1001; display: none; align-items: center; gap: 12px; animation: slideUp 0.5s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
@@ -83,9 +76,14 @@
 
 <div class="container">
     <div class="search-area">
-        <input type="text" id="search" placeholder="Buscar..." oninput="filter()">
+        <input type="text" id="search" placeholder="Buscar escalas, guías, fármacos..." oninput="filter()">
         <div id="filterContainer" class="filter-buttons"></div>
     </div>
+
+    <div id="favs-title" class="section-title"><i class="fas fa-star"></i> Mis Favoritos</div>
+    <div id="favs-app"></div>
+
+    <div id="main-title" class="section-title">Todos los Recursos</div>
     <div id="app"></div>
 </div>
 
@@ -114,40 +112,12 @@
     const RANGE = 'B2:G100';
 
     let db = [];
+    let favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]');
     let currentCategory = 'TODOS';
     let lastScrollY = window.scrollY;
     let deferredPrompt;
 
-    // DETECCIÓN DE IPHONE Y ANDROID
-    const isIos = () => {
-        const userAgent = window.navigator.userAgent.toLowerCase();
-        return /iphone|ipad|ipod/.test(userAgent);
-    };
-    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-
-    // Lógica para Android
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installBtn').style.display = 'flex';
-    });
-
-    document.getElementById('installBtn').addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') document.getElementById('installBtn').style.display = 'none';
-            deferredPrompt = null;
-        }
-    });
-
-    // Lógica para iPhone
-    window.addEventListener('load', () => {
-        if (isIos() && !isInStandaloneMode()) {
-            document.getElementById('iosAlert').style.display = 'flex';
-        }
-    });
-
+    // Control de scroll
     window.addEventListener('scroll', () => {
         const header = document.getElementById('mainHeader');
         if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
@@ -155,6 +125,7 @@
         lastScrollY = window.scrollY;
     });
 
+    // Colores pastel por nombre
     function getPasteColor(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -162,17 +133,38 @@
         return `background-color: hsl(${h}, 70%, 90%); color: hsl(${h}, 70%, 25%); border: 1px solid hsl(${h}, 70%, 80%);`;
     }
 
+    // Parser de fechas robusto
+    function parseDate(dateStr) {
+        if (!dateStr) return new Date(0);
+        const parts = dateStr.split(/[/ -]/);
+        if (parts.length === 3) {
+            // Formato DD/MM/YYYY
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+        return new Date(dateStr) || new Date(0);
+    }
+
     async function loadData() {
         try {
             const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`);
             const data = await res.json();
             if (!data.values) return;
+            
             db = data.values.map((row, index) => ({
-                fecha: row[0], titulo: row[1], resumen: row[2], link: row[3], imagen: row[4], 
-                categoria: (row[5] || 'Otros').trim().toUpperCase(), id: index
+                fecha: row[0] || '', 
+                titulo: row[1] || '', 
+                resumen: row[2] || '', 
+                link: row[3] || '', 
+                imagen: row[4] || '', 
+                categoria: (row[5] || 'Otros').trim().toUpperCase(), 
+                id: 'psq-' + row[1].replace(/\s+/g, '-').toLowerCase() // ID único basado en título
             }));
+
+            // ORDENAR POR FECHA (Últimos primero)
+            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
+
             createFilterButtons();
-            render(db);
+            renderAll();
         } catch (e) { console.error(e); }
     }
 
@@ -194,26 +186,63 @@
         });
     }
 
-    function render(data) {
+    function toggleFavorite(e, id) {
+        e.stopPropagation();
+        if (favorites.includes(id)) {
+            favorites = favorites.filter(fav => fav !== id);
+        } else {
+            favorites.push(id);
+        }
+        localStorage.setItem('psq_favs', JSON.stringify(favorites));
+        filter();
+    }
+
+    function renderAll(dataToRender = db) {
+        const favsApp = document.getElementById('favs-app');
         const app = document.getElementById('app');
+        const favsTitle = document.getElementById('favs-title');
+        const mainTitle = document.getElementById('main-title');
+
+        const favsList = dataToRender.filter(i => favorites.includes(i.id));
+        const othersList = dataToRender.filter(i => !favorites.includes(i.id));
+
+        favsApp.innerHTML = '';
         app.innerHTML = '';
-        data.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.onclick = () => openModal(item.id);
-            card.innerHTML = `
-                <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img">
-                <div class="card-content">
-                    <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-                    <div class="tit">${item.titulo}</div>
-                    <div class="res">${item.resumen}</div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary">ACCEDER</button>
-                        <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>`;
-            app.appendChild(card);
-        });
+
+        if (favsList.length > 0 && currentCategory === 'TODOS') {
+            favsTitle.style.display = 'block';
+            favsList.forEach(item => favsApp.appendChild(createCard(item)));
+        } else {
+            favsTitle.style.display = 'none';
+        }
+
+        if (othersList.length > 0) {
+            mainTitle.style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
+            othersList.forEach(item => app.appendChild(createCard(item)));
+        }
+    }
+
+    function createCard(item) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = () => openModal(item.id);
+        const isFav = favorites.includes(item.id);
+        
+        card.innerHTML = `
+            <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')">
+                <i class="fa${isFav ? 's' : 'r'} fa-star"></i>
+            </button>
+            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img">
+            <div class="card-content">
+                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+                <div class="tit">${item.titulo}</div>
+                <div class="res">${item.resumen}</div>
+                <div class="card-actions">
+                    <button class="btn btn-primary">ACCEDER</button>
+                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>`;
+        return card;
     }
 
     function filter() {
@@ -223,24 +252,49 @@
             const matchC = currentCategory === 'TODOS' || i.categoria === currentCategory;
             return matchQ && matchC;
         });
-        render(filtered);
+        renderAll(filtered);
     }
 
-    function openModal(idx) {
-        const item = db[idx];
+    function openModal(id) {
+        const item = db.find(i => i.id === id);
         document.getElementById('modalData').innerHTML = `
             <img src="${item.imagen}" style="width:100%; height:250px; object-fit:cover;">
             <div style="padding:2rem;">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <h2 style="margin:1rem 0;">${item.titulo}</h2>
                 <p style="color:#64748b; line-height:1.6; margin-bottom:2rem;">${item.resumen}</p>
-                <a href="${item.link}" target="_blank" class="btn btn-primary" style="padding:1rem;">ACCEDER AL RECURSO</a>
+                <div class="card-actions">
+                    <a href="${item.link}" target="_blank" class="btn btn-primary" style="padding:1rem;">ACCEDER AL RECURSO</a>
+                </div>
+                <p style="font-size:0.75rem; color:#94a3b8; margin-top:1.5rem;">Publicado: ${item.fecha}</p>
             </div>`;
         document.getElementById('modal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
     function closeModal() { document.getElementById('modal').style.display = 'none'; document.body.style.overflow = 'auto'; }
+    
+    // Detección iOS/PWA
+    window.addEventListener('load', () => {
+        const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        const isStandalone = ('standalone' in window.navigator) && (window.navigator.standalone);
+        if (isIos && !isStandalone) document.getElementById('iosAlert').style.display = 'flex';
+    });
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBtn').style.display = 'flex';
+    });
+
+    document.getElementById('installBtn').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt = null;
+            document.getElementById('installBtn').style.display = 'none';
+        }
+    });
+
     loadData();
 </script>
 </body>
