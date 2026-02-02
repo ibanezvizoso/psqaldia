@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSQALDÍA | Recursos para Psiquiatría</title>
+    <meta name="description" content="Repositorio especializado de recursos para psiquiatría: escalas, guías clínicas y herramientas de consulta rápida.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -14,13 +15,13 @@
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; line-height: 1.5; }
 
         header { background: var(--card); padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; text-align: center; }
-        .logo { height: 50px; margin-bottom: 10px; }
+        .logo { height: 60px; max-width: 200px; object-fit: contain; margin-bottom: 10px; }
         .brand { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em; color: var(--primary); text-transform: uppercase; }
 
         .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
 
         .search-area { max-width: 600px; margin: 0 auto 2rem; display: flex; gap: 0.5rem; }
-        #search { flex: 1; padding: 0.75rem 1.5rem; border-radius: 99px; border: 1px solid #e2e8f0; font-size: 1rem; transition: border-color 0.2s; outline: none; }
+        #search { flex: 1; padding: 0.75rem 1.5rem; border-radius: 99px; border: 1px solid #e2e8f0; font-size: 1rem; transition: border-color 0.2s; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         #search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
 
         #app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
@@ -32,24 +33,22 @@
         .card img { width: 100%; height: 180px; object-fit: cover; background: #f1f5f9; }
         
         .card-content { padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; width: fit-content; }
+        .tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; width: fit-content; text-transform: uppercase; }
         .tit { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); line-height: 1.3; }
         .res { font-size: 0.875rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 1rem; }
 
         .card-actions { display: flex; gap: 0.5rem; margin-top: auto; }
         .btn { flex: 1; padding: 0.6rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 0.875rem; text-align: center; transition: opacity 0.2s; }
-        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary { background: var(--primary); color: white; border: none; cursor: pointer; }
         .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 45px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .btn:hover { opacity: 0.9; }
 
-        /* MODAL REDISEÑADO */
         .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-        .modal-content { background: white; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 1.5rem; overflow-y: auto; position: relative; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-content { background: white; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 1.5rem; overflow-y: auto; position: relative; }
         .modal-body { padding: 2rem; }
         .close-modal { position: absolute; top: 1rem; right: 1rem; background: white; border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #e2e8f0; z-index: 10; font-size: 1.2rem; }
 
-        .skeleton { height: 350px; background: white; border-radius: 1rem; animation: pulse 1.5s infinite; border: 1px solid #e2e8f0; }
+        .skeleton { height: 350px; background: #edf2f7; border-radius: 1rem; animation: pulse 1.5s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
         @media (max-width: 640px) { .brand { font-size: 1.25rem; } }
@@ -58,12 +57,14 @@
 <body>
 
 <header>
+    de la línea siguiente -->
+    <img src="logo.png" alt="PSQALDÍA" class="logo" onerror="this.style.display='none'">
     <div class="brand">PSQALDÍA</div>
 </header>
 
 <div class="container">
     <div class="search-area">
-        <input type="text" id="search" placeholder="Buscar guías, escalas, recursos..." oninput="filter()">
+        <input type="text" id="search" placeholder="Buscar por título, categoría o resumen..." oninput="filter()">
     </div>
 
     <div id="app">
@@ -83,7 +84,7 @@
 <script>
     const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
     const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
-    const RANGE = 'A2:Z100'; // Ajusta según tu hoja
+    const RANGE = 'B2:G100'; // De B (Fecha) a G (Categoría)
 
     let db = [];
 
@@ -93,38 +94,43 @@
             const response = await fetch(url);
             const data = await response.json();
             
-            // Transformar array de arrays a array de objetos usando la primera fila como cabecera si es necesario
-            // Como empezamos en A2, asumo que tienes un orden fijo: 0:id, 1:Categoría, 2:Título, 3:Resumen, 4:Link, 5:Imagen, 6:Fecha
-            db = data.values.map(row => ({
-                id_p: row[0],
-                categoria: row[1],
-                titulo: row[2],
-                resumen: row[3],
-                link: row[4],
-                imagen: row[5],
-                fecha: row[6]
+            if (!data.values) throw new Error("No hay datos");
+
+            db = data.values.map((row, index) => ({
+                fecha:     row[0] || '', // B
+                titulo:    row[1] || '', // C
+                resumen:   row[2] || '', // D
+                link:      row[3] || '', // E
+                imagen:    row[4] || '', // F
+                categoria: row[5] || '', // G
+                id:        'item-' + index // ID interno para el modal
             }));
             render(db);
         } catch (e) {
-            document.getElementById('app').innerHTML = `<p style="text-align:center; color:red;">Error al cargar datos. Revisa la clave API y el acceso al Excel.</p>`;
+            console.error(e);
+            document.getElementById('app').innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 2rem;">
+                <p style="color:red; font-weight:bold;">Error de conexión.</p>
+                <p>Asegúrate de que el Excel está compartido como "Cualquier persona con el enlace" en modo Lector.</p>
+            </div>`;
         }
     }
 
     function filter() {
         const q = document.getElementById('search').value.toLowerCase();
         const filtered = db.filter(i => 
-            (i.titulo || '').toLowerCase().includes(q) || 
-            (i.resumen || '').toLowerCase().includes(q) ||
-            (i.categoria || '').toLowerCase().includes(q)
+            i.titulo.toLowerCase().includes(q) || 
+            i.resumen.toLowerCase().includes(q) ||
+            i.categoria.toLowerCase().includes(q)
         );
         render(filtered);
     }
 
     function getTagColor(cat) {
-        const colors = {
-            'ESCALAS': '#dbeafe', 'GUÍAS': '#dcfce7', 'FÁRMACOS': '#fee2e2', 'GENERAL': '#f3e8ff'
-        };
-        return colors[cat?.toUpperCase()] || '#e2e8f0';
+        const c = cat.toUpperCase();
+        if(c.includes('ESCALA')) return '#dbeafe';
+        if(c.includes('GUÍA')) return '#dcfce7';
+        if(c.includes('FÁRMACO')) return '#fee2e2';
+        return '#f3e8ff';
     }
 
     function render(data) {
@@ -133,18 +139,18 @@
         data.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.onclick = () => openModal(item.id_p);
+            card.onclick = () => openModal(item.id);
             
             const waText = encodeURIComponent(`*${item.titulo}*\n${item.link}`);
             
             card.innerHTML = `
                 <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" loading="lazy">
                 <div class="card-content">
-                    <span class="tag" style="background:${getTagColor(item.categoria)}">${item.categoria || 'Recurso'}</span>
-                    <div class="tit">${item.titulo || 'Sin título'}</div>
-                    <div class="res">${item.resumen || ''}</div>
+                    <span class="tag" style="background:${getTagColor(item.categoria)}">${item.categoria || 'RECURSO'}</span>
+                    <div class="tit">${item.titulo}</div>
+                    <div class="res">${item.resumen}</div>
                     <div class="card-actions">
-                        <a href="${item.link}" target="_blank" class="btn btn-primary" onclick="event.stopPropagation()">VER RECURSO</a>
+                        <button class="btn btn-primary">VER DETALLES</button>
                         <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
@@ -154,7 +160,7 @@
     }
 
     function openModal(id) {
-        const item = db.find(x => x.id_p === id);
+        const item = db.find(x => x.id === id);
         const modalData = document.getElementById('modalData');
         const waText = encodeURIComponent(`*${item.titulo}*\n${item.link}`);
         
@@ -162,12 +168,13 @@
             <img src="${item.imagen}" style="width:100%; height:250px; object-fit:cover;">
             <div class="modal-body">
                 <span class="tag" style="background:${getTagColor(item.categoria)}">${item.categoria}</span>
-                <h2 style="margin: 0.5rem 0 1rem; font-size:1.75rem;">${item.titulo}</h2>
+                <h2 style="margin: 0.5rem 0 1rem; font-size:1.75rem; line-height:1.2;">${item.titulo}</h2>
                 <p style="color:var(--text-muted); font-size:1rem; line-height:1.7; margin-bottom:2rem;">${item.resumen}</p>
                 <div class="card-actions">
-                    <a href="${item.link}" target="_blank" class="btn btn-primary" style="padding:1rem;">ABRIR RECURSO COMPLETO</a>
+                    <a href="${item.link}" target="_blank" class="btn btn-primary" style="padding:1rem; display:block;">ABRIR PDF / LINK</a>
                     <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="btn btn-wa" style="flex:none; width:60px;"><i class="fab fa-whatsapp"></i></a>
                 </div>
+                <p style="margin-top:1.5rem; font-size:0.75rem; color:#94a3b8;">Publicado: ${item.fecha}</p>
             </div>
         `;
         document.getElementById('modal').style.display = 'flex';
