@@ -4,69 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSQALDÍA | Recursos para Psiquiatría</title>
-    <meta name="description" content="Repositorio especializado de recursos para psiquiatría: escalas, guías clínicas y herramientas de consulta rápida.">
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #f8fafc; --card: #ffffff; --primary: #6366f1; --primary-hover: #4f46e5;
-            --text-main: #0f172a; --text-muted: #64748b; --whatsapp: #25D366;
+            --bg: #f1f5f9; --card: #ffffff; --primary: #4338ca; --primary-hover: #3730a3;
+            --text-main: #1e293b; --text-muted: #64748b; --whatsapp: #22c55e;
         }
 
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; line-height: 1.5; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; }
 
-        header { background: var(--card); padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; text-align: center; }
-        .logo { height: 60px; max-width: 200px; object-fit: contain; margin-bottom: 10px; }
-        .brand { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em; color: var(--primary); text-transform: uppercase; }
+        header { background: var(--card); padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; position: sticky; top: 0; z-index: 100; }
+        .logo-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .logo-img { max-height: 70px; max-width: 220px; object-fit: contain; margin-bottom: 5px; }
+        .brand { font-size: 1.75rem; font-weight: 900; color: var(--primary); letter-spacing: -1px; text-transform: uppercase; margin: 0; }
 
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-
-        .search-area { max-width: 600px; margin: 0 auto 2rem; display: flex; gap: 0.5rem; }
-        #search { flex: 1; padding: 0.75rem 1.5rem; border-radius: 99px; border: 1px solid #e2e8f0; font-size: 1rem; transition: border-color 0.2s; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        #search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+        
+        .search-area { max-width: 500px; margin: 0 auto 2.5rem; }
+        #search { width: 100%; padding: 0.8rem 1.5rem; border-radius: 50px; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; transition: all 0.3s; box-sizing: border-box; }
+        #search:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 56, 202, 0.1); }
 
         #app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
 
-        .card { 
-            background: var(--card); border-radius: 1rem; overflow: hidden; border: 1px solid #e2e8f0; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column;
-        }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 180px; object-fit: cover; background: #f1f5f9; }
+        /* Tarjetas */
+        .card { background: var(--card); border-radius: 1.25rem; overflow: hidden; border: 1px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .card-img { width: 100%; height: 180px; object-fit: cover; background: #cbd5e1; }
+        .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
         
-        .card-content { padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; width: fit-content; text-transform: uppercase; }
-        .tit { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); line-height: 1.3; }
-        .res { font-size: 0.875rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 1rem; }
+        /* Sistema de Etiquetas */
+        .tag { padding: 0.35rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid rgba(0,0,0,0.05); }
+        
+        .tag-escala { background: #dbeafe; color: #1e40af; } /* Azul */
+        .tag-guia { background: #dcfce7; color: #166534; }   /* Verde */
+        .tag-farmaco { background: #fee2e2; color: #991b1b; } /* Rojo */
+        .tag-video { background: #ffedd5; color: #9a3412; }   /* Naranja */
+        .tag-formacion { background: #fef9c3; color: #854d0e; } /* Amarillo */
+        .tag-default { background: #f3e8ff; color: #6b21a8; }  /* Morado (para el resto) */
 
-        .card-actions { display: flex; gap: 0.5rem; margin-top: auto; }
-        .btn { flex: 1; padding: 0.6rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 0.875rem; text-align: center; transition: opacity 0.2s; }
-        .btn-primary { background: var(--primary); color: white; border: none; cursor: pointer; }
-        .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 45px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .btn:hover { opacity: 0.9; }
+        .tit { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; line-height: 1.2; color: #0f172a; }
+        .res { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-        .modal-content { background: white; width: 100%; max-width: 600px; max-height: 90vh; border-radius: 1.5rem; overflow-y: auto; position: relative; }
-        .modal-body { padding: 2rem; }
-        .close-modal { position: absolute; top: 1rem; right: 1rem; background: white; border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #e2e8f0; z-index: 10; font-size: 1.2rem; }
+        .card-actions { display: flex; gap: 0.75rem; margin-top: auto; }
+        .btn { flex: 1; padding: 0.75rem; border-radius: 0.75rem; text-decoration: none; font-weight: 700; font-size: 0.85rem; text-align: center; transition: all 0.2s; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 50px; font-size: 1.25rem; }
 
-        .skeleton { height: 350px; background: #edf2f7; border-radius: 1rem; animation: pulse 1.5s infinite; }
+        /* Modal */
+        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        .modal-content { background: white; width: 100%; max-width: 650px; max-height: 90vh; border-radius: 1.5rem; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: white; border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .modal-body { padding: 2.5rem; }
+
+        .skeleton { height: 350px; background: #e2e8f0; border-radius: 1.25rem; animation: pulse 1.5s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
-
-        @media (max-width: 640px) { .brand { font-size: 1.25rem; } }
     </style>
 </head>
 <body>
 
 <header>
-    de la línea siguiente -->
-    <img src="logo.png" alt="PSQALDÍA" class="logo" onerror="this.style.display='none'">
-    <div class="brand">PSQALDÍA</div>
+    <div class="logo-container">
+        <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+        <h1 class="brand">PSQALDÍA</h1>
+    </div>
 </header>
 
 <div class="container">
     <div class="search-area">
-        <input type="text" id="search" placeholder="Buscar por título, categoría o resumen..." oninput="filter()">
+        <input type="text" id="search" placeholder="Buscar escalas, guías o fármacos..." oninput="filter()">
     </div>
-
     <div id="app">
         <div class="skeleton"></div>
         <div class="skeleton"></div>
@@ -76,7 +83,7 @@
 
 <div id="modal" class="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        <div class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></div>
         <div id="modalData"></div>
     </div>
 </div>
@@ -84,7 +91,7 @@
 <script>
     const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
     const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
-    const RANGE = 'B2:G100'; // De B (Fecha) a G (Categoría)
+    const RANGE = 'B2:G100';
 
     let db = [];
 
@@ -93,44 +100,31 @@
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
             const response = await fetch(url);
             const data = await response.json();
-            
-            if (!data.values) throw new Error("No hay datos");
+            if (!data.values) return;
 
             db = data.values.map((row, index) => ({
-                fecha:     row[0] || '', // B
-                titulo:    row[1] || '', // C
-                resumen:   row[2] || '', // D
-                link:      row[3] || '', // E
-                imagen:    row[4] || '', // F
-                categoria: row[5] || '', // G
-                id:        'item-' + index // ID interno para el modal
+                fecha:     row[0] || '',
+                titulo:    row[1] || '',
+                resumen:   row[2] || '',
+                link:      row[3] || '',
+                imagen:    row[4] || '',
+                categoria: row[5] || 'General',
+                id:        'item-' + index
             }));
             render(db);
         } catch (e) {
-            console.error(e);
-            document.getElementById('app').innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 2rem;">
-                <p style="color:red; font-weight:bold;">Error de conexión.</p>
-                <p>Asegúrate de que el Excel está compartido como "Cualquier persona con el enlace" en modo Lector.</p>
-            </div>`;
+            document.getElementById('app').innerHTML = '<p>Error al conectar con los datos.</p>';
         }
     }
 
-    function filter() {
-        const q = document.getElementById('search').value.toLowerCase();
-        const filtered = db.filter(i => 
-            i.titulo.toLowerCase().includes(q) || 
-            i.resumen.toLowerCase().includes(q) ||
-            i.categoria.toLowerCase().includes(q)
-        );
-        render(filtered);
-    }
-
-    function getTagColor(cat) {
-        const c = cat.toUpperCase();
-        if(c.includes('ESCALA')) return '#dbeafe';
-        if(c.includes('GUÍA')) return '#dcfce7';
-        if(c.includes('FÁRMACO')) return '#fee2e2';
-        return '#f3e8ff';
+    function getTagClass(cat) {
+        const c = cat.toLowerCase();
+        if (c.includes('escala')) return 'tag-escala';
+        if (c.includes('guía') || c.includes('guia')) return 'tag-guia';
+        if (c.includes('fármaco') || c.includes('farmaco')) return 'tag-farmaco';
+        if (c.includes('video') || c.includes('vídeo')) return 'tag-video';
+        if (c.includes('formación') || c.includes('curso')) return 'tag-formacion';
+        return 'tag-default';
     }
 
     function render(data) {
@@ -140,17 +134,16 @@
             const card = document.createElement('div');
             card.className = 'card';
             card.onclick = () => openModal(item.id);
-            
             const waText = encodeURIComponent(`*${item.titulo}*\n${item.link}`);
             
             card.innerHTML = `
-                <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" loading="lazy">
+                <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
                 <div class="card-content">
-                    <span class="tag" style="background:${getTagColor(item.categoria)}">${item.categoria || 'RECURSO'}</span>
+                    <span class="tag ${getTagClass(item.categoria)}">${item.categoria}</span>
                     <div class="tit">${item.titulo}</div>
                     <div class="res">${item.resumen}</div>
                     <div class="card-actions">
-                        <button class="btn btn-primary">VER DETALLES</button>
+                        <button class="btn btn-primary">ACCEDER</button>
                         <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
@@ -165,16 +158,15 @@
         const waText = encodeURIComponent(`*${item.titulo}*\n${item.link}`);
         
         modalData.innerHTML = `
-            <img src="${item.imagen}" style="width:100%; height:250px; object-fit:cover;">
+            <img src="${item.imagen}" style="width:100%; height:300px; object-fit:cover;">
             <div class="modal-body">
-                <span class="tag" style="background:${getTagColor(item.categoria)}">${item.categoria}</span>
-                <h2 style="margin: 0.5rem 0 1rem; font-size:1.75rem; line-height:1.2;">${item.titulo}</h2>
-                <p style="color:var(--text-muted); font-size:1rem; line-height:1.7; margin-bottom:2rem;">${item.resumen}</p>
+                <span class="tag ${getTagClass(item.categoria)}">${item.categoria}</span>
+                <h2 style="font-size:1.8rem; margin:1rem 0; line-height:1.2;">${item.titulo}</h2>
+                <p style="color:var(--text-muted); font-size:1rem; line-height:1.6; margin-bottom:2.5rem;">${item.resumen}</p>
                 <div class="card-actions">
-                    <a href="${item.link}" target="_blank" class="btn btn-primary" style="padding:1rem; display:block;">ABRIR PDF / LINK</a>
-                    <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="btn btn-wa" style="flex:none; width:60px;"><i class="fab fa-whatsapp"></i></a>
+                    <a href="${item.link}" target="_blank" class="btn btn-primary" style="padding:1rem;">ACCEDER AL RECURSO</a>
+                    <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="btn btn-wa" style="width:65px; flex:none;"><i class="fab fa-whatsapp"></i></a>
                 </div>
-                <p style="margin-top:1.5rem; font-size:0.75rem; color:#94a3b8;">Publicado: ${item.fecha}</p>
             </div>
         `;
         document.getElementById('modal').style.display = 'flex';
@@ -184,6 +176,16 @@
     function closeModal() {
         document.getElementById('modal').style.display = 'none';
         document.body.style.overflow = 'auto';
+    }
+
+    function filter() {
+        const q = document.getElementById('search').value.toLowerCase();
+        const filtered = db.filter(i => 
+            i.titulo.toLowerCase().includes(q) || 
+            i.resumen.toLowerCase().includes(q) ||
+            i.categoria.toLowerCase().includes(q)
+        );
+        render(filtered);
     }
 
     loadData();
