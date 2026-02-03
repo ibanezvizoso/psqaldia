@@ -44,11 +44,11 @@ function ejecutarCalculo() {
     let alertText = "";
 
     if (Maudsley > d.max) {
-        bgColor = '#fee2e2'; textColor = "#b91c1c"; alertText = "⚠️ EXCEDE DOSIS MÁXIMA";
+        bgColor = '#fee2e2'; textColor = "#b91c1c"; alertText = "⚠️ EXCEDE DOSIS MÁXIMA en ficha técnica";
     } else if (Maudsley > d.ed95) {
-        bgColor = '#fef3c7'; textColor = "#b45309"; alertText = "⚠️ SUPERIOR A ED95";
+        bgColor = '#fef3c7'; textColor = "#b45309"; alertText = "⚠️ SUPERIOR A dosis eficaz para reducción de 95% síntomas (ED95)";
     } else if (Maudsley < d.min) {
-        bgColor = '#f1f5f9'; textColor = "#475569"; alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO";
+        bgColor = '#f1f5f9'; textColor = "#475569"; alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO en primer episodio psicótico";
     } else {
         bgColor = '#dcfce7'; textColor = "#15803d"; alertText = "✅ RANGO ESTÁNDAR";
     }
