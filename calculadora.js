@@ -38,32 +38,35 @@ function ejecutarCalculo() {
 
     resBox.style.display = 'block';
     
-    // 1. Colores de fondo del Recuadro Grande (Semáforo muy suave)
+    // 1. DEFINICIÓN DE MENSAJES Y COLORES
     let bgColor = "";
     let textColor = "";
     let alertText = "";
 
     if (Maudsley > d.max) {
-        bgColor = '#fee2e2'; textColor = "#b91c1c"; alertText = "⚠️ EXCEDE DOSIS MÁXIMA en ficha técnica";
+        bgColor = '#fee2e2'; textColor = "#b91c1c"; 
+        alertText = "⚠️ EXCEDE DOSIS MÁXIMA en ficha técnica";
     } else if (Maudsley > d.ed95) {
-        bgColor = '#fef3c7'; textColor = "#b45309"; alertText = "⚠️ SUPERIOR A dosis eficaz para reducción de 95% síntomas (ED95)";
+        bgColor = '#fef3c7'; textColor = "#b45309"; 
+        alertText = "⚠️ SUPERIOR A dosis eficaz ED95 (95% respuesta)";
     } else if (Maudsley < d.min) {
-        bgColor = '#f1f5f9'; textColor = "#475569"; alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO en primer episodio psicótico";
+        bgColor = '#f1f5f9'; textColor = "#475569"; 
+        alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO en primer episodio";
     } else {
-        bgColor = '#dcfce7'; textColor = "#15803d"; alertText = "✅ RANGO ESTÁNDAR";
+        bgColor = '#dcfce7'; textColor = "#15803d"; 
+        alertText = "✅ RANGO ESTÁNDAR";
     }
 
     resBox.style.background = bgColor;
 
-    // 2. RENDERIZADO UX: Foco interno blanco para dosis principal + alerta
+    // 2. RENDERIZADO UX CON EL TEXTO COMPLETO
     resVal.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
-            
             <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
                 <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.5px;">Dosis de prescripción (Maudsley)</div>
                 <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
                 
-                <div id="status-tag" style="display: inline-block; margin-top: 12px; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor};">
+                <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor}; line-height: 1.2;">
                     ${alertText}
                 </div>
             </div>
@@ -72,12 +75,11 @@ function ejecutarCalculo() {
                 <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
                 <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
             </div>
-
         </div>
     `;
 
-    // Limpiamos el resAlert viejo (ahora está dentro del resVal)
-    resAlert.innerText = "";
+    // Limpiamos los contenedores antiguos para evitar duplicados o errores
+    if(resAlert) resAlert.innerHTML = "";
 
     // 3. Estrategia INTEGRATE
     const key = `${o.farmaco}-${d.farmaco}`.toUpperCase();
