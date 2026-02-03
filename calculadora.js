@@ -1,18 +1,27 @@
 /**
  * MOTOR LÓGICO DE LA CALCULADORA PSQALDÍA
+ * UX Refinada con lógica de integración corregida
  */
 
 const MATRIZ_INTEGRATE = {
+  // 1. Parejas Específicas
   "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
   "RISPERIDONA-PALIPERIDONA": "Cambio Directo: Stop origen e iniciar dosis equivalente el Día 1.",
+
+  // 2. Destinos Específicos (Cualquiera -> Destino)
   "DESTINO-CARIPRAZINA": "Cambio Lento (4 sem): Iniciar 1.5 mg. Mantener origen total 21 días. Reducir origen al 50% día 22. Stop día 29.",
   "DESTINO-BREXPIPRAZOL": "Solapamiento 12d: Día 1: 1 mg, Día 2: 2 mg. Reducir origen al 50% y suspender el Día 12.",
+
+  // 3. Orígenes Específicos (Origen -> Cualquiera)
   "ORIGEN-ARIPIPRAZOL": "Elección: A) Stop Día 1 o B) Reducir al 50% el Día 1 y Stop el Día 14.",
   "ORIGEN-QUETIAPINA": "Si dosis > 300 mg: IR: Reducir 25% cada 4 días (Stop día 13). MR: Reducir 50% 1 semana (Stop día 8).",
   "ORIGEN-AGONISTA_PARCIAL": "Stop & Start: Suspender origen el Día 1. Iniciar destino el Día 1 (titulando según fármaco).",
+
+  // 4. Regla General
   "ESTANDAR": "Regla Umbral: Si Dosis < Umbral_Switch, Stop Día 1. Si > Umbral_Switch, 50% Día 1 y Stop Día 7."
 };
 
+// Esta función es el cerebro que decide qué regla usar
 function obtenerInstruccion(origen, destino) {
   const o = origen.toUpperCase().trim();
   const d = destino.toUpperCase().trim();
@@ -37,7 +46,7 @@ function ejecutarCalculo() {
     const d = window.dbCalc.find(f => f.farmaco === fDestName);
     
     if (!dosisO || isNaN(dosisO) || !o || !d) {
-        alert("Por favor, introduce datos válidos.");
+        alert("Por favor, introduce una dosis válida.");
         return;
     }
 
@@ -65,28 +74,27 @@ function ejecutarCalculo() {
 
     resBox.style.background = bgColor;
 
-    // 2. RENDERIZADO PRINCIPAL
+    // 2. RENDERIZADO UX
     resVal.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
             <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 5px;">Dosis Maudsley</div>
-                <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: #1e293b;">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">Dosis de prescripción (Maudsley)</div>
+                <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
                 <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor};">
                     ${alertText}
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
-                <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">Equivalencia en rango (${porcentajeRango.toFixed(0)}%)</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
                 <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
             </div>
         </div>
     `;
 
-    // 3. ESTRATEGIA DE CAMBIO (Corregido)
+    // 3. ESTRATEGIA INTEGRATE (Aquí estaba el fallo corregido)
     let tip = obtenerInstruccion(o.farmaco, d.farmaco);
 
-    // Sobreescribir si la dosis es menor al umbral de switch (Regla Umbral)
-    // Solo si no es una pareja específica (como Amisulprida-Aripiprazol) que tiene su propio plan
+    // Excepción de Dosis Baja (Regla Umbral)
     const parClave = `${o.farmaco.toUpperCase()}-${d.farmaco.toUpperCase()}`;
     if (dosisO <= o.umbral && !MATRIZ_INTEGRATE[parClave]) {
         tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
@@ -94,7 +102,7 @@ function ejecutarCalculo() {
 
     resTip.innerHTML = `
         <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
-            <b style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 5px;">Estrategia de Cambio</b>
+            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px;">Estrategia de Cambio</b>
             ${tip}
         </div>
     `;
