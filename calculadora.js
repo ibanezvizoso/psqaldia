@@ -1,6 +1,6 @@
 /**
  * MOTOR LÓGICO DE LA CALCULADORA PSQALDÍA
- * Basado en Maudsley, Leucht e INTEGRATE
+ * UX Refinada: Foco en dosis de prescripción y alerta
  */
 
 const MATRIZ_INTEGRATE = {
@@ -19,7 +19,6 @@ function ejecutarCalculo() {
     const fDestName = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
     
-    // Accedemos a la variable global dbCalc que cargó el index.html
     const o = window.dbCalc.find(f => f.farmaco === fOrigName);
     const d = window.dbCalc.find(f => f.farmaco === fDestName);
     
@@ -28,10 +27,7 @@ function ejecutarCalculo() {
         return;
     }
 
-    // 1. Cálculo Equivalencia Maudsley (Principal)
     let Maudsley = (dosisO / o.factor) * d.factor;
-
-    // 2. Cálculo Equivalencia en su rango de dosis (Secundario)
     let porcentajeRango = (dosisO / o.max) * 100;
     let dosisRango = (porcentajeRango / 100) * d.max;
     
@@ -42,45 +38,48 @@ function ejecutarCalculo() {
 
     resBox.style.display = 'block';
     
-    // 3. Lógica de Colores (Semáforo) vinculada a Maudsley
+    // 1. Colores de fondo del Recuadro Grande (Semáforo muy suave)
+    let bgColor = "";
+    let textColor = "";
+    let alertText = "";
+
     if (Maudsley > d.max) {
-        resBox.style.background = '#fee2e2'; 
-        resAlert.innerText = "⚠️ ALERTA: EXCEDE DOSIS MÁXIMA";
-        resAlert.style.color = "#b91c1c";
+        bgColor = '#fee2e2'; textColor = "#b91c1c"; alertText = "⚠️ EXCEDE DOSIS MÁXIMA";
     } else if (Maudsley > d.ed95) {
-        resBox.style.background = '#fef3c7'; 
-        resAlert.innerText = "⚠️ AVISO: SUPERIOR A EFICACIA MÁXIMA (ED95)";
-        resAlert.style.color = "#b45309";
+        bgColor = '#fef3c7'; textColor = "#b45309"; alertText = "⚠️ SUPERIOR A ED95";
     } else if (Maudsley < d.min) {
-        resBox.style.background = '#f1f5f9'; 
-        resAlert.innerText = "🔍 INFO: DOSIS POR DEBAJO DEL MÍNIMO EFECTIVO";
-        resAlert.style.color = "#475569";
+        bgColor = '#f1f5f9'; textColor = "#475569"; alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO";
     } else {
-        resBox.style.background = '#dcfce7'; 
-        resAlert.innerText = "✅ RANGO DE DOSIS ESTÁNDAR";
-        resAlert.style.color = "#15803d";
+        bgColor = '#dcfce7'; textColor = "#15803d"; alertText = "✅ RANGO ESTÁNDAR";
     }
 
-    // 4. Renderizado: Maudsley Grande, Rango pequeño a la derecha
+    resBox.style.background = bgColor;
+
+    // 2. RENDERIZADO UX: Foco interno blanco para dosis principal + alerta
     resVal.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; align-items: baseline; gap: 25px; flex-wrap: wrap;">
-                <div>
-                    <span style="font-size: 2.4rem; font-weight: 900; line-height: 1;">${Maudsley.toFixed(1)}</span> 
-                    <span style="font-size: 1.1rem; font-weight: 700;">mg/día</span>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-top: 2px;">Equivalencia Maudsley</div>
-                </div>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            
+            <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.5px;">Dosis de prescripción (Maudsley)</div>
+                <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
                 
-                <div style="padding-left: 20px; border-left: 2px solid rgba(0,0,0,0.1);">
-                    <span style="font-size: 1.4rem; font-weight: 700; opacity: 0.7;">${dosisRango.toFixed(1)}</span> 
-                    <span style="font-size: 0.9rem; font-weight: 600; opacity: 0.7;">mg</span>
-                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600; line-height: 1.2; max-width: 100px;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
+                <div id="status-tag" style="display: inline-block; margin-top: 12px; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor};">
+                    ${alertText}
                 </div>
             </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
+                <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
+            </div>
+
         </div>
     `;
 
-    // 5. Obtener consejo INTEGRATE
+    // Limpiamos el resAlert viejo (ahora está dentro del resVal)
+    resAlert.innerText = "";
+
+    // 3. Estrategia INTEGRATE
     const key = `${o.farmaco}-${d.farmaco}`.toUpperCase();
     const keyGen = `${o.farmaco}-CUALQUIERA`.toUpperCase();
     let tip = MATRIZ_INTEGRATE[key] || MATRIZ_INTEGRATE[keyGen] || MATRIZ_INTEGRATE["ESTANDAR"];
@@ -89,7 +88,10 @@ function ejecutarCalculo() {
         tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
     }
 
-    resTip.innerHTML = `<div style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
-        <strong>Estrategia de Cambio:</strong><br>${tip}
-    </div>`;
+    resTip.innerHTML = `
+        <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
+            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px;">Estrategia de Cambio</b>
+            ${tip}
+        </div>
+    `;
 }
