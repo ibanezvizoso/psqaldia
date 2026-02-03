@@ -4,14 +4,50 @@
  */
 
 const MATRIZ_INTEGRATE = {
-    "AMISULPRIDA-ARIPIPRAZOL": "Iniciar Aripiprazol dosis objetivo Día 1. Mantener Amisulprida total 7 días. Amisulprida al 50% Día 8. Stop Día 14.",
-    "AMISULPRIDA-CARIPRAZINA": "Iniciar 1.5mg Día 1. Mantener Amisulprida dosis total 21 días. Día 22: Amisulprida al 50%. Día 29: Stop Amisulprida.",
-    "CARIPRAZINA-CUALQUIERA": "Suspender Cariprazina el Día 1. Iniciar nuevo fármaco el Día 1 con titulación lenta (3-4 semanas).",
-    "BREXPIPRAZOL-CUALQUIERA": "Suspender Brexpiprazol el Día 1. Iniciar nuevo fármaco el Día 1.",
-    "ARIPIPRAZOL-CUALQUIERA": "Opción A: Stop Día 1. Opción B: Reducir al 50% el Día 1 y Stop el Día 14.",
-    "RISPERIDONA-PALIPERIDONA": "Cambio directo a dosis equivalente el Día 1. Sin solapamiento.",
-    "QUETIAPINA-CUALQUIERA": "Si >300mg e IR: Reducir 25% cada 4 días (Stop día 13). Si MR: 50% una semana y Stop.",
-    "ESTANDAR": "Reducir origen al 50% el Día 1. Suspender tras 7 días de solapamiento."
+   // 1. Parejas Específicas
+  "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
+  "RISPERIDONA-PALIPERIDONA": "Cambio Directo: Stop origen e iniciar dosis equivalente el Día 1.",
+
+  // 2. Destinos Específicos (Cualquiera -> Destino)
+  "DESTINO-CARIPRAZINA": "Cambio Lento (4 sem): Iniciar 1.5 mg. Mantener origen total 21 días. Reducir origen al 50% día 22. Stop día 29.",
+  "DESTINO-BREXPIPRAZOL": "Solapamiento 12d: Día 1: 1 mg, Día 2: 2 mg. Reducir origen al 50% y suspender el Día 12.",
+
+  // 3. Orígenes Específicos (Origen -> Cualquiera)
+  "ORIGEN-ARIPIPRAZOL": "Elección: A) Stop Día 1 o B) Reducir al 50% el Día 1 y Stop el Día 14.",
+  "ORIGEN-QUETIAPINA": "Si dosis > 300 mg: IR: Reducir 25% cada 4 días (Stop día 13). MR: Reducir 50% 1 semana (Stop día 8).",
+  "ORIGEN-AGONISTA_PARCIAL": "Stop & Start: Suspender origen el Día 1. Iniciar destino el Día 1 (titulando según fármaco).",
+
+  // 4. Regla General
+  "ESTANDAR": "Regla Umbral: Si Dosis < Umbral_Switch, Stop Día 1. Si > Umbral_Switch, 50% Día 1 y Stop Día 7."
+};
+
+/**
+ * Función principal para obtener la instrucción.
+ * @param {string} origen - Nombre del fármaco de salida.
+ * @param {string} destino - Nombre del fármaco de entrada.
+ * @returns {string} - La instrucción directa para la App.
+ */
+function obtenerInstruccion(origen, destino) {
+  const o = origen.toUpperCase().trim();
+  const d = destino.toUpperCase().trim();
+  const parClave = `${o}-${d}`;
+
+  // A. Prioridad 1: Parejas exactas
+  if (MATRIZ_INTEGRATE[parClave]) {
+    return MATRIZ_INTEGRATE[parClave];
+  }
+
+  // B. Prioridad 2: Destinos especiales
+  if (d === "CARIPRAZINA") return MATRIZ_INTEGRATE["DESTINO-CARIPRAZINA"];
+  if (d === "BREXPIPRAZOL") return MATRIZ_INTEGRATE["DESTINO-BREXPIPRAZOL"];
+
+  // C. Prioridad 3: Orígenes especiales
+  if (o === "ARIPIPRAZOL") return MATRIZ_INTEGRATE["ORIGEN-ARIPIPRAZOL"];
+  if (o === "CARIPRAZINA" || o === "BREXPIPRAZOL") return MATRIZ_INTEGRATE["ORIGEN-AGONISTA_PARCIAL"];
+  if (o === "QUETIAPINA") return MATRIZ_INTEGRATE["ORIGEN-QUETIAPINA"];
+
+  // D. Fallback: Regla Estándar
+  return MATRIZ_INTEGRATE["ESTANDAR"];
 };
 
 function ejecutarCalculo() {
