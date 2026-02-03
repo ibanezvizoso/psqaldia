@@ -1,15 +1,25 @@
+/**
+ * MOTOR LÓGICO DE LA CALCULADORA PSQALDÍA
+ * Versión Final: Recupera porcentajes y mantiene jerarquía INTEGRATE
+ */
+
 const MATRIZ_INTEGRATE = {
+  // 1. Parejas Específicas
   "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
   "RISPERIDONA-PALIPERIDONA": "Cambio Directo: Stop origen e iniciar dosis equivalente el Día 1.",
+
+  // 2. Destinos Específicos
   "DESTINO-CARIPRAZINA": "Cambio Lento (4 sem): Iniciar 1.5 mg. Mantener origen total 21 días. Reducir origen al 50% día 22. Stop día 29.",
   "DESTINO-BREXPIPRAZOL": "Solapamiento 12d: Día 1: 1 mg, Día 2: 2 mg. Reducir origen al 50% y suspender el Día 12.",
+
+  // 3. Orígenes Específicos
   "ORIGEN-ARIPIPRAZOL": "Elección: A) Stop Día 1 o B) Reducir al 50% el Día 1 y Stop el Día 14.",
   "ORIGEN-QUETIAPINA": "Si dosis > 300 mg: IR: Reducir 25% cada 4 días (Stop día 13). MR: Reducir 50% 1 semana (Stop día 8).",
   "ORIGEN-AGONISTA_PARCIAL": "Stop & Start: Suspender origen el Día 1. Iniciar destino el Día 1 (titulando según fármaco)."
 };
 
 function ejecutarCalculo() {
-    // 1. CAPTURA DE DATOS
+    // 1. CAPTURA Y VALIDACIÓN
     const fOrigName = document.getElementById('f_orig').value;
     const fDestName = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
@@ -22,55 +32,77 @@ function ejecutarCalculo() {
         return;
     }
 
-    // 2. CÁLCULOS MATEMÁTICOS (Maudsley y Rangos)
+    // 2. CÁLCULOS MATEMÁTICOS COMPLETOS
     let Maudsley = (dosisO / o.factor) * d.factor;
     let porcentajeRango = (dosisO / o.max) * 100;
     let dosisRango = (porcentajeRango / 100) * d.max;
     
-    // 3. LÓGICA DE ALERTAS Y COLORES
-    let textColor = Maudsley > d.max ? "#b91c1c" : (Maudsley > d.ed95 ? "#b45309" : "#15803d");
-    let alertText = Maudsley > d.max ? "⚠️ EXCEDE DOSIS MÁXIMA" : (Maudsley > d.ed95 ? "⚠️ SUPERIOR A ED95" : "✅ RANGO ESTÁNDAR");
-    const bgColor = Maudsley > d.max ? '#fee2e2' : (Maudsley > d.ed95 ? '#fef3c7' : '#dcfce7');
+    // 3. ESTADOS DE ALERTA Y COLORES
+    let bgColor = ""; let textColor = ""; let alertText = "";
 
+    if (Maudsley > d.max) {
+        bgColor = '#fee2e2'; textColor = "#b91c1c"; 
+        alertText = "⚠️ EXCEDE DOSIS MÁXIMA en ficha técnica";
+    } else if (Maudsley > d.ed95) {
+        bgColor = '#fef3c7'; textColor = "#b45309"; 
+        alertText = "⚠️ SUPERIOR A ED95 (dosis para 95% respuesta)";
+    } else if (Maudsley < d.min) {
+        bgColor = '#f1f5f9'; textColor = "#475569"; 
+        alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO";
+    } else {
+        bgColor = '#dcfce7'; textColor = "#15803d"; 
+        alertText = "✅ RANGO ESTÁNDAR";
+    }
+
+    // 4. PREPARACIÓN DE UI
     const resBox = document.getElementById('res-box');
+    const resVal = document.getElementById('res-val');
+    const resAlert = document.getElementById('res-alert');
+    const resTip = document.getElementById('res-tip');
+
     resBox.style.display = 'block';
     resBox.style.background = bgColor;
+    if(resAlert) resAlert.innerHTML = ""; // Limpieza de seguridad
 
-    // 4. RENDERIZADO DE RESULTADOS (UX)
-    document.getElementById('res-val').innerHTML = `
-        <div style="text-align: center; padding: 1rem;">
-            <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Dosis Maudsley</div>
-            <div style="font-size: 2.8rem; font-weight: 900; color: var(--text-main); line-height: 1;">${Maudsley.toFixed(1)} <span style="font-size: 1rem;">mg</span></div>
-            <div style="color: ${textColor}; font-weight: 800; font-size: 0.75rem; margin-top: 10px; border: 1px solid ${textColor}; display: inline-block; padding: 4px 12px; border-radius: 20px;">${alertText}</div>
+    // 5. RENDERIZADO UX (Incluyendo el porcentaje recuperado)
+    resVal.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.5px;">Dosis de prescripción (Maudsley)</div>
+                <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
+                
+                <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor}; line-height: 1.2;">
+                    ${alertText}
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
+                <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
+            </div>
         </div>
     `;
 
-    // 5. MOTOR LÓGICO INTEGRATE (La jerarquía que pediste)
+    // 6. ESTRATEGIA DE CAMBIO (Lógica INTEGRATE)
     let tip = "";
     const oName = o.farmaco.toUpperCase();
     const dName = d.farmaco.toUpperCase();
     const parClave = `${oName}-${dName}`;
 
-    // Nivel 1: Parejas exactas (Amisul-Aripi / Risper-Pali)
     if (MATRIZ_INTEGRATE[parClave]) {
         tip = MATRIZ_INTEGRATE[parClave];
-    } 
-    // Nivel 2: Destinos con farmacocinética especial (Cariprazina / Brexpiprazol)
-    else if (dName === "CARIPRAZINA") {
+    } else if (dName === "CARIPRAZINA") {
         tip = MATRIZ_INTEGRATE["DESTINO-CARIPRAZINA"];
     } else if (dName === "BREXPIPRAZOL") {
         tip = MATRIZ_INTEGRATE["DESTINO-BREXPIPRAZOL"];
-    } 
-    // Nivel 3: Orígenes con manejo especial (Aripiprazol / Agonistas / Quetiapina)
-    else if (oName === "ARIPIPRAZOL") {
+    } else if (oName === "ARIPIPRAZOL") {
         tip = MATRIZ_INTEGRATE["ORIGEN-ARIPIPRAZOL"];
     } else if (oName === "CARIPRAZINA" || oName === "BREXPIPRAZOL") {
         tip = MATRIZ_INTEGRATE["ORIGEN-AGONISTA_PARCIAL"];
     } else if (oName === "QUETIAPINA") {
         tip = MATRIZ_INTEGRATE["ORIGEN-QUETIAPINA"];
-    } 
-    // Nivel 4: Regla General (Haloperidol, Olanzapina, etc.) basada en Umbral
-    else {
+    } else {
+        // Regla Umbral Dinámica
         if (dosisO <= o.umbral) {
             tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
         } else {
@@ -78,10 +110,10 @@ function ejecutarCalculo() {
         }
     }
 
-    document.getElementById('res-tip').innerHTML = `
-        <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px;">
+    resTip.innerHTML = `
+        <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
             <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px;">Estrategia de Cambio</b>
-            <p style="font-size: 0.95rem; line-height: 1.4; color: var(--text-main); margin: 0;">${tip}</p>
+            ${tip}
         </div>
     `;
 }
