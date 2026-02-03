@@ -1,7 +1,20 @@
 /**
  * MOTOR LÓGICO DE LA CALCULADORA PSQALDÍA
- * Basado en Maudsley, Leucht e INTEGRATE
  */
+
+const PERFILES = {
+    "Haloperidol": "#f1f5f9", // FGA - Gris claro
+    "Risperidona": "#e0f2fe", // SGA Alta Potencia - Azul muy claro
+    "Paliperidona": "#e0f2fe",
+    "Lurasidona": "#e0f2fe",
+    "Ziprasidona": "#e0f2fe",
+    "Olanzapina": "#fef3c7",  // SGA MARTA - Amarillento claro
+    "Quetiapina": "#fef3c7",
+    "Amisulprida": "#dcfce7", // D2/D3 Selectivo - Verde muy claro
+    "Aripiprazol": "#fae8ff", // Agonista Parcial - Púrpura muy claro
+    "Brexpiprazol": "#fae8ff",
+    "Cariprazina": "#fae8ff"
+};
 
 const MATRIZ_INTEGRATE = {
     "AMISULPRIDA-ARIPIPRAZOL": "Iniciar Aripiprazol dosis objetivo Día 1. Mantener Amisulprida total 7 días. Amisulprida al 50% Día 8. Stop Día 14.",
@@ -19,7 +32,6 @@ function ejecutarCalculo() {
     const fDestName = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
     
-    // Accedemos a la variable global dbCalc que cargó el index.html
     const o = window.dbCalc.find(f => f.farmaco === fOrigName);
     const d = window.dbCalc.find(f => f.farmaco === fDestName);
     
@@ -28,7 +40,11 @@ function ejecutarCalculo() {
         return;
     }
 
-    // 1. Cálculo Equivalencia Maudsley
+    // Aplicar color de perfil a los selectores para feedback visual
+    document.getElementById('f_orig').style.backgroundColor = PERFILES[fOrigName] || 'white';
+    document.getElementById('f_dest').style.backgroundColor = PERFILES[fDestName] || 'white';
+
+    // 1. CÁLCULO DE EQUIVALENCIA
     let Maudsley = (dosisO / o.factor) * d.factor;
     
     const resBox = document.getElementById('res-box');
@@ -38,36 +54,43 @@ function ejecutarCalculo() {
 
     resBox.style.display = 'block';
     
-    // 2. Lógica de Colores (Semáforo)
+    // 2. LÓGICA DE SEGURIDAD (Semáforo de fondo)
+    let mensajeSeguridad = "";
+    
     if (Maudsley > d.max) {
-        resBox.style.background = '#fee2e2'; // Rojo suave
-        resAlert.innerText = "ALERTA: EXCEDE DOSIS MÁXIMA";
-        resAlert.style.color = "#b91c1c";
-    } else if (Maudsley > d.ed95) {
-        resBox.style.background = '#fef3c7'; // Amarillo/Naranja suave
-        resAlert.innerText = "AVISO: SUPERIOR A EFICACIA MÁXIMA (ED95)";
-        resAlert.style.color = "#b45309";
-    } else if (Maudsley < d.min) {
-        resBox.style.background = '#f1f5f9'; // Gris suave
-        resAlert.innerText = "DOSIS POR DEBAJO DEL MÍNIMO EFECTIVO";
-        resAlert.style.color = "#475569";
-    } else {
-        resBox.style.background = '#dcfce7'; // Verde suave
-        resAlert.innerText = "RANGO DE DOSIS ESTÁNDAR";
-        resAlert.style.color = "#15803d";
+        resBox.style.borderLeft = "8px solid #b91c1c";
+        mensajeSeguridad = `⚠️ <b>ALERTA:</b> La dosis equivalente supera la <b>Dosis Máxima</b> autorizada en Ficha Técnica (${d.max}mg).`;
+    } 
+    else if (Maudsley > d.ed95) {
+        resBox.style.borderLeft = "8px solid #b45309";
+        mensajeSeguridad = `ℹ️ <b>AVISO:</b> Dosis superior a la <b>ED95</b> (${d.ed95}mg). Según la evidencia, por encima de este nivel no suele haber mayor eficacia.`;
+    } 
+    else if (Maudsley < d.min) {
+        resBox.style.borderLeft = "8px solid #475569";
+        mensajeSeguridad = `🔍 <b>INFO:</b> Dosis por debajo del <b>Mínimo Efectivo</b> recomendado para un primer episodio psicótico (${d.min}mg).`;
+    } 
+    else {
+        resBox.style.borderLeft = "8px solid #15803d";
+        mensajeSeguridad = `✅ <b>RANGO ÓPTIMO:</b> Dosis dentro del rango terapéutico estándar (entre ${d.min}mg y ${d.ed95}mg).`;
     }
 
-    resVal.innerText = Maudsley.toFixed(1) + " mg/día";
+    // Color de fondo del cuadro basado en el perfil del fármaco DESTINO
+    resBox.style.backgroundColor = PERFILES[fDestName] || 'var(--card)';
 
-    // 3. Obtener consejo INTEGRATE
+    // 3. RENDERIZADO
+    resVal.innerText = Maudsley.toFixed(1) + " mg/día";
+    resAlert.innerHTML = mensajeSeguridad;
+
+    // 4. ESTRATEGIA INTEGRATE
     const key = `${o.farmaco}-${d.farmaco}`.toUpperCase();
     const keyGen = `${o.farmaco}-CUALQUIERA`.toUpperCase();
     let tip = MATRIZ_INTEGRATE[key] || MATRIZ_INTEGRATE[keyGen] || MATRIZ_INTEGRATE["ESTANDAR"];
 
-    // Regla de dosis baja (Umbral)
     if (dosisO <= o.umbral && !MATRIZ_INTEGRATE[key]) {
         tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
     }
 
-    resTip.innerHTML = `<strong>Estrategia de Cambio:</strong><br>${tip}`;
+    resTip.innerHTML = `<div style="margin-top:10px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
+        <b>Estrategia de Cambio (INTEGRATE):</b><br>${tip}
+    </div>`;
 }
