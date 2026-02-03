@@ -216,16 +216,27 @@
         toggleMenu();
         document.getElementById('modalData').innerHTML = `
             <div style="padding:2.5rem;">
-                <h2 style="margin-bottom:1.5rem;">Sobre PSQALDÍA</h2>
-                <p style="line-height:1.6; color:var(--text-main);">
-                </p>
-                <div style="background:var(--bg); padding:1rem; border-radius:12px; font-style:italic; border:1px solid var(--border); margin-top:1.5rem; color:var(--text-muted);">
-                
-                </div>
-            </div>`;
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+            <h2 style="margin-bottom:1.5rem; font-weight:800;">Sobre el proyecto</h2>
+            
+            <p style="line-height:1.6; margin-bottom:1.2rem;">
+                El objetivo de PSQ al día es que podamos mantenernos actualizados y el acceder rápidamente a recursos útiles en la práctica clínica. 
+            </p>
+
+            <p style="line-height:1.6; margin-bottom:1.2rem;">
+                Los artículos y contenidos externos se seleccionan en función de su actualidad y su relevancia. 
+            </p>
+
+            <p style="line-height:1.6; margin-bottom:1.2rem;">
+                Los algoritmos se desarrollan en base a evidencia científica y criterios del autor para maximizar la utilidad en entornos clínicos reales. 
+            </p>
+
+            <p style="line-height:1.6; margin-bottom:1.2rem;">
+                Las herramientas toman elementos clínicos o farmacológicos y tratan de operar con ellos o representarlos de una forma novedosa, atractiva o útil para manejar y exportar información.
+            </p>
+        </div>`;
+    document.getElementById('modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
 
     function openSettings() {
         toggleMenu();
