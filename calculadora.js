@@ -83,14 +83,15 @@ function ejecutarCalculo() {
         </div>
     `;
 
-    // 6. ESTRATEGIA DE CAMBIO (Lógica INTEGRATE)
+   // 6. ESTRATEGIA DE CAMBIO (Lógica INTEGRATE)
     let tip = "";
     const oName = o.farmaco.toUpperCase();
     const dName = d.farmaco.toUpperCase();
     const parClave = `${oName}-${dName}`;
 
+    // A. Lógica de selección de protocolo por niveles
     if (MATRIZ_INTEGRATE[parClave]) {
-        tip = MATRIZ_INTEGRATE[parClave];
+        tip = MATRIZ_INTEGRATE[parClave]; // Parejas específicas
     } else if (dName === "CARIPRAZINA") {
         tip = MATRIZ_INTEGRATE["DESTINO-CARIPRAZINA"];
     } else if (dName === "BREXPIPRAZOL") {
@@ -102,7 +103,7 @@ function ejecutarCalculo() {
     } else if (oName === "QUETIAPINA") {
         tip = MATRIZ_INTEGRATE["ORIGEN-QUETIAPINA"];
     } else {
-        // Regla Umbral Dinámica
+        // Regla Umbral Dinámica (Haloperidol, Olanzapina, etc.)
         if (dosisO <= o.umbral) {
             tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
         } else {
@@ -110,6 +111,10 @@ function ejecutarCalculo() {
         }
     }
 
+    // B. NOTA DE TITULACIÓN (Fármacos específicos de destino)
+    if (dName === "QUETIAPINA") {
+        tip += "<br><br>Iniciar Quetiapina de forma gradual (ej. 25-50mg) y subir hasta la dosis objetivo en 4-7 días.";
+    }
     resTip.innerHTML = `
         <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
             <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px;">Estrategia de Cambio</b>
