@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://psqaldia.pages.dev/sitemap.xml
