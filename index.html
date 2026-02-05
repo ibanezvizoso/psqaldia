@@ -30,7 +30,6 @@
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s; }
         
-        /* HEADER CON BOTÓN SÁNDWICH */
         header { 
             background: var(--bg); padding: 1rem 1.5rem;
             position: sticky; top: 0; z-index: 100; 
@@ -43,7 +42,6 @@
         .logo-img { max-height: 80px; width: auto; display: block; margin: 0 auto; position: absolute; left: 50%; transform: translateX(-50%); }
         .header-spacer { width: 40px; }
 
-        /* MENÚ LATERAL (DRAWER) */
         .side-menu {
             position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
             background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -56,29 +54,14 @@
         }
         .menu-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
         .menu-nav { display: flex; flex-direction: column; padding: 1rem 0; }
-       .menu-link { 
-    padding: 1rem 1.5rem; 
-    display: flex; 
-    align-items: center; 
-    gap: 15px;
-    text-decoration: none; /* Esto quita el subrayado */
-    color: var(--text-main); /* Esto quita el azul y pone tu color de texto */
-    font-weight: 700; 
-    transition: 0.2s;
-    border-left: 4px solid transparent;
-}
+        .menu-link { 
+            padding: 1rem 1.5rem; display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: var(--text-main); font-weight: 700; transition: 0.2s;
+            border-left: 4px solid transparent;
+        }
+        .menu-link:hover { background: var(--bg); border-left-color: var(--primary); }
+        .menu-link i { width: 20px; color: var(--text-muted); text-align: center; }
 
-.menu-link:hover { 
-    background: var(--bg); 
-    border-left-color: var(--primary); 
-}
-
-.menu-link i { 
-    width: 20px; 
-    color: var(--text-muted); 
-    text-align: center; 
-}
-        /* ESTILOS ORIGINALES PRESERVADOS */
         .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; }
         .search-area { max-width: 600px; margin: 1rem auto 2.5rem; text-align: center; }
         #search { 
@@ -110,11 +93,14 @@
         .btn { flex: 1; padding: 0.8rem; border-radius: 1rem; text-decoration: none; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 55px; font-size: 1.4rem; }
+        
         footer { margin-top: 5rem; padding: 3rem 1rem; border-top: 1px solid var(--border); text-align: center; }
         .disclaimer { max-width: 800px; margin: 0 auto; font-size: 0.72rem; line-height: 1.6; color: var(--text-muted); font-style: italic; }
+        
         #installBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none; align-items: center; gap: 10px; }
         #iosAlert { position: fixed; bottom: 20px; left: 10px; right: 10px; background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1001; display: none; align-items: center; gap: 12px; animation: slideUp 0.5s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
         .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
         .modal-content { background: var(--card); color: var(--text-main); width: 100%; max-width: 600px; border-radius: 2rem; position: relative; overflow-y: auto; max-height: 90vh; }
         .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--card); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 20; }
@@ -144,10 +130,10 @@
         </button>
     </div>
     <nav class="menu-nav">
-       <a href="#" class="menu-link" onclick="toggleMenu(); window.scrollTo({top: 0, behavior: 'smooth'});">
+        <a href="#" class="menu-link" onclick="toggleMenu(); window.scrollTo({top: 0, behavior: 'smooth'});">
             <i class="fas fa-home"></i> Inicio
         </a>
-        <a href="https://forms.gle/ugCJGaTksJ4g5eUr7" target="_blank" class="menu-link" style="text-decoration: none;">
+        <a href="https://forms.gle/ugCJGaTksJ4g5eUr7" target="_blank" class="menu-link">
             <i class="fas fa-lightbulb"></i> Sugiere contenidos
         </a>
         <a href="#" class="menu-link" onclick="openSettings()">
@@ -174,7 +160,7 @@
 
 <footer>
     <div class="disclaimer">
-        <b>Aviso legal:</b> PSQALDÍA es una plataforma informativa que pretende recopilar materiales y crear recursos útiles para mantenerse actualizado en la práctica clínica diaria. Esta selección se realiza de manera no exhaustiva y refleja únicamente la opinión del autor. El contenido no sustituye el juicio clínico profesional ni debe usarse para diagnóstico o tratamiento sin supervisión médica especializada. El autor no se responsabiliza del uso de las herramientas externas enlazadas.
+        <b>Aviso legal:</b> PSQALDÍA es una plataforma informativa que pretende recopilar materiales y crear recursos útiles para mantenerse actualizado en la práctica clínica diaria. El contenido no sustituye el juicio clínico profesional ni debe usarse para diagnóstico o tratamiento sin supervisión médica especializada.
     </div>
 </footer>
 
@@ -196,6 +182,7 @@
 </div>
 
 <script src="calculadora.js"></script>
+<script src="diagnostico.js"></script>
 
 <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
@@ -209,7 +196,6 @@
     let lastScrollY = window.scrollY;
     let deferredPrompt;
 
-    /* FUNCIONES DE NAVEGACIÓN NUEVAS */
     function toggleMenu() {
         const menu = document.getElementById('sideMenu');
         const overlay = document.getElementById('menuOverlay');
@@ -230,45 +216,26 @@
         toggleMenu();
         document.getElementById('modalData').innerHTML = `
             <div style="padding:2.5rem;">
-            <h2 style="margin-bottom:1.5rem; font-weight:800;">Sobre el proyecto</h2>
-            
-            <p style="line-height:1.6; margin-bottom:1.2rem;">
-                El objetivo de PSQ al día es que podamos mantenernos actualizados y el acceder rápidamente a recursos útiles en la práctica clínica. 
-            </p>
-
-            <p style="line-height:1.6; margin-bottom:1.2rem;">
-                Los artículos y contenidos externos se seleccionan en función de su actualidad y su relevancia. 
-            </p>
-
-            <p style="line-height:1.6; margin-bottom:1.2rem;">
-                Los algoritmos se desarrollan en base a evidencia científica y criterios del autor para maximizar la utilidad en entornos clínicos reales. 
-            </p>
-
-            <p style="line-height:1.6; margin-bottom:1.2rem;">
-                Las herramientas toman elementos clínicos o farmacológicos y tratan de operar con ellos o representarlos de una forma novedosa, atractiva o útil para manejar y exportar información.
-            </p>
-        </div>`;
-    document.getElementById('modal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
+                <h2 style="margin-bottom:1.5rem; font-weight:800;">Sobre el proyecto</h2>
+                <p style="line-height:1.6;">Plataforma para mantenerse actualizado en psiquiatría y acceder rápidamente a recursos útiles.</p>
+            </div>`;
+        document.getElementById('modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 
     function openSettings() {
         toggleMenu();
         document.getElementById('modalData').innerHTML = `
             <div style="padding:2.5rem;">
                 <h2 style="margin-bottom:1.5rem;"><i class="fas fa-cog"></i> Ajustes</h2>
-                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:2rem;">Gestión de datos locales y preferencias de la aplicación.</p>
-                
-                <button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">
-                    BORRAR TODOS LOS FAVORITOS
-                </button>
+                <button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button>
             </div>`;
         document.getElementById('modal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
     function clearFavs() {
-        if(confirm("¿Seguro que quieres borrar todos tus favoritos guardados?")) {
+        if(confirm("¿Seguro?")) {
             favorites = [];
             localStorage.setItem('psq_favs', '[]');
             filter();
@@ -276,7 +243,6 @@
         }
     }
 
-    /* LÓGICA ORIGINAL PRESERVADA */
     window.addEventListener('scroll', () => {
         const header = document.getElementById('mainHeader');
         if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
@@ -326,6 +292,17 @@
 
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
 
+            // HERRAMIENTAS MANUALES
+            db.unshift({
+                titulo: "Diferencial SS vs SNM", 
+                resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
+                categoria: "HERRAMIENTAS", 
+                id: "diag-ss-snm", 
+                imagen: "urgencia.jpg", 
+                isDiag: true,
+                fecha: '31/12/2099'
+            });
+
             db.unshift({
                 titulo: "Calculadora de Antipsicóticos", 
                 resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley, Leucht et al e INTEGRATE.",
@@ -335,15 +312,6 @@
                 isCalc: true,
                 fecha: '31/12/2099'
             });
-            db.unshift({
-    titulo: "Diferencial SS vs SNM", 
-    resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
-    categoria: "HERRAMIENTAS", 
-    id: "diag-ss-snm", 
-    imagen: "urgencia.jpg", // Asegúrate de tener una imagen o usa un placeholder
-    isDiag: true,
-    fecha: '31/12/2099'
-});
 
             createFilterButtons();
             renderAll();
@@ -351,24 +319,25 @@
     }
 
     function createCard(item) {
+        const isFav = favorites.includes(item.id);
         const card = document.createElement('div');
         card.className = 'card';
         card.onclick = () => {
-    if (item.isCalc) openCalcUI();
-    else if (item.isDiag) openDiagUI(); // Nueva función
-    else openModal(item.id);
-};
+            if (item.isCalc) openCalcUI();
+            else if (item.isDiag) openDiagUI();
+            else openModal(item.id);
+        };
         
         card.innerHTML = `
-            ${!item.isCalc ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
+            ${(!item.isCalc && !item.isDiag) ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
                 <div class="res">${item.resumen}</div>
                 <div class="card-actions">
-                    <button class="btn btn-primary">${item.isCalc ? 'CALCULAR' : 'ACCEDER'}</button>
-                    ${!item.isCalc ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
+                    <button class="btn btn-primary">${(item.isCalc || item.isDiag) ? 'CALCULAR' : 'ACCEDER'}</button>
+                    ${(!item.isCalc && !item.isDiag) ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
                 </div>
             </div>`;
         return card;
@@ -378,15 +347,15 @@
         const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
         document.getElementById('modalData').innerHTML = `
             <div class="calc-ui">
-                <h2 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:12px;"><i class="fas fa-calculator" style="color:var(--primary)"></i> Calculadora APS</h2>
+                <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
                 <label>Fármaco Origen</label><select id="f_orig">${options}</select>
                 <label>Dosis Actual (mg/día)</label><input type="number" id="d_orig" placeholder="0.00">
                 <label>Fármaco Destino</label><select id="f_dest">${options}</select>
-                <button class="btn btn-primary" style="width:100%; padding:1.2rem; border-radius:15px; font-size:1rem;" onclick="ejecutarCalculo()">CALCULAR EQUIVALENCIA</button>
+                <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
                 <div id="res-box" class="res-container">
-                    <div id="res-val" style="font-size:2.2rem; font-weight:900; margin-bottom:0.2rem;"></div>
-                    <div id="res-alert" style="font-weight:800; font-size:0.8rem; margin-bottom:1.5rem; text-transform:uppercase;"></div>
-                    <div id="res-tip" style="background:rgba(255,255,255,0.4); padding:1rem; border-radius:12px; font-size:0.9rem; border: 1px solid rgba(0,0,0,0.05);"></div>
+                    <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
+                    <div id="res-alert"></div>
+                    <div id="res-tip"></div>
                 </div>
             </div>`;
         document.getElementById('modal').style.display = 'flex';
@@ -400,12 +369,11 @@
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
             <div style="padding:2rem;">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-                <h2 style="margin:1rem 0; line-height:1.2;">${item.titulo}</h2>
-                <p style="color:var(--text-muted); line-height:1.6; margin-bottom:2rem; font-size:1.05rem;">${item.resumen}</p>
+                <h2 style="margin:1rem 0;">${item.titulo}</h2>
+                <p style="color:var(--text-muted);">${item.resumen}</p>
                 <div class="card-actions">
-                    <a href="${item.link}" target="_blank" class="btn btn-primary" style="padding:1rem;">ACCEDER AL RECURSO</a>
+                    <a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a>
                 </div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1.5rem;">Publicado: ${item.fecha}</p>
             </div>`;
         document.getElementById('modal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
