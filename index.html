@@ -335,6 +335,15 @@
                 isCalc: true,
                 fecha: '31/12/2099'
             });
+            db.unshift({
+    titulo: "Diferencial SS vs SNM", 
+    resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
+    categoria: "HERRAMIENTAS", 
+    id: "diag-ss-snm", 
+    imagen: "urgencia.jpg", // Asegúrate de tener una imagen o usa un placeholder
+    isDiag: true,
+    fecha: '31/12/2099'
+});
 
             createFilterButtons();
             renderAll();
@@ -344,8 +353,11 @@
     function createCard(item) {
         const card = document.createElement('div');
         card.className = 'card';
-        card.onclick = () => item.isCalc ? openCalcUI() : openModal(item.id);
-        const isFav = favorites.includes(item.id);
+        card.onclick = () => {
+    if (item.isCalc) openCalcUI();
+    else if (item.isDiag) openDiagUI(); // Nueva función
+    else openModal(item.id);
+};
         
         card.innerHTML = `
             ${!item.isCalc ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
