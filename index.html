@@ -88,7 +88,11 @@
         .fav-btn.is-fav { color: var(--fav); }
         .tag { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; }
         .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: var(--text-main); line-height: 1.2; }
-        .res { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .res { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* FECHA SUTIL */
+        .card-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 5px; font-weight: 600; opacity: 0.8; }
+
         .card-actions { display: flex; gap: 0.75rem; margin-top: auto; }
         .btn { flex: 1; padding: 0.8rem; border-radius: 1rem; text-decoration: none; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-primary { background: var(--primary); color: white; }
@@ -201,7 +205,6 @@
         const menu = document.getElementById('sideMenu');
         const overlay = document.getElementById('menuOverlay');
         const isOpen = menu.classList.contains('open');
-        
         if (isOpen) {
             menu.classList.remove('open');
             overlay.style.display = 'none';
@@ -272,17 +275,17 @@
         try {
             const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`);
             const data = await res.json();
-            if (!data.values) return;
-            
-            db = data.values.map(row => ({
-                fecha: row[0] || '', 
-                titulo: row[1] || '', 
-                resumen: row[2] || '', 
-                link: row[3] || '', 
-                imagen: row[4] || '', 
-                categoria: (row[5] || 'Otros').trim().toUpperCase(), 
-                id: 'psq-' + (row[1] || 'item').replace(/\s+/g, '-').toLowerCase()
-            }));
+            if (data.values) {
+                db = data.values.map(row => ({
+                    fecha: row[0] || '', 
+                    titulo: row[1] || '', 
+                    resumen: row[2] || '', 
+                    link: row[3] || '', 
+                    imagen: row[4] || '', 
+                    categoria: (row[5] || 'Otros').trim().toUpperCase(), 
+                    id: 'psq-' + (row[1] || 'item').replace(/\s+/g, '-').toLowerCase()
+                }));
+            }
 
             const resC = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`);
             const dataC = await resC.json();
@@ -291,40 +294,27 @@
                 max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5])
             }));
 
-            // AÑADIR HERRAMIENTAS AL ARRAY ANTES DE ORDENAR
+            // HERRAMIENTAS MANUALES - AHORA CON FECHA Y LINK PARA WHATSAPP
             db.push({
                 titulo: "Psicosis Autoinmune", 
-                resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune en cuadros psicóticos.",
-                categoria: "HERRAMIENTAS", 
-                id: "diag-autoimmune", 
-                imagen: "imagenautoinmunes.jpg", 
-                isAutoimmune: true,
-                fecha: '09/02/2026'
+                resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.",
+                categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", 
+                isAutoimmune: true, fecha: '09/02/2026', link: 'https://psqaldia.com'
             });
-
             db.push({
-                titulo: "Diferenciar Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno", 
+                titulo: "Diferencial SS vs SNM", 
                 resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
-                categoria: "HERRAMIENTAS", 
-                id: "diag-ss-snm", 
-                imagen: "fundicion.jpg", 
-                isDiag: true,
-                fecha: '01/01/2026'
+                categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", 
+                isDiag: true, fecha: '05/02/2026', link: 'https://psqaldia.com'
             });
-
             db.push({
                 titulo: "Calculadora de Antipsicóticos", 
-                resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley, Leucht et al e INTEGRATE.",
-                categoria: "HERRAMIENTAS", 
-                id: "calc-aps", 
-                imagen: "calc.jpg", 
-                isCalc: true,
-                fecha: '01/01/2026'
+                resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley e INTEGRATE.",
+                categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", 
+                isCalc: true, fecha: '01/02/2026', link: 'https://psqaldia.com'
             });
 
-            // ORDENAR: LO MÁS RECIENTE PRIMERO (FECHA DESCENDENTE)
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-            
             createFilterButtons();
             renderAll();
         } catch (e) { console.error(e); }
@@ -336,27 +326,23 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.onclick = () => {
-            if (item.isCalc) {
-                openCalcUI();
-            } else if (item.isDiag) {
-                openDiagUI();
-            } else if (item.isAutoimmune) {
-                openAutoimmuneUI();
-            } else {
-                openModal(item.id);
-            }
+            if (item.isCalc) openCalcUI();
+            else if (item.isDiag) openDiagUI();
+            else if (item.isAutoimmune) openAutoimmuneUI();
+            else openModal(item.id);
         };
         
         card.innerHTML = `
-            ${!isTool ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
+            <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
                 <div class="res">${item.resumen}</div>
+                <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
                 <div class="card-actions">
                     <button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
-                    ${!isTool ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
+                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>`;
         return card;
@@ -371,7 +357,7 @@
                 <label>Dosis Actual (mg/día)</label><input type="number" id="d_orig" placeholder="0.00">
                 <label>Fármaco Destino</label><select id="f_dest">${options}</select>
                 <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
-                <div id="res-box" class="res-container">
+                <div id="res-box" class="res-container" style="background:var(--bg);">
                     <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
                     <div id="res-alert"></div>
                     <div id="res-tip"></div>
@@ -425,7 +411,6 @@
         const app = document.getElementById('app');
         const favsTitle = document.getElementById('favs-title');
         const mainTitle = document.getElementById('main-title');
-
         const favsList = dataToRender.filter(i => favorites.includes(i.id));
         const othersList = dataToRender.filter(i => !favorites.includes(i.id));
 
@@ -448,7 +433,7 @@
         container.innerHTML = '';
         categories.forEach(cat => {
             const btn = document.createElement('button');
-            btn.className = `f-btn ${cat === 'TODOS' ? 'active' : ''}`;
+            btn.className = `f-btn ${cat === currentCategory ? 'active' : ''}`;
             btn.textContent = cat;
             btn.onclick = () => {
                 currentCategory = cat;
