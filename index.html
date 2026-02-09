@@ -317,6 +317,7 @@
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
             createFilterButtons();
             renderAll();
+            checkSharedResource();
         } catch (e) { console.error(e); }
     }
 
@@ -325,24 +326,33 @@
         const isTool = item.isCalc || item.isDiag || item.isAutoimmune;
         const card = document.createElement('div');
         card.className = 'card';
+        card.id = 'anchor-' + item.id; // Añadimos un ID a la tarjeta para poder navegar a ella
         card.onclick = () => {
-            if (item.isCalc) openCalcUI();
-            else if (item.isDiag) openDiagUI();
-            else if (item.isAutoimmune) openAutoimmuneUI();
-            else openModal(item.id);
+            if (item.isCalc) {
+                openCalcUI();
+            } else if (item.isDiag) {
+                openDiagUI();
+            } else if (item.isAutoimmune) {
+                openAutoimmuneUI();
+            } else {
+                openModal(item.id);
+            }
         };
         
+        // Creamos un enlace que incluye el ID del recurso (ej: psqaldia.com/?id=psq-ejemplo)
+        const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
+        const shareText = `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
+
         card.innerHTML = `
-            <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>
+            ${!isTool ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
                 <div class="res">${item.resumen}</div>
-                <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
                 <div class="card-actions">
                     <button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
-                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
+                    ${!isTool ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
                 </div>
             </div>`;
         return card;
@@ -464,7 +474,28 @@
             document.getElementById('installBtn').style.display = 'none';
         }
     });
-
+// Función para detectar si venimos de un enlace compartido y abrir el recurso
+    function checkSharedResource() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedId = urlParams.get('id');
+        if (sharedId) {
+            // Esperamos un momento a que los datos estén cargados
+            setTimeout(() => {
+                const item = db.find(i => i.id === sharedId);
+                if (item) {
+                    // Si es una herramienta, abrimos su UI, si no, el modal normal
+                    if (item.isCalc) openCalcUI();
+                    else if (item.isDiag) openDiagUI();
+                    else if (item.isAutoimmune) openAutoimmuneUI();
+                    else openModal(sharedId);
+                    
+                    // Opcional: Desplazar la pantalla hasta la tarjeta del recurso
+                    const element = document.getElementById('anchor-' + sharedId);
+                    if (element) element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 800); 
+        }
+    }
     loadData();
 </script>
 </body>
