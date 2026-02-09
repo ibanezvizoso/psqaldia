@@ -1,485 +1,156 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta name="google-site-verification" content="BpHCi544mGO8TaOecGzGZpkH4wzaltHrdY4VqNhBEp4" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+const CRITERIOS_PA = {
+    clinicos: [
+        { id: 'tumor', label: 'Tumor actual o reciente' },
+        { id: 'movimiento', label: 'Trastorno movimiento (Catatonia/Discinesia)' },
+        { id: 'adverso_ap', label: 'Respuesta adversa a antipsicóticos (sospecha SNM)' },
+        { id: 'cognitivo', label: 'Disfunción cognitiva severa/desproporcionada' },
+        { id: 'conciencia', label: 'Nivel de conciencia disminuido' },
+        { id: 'convulsiones', label: 'Convulsiones (no explicadas por cuadro previo)' },
+        { id: 'autonomica', label: 'Disfunción autonómica significativa' }
+    ],
+    paraclinicos: [
+        { id: 'lcr_pleocitosis', label: 'LCR: Pleocitosis (>5 WBC/µL)' },
+        { id: 'mri_temporal', label: 'RM: Anomalías bilaterales lóbulo temporal medial' },
+        { id: 'eeg_encef', label: 'EEG: Cambios encefalopáticos (ondas lentas/puntas)' },
+        { id: 'lcr_bandas', label: 'LCR: Bandas oligoclonales o índice IgG elevado' },
+        { id: 'suero_ab', label: 'Suero: Anticuerpos antineuronales positivos' }
+    ],
+    definitivo: [
+        { id: 'lcr_igg', label: 'LCR: Anticuerpos IgG antineuronales positivos' }
+    ]
+};
+
+function openAutoimmuneUI() {
+    const modal = document.getElementById('modal');
+    const modalData = document.getElementById('modalData');
     
-    <title>PSQALDÍA | Actualidad y recursos para psiquiatría</title>
-    <meta name="description" content="Plataforma de actualidad y recursos para psiquiatría. Recopilación de materiales y creación de recursos útiles para la práctica clínica diaria.">
+    // Forzamos la visibilidad del modal antes de rellenar
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    modalData.innerHTML = `
+        <div class="calc-ui" style="padding: 1.5rem; display: flex; flex-direction: column; font-family: 'Inter', sans-serif;">
+            <div style="position: sticky; top: 0; background: var(--card); z-index: 10; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <h2 style="font-weight:800; font-size: 1.2rem; margin:0; color: var(--text-main);">Psicosis Autoinmune</h2>
+                    <button onclick="openRedFlags()" style="background:var(--fav); color:white; border:none; padding:5px 12px; border-radius:8px; font-size:0.7rem; font-weight:800; cursor:pointer;">RED FLAGS</button>
+                </div>
+
+                <div style="display: flex; gap: 4px; height: 12px; margin-bottom: 0.5rem;">
+                    <div id="seg-posible" style="flex:1; background: var(--border); border-radius: 4px 0 0 4px; transition: 0.3s;"></div>
+                    <div id="seg-probable" style="flex:1; background: var(--border); transition: 0.3s;"></div>
+                    <div id="seg-definitiva" style="flex:1; background: var(--border); border-radius: 0 4px 4px 0; transition: 0.3s;"></div>
+                </div>
+                <div id="status-label" style="text-align:center; font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--text-muted);">Pendiente criterio base</div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 10px; background: #eff6ff; padding: 1rem; border-radius: 12px; cursor: pointer; border: 2px solid #3b82f6; font-size: 0.9rem; font-weight:700; margin-bottom:1rem; color: #1e40af;">
+                    <input type="checkbox" id="base_abrupto" onchange="updatePA()" style="width:20px; height:20px;">
+                    Inicio abrupto (< 3 meses) [Criterio Base]
+                </label>
+
+                <div id="estudio-box" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; padding:1rem; border-radius:12px; font-size:0.8rem; margin-bottom:1.5rem; color:#166534; line-height:1.4;">
+                    <strong>Estudio recomendado:</strong> Realizar EEG, RM cerebral, análisis de suero y LCR (incluyendo panel de anticuerpos).
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                    <p style="font-size:0.7rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.2rem; text-transform: uppercase;">CRITERIOS CLÍNICOS</p>
+                    ${CRITERIOS_PA.clinicos.map(s => renderCheck(s)).join('')}
+                    
+                    <p style="font-size:0.7rem; font-weight:800; color:var(--text-muted); margin: 1rem 0 0.2rem; text-transform: uppercase;">PARA-CLÍNICOS / LABORATORIO</p>
+                    ${CRITERIOS_PA.paraclinicos.map(s => renderCheck(s)).join('')}
+
+                    <p style="font-size:0.7rem; font-weight:800; color:var(--text-muted); margin: 1rem 0 0.2rem; text-transform: uppercase;">CONFIRMACIÓN LCR</p>
+                    ${CRITERIOS_PA.definitivo.map(s => renderCheck(s)).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderCheck(s) {
+    return `
+        <label style="display: flex; align-items: center; gap: 10px; background: var(--bg); padding: 0.75rem; border-radius: 10px; cursor: pointer; border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-main);">
+            <input type="checkbox" class="pa-check" value="${s.id}" onchange="updatePA()" style="width:16px; height:16px;">
+            ${s.label}
+        </label>
+    `;
+}
+
+function updatePA() {
+    const isAbrupto = document.getElementById('base_abrupto').checked;
+    const checks = Array.from(document.querySelectorAll('.pa-check:checked')).map(c => c.value);
     
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4338ca">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="Logo.png">
-    <link rel="icon" type="image/png" href="Logo.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    const numClinicos = CRITERIOS_PA.clinicos.filter(c => checks.includes(c.id)).length;
+    const paraclinicosActivos = CRITERIOS_PA.paraclinicos.filter(c => checks.includes(c.id)).map(c => c.id);
+    const hasIgGLCR = checks.includes('lcr_igg');
+
+    // Lógica Diagnóstica (Pollak et al. 2020)
+    let posible = isAbrupto && numClinicos >= 1;
     
-    <style>
-        :root {
-            --bg: #f8fafc; --card: #ffffff; --primary: #4338ca; --whatsapp: #22c55e;
-            --text-main: #1e293b; --text-muted: #64748b; --fav: #f59e0b; --border: #e2e8f0;
-        }
+    // Probable: Posible + (1 criterio fuerte o 2 débiles)
+    const labFuerte = paraclinicosActivos.some(id => ['lcr_pleocitosis', 'mri_temporal'].includes(id));
+    const labDebilCount = paraclinicosActivos.filter(id => ['eeg_encef', 'lcr_bandas', 'suero_ab'].includes(id)).length;
+    let probable = posible && (labFuerte || labDebilCount >= 2);
+    
+    let definitiva = probable && hasIgGLCR;
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a; --card: #1e293b; --primary: #818cf8;
-                --text-main: #f1f5f9; --text-muted: #94a3b8; --border: #334155;
-            }
-        }
-
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s; }
-        
-        header { 
-            background: var(--bg); padding: 1rem 1.5rem;
-            position: sticky; top: 0; z-index: 100; 
-            transition: transform 0.4s ease;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        header.hide { transform: translateY(-100%); }
-        
-        .menu-toggle { background: none; border: none; color: var(--text-main); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; z-index: 110; width: 40px; display: flex; align-items: center; justify-content: center; }
-        .logo-img { max-height: 80px; width: auto; display: block; margin: 0 auto; position: absolute; left: 50%; transform: translateX(-50%); }
-        .header-spacer { width: 40px; }
-
-        .side-menu {
-            position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
-            background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 10px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column;
-        }
-        .side-menu.open { left: 0; }
-        .menu-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); 
-            backdrop-filter: blur(4px); z-index: 1999; display: none;
-        }
-        .menu-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .menu-nav { display: flex; flex-direction: column; padding: 1rem 0; }
-        .menu-link { 
-            padding: 1rem 1.5rem; display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: var(--text-main); font-weight: 700; transition: 0.2s;
-            border-left: 4px solid transparent;
-        }
-        .menu-link:hover { background: var(--bg); border-left-color: var(--primary); }
-        .menu-link i { width: 20px; color: var(--text-muted); text-align: center; }
-
-        .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; }
-        .search-area { max-width: 600px; margin: 1rem auto 2.5rem; text-align: center; }
-        #search { 
-            width: 100%; padding: 1.1rem 1.5rem; border-radius: 50px; 
-            border: 2px solid var(--border); background: var(--card); 
-            color: var(--text-main); font-size: 1rem; outline: none; 
-            margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-        }
-        .filter-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 1rem; }
-        .f-btn { 
-            padding: 0.6rem 1.2rem; border-radius: 50px; border: 1px solid var(--border); 
-            background: var(--card); cursor: pointer; font-size: 0.8rem; 
-            font-weight: 800; text-transform: uppercase; transition: 0.3s; 
-            color: var(--text-muted); 
-        }
-        .f-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
-        .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
-        #app, #favs-app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        .card-img { width: 100%; height: 180px; object-fit: cover; background: var(--border); }
-        .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .fav-btn { position: absolute; top: 1rem; right: 1rem; background: var(--card); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; font-size: 1.1rem; color: #cbd5e1; transition: 0.2s; }
-        .fav-btn.is-fav { color: var(--fav); }
-        .tag { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; }
-        .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: var(--text-main); line-height: 1.2; }
-        .res { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-actions { display: flex; gap: 0.75rem; margin-top: auto; }
-        .btn { flex: 1; padding: 0.8rem; border-radius: 1rem; text-decoration: none; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 55px; font-size: 1.4rem; }
-        
-        footer { margin-top: 5rem; padding: 3rem 1rem; border-top: 1px solid var(--border); text-align: center; }
-        .disclaimer { max-width: 800px; margin: 0 auto; font-size: 0.72rem; line-height: 1.6; color: var(--text-muted); font-style: italic; }
-        
-        #installBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none; align-items: center; gap: 10px; }
-        #iosAlert { position: fixed; bottom: 20px; left: 10px; right: 10px; background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1001; display: none; align-items: center; gap: 12px; animation: slideUp 0.5s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-        .modal-content { background: var(--card); color: var(--text-main); width: 100%; max-width: 600px; border-radius: 2rem; position: relative; overflow-y: auto; max-height: 90vh; }
-        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--card); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 20; }
-        .calc-ui { padding: 2.5rem; }
-        .calc-ui label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
-        .calc-ui select, .calc-ui input { width: 100%; padding: 1rem; border-radius: 15px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; margin-bottom: 1.5rem; font-family: inherit; }
-        .res-container { border-radius: 20px; padding: 1.5rem; margin-top: 1rem; display: none; transition: 0.3s; }
-    </style>
-</head>
-<body>
-
-<header id="mainHeader">
-    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Abrir Menú">
-        <i class="fas fa-bars"></i>
-    </button>
-    <img src="Logo.png" alt="Logo PSQALDÍA" class="logo-img">
-    <div class="header-spacer"></div>
-</header>
-
-<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
-
-<div id="sideMenu" class="side-menu">
-    <div class="menu-header">
-        <span style="font-weight: 900; color: var(--primary); letter-spacing: 1px;">PSQALDÍA</span>
-        <button class="menu-toggle" onclick="toggleMenu()" aria-label="Cerrar Menú">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    <nav class="menu-nav">
-        <a href="#" class="menu-link" onclick="toggleMenu(); window.scrollTo({top: 0, behavior: 'smooth'});">
-            <i class="fas fa-home"></i> Inicio
-        </a>
-        <a href="https://forms.gle/ugCJGaTksJ4g5eUr7" target="_blank" class="menu-link">
-            <i class="fas fa-lightbulb"></i> Sugiere contenidos
-        </a>
-        <a href="#" class="menu-link" onclick="openSettings()">
-            <i class="fas fa-cog"></i> Ajustes
-        </a>
-        <a href="#" class="menu-link" onclick="openAbout()">
-            <i class="fas fa-info-circle"></i> Sobre el proyecto
-        </a>
-    </nav>
-</div>
-
-<div class="container">
-    <div class="search-area">
-        <input type="text" id="search" placeholder="Buscar escalas, guías, fármacos..." oninput="filter()">
-        <div id="filterContainer" class="filter-buttons"></div>
-    </div>
-
-    <div id="favs-title" class="section-title"><i class="fas fa-star"></i> Mis Favoritos</div>
-    <div id="favs-app"></div>
-
-    <div id="main-title" class="section-title">Todos los Recursos</div>
-    <div id="app"></div>
-</div>
-
-<footer>
-    <div class="disclaimer">
-        <b>Aviso legal:</b> PSQALDÍA es una plataforma informativa que pretende recopilar materiales y crear recursos útiles para mantenerse actualizado en la práctica clínica diaria. El contenido no sustituye el juicio clínico profesional ni debe usarse para diagnóstico o tratamiento sin supervisión médica especializada.
-    </div>
-</footer>
-
-<button id="installBtn"><i class="fas fa-download"></i> INSTALAR APP</button>
-
-<div id="iosAlert">
-    <div style="font-size: 1.5rem;">📲</div>
-    <div style="font-size: 0.85rem; line-height: 1.3;">
-        <b>¡Instala PSQALDÍA!</b> Pulsa compartir <i class="fa-solid fa-arrow-up-from-bracket"></i> y luego selecciona <b>"Añadir a la pantalla de inicio"</b>.
-    </div>
-    <button onclick="document.getElementById('iosAlert').style.display='none'" style="background:none; border:none; color:var(--text-muted); font-weight:bold;">X</button>
-</div>
-
-<div id="modal" class="modal" onclick="closeModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></div>
-        <div id="modalData"></div>
-    </div>
-</div>
-
-<script src="calculadora.js"></script>
-<script src="diagnostico.js"></script>
-<script src="autoinmune.js"></script>
-
-<script>
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-
-    const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
-    const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
-
-    let db = [];
-    let favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]');
-    let currentCategory = 'TODOS';
-    let lastScrollY = window.scrollY;
-    let deferredPrompt;
-
-    function toggleMenu() {
-        const menu = document.getElementById('sideMenu');
-        const overlay = document.getElementById('menuOverlay');
-        const isOpen = menu.classList.contains('open');
-        
-        if (isOpen) {
-            menu.classList.remove('open');
-            overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        } else {
-            menu.classList.add('open');
-            overlay.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
+    // Actualización Visual de la Barra
+    document.getElementById('seg-posible').style.background = posible ? '#fef08a' : 'var(--border)';
+    document.getElementById('seg-probable').style.background = probable ? '#fed7aa' : 'var(--border)';
+    document.getElementById('seg-definitiva').style.background = definitiva ? '#fda4af' : 'var(--border)';
+    
+    document.getElementById('estudio-box').style.display = posible ? 'block' : 'none';
+    
+    const label = document.getElementById('status-label');
+    if (definitiva) { 
+        label.innerText = "Psicosis Autoinmune Definitiva"; 
+        label.style.color = "#e11d48"; 
+    } else if (probable) { 
+        label.innerText = "Psicosis Autoinmune Probable"; 
+        label.style.color = "#ea580c"; 
+    } else if (posible) { 
+        label.innerText = "Psicosis Autoinmune Posible"; 
+        label.style.color = "#ca8a04"; 
+    } else { 
+        label.innerText = isAbrupto ? "Faltan criterios clínicos" : "Pendiente criterio base"; 
+        label.style.color = "var(--text-muted)"; 
     }
+}
 
-    function openAbout() {
-        toggleMenu();
-        document.getElementById('modalData').innerHTML = `
-            <div style="padding:2.5rem;">
-                <h2 style="margin-bottom:1.5rem; font-weight:800;">Sobre el proyecto</h2>
-                <p style="line-height:1.6;">Plataforma para mantenerse actualizado en psiquiatría y acceder rápidamente a recursos útiles.</p>
-            </div>`;
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+function openRedFlags() {
+    const flags = [
+        "Pródromo infeccioso (fiebre, malestar)", 
+        "Cefalea severa de nuevo inicio", 
+        "Progresión rápida (< 3 meses)",
+        "Respuesta adversa/SNM a antipsicóticos", 
+        "Catatonia o discinesias orofaciales",
+        "Focalidad neurológica", 
+        "Fluctuación de la conciencia", 
+        "Inestabilidad autonómica",
+        "Afasia, mutismo o disartria", 
+        "Convulsiones", 
+        "Historia personal de tumor",
+        "Hiponatremia", 
+        "Otros trastornos autoinmunes", 
+        "Parestesias de nuevo inicio"
+    ];
 
-    function openSettings() {
-        toggleMenu();
-        document.getElementById('modalData').innerHTML = `
-            <div style="padding:2.5rem;">
-                <h2 style="margin-bottom:1.5rem;"><i class="fas fa-cog"></i> Ajustes</h2>
-                <button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button>
-            </div>`;
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function clearFavs() {
-        if(confirm("¿Seguro?")) {
-            favorites = [];
-            localStorage.setItem('psq_favs', '[]');
-            filter();
-            closeModal();
-        }
-    }
-
-    window.addEventListener('scroll', () => {
-        const header = document.getElementById('mainHeader');
-        if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
-        else header.classList.remove('hide');
-        lastScrollY = window.scrollY;
-    });
-
-    function getPasteColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        const h = Math.abs(hash) % 360;
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const lightness = isDark ? 25 : 92;
-        const textLightness = isDark ? 90 : 25;
-        return `background-color: hsl(${h}, 70%, ${lightness}%); color: hsl(${h}, 70%, ${textLightness}%); border: 1px solid hsl(${h}, 70%, ${isDark ? 40 : 80}%);`;
-    }
-
-    function parseDate(dateStr) {
-        if (!dateStr) return new Date(0);
-        const parts = dateStr.split(/[/ -]/);
-        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
-        return new Date(dateStr) || new Date(0);
-    }
-
-    async function loadData() {
-        try {
-            const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`);
-            const data = await res.json();
-            if (!data.values) return;
-            
-            db = data.values.map(row => ({
-                fecha: row[0] || '', 
-                titulo: row[1] || '', 
-                resumen: row[2] || '', 
-                link: row[3] || '', 
-                imagen: row[4] || '', 
-                categoria: (row[5] || 'Otros').trim().toUpperCase(), 
-                id: 'psq-' + (row[1] || 'item').replace(/\s+/g, '-').toLowerCase()
-            }));
-
-            const resC = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`);
-            const dataC = await resC.json();
-            window.dbCalc = dataC.values.map(row => ({
-                farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), 
-                max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5])
-            }));
-
-            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-
-            // HERRAMIENTAS MANUALES
-            db.unshift({
-                titulo: "Psicosis Autoinmune", 
-                resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune en cuadros psicóticos.",
-                categoria: "HERRAMIENTAS", 
-                id: "diag-autoimmune", 
-                imagen: "imagenautoinmunes.jpg", 
-                isAutoimmune: true,
-                fecha: '09/02/2026'
-            });
-
-            db.unshift({
-                titulo: "Diferenciar Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno", 
-                resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
-                categoria: "HERRAMIENTAS", 
-                id: "diag-ss-snm", 
-                imagen: "fundicion.jpg", 
-                isDiag: true,
-                fecha: '31/12/2099'
-            });
-
-            db.unshift({
-                titulo: "Calculadora de Antipsicóticos", 
-                resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley, Leucht et al e INTEGRATE.",
-                categoria: "HERRAMIENTAS", 
-                id: "calc-aps", 
-                imagen: "calc.jpg", 
-                isCalc: true,
-                fecha: '31/12/2099'
-            });
-            
-            createFilterButtons();
-            renderAll();
-        } catch (e) { console.error(e); }
-    }
-
-    function createCard(item) {
-        const isFav = favorites.includes(item.id);
-        const isTool = item.isCalc || item.isDiag || item.isAutoimmune;
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.onclick = () => {
-            if (item.isCalc) {
-                openCalcUI();
-            } else if (item.isDiag) {
-                openDiagUI();
-            } else if (item.isAutoimmune) {
-                openAutoimmuneUI();
-            } else {
-                openModal(item.id);
-            }
-        };
-        
-        card.innerHTML = `
-            ${!isTool ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
-            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
-            <div class="card-content">
-                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-                <div class="tit">${item.titulo}</div>
-                <div class="res">${item.resumen}</div>
-                <div class="card-actions">
-                    <button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
-                    ${!isTool ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
-                </div>
-            </div>`;
-        return card;
-    }
-
-    function openCalcUI() {
-        const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
-        document.getElementById('modalData').innerHTML = `
-            <div class="calc-ui">
-                <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
-                <label>Fármaco Origen</label><select id="f_orig">${options}</select>
-                <label>Dosis Actual (mg/día)</label><input type="number" id="d_orig" placeholder="0.00">
-                <label>Fármaco Destino</label><select id="f_dest">${options}</select>
-                <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
-                <div id="res-box" class="res-container">
-                    <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
-                    <div id="res-alert"></div>
-                    <div id="res-tip"></div>
-                </div>
-            </div>`;
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function openModal(id) {
-        const item = db.find(i => i.id === id);
-        if (!item) return;
-        document.getElementById('modalData').innerHTML = `
-            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
-            <div style="padding:2rem;">
-                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-                <h2 style="margin:1rem 0;">${item.titulo}</h2>
-                <p style="color:var(--text-muted);">${item.resumen}</p>
-                <div class="card-actions">
-                    <a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a>
-                </div>
-            </div>`;
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function toggleFavorite(e, id) {
-        e.stopPropagation();
-        favorites = favorites.includes(id) ? favorites.filter(fav => fav !== id) : [...favorites, id];
-        localStorage.setItem('psq_favs', JSON.stringify(favorites));
-        filter();
-    }
-
-    function filter() {
-        const q = document.getElementById('search').value.toLowerCase().trim();
-        const filtered = db.filter(i => {
-            const matchQ = i.titulo.toLowerCase().includes(q) || i.resumen.toLowerCase().includes(q);
-            const matchC = currentCategory === 'TODOS' || i.categoria === currentCategory;
-            return matchQ && matchC;
-        });
-        renderAll(filtered);
-    }
-
-    function renderAll(dataToRender = db) {
-        const favsApp = document.getElementById('favs-app');
-        const app = document.getElementById('app');
-        const favsTitle = document.getElementById('favs-title');
-        const mainTitle = document.getElementById('main-title');
-
-        const favsList = dataToRender.filter(i => favorites.includes(i.id));
-        const othersList = dataToRender.filter(i => !favorites.includes(i.id));
-
-        favsApp.innerHTML = ''; app.innerHTML = '';
-
-        if (favsList.length > 0 && currentCategory === 'TODOS') {
-            favsTitle.style.display = 'block';
-            favsList.forEach(item => favsApp.appendChild(createCard(item)));
-        } else {
-            favsTitle.style.display = 'none';
-        }
-
-        mainTitle.style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
-        othersList.forEach(item => app.appendChild(createCard(item)));
-    }
-
-    function createFilterButtons() {
-        const container = document.getElementById('filterContainer');
-        const categories = ['TODOS', ...new Set(db.map(i => i.categoria))];
-        container.innerHTML = '';
-        categories.forEach(cat => {
-            const btn = document.createElement('button');
-            btn.className = `f-btn ${cat === 'TODOS' ? 'active' : ''}`;
-            btn.textContent = cat;
-            btn.onclick = () => {
-                currentCategory = cat;
-                document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filter();
-            };
-            container.appendChild(btn);
-        });
-    }
-
-    window.addEventListener('load', () => {
-        const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-        const isStandalone = ('standalone' in window.navigator) || (window.matchMedia('(display-mode: standalone)').matches);
-        if (isIos && !isStandalone) document.getElementById('iosAlert').style.display = 'flex';
-    });
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installBtn').style.display = 'flex';
-    });
-
-    document.getElementById('installBtn').addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt = null;
-            document.getElementById('installBtn').style.display = 'none';
-        }
-    });
-
-    loadData();
-</script>
-</body>
-</html>
+    const rfModal = document.createElement('div');
+    rfModal.id = "rf-modal";
+    rfModal.style = "position:fixed; inset:0; background:rgba(15, 23, 42, 0.9); backdrop-filter: blur(4px); z-index:3000; display:flex; align-items:center; justify-content:center; padding:1.5rem;";
+    rfModal.onclick = () => rfModal.remove();
+    
+    rfModal.innerHTML = `
+        <div style="background:var(--card); padding:2rem; border-radius:2rem; max-width:450px; width:100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--border);" onclick="event.stopPropagation()">
+            <h3 style="margin-top:0; color:var(--text-main); font-weight:800;">Red Flags (Pollak et al.)</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1rem;">Signos de sospecha clínica de etiología orgánica/autoinmune:</p>
+            <ul style="font-size:0.85rem; line-height:1.6; padding-left:1.2rem; color:var(--text-main); max-height: 350px; overflow-y: auto;">
+                ${flags.map(f => `<li style="margin-bottom:6px;">${f}</li>`).join('')}
+            </ul>
+            <button onclick="document.getElementById('rf-modal').remove()" style="background:var(--primary); color:white; border:none; width:100%; padding:1rem; border-radius:15px; font-weight:700; cursor:pointer; margin-top:1.5rem;">CERRAR</button>
+        </div>
+    `;
+    document.body.appendChild(rfModal);
+}
