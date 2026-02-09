@@ -61,7 +61,7 @@ function openAutoimmuneUI() {
                 
                 <div style="display: flex; justify-content: center;">
                     <button onclick="openRedFlags()" style="background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-flag"></i> VER RED FLAGS
+                        <i class="fas fa-flag"></i> VER RED FLAGS ENCEFALITIS
                     </button>
                 </div>
             </div>
@@ -174,7 +174,7 @@ function openRedFlags() {
     
     rfModal.innerHTML = `
         <div style="background:var(--card); padding:1.5rem; border-radius:1.5rem; max-width:400px; width:100%; box-shadow: 0 20px 25px rgba(0,0,0,0.5); border: 1px solid var(--border);" onclick="event.stopPropagation()">
-            <h3 style="margin-top:0; color:var(--text-main); font-weight:800; font-size:1.1rem;">Red Flags (Pollak et al.)</h3>
+            <h3 style="margin-top:0; color:var(--text-main); font-weight:800; font-size:1.1rem;">Red Flags encefalitis (Pollak et al.)</h3>
             <ul style="font-size:0.8rem; line-height:1.5; padding-left:1.1rem; color:var(--text-main); margin-bottom:0;">
                 ${flags.map(f => `<li style="margin-bottom:4px;">${f}</li>`).join('')}
             </ul>
