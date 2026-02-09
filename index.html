@@ -183,6 +183,7 @@
 
 <script src="calculadora.js"></script>
 <script src="diagnostico.js"></script>
+<script src="autoinmune.js"></script>
 
 <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
@@ -294,6 +295,16 @@
 
             // HERRAMIENTAS MANUALES
             db.unshift({
+                titulo: "Psicosis Autoinmune", 
+                resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune en cuadros psicóticos.",
+                categoria: "HERRAMIENTAS", 
+                id: "diag-autoimmune", 
+                imagen: "imagenautoinmunes.jpg", 
+                isAutoimmune: true,
+                fecha: '09/02/2026'
+            });
+
+            db.unshift({
                 titulo: "Diferenciar Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno", 
                 resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
                 categoria: "HERRAMIENTAS", 
@@ -313,15 +324,6 @@
                 fecha: '31/12/2099'
             });
             
-            db.unshift({
-    titulo: "Psicosis Autoinmune", 
-    resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune en cuadros psicóticos.",
-    categoria: "HERRAMIENTAS", 
-    id: "diag-autoimmune", 
-    imagen: "imagenautoinmunes.jpg", 
-    isAutoimmune: true,
-    fecha: '09/02/2026'
-
             createFilterButtons();
             renderAll();
         } catch (e) { console.error(e); }
@@ -329,25 +331,26 @@
 
     function createCard(item) {
         const isFav = favorites.includes(item.id);
+        const isTool = item.isCalc || item.isDiag || item.isAutoimmune;
         const card = document.createElement('div');
         card.className = 'card';
         card.onclick = () => {
             if (item.isCalc) openCalcUI();
             else if (item.isDiag) openDiagUI();
-            else openModal(item.id);
             else if (item.isAutoimmune) openAutoimmuneUI();
+            else openModal(item.id);
         };
         
         card.innerHTML = `
-            ${(!item.isCalc && !item.isDiag) ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
+            ${!isTool ? `<button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>` : ''}
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
                 <div class="res">${item.resumen}</div>
                 <div class="card-actions">
-                    <button class="btn btn-primary">${(item.isCalc || item.isDiag) ? 'CALCULAR' : 'ACCEDER'}</button>
-                    ${(!item.isCalc && !item.isDiag) ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
+                    <button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
+                    ${!isTool ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(item.titulo + ' ' + item.link)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
                 </div>
             </div>`;
         return card;
