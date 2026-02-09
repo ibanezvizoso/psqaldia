@@ -216,15 +216,27 @@
         }
     }
 
-    function openAbout() {
+    async function openAbout() {
         toggleMenu();
-        document.getElementById('modalData').innerHTML = `
-            <div style="padding:2.5rem;">
-                <h2 style="margin-bottom:1.5rem; font-weight:800;">Sobre el proyecto</h2>
-                <p style="line-height:1.6;">Plataforma para mantenerse actualizado en psiquiatría y acceder rápidamente a recursos útiles.</p>
-            </div>`;
+        const modalData = document.getElementById('modalData');
+        
+        // Ponemos un mensaje de carga momentáneo
+        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando información...</div>';
         document.getElementById('modal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        try {
+            // Intentamos traer el contenido del archivo externo
+            const response = await fetch('about.html');
+            if (response.ok) {
+                const html = await response.text();
+                modalData.innerHTML = html;
+            } else {
+                modalData.innerHTML = '<div style="padding:2.5rem;">Error al cargar la información.</div>';
+            }
+        } catch (error) {
+            modalData.innerHTML = '<div style="padding:2.5rem;">No se pudo conectar con el servidor.</div>';
+        }
     }
 
     function openSettings() {
