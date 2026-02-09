@@ -1,8 +1,32 @@
-/**
- * MOTOR LÓGICO DE LA CALCULADORA PSQALDÍA
- * Versión Final: Recupera porcentajes y mantiene jerarquía INTEGRATE
- */
-
+function iniciarInterfazCalculadora() {
+    const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
+    
+    document.getElementById('modalData').innerHTML = `
+        <div class="calc-ui">
+            <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
+            
+            <label>Fármaco Origen</label>
+            <select id="f_orig">${options}</select>
+            
+            <label>Dosis Actual (mg/día)</label>
+            <input type="number" id="d_orig" placeholder="0.00">
+            
+            <label>Fármaco Destino</label>
+            <select id="f_dest">${options}</select>
+            
+            <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
+            
+            <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
+                <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
+                <div id="res-alert"></div>
+                <div id="res-tip"></div>
+            </div>
+            
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
+                Basado en Taylor (Maudsley Prescribing Guidelines), Leucht et al. e INTEGRATE. Juicio clínico indispensable.
+            </p>
+        </div>`;
+}
 const MATRIZ_INTEGRATE = {
   // 1. Parejas Específicas
   "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
