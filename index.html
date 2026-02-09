@@ -291,10 +291,8 @@
                 max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5])
             }));
 
-            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-
-            // HERRAMIENTAS MANUALES
-            db.unshift({
+            // AÑADIR HERRAMIENTAS AL ARRAY ANTES DE ORDENAR
+            db.push({
                 titulo: "Psicosis Autoinmune", 
                 resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune en cuadros psicóticos.",
                 categoria: "HERRAMIENTAS", 
@@ -304,25 +302,28 @@
                 fecha: '09/02/2026'
             });
 
-            db.unshift({
+            db.push({
                 titulo: "Diferenciar Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno", 
                 resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
                 categoria: "HERRAMIENTAS", 
                 id: "diag-ss-snm", 
                 imagen: "fundicion.jpg", 
                 isDiag: true,
-                fecha: '31/12/2099'
+                fecha: '01/01/2026'
             });
 
-            db.unshift({
+            db.push({
                 titulo: "Calculadora de Antipsicóticos", 
                 resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley, Leucht et al e INTEGRATE.",
                 categoria: "HERRAMIENTAS", 
                 id: "calc-aps", 
                 imagen: "calc.jpg", 
                 isCalc: true,
-                fecha: '31/12/2099'
+                fecha: '01/01/2026'
             });
+
+            // ORDENAR: LO MÁS RECIENTE PRIMERO (FECHA DESCENDENTE)
+            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
             
             createFilterButtons();
             renderAll();
@@ -334,7 +335,7 @@
         const isTool = item.isCalc || item.isDiag || item.isAutoimmune;
         const card = document.createElement('div');
         card.className = 'card';
-       card.onclick = () => {
+        card.onclick = () => {
             if (item.isCalc) {
                 openCalcUI();
             } else if (item.isDiag) {
