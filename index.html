@@ -391,23 +391,17 @@ function checkSharedResource() {
     return card;
 }
 
-    function openCalcUI() {
-        const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
-        document.getElementById('modalData').innerHTML = `
-            <div class="calc-ui">
-                <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
-                <label>Fármaco Origen</label><select id="f_orig">${options}</select>
-                <label>Dosis Actual (mg/día)</label><input type="number" id="d_orig" placeholder="0.00">
-                <label>Fármaco Destino</label><select id="f_dest">${options}</select>
-                <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
-                <div id="res-box" class="res-container" style="background:var(--bg);">
-                    <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
-                    <div id="res-alert"></div>
-                    <div id="res-tip"></div>
-                </div>
-            </div>`;
+   function openCalcUI() {
+        // 1. Abrimos el modal vacío
         document.getElementById('modal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        
+        // 2. Llamamos a la calculadora para que se pinte a sí misma
+        if (typeof iniciarInterfazCalculadora === 'function') {
+            iniciarInterfazCalculadora();
+        } else {
+            document.getElementById('modalData').innerHTML = "Error: No se pudo cargar el motor de la calculadora.";
+        }
     }
 
     function openModal(id) {
