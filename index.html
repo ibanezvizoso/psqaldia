@@ -163,9 +163,8 @@
 </div>
 
 <footer>
-    <div class="disclaimer">
-        <b>Aviso legal:</b> PSQALDÍA es una plataforma informativa que pretende recopilar materiales y crear recursos útiles para mantenerse actualizado en la práctica clínica diaria. El contenido no sustituye el juicio clínico profesional ni debe usarse para diagnóstico o tratamiento sin supervisión médica especializada.
-    </div>
+    <div style="margin-bottom: 1rem; font-weight: 800; opacity: 0.5; font-size: 0.8rem; letter-spacing: 1px;">PSQALDÍA © 2026</div>
+    <a href="#" onclick="openLegal(); return false;" style="color: var(--text-muted); font-size: 0.7rem; text-decoration: underline;">Ver Aviso Legal y Responsabilidad</a>
 </footer>
 
 <button id="installBtn"><i class="fas fa-download"></i> INSTALAR APP</button>
@@ -236,6 +235,24 @@
             }
         } catch (error) {
             modalData.innerHTML = '<div style="padding:2.5rem;">No se pudo conectar con el servidor.</div>';
+        }
+    }
+    async function openLegal() {
+        const modalData = document.getElementById('modalData');
+        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
+        document.getElementById('modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        try {
+            const response = await fetch('legal.html');
+            if (response.ok) {
+                const html = await response.text();
+                modalData.innerHTML = html;
+            } else {
+                modalData.innerHTML = '<div style="padding:2.5rem;">Error al cargar el aviso legal.</div>';
+            }
+        } catch (e) {
+            modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>';
         }
     }
 
