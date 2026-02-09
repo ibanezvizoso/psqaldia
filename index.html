@@ -189,6 +189,7 @@
 <script src="autoinmune.js"></script>
 
 <script>
+  <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
     const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
@@ -200,16 +201,19 @@
     let lastScrollY = window.scrollY;
     let deferredPrompt;
 
-    // --- MEJORA iOS: Bloqueo de scroll robusto ---
+    // --- SISTEMA DE BLOQUEO DE SCROLL (Anti-congelamiento iOS) ---
     function setScrollLock(lock) {
         if (lock) {
             document.body.style.top = `-${window.scrollY}px`;
             document.body.style.position = 'fixed';
             document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
         } else {
             const scrollY = document.body.style.top;
             document.body.style.position = '';
             document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
             window.scrollTo(0, parseInt(scrollY || '0') * -1);
         }
     }
@@ -229,12 +233,44 @@
         }
     }
 
+    // --- LLAMADORES DE HERRAMIENTAS MODULARES ---
+    function openCalcUI() {
+        document.getElementById('modal').style.display = 'flex';
+        setScrollLock(true);
+        if (typeof iniciarInterfazCalculadora === 'function') {
+            iniciarInterfazCalculadora();
+        } else {
+            document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Error: No se cargó calculadora.js</div>';
+        }
+    }
+
+    function openDiagUI() {
+        document.getElementById('modal').style.display = 'flex';
+        setScrollLock(true);
+        if (typeof iniciarInterfazDiagnostico === 'function') {
+            iniciarInterfazDiagnostico();
+        } else {
+            document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Error: No se cargó diagnostico.js</div>';
+        }
+    }
+
+    function openAutoimmuneUI() {
+        document.getElementById('modal').style.display = 'flex';
+        setScrollLock(true);
+        if (typeof iniciarInterfazAutoinmune === 'function') {
+            iniciarInterfazAutoinmune();
+        } else {
+            document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Error: No se cargó autoinmune.js</div>';
+        }
+    }
+
+    // --- MODALES DE TEXTO (About / Legal) ---
     async function openAbout() {
         toggleMenu();
         showModalLoading();
         try {
             const response = await fetch('about.html');
-            const html = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar.</div>';
+            const html = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar información.</div>';
             document.getElementById('modalData').innerHTML = html;
         } catch (e) {
             document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>';
@@ -245,7 +281,7 @@
         showModalLoading();
         try {
             const response = await fetch('legal.html');
-            const html = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar.</div>';
+            const html = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar aviso legal.</div>';
             document.getElementById('modalData').innerHTML = html;
         } catch (e) {
             document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>';
@@ -253,9 +289,14 @@
     }
 
     function showModalLoading() {
-        document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
+        document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem; text-align:center;"><i class="fas fa-circle-notch fa-spin"></i> Cargando...</div>';
         document.getElementById('modal').style.display = 'flex';
         setScrollLock(true);
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+        setScrollLock(false);
     }
 
     function openSettings() {
@@ -278,46 +319,21 @@
         }
     }
 
-    window.addEventListener('scroll', () => {
-        const header = document.getElementById('mainHeader');
-        if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
-        else header.classList.remove('hide');
-        lastScrollY = window.scrollY;
-    }, { passive: true });
-
-    function getPasteColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        const h = Math.abs(hash) % 360;
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        return `background-color: hsl(${h}, 70%, ${isDark ? 25 : 92}%); color: hsl(${h}, 70%, ${isDark ? 90 : 25}%); border: 1px solid hsl(${h}, 70%, ${isDark ? 40 : 80}%);`;
-    }
-
-    function parseDate(dateStr) {
-        if (!dateStr) return new Date(0);
-        const parts = dateStr.split(/[/ -]/);
-        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
-        return new Date(dateStr) || new Date(0);
-    }
-
+    // --- LÓGICA DE CARGA Y RENDER ---
     async function loadData() {
         try {
-            // Cargar Datos Principales
+            // 1. Cargar Recursos
             const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`);
             const data = await res.json();
             if (data.values) {
                 db = data.values.map(row => ({
-                    fecha: row[0] || '', 
-                    titulo: row[1] || '', 
-                    resumen: row[2] || '', 
-                    link: row[3] || '', 
-                    imagen: row[4] || '', 
-                    categoria: (row[5] || 'Otros').trim().toUpperCase(), 
+                    fecha: row[0] || '', titulo: row[1] || '', resumen: row[2] || '', 
+                    link: row[3] || '', imagen: row[4] || '', categoria: (row[5] || 'Otros').trim().toUpperCase(), 
                     id: 'psq-' + (row[1] || 'item').replace(/\s+/g, '-').toLowerCase()
                 }));
             }
 
-            // Cargar Datos Calculadora
+            // 2. Cargar Datos APS
             const resC = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`);
             const dataC = await resC.json();
             if(dataC.values) {
@@ -327,11 +343,11 @@
                 }));
             }
 
-            // Inyectar Herramientas Manuales
+            // 3. Inyectar Herramientas Manuales
             const shareBase = window.location.origin + window.location.pathname;
             db.push(
-                { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: shareBase },
-                { titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", resumen: "Basado en criterios de Hunter y Levenson.", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: shareBase },
+                { titulo: "Criterios Psicosis Autoinmune", resumen: "Determinación de probabilidad de etiología autoinmune (Pollak et al., 2020).", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: shareBase },
+                { titulo: "Diferenciar SS vs SNM", resumen: "Herramienta diagnóstica basada en criterios de Hunter y Levenson.", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: shareBase },
                 { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: shareBase }
             );
 
@@ -339,7 +355,26 @@
             createFilterButtons();
             renderAll();
             checkSharedResource(); 
-        } catch (e) { console.error("Error cargando datos:", e); }
+        } catch (e) { console.error("Error en loadData:", e); }
+    }
+
+    function renderAll(dataToRender = db) {
+        const favsApp = document.getElementById('favs-app');
+        const app = document.getElementById('app');
+        const favsTitle = document.getElementById('favs-title');
+        const mainTitle = document.getElementById('main-title');
+        const favsList = dataToRender.filter(i => favorites.includes(i.id));
+        const othersList = dataToRender.filter(i => !favorites.includes(i.id));
+
+        favsApp.innerHTML = ''; app.innerHTML = '';
+
+        if (favsList.length > 0 && currentCategory === 'TODOS') {
+            favsTitle.style.display = 'block';
+            favsList.forEach(item => favsApp.appendChild(createCard(item)));
+        } else { favsTitle.style.display = 'none'; }
+
+        mainTitle.style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
+        othersList.forEach(item => app.appendChild(createCard(item)));
     }
 
     function createCard(item) {
@@ -348,7 +383,6 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.id = 'anchor-' + item.id;
-        
         card.onclick = () => {
             if (item.isCalc) openCalcUI();
             else if (item.isDiag) openDiagUI();
@@ -360,9 +394,7 @@
         const shareText = isTool ? `🛠️Herramienta PSQALDÍA: ${item.titulo}\n${shareUrl}` : `${item.titulo}: ${shareUrl}`;
 
         card.innerHTML = `
-            <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')">
-                <i class="fa${isFav ? 's' : 'r'} fa-star"></i>
-            </button>
+            <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')"><i class="fa${isFav ? 's' : 'r'} fa-star"></i></button>
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
@@ -371,42 +403,12 @@
                 <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
                 <div class="card-actions">
                     <button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
-                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
+                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>`;
         return card;
     }
 
-    function openCalcUI() {
-        document.getElementById('modal').style.display = 'flex';
-        setScrollLock(true);
-        if (typeof iniciarInterfazCalculadora === 'function') iniciarInterfazCalculadora();
-        else document.getElementById('modalData').innerHTML = "Error: Calculadora no disponible.";
-    }
-
-function openDiagUI() {
-    document.getElementById('modal').style.display = 'flex';
-    setScrollLock(true);
-    // Llama a la función que debe estar dentro de diagnostico.js
-    if (typeof iniciarInterfazDiagnostico === 'function') {
-        iniciarInterfazDiagnostico();
-    } else {
-        document.getElementById('modalData').innerHTML = '<div style="padding:2rem;">Error: No se pudo cargar diagnostico.js</div>';
-    }
-}
-
-function openAutoimmuneUI() {
-    document.getElementById('modal').style.display = 'flex';
-    setScrollLock(true);
-    // Llama a la función que debe estar dentro de autoinmune.js
-    if (typeof iniciarInterfazAutoinmune === 'function') {
-        iniciarInterfazAutoinmune();
-    } else {
-        document.getElementById('modalData').innerHTML = '<div style="padding:2rem;">Error: No se pudo cargar autoinmune.js</div>';
-    }
-}
     function openModal(id) {
         const item = db.find(i => i.id === id);
         if (!item) return;
@@ -416,24 +418,28 @@ function openAutoimmuneUI() {
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <h2 style="margin:1rem 0;">${item.titulo}</h2>
                 <p style="color:var(--text-muted); line-height:1.6;">${item.resumen}</p>
-                <div class="card-actions">
-                    <a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER AL RECURSO</a>
-                </div>
+                <div class="card-actions"><a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a></div>
             </div>`;
         document.getElementById('modal').style.display = 'flex';
         setScrollLock(true);
     }
 
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-        setScrollLock(false);
-    }
-
-    function toggleFavorite(e, id) {
-        e.stopPropagation();
-        favorites = favorites.includes(id) ? favorites.filter(fav => fav !== id) : [...favorites, id];
-        localStorage.setItem('psq_favs', JSON.stringify(favorites));
-        filter();
+    function checkSharedResource() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedId = urlParams.get('id');
+        if (sharedId) {
+            setTimeout(() => {
+                const item = db.find(i => i.id === sharedId);
+                if (item) {
+                    const element = document.getElementById('anchor-' + sharedId);
+                    if (element) element.scrollIntoView({ behavior: 'smooth' });
+                    if (item.isCalc) openCalcUI();
+                    else if (item.isDiag) openDiagUI();
+                    else if (item.isAutoimmune) openAutoimmuneUI();
+                    else openModal(sharedId);
+                }
+            }, 500); 
+        }
     }
 
     function filter() {
@@ -444,28 +450,6 @@ function openAutoimmuneUI() {
             return matchQ && matchC;
         });
         renderAll(filtered);
-    }
-
-    function renderAll(dataToRender = db) {
-        const favsApp = document.getElementById('favs-app');
-        const app = document.getElementById('app');
-        const favsTitle = document.getElementById('favs-title');
-        const mainTitle = document.getElementById('main-title');
-
-        const favsList = dataToRender.filter(i => favorites.includes(i.id));
-        const othersList = dataToRender.filter(i => !favorites.includes(i.id));
-
-        favsApp.innerHTML = ''; app.innerHTML = '';
-
-        if (favsList.length > 0 && currentCategory === 'TODOS') {
-            favsTitle.style.display = 'block';
-            favsList.forEach(item => favsApp.appendChild(createCard(item)));
-        } else {
-            favsTitle.style.display = 'none';
-        }
-
-        mainTitle.style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
-        othersList.forEach(item => app.appendChild(createCard(item)));
     }
 
     function createFilterButtons() {
@@ -486,24 +470,34 @@ function openAutoimmuneUI() {
         });
     }
 
-    function checkSharedResource() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedId = urlParams.get('id');
-        if (sharedId) {
-            setTimeout(() => {
-                const item = db.find(i => i.id === sharedId);
-                if (item) {
-                    if (item.isCalc) openCalcUI();
-                    else if (item.isDiag) openDiagUI();
-                    else if (item.isAutoimmune) openAutoimmuneUI();
-                    else openModal(sharedId);
-                    
-                    const element = document.getElementById('anchor-' + sharedId);
-                    if (element) element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 800); 
-        }
+    function toggleFavorite(e, id) {
+        e.stopPropagation();
+        favorites = favorites.includes(id) ? favorites.filter(fav => fav !== id) : [...favorites, id];
+        localStorage.setItem('psq_favs', JSON.stringify(favorites));
+        filter();
     }
+
+    function getPasteColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        const h = Math.abs(hash) % 360;
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return `background-color: hsl(${h}, 70%, ${isDark ? 25 : 92}%); color: hsl(${h}, 70%, ${isDark ? 90 : 25}%); border: 1px solid hsl(${h}, 70%, ${isDark ? 40 : 80}%);`;
+    }
+
+    function parseDate(dateStr) {
+        if (!dateStr) return new Date(0);
+        const parts = dateStr.split(/[/ -]/);
+        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
+        return new Date(dateStr) || new Date(0);
+    }
+
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('mainHeader');
+        if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
+        else header.classList.remove('hide');
+        lastScrollY = window.scrollY;
+    }, { passive: true });
 
     window.addEventListener('load', () => {
         const ua = window.navigator.userAgent.toLowerCase();
@@ -527,6 +521,7 @@ function openAutoimmuneUI() {
     });
 
     loadData();
+</script>
 </script>
 </body>
 </html>
