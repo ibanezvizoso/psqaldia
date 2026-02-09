@@ -1,23 +1,42 @@
 const CRITERIOS_PA = {
-    clinicos: [
+   clinicos: [
+
         { id: 'tumor', label: 'Tumor' },
-        { id: 'movimiento', label: 'Movimientos ext.' },
+
+        { id: 'movimiento', label: 'Catatonía/discinesia' },
+
         { id: 'adverso_ap', label: 'Sospecha SNM' },
-        { id: 'cognitivo', label: 'Deterioro cog.' },
+
+        { id: 'cognitivo', label: 'Disfx cognitiva' },
+
         { id: 'conciencia', label: 'Baja conciencia' },
+
         { id: 'convulsiones', label: 'Convulsiones' },
-        { id: 'autonomica', label: 'Disf. autonómica' }
+
+        { id: 'autonomica', label: 'Disfx autonómica' }
+
     ],
+
     paraclinicos: [
+
         { id: 'lcr_pleocitosis', label: 'LCR: Pleocitosis' },
-        { id: 'mri_temporal', label: 'RM: Temp. Medial' },
-        { id: 'eeg_encef', label: 'EEG: Encefalopatía' },
-        { id: 'lcr_bandas', label: 'LCR: Bandas IgG' },
-        { id: 'suero_ab', label: 'Suero: Anticuerpos' }
+
+        { id: 'mri_temporal', label: 'RM: Anomalías señal lóbulo temporal medial' },
+
+        { id: 'eeg_encef', label: 'EEG: Cambios de encefalopatía' },
+
+        { id: 'lcr_bandas', label: 'LCR: Bandas oligoclonales/Aumento índice IgG' },
+
+        { id: 'suero_ab', label: 'Suero: Anticuerpos antineuronales' }
+
     ],
+
     definitivo: [
-        { id: 'lcr_igg', label: 'LCR: IgG (+) neur.' }
+
+        { id: 'lcr_igg', label: 'LCR: IgG antineuronales' }
+
     ]
+
 };
 
 function openAutoimmuneUI() {
