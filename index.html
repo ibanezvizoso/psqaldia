@@ -3,7 +3,7 @@
 <head>
     <meta name="google-site-verification" content="BpHCi544mGO8TaOecGzGZpkH4wzaltHrdY4VqNhBEp4" />
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>PSQALDÍA | Actualidad y recursos para psiquiatría</title>
     <meta name="description" content="Plataforma de actualidad y recursos para psiquiatría. Recopilación de materiales y creación de recursos útiles para la práctica clínica diaria.">
@@ -11,6 +11,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4338ca">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="Logo.png">
     <link rel="icon" type="image/png" href="Logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -28,7 +29,7 @@
             }
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s; -webkit-tap-highlight-color: transparent; }
         
         header { 
             background: var(--bg); padding: 1rem 1.5rem;
@@ -69,6 +70,7 @@
             border: 2px solid var(--border); background: var(--card); 
             color: var(--text-main); font-size: 1rem; outline: none; 
             margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            -webkit-appearance: none;
         }
         .filter-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 1rem; }
         .f-btn { 
@@ -80,7 +82,8 @@
         .f-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
         .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
         #app, #favs-app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
+        
+        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; -webkit-user-select: none; }
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .card-img { width: 100%; height: 180px; object-fit: cover; background: var(--border); }
         .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
@@ -89,8 +92,6 @@
         .tag { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; }
         .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: var(--text-main); line-height: 1.2; }
         .res { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        
-        /* FECHA SUTIL */
         .card-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 5px; font-weight: 600; opacity: 0.8; }
 
         .card-actions { display: flex; gap: 0.75rem; margin-top: auto; }
@@ -111,16 +112,7 @@
         .calc-ui { padding: 2.5rem; }
         .calc-ui label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
         .calc-ui select, .calc-ui input { width: 100%; padding: 1rem; border-radius: 15px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; margin-bottom: 1.5rem; font-family: inherit; }
-        .res-container { border-radius: 20px; padding: 1.5rem; margin-top: 1rem; display: none; transition: 0.3s; }
     </style>
-    <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "PSQ al día",
-  "url": "https://psqaldia.pages.dev/"
-}
-</script>
 </head>
 <body>
 
@@ -208,6 +200,20 @@
     let lastScrollY = window.scrollY;
     let deferredPrompt;
 
+    // --- MEJORA iOS: Bloqueo de scroll robusto ---
+    function setScrollLock(lock) {
+        if (lock) {
+            document.body.style.top = `-${window.scrollY}px`;
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+        } else {
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        }
+    }
+
     function toggleMenu() {
         const menu = document.getElementById('sideMenu');
         const overlay = document.getElementById('menuOverlay');
@@ -215,53 +221,41 @@
         if (isOpen) {
             menu.classList.remove('open');
             overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
+            setScrollLock(false);
         } else {
             menu.classList.add('open');
             overlay.style.display = 'block';
-            document.body.style.overflow = 'hidden';
+            setScrollLock(true);
         }
     }
 
     async function openAbout() {
         toggleMenu();
-        const modalData = document.getElementById('modalData');
-        
-        // Ponemos un mensaje de carga momentáneo
-        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando información...</div>';
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-
+        showModalLoading();
         try {
-            // Intentamos traer el contenido del archivo externo
             const response = await fetch('about.html');
-            if (response.ok) {
-                const html = await response.text();
-                modalData.innerHTML = html;
-            } else {
-                modalData.innerHTML = '<div style="padding:2.5rem;">Error al cargar la información.</div>';
-            }
-        } catch (error) {
-            modalData.innerHTML = '<div style="padding:2.5rem;">No se pudo conectar con el servidor.</div>';
+            const html = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar.</div>';
+            document.getElementById('modalData').innerHTML = html;
+        } catch (e) {
+            document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>';
         }
     }
-    async function openLegal() {
-        const modalData = document.getElementById('modalData');
-        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
 
+    async function openLegal() {
+        showModalLoading();
         try {
             const response = await fetch('legal.html');
-            if (response.ok) {
-                const html = await response.text();
-                modalData.innerHTML = html;
-            } else {
-                modalData.innerHTML = '<div style="padding:2.5rem;">Error al cargar el aviso legal.</div>';
-            }
+            const html = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar.</div>';
+            document.getElementById('modalData').innerHTML = html;
         } catch (e) {
-            modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>';
+            document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>';
         }
+    }
+
+    function showModalLoading() {
+        document.getElementById('modalData').innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
+        document.getElementById('modal').style.display = 'flex';
+        setScrollLock(true);
     }
 
     function openSettings() {
@@ -272,11 +266,11 @@
                 <button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button>
             </div>`;
         document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        setScrollLock(true);
     }
 
     function clearFavs() {
-        if(confirm("¿Seguro?")) {
+        if(confirm("¿Seguro que quieres borrar tus favoritos?")) {
             favorites = [];
             localStorage.setItem('psq_favs', '[]');
             filter();
@@ -289,16 +283,14 @@
         if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
         else header.classList.remove('hide');
         lastScrollY = window.scrollY;
-    });
+    }, { passive: true });
 
     function getPasteColor(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
         const h = Math.abs(hash) % 360;
         const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const lightness = isDark ? 25 : 92;
-        const textLightness = isDark ? 90 : 25;
-        return `background-color: hsl(${h}, 70%, ${lightness}%); color: hsl(${h}, 70%, ${textLightness}%); border: 1px solid hsl(${h}, 70%, ${isDark ? 40 : 80}%);`;
+        return `background-color: hsl(${h}, 70%, ${isDark ? 25 : 92}%); color: hsl(${h}, 70%, ${isDark ? 90 : 25}%); border: 1px solid hsl(${h}, 70%, ${isDark ? 40 : 80}%);`;
     }
 
     function parseDate(dateStr) {
@@ -310,6 +302,7 @@
 
     async function loadData() {
         try {
+            // Cargar Datos Principales
             const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`);
             const data = await res.json();
             if (data.values) {
@@ -324,109 +317,73 @@
                 }));
             }
 
+            // Cargar Datos Calculadora
             const resC = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`);
             const dataC = await resC.json();
-            window.dbCalc = dataC.values.map(row => ({
-                farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), 
-                max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5])
-            }));
+            if(dataC.values) {
+                window.dbCalc = dataC.values.map(row => ({
+                    farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), 
+                    max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5])
+                }));
+            }
 
-            // HERRAMIENTAS MANUALES - AHORA CON FECHA Y LINK PARA WHATSAPP
-            db.push({
-                titulo: "Comprueba los criterios de psicosis autoinmune", 
-                resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.",
-                categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", 
-                isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname
-            });
-            db.push({
-                titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", 
-                resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).",
-                categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", 
-                isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname
-            });
-            db.push({
-                titulo: "Calculadora de Antipsicóticos", 
-                resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley e INTEGRATE.",
-                categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", 
-                isCalc: true, fecha: '01/02/2026', link: window.location.origin + window.location.pathname
-            });
+            // Inyectar Herramientas Manuales
+            const shareBase = window.location.origin + window.location.pathname;
+            db.push(
+                { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: shareBase },
+                { titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", resumen: "Basado en criterios de Hunter y Levenson.", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: shareBase },
+                { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: shareBase }
+            );
 
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
             createFilterButtons();
             renderAll();
-            checkSharedResource();
-        } catch (e) { console.error(e); }
+            checkSharedResource(); 
+        } catch (e) { console.error("Error cargando datos:", e); }
     }
-function checkSharedResource() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedId = urlParams.get('id');
-        if (sharedId) {
-            setTimeout(() => {
-                const item = db.find(i => i.id === sharedId);
-                if (item) {
-                    if (item.isCalc) openCalcUI();
-                    else if (item.isDiag) openDiagUI();
-                    else if (item.isAutoimmune) openAutoimmuneUI();
-                    else openModal(sharedId);
-                    
-                    const element = document.getElementById('anchor-' + sharedId);
-                    if (element) element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 800); 
-        }
-    }
+
     function createCard(item) {
-    const isFav = favorites.includes(item.id);
-    const isTool = item.isCalc || item.isDiag || item.isAutoimmune;
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.id = 'anchor-' + item.id; // Importante para el scroll automático
-    
-    card.onclick = () => {
-        if (item.isCalc) openCalcUI();
-        else if (item.isDiag) openDiagUI();
-        else if (item.isAutoimmune) openAutoimmuneUI();
-        else openModal(item.id);
-    };
-    
-    // AQUÍ ESTÁ EL TRUCO: Genera el link real de donde esté tu web alojada
-    const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
-    const shareText = isTool 
-        ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}`
-        : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
-
-    card.innerHTML = `
-        <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')">
-            <i class="fa${isFav ? 's' : 'r'} fa-star"></i>
-        </button>
-        <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
-        <div class="card-content">
-            <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-            <div class="tit">${item.titulo}</div>
-            <div class="res">${item.resumen}</div>
-            <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
-            <div class="card-actions">
-                <button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
-                <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" 
-                   target="_blank" class="btn btn-wa" onclick="event.stopPropagation()">
-                   <i class="fab fa-whatsapp"></i>
-                </a>
-            </div>
-        </div>`;
-    return card;
-}
-
-   function openCalcUI() {
-        // 1. Abrimos el modal vacío
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        const isFav = favorites.includes(item.id);
+        const isTool = item.isCalc || item.isDiag || item.isAutoimmune;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.id = 'anchor-' + item.id;
         
-        // 2. Llamamos a la calculadora para que se pinte a sí misma
-        if (typeof iniciarInterfazCalculadora === 'function') {
-            iniciarInterfazCalculadora();
-        } else {
-            document.getElementById('modalData').innerHTML = "Error: No se pudo cargar el motor de la calculadora.";
-        }
+        card.onclick = () => {
+            if (item.isCalc) openCalcUI();
+            else if (item.isDiag) openDiagUI();
+            else if (item.isAutoimmune) openAutoimmuneUI();
+            else openModal(item.id);
+        };
+        
+        const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
+        const shareText = isTool ? `🛠️Herramienta PSQALDÍA: ${item.titulo}\n${shareUrl}` : `${item.titulo}: ${shareUrl}`;
+
+        card.innerHTML = `
+            <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFavorite(event, '${item.id}')">
+                <i class="fa${isFav ? 's' : 'r'} fa-star"></i>
+            </button>
+            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
+            <div class="card-content">
+                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+                <div class="tit">${item.titulo}</div>
+                <div class="res">${item.resumen}</div>
+                <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
+                <div class="card-actions">
+                    <button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
+                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>`;
+        return card;
+    }
+
+    function openCalcUI() {
+        document.getElementById('modal').style.display = 'flex';
+        setScrollLock(true);
+        if (typeof iniciarInterfazCalculadora === 'function') iniciarInterfazCalculadora();
+        else document.getElementById('modalData').innerHTML = "Error: Calculadora no disponible.";
     }
 
     function openModal(id) {
@@ -437,18 +394,18 @@ function checkSharedResource() {
             <div style="padding:2rem;">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <h2 style="margin:1rem 0;">${item.titulo}</h2>
-                <p style="color:var(--text-muted);">${item.resumen}</p>
+                <p style="color:var(--text-muted); line-height:1.6;">${item.resumen}</p>
                 <div class="card-actions">
-                    <a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a>
+                    <a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER AL RECURSO</a>
                 </div>
             </div>`;
         document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        setScrollLock(true);
     }
 
     function closeModal() {
         document.getElementById('modal').style.display = 'none';
-        document.body.style.overflow = 'auto';
+        setScrollLock(false);
     }
 
     function toggleFavorite(e, id) {
@@ -473,6 +430,7 @@ function checkSharedResource() {
         const app = document.getElementById('app');
         const favsTitle = document.getElementById('favs-title');
         const mainTitle = document.getElementById('main-title');
+
         const favsList = dataToRender.filter(i => favorites.includes(i.id));
         const othersList = dataToRender.filter(i => !favorites.includes(i.id));
 
@@ -507,8 +465,28 @@ function checkSharedResource() {
         });
     }
 
+    function checkSharedResource() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedId = urlParams.get('id');
+        if (sharedId) {
+            setTimeout(() => {
+                const item = db.find(i => i.id === sharedId);
+                if (item) {
+                    if (item.isCalc) openCalcUI();
+                    else if (item.isDiag) openDiagUI();
+                    else if (item.isAutoimmune) openAutoimmuneUI();
+                    else openModal(sharedId);
+                    
+                    const element = document.getElementById('anchor-' + sharedId);
+                    if (element) element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 800); 
+        }
+    }
+
     window.addEventListener('load', () => {
-        const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        const ua = window.navigator.userAgent.toLowerCase();
+        const isIos = /iphone|ipad|ipod/.test(ua);
         const isStandalone = ('standalone' in window.navigator) || (window.matchMedia('(display-mode: standalone)').matches);
         if (isIos && !isStandalone) document.getElementById('iosAlert').style.display = 'flex';
     });
@@ -526,28 +504,7 @@ function checkSharedResource() {
             document.getElementById('installBtn').style.display = 'none';
         }
     });
-// Función para detectar si venimos de un enlace compartido y abrir el recurso
-    function checkSharedResource() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedId = urlParams.get('id');
-        if (sharedId) {
-            // Esperamos un momento a que los datos estén cargados
-            setTimeout(() => {
-                const item = db.find(i => i.id === sharedId);
-                if (item) {
-                    // Si es una herramienta, abrimos su UI, si no, el modal normal
-                    if (item.isCalc) openCalcUI();
-                    else if (item.isDiag) openDiagUI();
-                    else if (item.isAutoimmune) openAutoimmuneUI();
-                    else openModal(sharedId);
-                    
-                    // Opcional: Desplazar la pantalla hasta la tarjeta del recurso
-                    const element = document.getElementById('anchor-' + sharedId);
-                    if (element) element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 800); 
-        }
-    }
+
     loadData();
 </script>
 </body>
