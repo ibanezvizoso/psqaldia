@@ -112,13 +112,13 @@ function updatePA() {
         estudioBox.style.background = '#ffedd5'; // Naranja claro
         estudioBox.style.border = '1px solid #fed7aa';
         estudioBox.style.color = '#9a3412';
-        estudioBox.innerHTML = `<strong>Siguiente paso:</strong> Estudio de LCR (Células, proteínas, bandas oligoclonales y anticuerpos antineuronales).`;
+        estudioBox.innerHTML = `<strong>Siguiente paso:</strong> Estudio de LCR`;
     } else if (posible) {
         estudioBox.style.display = 'block';
         estudioBox.style.background = '#fef9c3'; // Amarillo claro
         estudioBox.style.border = '1px solid #fef08a';
         estudioBox.style.color = '#854d0e';
-        estudioBox.innerHTML = `<strong>Siguiente paso:</strong> Solicitar EEG, RM cerebral y detección de anticuerpos en suero.`;
+        estudioBox.innerHTML = `<strong>Siguiente paso:</strong> Solicitar EEG, RM cerebral, anticuerpos en suero, LCR`;
     } else {
         estudioBox.style.display = 'none';
     }
