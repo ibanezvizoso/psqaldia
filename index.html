@@ -386,6 +386,27 @@
         else document.getElementById('modalData').innerHTML = "Error: Calculadora no disponible.";
     }
 
+function openDiagUI() {
+    document.getElementById('modal').style.display = 'flex';
+    setScrollLock(true);
+    // Llama a la función que debe estar dentro de diagnostico.js
+    if (typeof iniciarInterfazDiagnostico === 'function') {
+        iniciarInterfazDiagnostico();
+    } else {
+        document.getElementById('modalData').innerHTML = '<div style="padding:2rem;">Error: No se pudo cargar diagnostico.js</div>';
+    }
+}
+
+function openAutoimmuneUI() {
+    document.getElementById('modal').style.display = 'flex';
+    setScrollLock(true);
+    // Llama a la función que debe estar dentro de autoinmune.js
+    if (typeof iniciarInterfazAutoinmune === 'function') {
+        iniciarInterfazAutoinmune();
+    } else {
+        document.getElementById('modalData').innerHTML = '<div style="padding:2rem;">Error: No se pudo cargar autoinmune.js</div>';
+    }
+}
     function openModal(id) {
         const item = db.find(i => i.id === id);
         if (!item) return;
