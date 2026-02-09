@@ -337,7 +337,7 @@
         card.onclick = () => {
             if (item.isCalc) openCalcUI();
             else if (item.isDiag) openDiagUI();
-            else if (item.isAutoimmune) openAutoimmuneUI();
+            else if (item.isAutoimmune) openAutoimmuneUI(); // <--- Aquí es donde se llama a tu archivo externo
             else openModal(item.id);
         };
         
