@@ -23,7 +23,7 @@ function openDiagUI() {
     let html = `
         <div class="calc-ui" style="padding: 1rem; display: flex; flex-direction: column; height: 100%;">
             <div style="position: sticky; top: 0; background: var(--card); z-index: 10; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
-                <h2 style="margin-bottom:0.5rem; font-weight:800; font-size: 1.2rem;">Diferencial SS / SNM</h2>
+                <h2 style="margin-bottom:0.5rem; font-weight:800; font-size: 1.2rem;">Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno</h2>
                 
                 <div style="display: flex; gap: 10px; margin-bottom: 0.5rem;">
                     <div style="flex:1;">
