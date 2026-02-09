@@ -43,7 +43,7 @@ function openDiagUI() {
                 <div id="diag-alert" style="display:none; padding:0.5rem; border-radius:8px; margin-top:0.5rem; font-weight:700; font-size:0.75rem; text-align:center;"></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 1rem;">
+            <div id="check-list-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 1rem;">
                 ${SINTOMAS_SSSNM.map(s => `
                     <label style="display: flex; align-items: center; gap: 6px; background: var(--bg); padding: 0.5rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); font-size: 0.75rem; line-height: 1.1;">
                         <input type="checkbox" value="${s.id}" onchange="actualizarDiagnostico()" style="width:14px; height:14px; flex-shrink: 0;">
@@ -52,7 +52,7 @@ function openDiagUI() {
                 `).join('')}
             </div>
             
-            <button onclick="resetDiag()" style="margin-top: 1rem; background:none; border:none; color:var(--text-muted); font-size:0.65rem; font-weight:700; cursor:pointer; text-transform: uppercase;">
+            <button onclick="resetDiag()" style="margin-top: 1rem; background:none; border:none; color:var(--text-muted); font-size:0.65rem; font-weight:700; cursor:pointer; text-transform: uppercase; padding: 10px;">
                 <i class="fas fa-undo"></i> Reiniciar selección
             </button>
         </div>
@@ -64,20 +64,21 @@ function openDiagUI() {
 }
 
 function actualizarDiagnostico() {
-    const checks = Array.from(document.querySelectorAll('.calc-ui input:checked')).map(c => c.value);
+    const checks = Array.from(document.querySelectorAll('#check-list-container input:checked')).map(c => c.value);
     const alertBox = document.getElementById('diag-alert');
     
-    // --- LÓGICA HUNTER (SS) ---
+    // --- LÓGICA HUNTER (SS) CORREGIDA ---
     const hasExp = checks.includes('exp_serot');
     const r1 = checks.includes('clonus_esp');
-    const r2 = checks.includes('clonus_ind') && (checks.includes('agitacion') || checks.includes('diaforesis'));
-    const r3 = checks.includes('clonus_ocu') && (checks.includes('agitacion') || checks.includes('diaforesis'));
+    // Corregido a AND (&&) según criterios estrictos:
+    const r2 = checks.includes('clonus_ind') && checks.includes('agitacion') && checks.includes('diaforesis');
+    const r3 = checks.includes('clonus_ocu') && checks.includes('agitacion') && checks.includes('diaforesis');
     const r4 = checks.includes('temblor') && checks.includes('hiperreflexia');
     const r5 = checks.includes('rigidez') && checks.includes('fiebre') && (checks.includes('clonus_ocu') || checks.includes('clonus_ind'));
     
     const cumpleHunter = hasExp && (r1 || r2 || r3 || r4 || r5);
-    let progresoSS = (hasExp ? 25 : 0) + (checks.length * 5); // Base visual
-    if (r1 || r2 || r3 || r4 || r5) progresoSS += 40;
+    let progresoSS = (hasExp ? 25 : 0) + (checks.length * 4); 
+    if (r1 || r2 || r3 || r4 || r5) progresoSS += 35;
     
     if (cumpleHunter) progresoSS = 100;
     else progresoSS = Math.min(progresoSS, 95);
@@ -94,7 +95,7 @@ function actualizarDiagnostico() {
 
     // --- ACTUALIZAR UI ---
     document.getElementById('bar-ss').style.width = progresoSS + '%';
-    document.getElementById('bar-ss').style.background = progresoSS === 100 ? '#fda4af' : '#bae6fd'; // Rosa pastel si cumple
+    document.getElementById('bar-ss').style.background = progresoSS === 100 ? '#fda4af' : '#bae6fd'; 
     
     document.getElementById('bar-snm').style.width = progresoSNM + '%';
     document.getElementById('bar-snm').style.background = progresoSNM === 100 ? '#fda4af' : '#fef08a';
@@ -108,4 +109,11 @@ function actualizarDiagnostico() {
     } else {
         alertBox.style.display = 'none';
     }
+}
+
+// --- FUNCIÓN DE RESET CORREGIDA ---
+function resetDiag() {
+    const checkBoxes = document.querySelectorAll('#check-list-container input[type="checkbox"]');
+    checkBoxes.forEach(cb => cb.checked = false);
+    actualizarDiagnostico();
 }
