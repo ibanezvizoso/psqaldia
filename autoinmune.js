@@ -1,22 +1,22 @@
 const CRITERIOS_PA = {
     clinicos: [
         { id: 'tumor', label: 'Tumor' },
-        { id: 'movimiento', label: 'Movimientos ext.' },
+        { id: 'movimiento', label: 'Catatonía/discinesia' },
         { id: 'adverso_ap', label: 'Sospecha SNM' },
-        { id: 'cognitivo', label: 'Deterioro cog.' },
+        { id: 'cognitivo', label: 'Disfx cognitiva' },
         { id: 'conciencia', label: 'Baja conciencia' },
         { id: 'convulsiones', label: 'Convulsiones' },
-        { id: 'autonomica', label: 'Disf. autonómica' }
+        { id: 'autonomica', label: 'Disfx autonómica' }
     ],
     paraclinicos: [
         { id: 'lcr_pleocitosis', label: 'LCR: Pleocitosis' },
-        { id: 'mri_temporal', label: 'RM: Temp. Medial' },
-        { id: 'eeg_encef', label: 'EEG: Encefalopatía' },
-        { id: 'lcr_bandas', label: 'LCR: Bandas IgG' },
-        { id: 'suero_ab', label: 'Suero: Anticuerpos' }
+        { id: 'mri_temporal', label: 'RM: Anomalías señal lóbulo temporal medial' },
+        { id: 'eeg_encef', label: 'EEG: Cambios de encefalopatía' },
+        { id: 'lcr_bandas', label: 'LCR: Bandas oligoclonales/Aumento índice IgG' },
+        { id: 'suero_ab', label: 'Suero: Anticuerpos antineuronales' }
     ],
     definitivo: [
-        { id: 'lcr_igg', label: 'LCR: IgG (+) neur.' }
+        { id: 'lcr_igg', label: 'LCR: IgG antineuronales' }
     ]
 };
 
@@ -57,12 +57,12 @@ function openAutoimmuneUI() {
                     <strong>Estudio:</strong> EEG, RM, suero y LCR (+ Panel anticuerpos).
                 </div>
 
-                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Clínicos (min. 1)</p>
+                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Clínicos</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 1rem;">
                     ${CRITERIOS_PA.clinicos.map(s => renderCheck(s)).join('')}
                 </div>
                 
-                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Paraclínicos (Probable)</p>
+                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Paraclínicos</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 1rem;">
                     ${CRITERIOS_PA.paraclinicos.map(s => renderCheck(s)).join('')}
                 </div>
