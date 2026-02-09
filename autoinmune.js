@@ -1,22 +1,22 @@
 const CRITERIOS_PA = {
     clinicos: [
         { id: 'tumor', label: 'Tumor' },
-        { id: 'movimiento', label: 'Catatonía/discinesia' },
+        { id: 'movimiento', label: 'Movimientos ext.' },
         { id: 'adverso_ap', label: 'Sospecha SNM' },
-        { id: 'cognitivo', label: 'Disfx cognitiva' },
+        { id: 'cognitivo', label: 'Deterioro cog.' },
         { id: 'conciencia', label: 'Baja conciencia' },
         { id: 'convulsiones', label: 'Convulsiones' },
-        { id: 'autonomica', label: 'Disfx autonómica' }
+        { id: 'autonomica', label: 'Disf. autonómica' }
     ],
     paraclinicos: [
         { id: 'lcr_pleocitosis', label: 'LCR: Pleocitosis' },
-        { id: 'mri_temporal', label: 'RM: Anomalías señal lóbulo temporal medial' },
-        { id: 'eeg_encef', label: 'EEG: Cambios de encefalopatía' },
-        { id: 'lcr_bandas', label: 'LCR: Bandas oligoclonales/Aumento índice IgG' },
-        { id: 'suero_ab', label: 'Suero: Anticuerpos antineuronales' }
+        { id: 'mri_temporal', label: 'RM: Temp. Medial' },
+        { id: 'eeg_encef', label: 'EEG: Encefalopatía' },
+        { id: 'lcr_bandas', label: 'LCR: Bandas IgG' },
+        { id: 'suero_ab', label: 'Suero: Anticuerpos' }
     ],
     definitivo: [
-        { id: 'lcr_igg', label: 'LCR: IgG antineuronales' }
+        { id: 'lcr_igg', label: 'LCR: IgG (+) neur.' }
     ]
 };
 
@@ -53,22 +53,21 @@ function openAutoimmuneUI() {
                     Psicosis abrupta (< 3 meses)
                 </label>
 
-                <div id="estudio-box" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; padding:0.8rem; border-radius:10px; font-size:0.75rem; margin-bottom:1rem; color:#166534; line-height:1.3;">
-                    <strong>Estudio:</strong> EEG, RM, suero y LCR (+ Panel anticuerpos).
+                <div id="estudio-box" style="display:none; padding:0.8rem; border-radius:10px; font-size:0.75rem; margin-bottom:1rem; line-height:1.3; transition: 0.3s;">
                 </div>
 
-                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Clínicos</p>
+                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Clínicos (min. 1)</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 1rem;">
                     ${CRITERIOS_PA.clinicos.map(s => renderCheck(s)).join('')}
                 </div>
                 
-                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Paraclínicos</p>
+                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Paraclínicos (Probable)</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 1rem;">
                     ${CRITERIOS_PA.paraclinicos.map(s => renderCheck(s)).join('')}
                 </div>
 
                 <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 0.5rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Definitivo</p>
-                <div style="display: grid; grid-template-columns: 1fr; gap: 6px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                     ${CRITERIOS_PA.definitivo.map(s => renderCheck(s)).join('')}
                 </div>
             </div>
@@ -99,11 +98,30 @@ function updatePA() {
     let probable = posible && (labFuerte || labDebilCount >= 2);
     let definitiva = probable && hasIgGLCR;
 
+    // Actualización de barras
     document.getElementById('seg-posible').style.background = posible ? '#fef08a' : 'var(--border)';
     document.getElementById('seg-probable').style.background = probable ? '#fed7aa' : 'var(--border)';
     document.getElementById('seg-definitiva').style.background = definitiva ? '#fda4af' : 'var(--border)';
     
-    document.getElementById('estudio-box').style.display = posible ? 'block' : 'none';
+    // LÓGICA DEL RECUADRO DE ESTUDIO
+    const estudioBox = document.getElementById('estudio-box');
+    if (definitiva) {
+        estudioBox.style.display = 'none';
+    } else if (probable) {
+        estudioBox.style.display = 'block';
+        estudioBox.style.background = '#ffedd5'; // Naranja claro
+        estudioBox.style.border = '1px solid #fed7aa';
+        estudioBox.style.color = '#9a3412';
+        estudioBox.innerHTML = `<strong>Siguiente paso:</strong> Estudio de LCR (Células, proteínas, bandas oligoclonales y anticuerpos antineuronales).`;
+    } else if (posible) {
+        estudioBox.style.display = 'block';
+        estudioBox.style.background = '#fef9c3'; // Amarillo claro
+        estudioBox.style.border = '1px solid #fef08a';
+        estudioBox.style.color = '#854d0e';
+        estudioBox.innerHTML = `<strong>Siguiente paso:</strong> Solicitar EEG, RM cerebral y detección de anticuerpos en suero.`;
+    } else {
+        estudioBox.style.display = 'none';
+    }
     
     const label = document.getElementById('status-label');
     if (definitiva) { 
