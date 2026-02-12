@@ -206,16 +206,16 @@
             window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
             
             // 3. Datos Motor Farmacocinético SSS
-            if (dataPK.values) {
-                window.dbPK = dataPK.values.map(row => ({ 
-                    farmaco: row[0], 
-                    t12: parseFloat(row[1]), 
-                    tmax: parseFloat(row[2]), 
-                    f: parseFloat(row[3]), 
-                    familia: row[4], 
-                    comentario: row[5] 
-                }));
-            }
+           if (dataPK.values) {
+    window.dbPK = dataPK.values.map(row => ({ 
+        farmaco: row[0],        // Columna A
+        t12: parseFloat(row[1]), // Columna B
+        tmax: parseFloat(row[2]),// Columna C
+        vd: parseFloat(row[3]),  // Columna D
+        comentario: row[4] || '',// Columna E (Donde dice "Metabolito...")
+        familia: row[5] || 'Sin Familia' // Columna F (Donde dice "Antipsicóticos")
+    }));
+}
             
             // Inyección de tarjetas de herramientas manuales
             db.push(
