@@ -130,12 +130,14 @@ function iniciarInterfazSSS() {
             </div>
             <div id="sss-inputs"></div>
             <div class="chart-box"><canvas id="sssChartCanvas" style="max-height: 190px;"></canvas></div>
-            <div id="sss-alerts" style="margin-top:8px; padding:8px; border-radius:6px; background:rgba(67, 56, 202, 0.05); font-size:0.65rem; display:none; border-left: 3px solid var(--primary);"></div>
-            <div class="sss-info-trigger" style="cursor:help; padding: 8px; color: var(--text-muted); font-size: 1rem;" 
-         onclick="alert('Esta gráfica representa el comportamiento cinético de los fármacos en términos relativos.\n\nEl 100% representa el pico máximo en estado estacionario, independientemente de la dosis (por ejemplo, 1 o 20mg de haloperidol).')">
-        <i class="fas fa-exclamation-circle"></i>
-    </div>
+          <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div id="sss-alerts" style="padding:8px; border-radius:6px; background:rgba(67, 56, 202, 0.05); font-size:0.65rem; display:none; border-left:3px solid var(--primary); flex-grow:1;"></div>
+            <div style="cursor:pointer; color:var(--primary); font-size:1.1rem; flex-shrink:0; padding:4px;" 
+                 onclick="alert('Esta gráfica representa el comportamiento cinético de los fármacos en términos relativos.\\n\\nEl 100% representa el pico máximo en estado estacionario, independientemente de la dosis (por ejemplo, 1 o 20mg de haloperidol).')">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
         </div>
+    </div>
     `;
     actualizarUI_SSS();
 }
