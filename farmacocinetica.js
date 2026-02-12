@@ -1,10 +1,10 @@
 /**
- * Motor Farmacocinético SSS - Versión 12 Días (Alta Precisión)
+ * Motor Farmacocinético SSS - Versión Steady State Garantizado
  * PSQALDÍA © 2026
  */
 
 const PK_ENGINE = {
-    RESOLUTION: 300, // Mayor resolución para evitar oscilaciones bruscas
+    RESOLUTION: 300, 
 
     calculateKa(tmax, ke) {
         if (tmax <= 0.1) return 20; 
@@ -29,27 +29,26 @@ const PK_ENGINE = {
         const step = durationHours / this.RESOLUTION;
         let points = [];
         
-        // Simular el pasado para estabilizar el Steady State
-        let pastPauta = params.pauta;
+        // 1. Encontrar el valor de normalización (Pico en Steady State)
+        // Simulamos un sujeto que solo toma la dosis inicial durante 15 días
+        let testPauta = [];
+        const interval = params.frecuencia || 24;
+        for (let t = -360; t <= 0; t += interval) {
+            testPauta.push({ tiempo: t, cantidad: params.refDose });
+        }
         
-        // Encontrar el valor de referencia (100%) analizando el pico en el equilibrio
+        // El máximo nivel alcanzado justo en t=0 (después de 15 días de tratamiento)
         let maxRef = 0;
-        // Analizamos una ventana pequeña justo antes de t=0 para capturar el pico real
-        for (let t = -48; t <= 0; t += 0.5) {
+        for (let t = -interval; t <= 0; t += 0.5) {
             let c = 0;
-            pastPauta.forEach(d => { if (t >= d.tiempo) c += this.bateman(t - d.tiempo, d.cantidad, ke, ka); });
+            testPauta.forEach(d => { if (t >= d.tiempo) c += this.bateman(t - d.tiempo, d.cantidad, ke, ka); });
             if (c > maxRef) maxRef = c;
         }
-        
-        // Si no hay pasado (START), usamos el pico de la primera dosis como referencia
-        if (maxRef === 0) {
-            maxRef = this.bateman(params.tmax, params.refDose, ke, ka);
-        }
 
-        // Generar puntos de la curva actual
+        // 2. Generar la curva real con la pauta del usuario
         for (let t = 0; t <= durationHours; t += step) {
             let totalC = 0;
-            pastPauta.forEach(d => {
+            params.pauta.forEach(d => {
                 if (t >= d.tiempo) totalC += this.bateman(t - d.tiempo, d.cantidad, ke, ka);
             });
             points.push({ x: t, y: (totalC / maxRef) * 100 });
@@ -58,16 +57,37 @@ const PK_ENGINE = {
         return points;
     },
 
-    createPauta(mode, initialDose, freq, changeDose, changeDay, durationDays, hasChange, isF2 = false) {
+    createPauta(mode, initialDose, freq, changeDose, changeDay, durationDays, hasChange, isF2 = false, stopDay = null) {
         let pauta = [];
         const durationHours = durationDays * 24;
         const interval = freq || 24;
-        const startT = (isF2 || mode === 'START') ? 0 : -480; // 20 días de pasado para equilibrio
+        
+        // PASADO: Siempre inyectamos dosis de mantenimiento hasta t = -interval
+        // Esto garantiza que en t=0 el fármaco esté en equilibrio
+        if (!isF2 && mode !== 'START') {
+            for (let t = -360; t < 0; t += interval) {
+                pauta.push({ tiempo: t, cantidad: initialDose });
+            }
+        }
 
-        for (let t = startT; t < durationHours; t += interval) {
-            let actualDose = initialDose;
-            if (t >= 0 && hasChange && t >= (changeDay * 24)) actualDose = changeDose;
-            if (t < 0 || actualDose > 0) pauta.push({ tiempo: t, cantidad: actualDose });
+        // FUTURO: A partir de t = 0
+        for (let t = 0; t < durationHours; t += interval) {
+            let dose = initialDose;
+            
+            // Si es F2 o START, la dosis empieza en 0
+            if (isF2 || mode === 'START') dose = initialDose;
+
+            // Lógica de cambio de dosis (Tapering / Escalada)
+            if (hasChange && t >= (changeDay * 24)) {
+                dose = changeDose;
+            }
+
+            // Lógica de STOP (Si existe día de parada)
+            if (stopDay !== null && t >= (stopDay * 24)) {
+                dose = 0;
+            }
+
+            if (dose > 0) pauta.push({ tiempo: t, cantidad: dose });
         }
         return pauta;
     },
@@ -172,14 +192,20 @@ function renderSSS() {
     if (!f1Data || !d1Value) { if (sssChart) sssChart.destroy(); return; }
 
     const ctx = document.getElementById('sssChartCanvas').getContext('2d');
-    const durDays = 12; // VENTANA DE 12 DÍAS SEGÚN SOLICITUD
+    const durDays = 12; // VENTANA DE 12 DÍAS
     
-    let p1 = PK_ENGINE.createPauta(mode, parseFloat(d1Value), parseFloat(document.getElementById('f1-f').value || 24), parseFloat(document.getElementById('f1-d2')?.value || 0), parseFloat(document.getElementById('f1-day')?.value || 0), durDays, document.getElementById('f1-ch').checked);
-
-    if (mode !== 'START') {
-        const stopVal = document.getElementById('f1-stop').value;
-        if (stopVal) p1 = p1.filter(d => d.tiempo < (parseFloat(stopVal) * 24));
-    }
+    // F1 Pauta
+    let p1 = PK_ENGINE.createPauta(
+        mode, 
+        parseFloat(d1Value), 
+        parseFloat(document.getElementById('f1-f').value || 24), 
+        parseFloat(document.getElementById('f1-d2')?.value || 0), 
+        parseFloat(document.getElementById('f1-day')?.value || 0), 
+        durDays, 
+        document.getElementById('f1-ch').checked,
+        false,
+        (mode !== 'START') ? parseFloat(document.getElementById('f1-stop')?.value || null) : null
+    );
 
     const d1Curve = PK_ENGINE.generateCurve({...f1Data, pauta: p1, frecuencia: parseFloat(document.getElementById('f1-f').value || 24), refDose: parseFloat(d1Value)}, durDays * 24);
 
@@ -200,7 +226,7 @@ function renderSSS() {
             p2.forEach(d => d.tiempo += delay);
             p2 = p2.filter(d => d.tiempo >= delay);
 
-            const d2Curve = PK_ENGINE.generateCurve({...f2Data, pauta: p2, frecuencia: parseFloat(document.getElementById('f2-f').value || 24), refDose: parseFloat(d2Value)}, durDays * 24);
+            const d2Curve = PK_ENGINE.generateCurve({...f2Data, pauta: p2, frecuencia: parseFloat(document.getElementById('f2-f').value || 24), refDose: parseFloat(document.getElementById('f2-d2')?.value || d2Value)}, durDays * 24);
             datasets.push({ 
                 label: f2Data.farmaco, data: d2Curve.map(p => ({x: p.x/24, y: p.y})), 
                 borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4, pointRadius: 0 
