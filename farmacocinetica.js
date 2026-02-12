@@ -29,23 +29,34 @@ const PK_ENGINE = {
         const step = durationHours / this.RESOLUTION;
         let points = [];
         
-        // 1. Simulación de Control (Para hallar el 100% real en equilibrio)
+       // 1. Simulación de Control (Para hallar el 100% real en equilibrio)
         let refPauta = [];
         const interval = params.frecuencia || 24;
+        
+        // Priorizamos refDose, si no existe usamos la primera dosis de la pauta, 
+        // y si no, un valor por defecto para no dividir por cero.
+        const dosisRef = params.refDose || (params.pauta[0] && params.pauta[0].cantidad) || 1;
+
+        // Simulamos siempre 20 días atrás (-480h) para estabilizar la referencia
         for (let t = -480; t <= 0; t += interval) {
-            refPauta.push({ tiempo: t, cantidad: params.refDose });
+            refPauta.push({ tiempo: t, cantidad: dosisRef });
         }
         
-        // Buscamos el valor máximo alcanzado en el equilibrio justo antes de t=0
         let maxRef = 0;
+        // Buscamos el pico máximo en el último intervalo del equilibrio
         for (let t = -interval; t <= 0; t += 0.2) {
             let c = 0;
-            refPauta.forEach(d => { if (t >= d.tiempo) c += this.bateman(t - d.tiempo, d.cantidad, ke, ka); });
+            refPauta.forEach(d => { 
+                if (t >= d.tiempo) c += this.bateman(t - d.tiempo, d.cantidad, ke, ka); 
+            });
             if (c > maxRef) maxRef = c;
         }
 
-        // Si es un inicio de cero (START), maxRef será el pico de la primera dosis
-        if (maxRef === 0) maxRef = this.bateman(params.tmax, params.refDose, ke, ka);
+        // Seguridad final: si maxRef es 0 (ej. dosis 0), evitamos el NaN
+        if (maxRef <= 0) maxRef = 1;
+
+        // Nota: Se elimina el bloque 'if (maxRef === 0) maxRef = this.bateman...'
+        // para que la escala sea siempre respecto al Steady State real.
 
         // 2. Generar curva con la pauta real
         for (let t = 0; t <= durationHours; t += step) {
