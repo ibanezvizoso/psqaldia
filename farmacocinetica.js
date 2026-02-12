@@ -1,10 +1,11 @@
 /**
- * Motor Farmacocinético SSS - Versión "Perfecta"
+ * Motor Farmacocinético SSS - Versión Steady-State Pro
  * PSQALDÍA © 2026
  */
 
 const PK_ENGINE = {
     RESOLUTION: 150, 
+
     calculateKa(tmax, ke) {
         if (tmax <= 0) return 15;
         let ka = ke * 1.1;
@@ -16,42 +17,67 @@ const PK_ENGINE = {
         }
         return ka;
     },
+
     bateman(t, dose, ke, ka) {
         if (t < 0) return 0;
         return dose * (ka / (ka - ke)) * (Math.exp(-ke * t) - Math.exp(-ka * t));
     },
+
     generateCurve(params, durationHours) {
         const ke = Math.log(2) / params.t12;
         const ka = this.calculateKa(params.tmax, ke);
         const step = durationHours / this.RESOLUTION;
         let points = [];
+
         for (let t = 0; t <= durationHours; t += step) {
             let totalC = 0;
-            params.pauta.forEach(dosis => {
-                if (t >= dosis.tiempo) totalC += this.bateman(t - dosis.tiempo, dosis.cantidad, ke, ka);
+            params.pauta.forEach(d => {
+                if (t >= d.tiempo) {
+                    totalC += this.bateman(t - d.tiempo, d.cantidad, ke, ka);
+                }
             });
             points.push({ x: t, y: totalC });
         }
-        // Normalización basada en el pico del Steady State de la dosis de referencia
-        const refSS = this.calculateSteadyStatePeak(params.refDose || 10, ke, ka, params.frecuencia || 24);
+        
+        // Normalización: Calculamos el pico máximo en Steady State para que sea el 100%
+        const refSS = this.calculateSteadyStatePeak(params.refDose, ke, ka, params.frecuencia);
         return points.map(p => ({ x: p.x, y: (p.y / refSS) * 100 }));
     },
+
     calculateSteadyStatePeak(dose, ke, ka, tau) {
         const rMax = (1 / (1 - Math.exp(-ke * tau)));
         return dose * (ka / (ka - ke)) * rMax;
     },
-    getFamilies(db) { return [...new Set(db.map(f => f.familia))].filter(Boolean).sort(); },
-    getFarmacosByFamilia(db, familia) { return db.filter(f => f.familia === familia); },
+
+    getFamilies(db) {
+        return [...new Set(db.map(f => f.familia))].filter(Boolean).sort();
+    },
+
+    getFarmacosByFamilia(db, familia) {
+        return db.filter(f => f.familia === familia);
+    },
+
     createPauta(mode, initialDose, freq, changeDose, changeDay, durationDays, hasChange, isF2 = false) {
         let pauta = [];
         const durationHours = durationDays * 24;
         const interval = freq || 24;
-        // F1 (Saliente) viene de Steady State (-500h), F2 (Entrante) o START empiezan de cero
+        
+        // Lógica de Pasado: F1 en STOP/SWITCH viene de SS. START o F2 empiezan de 0.
+        // Simulamos 500h de pasado (suficiente para cualquier T1/2)
         const startT = (isF2 || mode === 'START') ? 0 : -500;
+
         for (let t = startT; t < durationHours; t += interval) {
             let actualDose = initialDose;
-            if (hasChange && t >= (changeDay * 24)) actualDose = changeDose;
-            if (actualDose > 0 || t < 0) pauta.push({ tiempo: t, cantidad: actualDose });
+
+            // Si estamos en el "futuro" y el usuario marcó un cambio:
+            if (t >= 0 && hasChange && t >= (changeDay * 24)) {
+                actualDose = changeDose;
+            }
+
+            // Solo añadimos la dosis si es mantenimiento previo o dosis activa actual
+            if (t < 0 || actualDose > 0) {
+                pauta.push({ tiempo: t, cantidad: actualDose });
+            }
         }
         return pauta;
     }
@@ -66,18 +92,18 @@ function iniciarInterfazSSS() {
         <style>
             .sss-ui { padding: 1rem; }
             .sss-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
-            .sss-mode-selector { background: var(--primary); color: white; border: none; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; }
+            .sss-mode-selector { background: var(--primary); color: white; border: none; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; cursor: pointer; }
             .sss-card { background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 10px; margin-bottom: 8px; }
             .sss-ui label { font-size: 0.58rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1px; display: block; }
             .sss-ui select, .sss-ui input { width: 100%; padding: 4px; border-radius: 5px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); font-size: 0.78rem; margin-bottom: 4px; box-sizing: border-box; }
             .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-            .check-row { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; font-weight: 700; color: var(--primary); cursor: pointer; margin: 8px 0; }
-            .check-row input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+            .check-row { display: flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 700; color: var(--primary); cursor: pointer; margin: 6px 0; width: fit-content; }
+            .check-row input { width: 15px; height: 15px; margin: 0; cursor: pointer; }
             .chart-box { margin-top: 8px; background: white; border-radius: 10px; padding: 5px; border: 1px solid var(--border); }
         </style>
         <div class="sss-ui">
             <div class="sss-header">
-                <h2 style="font-size: 0.95rem; margin: 0;"><i class="fas fa-wave-square"></i> Simulador SSS</h2>
+                <h2 style="font-size: 1rem; margin: 0;"><i class="fas fa-wave-square"></i> Simulador SSS</h2>
                 <select id="sss-mode" class="sss-mode-selector" onchange="actualizarUI_SSS()">
                     <option value="START">START</option>
                     <option value="STOP">STOP</option>
@@ -85,7 +111,7 @@ function iniciarInterfazSSS() {
                 </select>
             </div>
             <div id="sss-inputs"></div>
-            <div class="chart-box"><canvas id="sssChartCanvas" style="max-height: 190px;"></canvas></div>
+            <div class="chart-box"><canvas id="sssChartCanvas" style="max-height: 200px;"></canvas></div>
             <div id="sss-alerts" style="margin-top:8px; padding:8px; border-radius:6px; background:rgba(67, 56, 202, 0.05); font-size:0.65rem; display:none; border-left: 3px solid var(--primary);"></div>
         </div>
     `;
@@ -97,7 +123,7 @@ function actualizarUI_SSS() {
     const familias = PK_ENGINE.getFamilies(window.dbPK);
     const container = document.getElementById('sss-inputs');
 
-    const renderDosisCampos = (id) => `
+    const renderInputs = (id) => `
         <div class="grid-2">
             <div><label>Dosis (mg)</label><input type="number" id="${id}-d" placeholder="Ej: 10" oninput="renderSSS()"></div>
             <div><label>Cada (h)</label><input type="number" id="${id}-f" placeholder="Ej: 24" oninput="renderSSS()"></div>
@@ -106,7 +132,7 @@ function actualizarUI_SSS() {
             <input type="checkbox" id="${id}-ch" onclick="event.stopPropagation()" onchange="toggleExt('${id}')"> 
             <span>¿Cambio de dosis / Taper?</span>
         </div>
-        <div id="${id}-ext" style="display:none; border-top:1px dashed var(--border); padding-top:4px; margin-top:4px;">
+        <div id="${id}-ext" style="display:none; border-top:1px dashed var(--border); padding-top:4px; margin-top:2px;">
             <div class="grid-2">
                 <div><label>Nueva Dosis</label><input type="number" id="${id}-d2" placeholder="0" oninput="renderSSS()"></div>
                 <div><label>Día Cambio</label><input type="number" id="${id}-day" placeholder="4" oninput="renderSSS()"></div>
@@ -121,7 +147,7 @@ function actualizarUI_SSS() {
                 <div><label>Fármaco</label><select id="${id}-sel" onchange="renderSSS()"><option value="" disabled selected>-</option></select></div>
             </div>
             ${id === 'f2' ? `<div><label>Día Inicio Fármaco B</label><input type="number" id="f2-start" placeholder="3" oninput="renderSSS()"></div>` : ''}
-            ${renderDosisCampos(id)}
+            ${renderInputs(id)}
             ${(id === 'f1' && mode !== 'START') ? `<div><label>Día STOP Total</label><input type="number" id="f1-stop" placeholder="7" oninput="renderSSS()"></div>` : ''}
         </div>`;
 
@@ -155,9 +181,8 @@ function renderSSS() {
     const mode = document.getElementById('sss-mode').value;
     const f1sel = document.getElementById('f1-sel').value;
     const f1Data = window.dbPK.find(f => f.farmaco === f1sel);
-    
-    // Escudo: Si no hay fármaco o dosis inicial en A, no dibujamos
     const d1Value = document.getElementById('f1-d').value;
+    
     if (!f1Data || !d1Value) {
         if (sssChart) { sssChart.destroy(); sssChart = null; }
         return;
@@ -177,13 +202,17 @@ function renderSSS() {
         document.getElementById('f1-ch').checked
     );
 
-    // Aplicar STOP si no es modo START
     if (mode !== 'START') {
         const stopVal = document.getElementById('f1-stop').value;
         if (stopVal) p1 = p1.filter(d => d.tiempo < (parseFloat(stopVal) * 24));
     }
 
-    const d1 = PK_ENGINE.generateCurve({...f1Data, pauta: p1, frecuencia: parseFloat(document.getElementById('f1-f').value || 24), refDose: parseFloat(d1Value)}, durDays * 24);
+    const d1 = PK_ENGINE.generateCurve({
+        ...f1Data, 
+        pauta: p1, 
+        frecuencia: parseFloat(document.getElementById('f1-f').value || 24), 
+        refDose: parseFloat(d1Value)
+    }, durDays * 24);
 
     let datasets = [{ 
         label: f1Data.farmaco, 
@@ -193,7 +222,6 @@ function renderSSS() {
         fill: true, tension: 0.3, pointRadius: 0 
     }];
 
-    // Lógica Fármaco B en SWITCH
     if (mode === 'SWITCH') {
         const f2sel = document.getElementById('f2-sel').value;
         const d2Value = document.getElementById('f2-d').value;
@@ -214,7 +242,13 @@ function renderSSS() {
             p2.forEach(d => d.tiempo += delay);
             p2 = p2.filter(d => d.tiempo >= delay);
 
-            const d2 = PK_ENGINE.generateCurve({...f2Data, pauta: p2, frecuencia: parseFloat(document.getElementById('f2-f').value || 24), refDose: parseFloat(d2Value)}, durDays * 24);
+            const d2 = PK_ENGINE.generateCurve({
+                ...f2Data, 
+                pauta: p2, 
+                frecuencia: parseFloat(document.getElementById('f2-f').value || 24), 
+                refDose: parseFloat(document.getElementById('f2-d2').value || d2Value)
+            }, durDays * 24);
+
             datasets.push({ 
                 label: f2Data.farmaco, 
                 data: d2.map(p => ({x: p.x/24, y: p.y})), 
@@ -233,7 +267,7 @@ function renderSSS() {
             responsive: true, 
             scales: { 
                 x: { type: 'linear', title: { display: true, text: 'Días', font: {size: 9} } }, 
-                y: { min: 0, title: { display: true, text: 'Nivel (%)', font: {size: 9} } } 
+                y: { min: 0, title: { display: true, text: 'Nivel Plasmático Relativo (%)', font: {size: 9} } } 
             }, 
             plugins: { legend: { labels: { boxWidth: 8, font: {size: 9} } } } 
         } 
