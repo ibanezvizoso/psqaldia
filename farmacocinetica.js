@@ -107,11 +107,20 @@ function actualizarUI_SSS() {
     const familias = PK_ENGINE.getFamilies(window.dbPK);
     const container = document.getElementById('sss-inputs');
 
-    const selector = (id) => `
-        <div class="grid-2">
-            <div><label>Familia</label><select id="${id}-fam" onchange="fillFarmacos('${id}')">${familias.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
-            <div><label>Fármaco</label><select id="${id}-sel" onchange="renderSSS()"></select></div>
-        </div>`;
+   const selector = (id) => `
+    <div class="grid-2">
+        <div>
+            <label>Familia</label>
+            <select id="${id}-fam" onchange="fillFarmacos('${id}')">
+                <option value="" disabled selected>Seleccionar familia...</option> ${familias.map(f => `<option value="${f}">${f}</option>`).join('')}
+            </select>
+        </div>
+        <div>
+            <label>Fármaco</label>
+            <select id="${id}-sel" onchange="renderSSS()">
+                <option value="" disabled selected>-</option> </select>
+        </div>
+    </div>`;
 
     if (mode !== 'SWITCH') {
         container.innerHTML = `
@@ -163,6 +172,21 @@ function fillFarmacos(id) {
 }
 
 function renderSSS() {
+    const mode = document.getElementById('sss-mode').value;
+    const f1SelElement = document.getElementById('f1-sel');
+    
+    // Si no hay fármaco seleccionado, no hagas nada y borra la gráfica si existía
+    if (!f1SelElement || !f1SelElement.value) {
+        if (sssChart) {
+            sssChart.destroy();
+            sssChart = null;
+        }
+        document.getElementById('sss-alerts').style.display = 'none';
+        return; 
+    }
+
+    const f1Data = window.dbPK.find(f => f.farmaco === f1SelElement.value);
+    if (!f1Data) return;
     const mode = document.getElementById('sss-mode').value;
     const f1sel = document.getElementById('f1-sel').value;
     const f1Data = window.dbPK.find(f => f.farmaco === f1sel);
