@@ -1,5 +1,5 @@
 /**
- * Motor Farmacocinético SSS (Start, Stop & Switch) - Versión Pro
+ * Motor Farmacocinético SSS (Start, Stop & Switch) - Versión Final Corregida
  * PSQALDÍA © 2026
  */
 
@@ -39,7 +39,6 @@ const PK_ENGINE = {
             points.push({ x: t, y: totalC });
         }
         
-        // Referencia: El pico del Steady State de la dosis inicial de A para normalizar al 100%
         const refSS = this.calculateSteadyStatePeak(params.refDose || params.pauta[0].cantidad, ke, ka, params.frecuencia || 24);
         return points.map(p => ({ x: p.x, y: (p.y / refSS) * 100 }));
     },
@@ -61,18 +60,13 @@ const PK_ENGINE = {
         let pauta = [];
         const durationHours = durationDays * 24;
         const interval = freq || 24;
-
-        // Si es F2 o modo START, no hay pasado. Si es STOP o SWITCH (F1), inyectamos pasado para Steady State.
-        const startT = (isF2 || mode === 'START') ? 0 : -500; // 500h atrás para saturar el modelo
+        const startT = (isF2 || mode === 'START') ? 0 : -500;
 
         for (let t = startT; t < durationHours; t += interval) {
             let actualDose = initialDose;
-            
-            // Lógica de cambio de dosis (Tapering o Escalada)
             if (hasChange && t >= (changeDay * 24)) {
                 actualDose = changeDose;
             }
-
             if (actualDose > 0 || t < 0) {
                 pauta.push({ tiempo: t, cantidad: actualDose });
             }
@@ -96,8 +90,8 @@ function iniciarInterfazSSS() {
             .sss-ui label { font-size: 0.58rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1px; display: block; }
             .sss-ui select, .sss-ui input { width: 100%; padding: 4px; border-radius: 5px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); font-size: 0.78rem; margin-bottom: 4px; box-sizing: border-box; }
             .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-            .check-row { display: flex; align-items: center; gap: 5px; font-size: 0.65rem; font-weight: 700; color: var(--primary); cursor: pointer; margin: 2px 0; }
-            .check-row input { width: auto; margin: 0; }
+            .check-row { display: flex; align-items: center; gap: 5px; font-size: 0.65rem; font-weight: 700; color: var(--primary); cursor: pointer; margin: 4px 0; }
+            .check-row input { pointer-events: none; }
             .chart-box { margin-top: 8px; background: white; border-radius: 10px; padding: 5px; border: 1px solid var(--border); }
         </style>
         <div class="sss-ui">
@@ -126,14 +120,16 @@ function actualizarUI_SSS() {
         <div class="sss-card" style="border-left: 3px solid ${color};">
             <label style="color:${color};">${label}</label>
             <div class="grid-2">
-                <div><label>Familia</label><select id="f1-fam" onchange="fillFarmacos('f1')">${familias.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
-                <div><label>Fármaco</label><select id="f1-sel" onchange="renderSSS()"></select></div>
+                <div><label>Familia</label><select id="f1-fam" onchange="fillFarmacos('f1')"><option value="" disabled selected>Elegir...</option>${familias.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
+                <div><label>Fármaco</label><select id="f1-sel" onchange="renderSSS()"><option value="" disabled selected>-</option></select></div>
             </div>
             <div class="grid-2">
                 <div><label>Dosis (mg)</label><input type="number" id="f1-d" value="10" oninput="renderSSS()"></div>
                 <div><label>Cada (h)</label><input type="number" id="f1-f" value="24" oninput="renderSSS()"></div>
             </div>
-            <div class="check-row" onclick="document.getElementById('f1-ch').click()"><input type="checkbox" id="f1-ch" onchange="toggleExt('f1'); event.stopPropagation()"> <span>Cambio de dosis / Taper</span></div>
+            <div class="check-row" onclick="toggleExt('f1')">
+                <input type="checkbox" id="f1-ch"> <span>Cambio de dosis / Taper</span>
+            </div>
             <div id="f1-ext" style="display:none; border-top:1px dashed var(--border); padding-top:4px;">
                 <div class="grid-2">
                     <div><label>Nueva Dosis</label><input type="number" id="f1-d2" value="${mode==='STOP'?'5':'20'}" oninput="renderSSS()"></div>
@@ -151,14 +147,16 @@ function actualizarUI_SSS() {
                 <div style="visibility:hidden"></div>
             </div>
             <div class="grid-2">
-                <div><label>Familia</label><select id="f2-fam" onchange="fillFarmacos('f2')">${familias.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
-                <div><label>Fármaco</label><select id="f2-sel" onchange="renderSSS()"></select></div>
+                <div><label>Familia</label><select id="f2-fam" onchange="fillFarmacos('f2')"><option value="" disabled selected>Elegir...</option>${familias.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
+                <div><label>Fármaco</label><select id="f2-sel" onchange="renderSSS()"><option value="" disabled selected>-</option></select></div>
             </div>
             <div class="grid-2">
                 <div><label>Dosis (mg)</label><input type="number" id="f2-d" value="5" oninput="renderSSS()"></div>
                 <div><label>Cada (h)</label><input type="number" id="f2-f" value="24" oninput="renderSSS()"></div>
             </div>
-            <div class="check-row" onclick="document.getElementById('f2-ch').click()"><input type="checkbox" id="f2-ch" onchange="toggleExt('f2'); event.stopPropagation()"> <span>Escalada / Titulación</span></div>
+            <div class="check-row" onclick="toggleExt('f2')">
+                <input type="checkbox" id="f2-ch"> <span>Escalada / Titulación</span>
+            </div>
             <div id="f2-ext" style="display:none; border-top:1px dashed var(--border); padding-top:4px;">
                 <div class="grid-2">
                     <div><label>Nueva Dosis</label><input type="number" id="f2-d2" value="10" oninput="renderSSS()"></div>
@@ -172,15 +170,16 @@ function actualizarUI_SSS() {
     } else {
         container.innerHTML = renderF1('Fármaco Saliente (A)', '#ef4444') + renderF2();
     }
-    
-    fillFarmacos('f1');
-    if (mode === 'SWITCH') fillFarmacos('f2');
 }
 
 function toggleExt(id) {
+    const cb = document.getElementById(`${id}-ch`);
     const ext = document.getElementById(`${id}-ext`);
-    if (ext) ext.style.display = document.getElementById(`${id}-ch`).checked ? 'block' : 'none';
-    renderSSS();
+    if (cb && ext) {
+        cb.checked = !cb.checked;
+        ext.style.display = cb.checked ? 'block' : 'none';
+        renderSSS();
+    }
 }
 
 function fillFarmacos(id) {
@@ -189,14 +188,20 @@ function fillFarmacos(id) {
     const fam = famSelect.value;
     const list = PK_ENGINE.getFarmacosByFamilia(window.dbPK, fam);
     const sel = document.getElementById(`${id}-sel`);
-    sel.innerHTML = list.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
+    sel.innerHTML = `<option value="" disabled selected>Seleccionar...</option>` + list.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
     renderSSS();
 }
 
 function renderSSS() {
-    const mode = document.getElementById('sss-mode').value;
-    const f1sel = document.getElementById('f1-sel').value;
-    const f1Data = window.dbPK.find(f => f.farmaco === f1sel);
+    const modeEl = document.getElementById('sss-mode');
+    const f1selEl = document.getElementById('f1-sel');
+    if (!modeEl || !f1selEl || !f1selEl.value) {
+        if (sssChart) { sssChart.destroy(); sssChart = null; }
+        return;
+    }
+
+    const mode = modeEl.value;
+    const f1Data = window.dbPK.find(f => f.farmaco === f1selEl.value);
     if (!f1Data) return;
 
     const ctx = document.getElementById('sssChartCanvas').getContext('2d');
@@ -228,28 +233,30 @@ function renderSSS() {
     }];
 
     if (mode === 'SWITCH') {
-        const f2sel = document.getElementById('f2-sel').value;
-        const f2Data = window.dbPK.find(f => f.farmaco === f2sel);
-        if (f2Data) {
-            const startDayB = parseFloat(document.getElementById('f2-start').value);
-            let p2 = PK_ENGINE.createPauta(
-                'START', 
-                parseFloat(document.getElementById('f2-d').value), 
-                parseFloat(document.getElementById('f2-f').value), 
-                parseFloat(document.getElementById('f2-d2').value), 
-                parseFloat(document.getElementById('f2-day').value), 
-                durDays, 
-                document.getElementById('f2-ch').checked,
-                true // Is F2
-            );
-            p2.forEach(d => d.tiempo += (startDayB * 24));
-            p2 = p2.filter(d => d.tiempo >= (startDayB * 24));
+        const f2selEl = document.getElementById('f2-sel');
+        if (f2selEl && f2selEl.value) {
+            const f2Data = window.dbPK.find(f => f.farmaco === f2selEl.value);
+            if (f2Data) {
+                const startDayB = parseFloat(document.getElementById('f2-start').value);
+                let p2 = PK_ENGINE.createPauta(
+                    'START', 
+                    parseFloat(document.getElementById('f2-d').value), 
+                    parseFloat(document.getElementById('f2-f').value), 
+                    parseFloat(document.getElementById('f2-d2').value), 
+                    parseFloat(document.getElementById('f2-day').value), 
+                    durDays, 
+                    document.getElementById('f2-ch').checked,
+                    true
+                );
+                p2.forEach(d => d.tiempo += (startDayB * 24));
+                p2 = p2.filter(d => d.tiempo >= (startDayB * 24));
 
-            const d2 = PK_ENGINE.generateCurve({...f2Data, pauta: p2, frecuencia: parseFloat(document.getElementById('f2-f').value), refDose: parseFloat(document.getElementById('f2-d2').value || document.getElementById('f2-d').value)}, durDays * 24);
-            datasets.push({ 
-                label: f2Data.farmaco, data: d2.map(p => ({x: p.x/24, y: p.y})), 
-                borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, pointRadius: 0 
-            });
+                const d2 = PK_ENGINE.generateCurve({...f2Data, pauta: p2, frecuencia: parseFloat(document.getElementById('f2-f').value), refDose: parseFloat(document.getElementById('f2-d2').value || document.getElementById('f2-d').value)}, durDays * 24);
+                datasets.push({ 
+                    label: f2Data.farmaco, data: d2.map(p => ({x: p.x/24, y: p.y})), 
+                    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, pointRadius: 0 
+                });
+            }
         }
     }
 
@@ -268,8 +275,12 @@ function renderSSS() {
     });
 
     const alerts = document.getElementById('sss-alerts');
-    if (f1Data.comentario) { alerts.innerHTML = `<i class="fas fa-info-circle"></i> ${f1Data.comentario}`; alerts.style.display = 'block'; } 
-    else { alerts.style.display = 'none'; }
+    if (f1Data.comentario && f1Data.comentario.trim() !== "") { 
+        alerts.innerHTML = `<i class="fas fa-info-circle"></i> ${f1Data.comentario}`; 
+        alerts.style.display = 'block'; 
+    } else { 
+        alerts.style.display = 'none'; 
+    }
 }
 
 window.iniciarInterfazSSS = iniciarInterfazSSS;
