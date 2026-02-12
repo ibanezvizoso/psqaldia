@@ -1,5 +1,5 @@
 /**
- * Motor Farmacocinético SSS - Versión Steady State Garantizado
+ * Motor Farmacocinético SSS - Versión Steady State Real
  * PSQALDÍA © 2026
  */
 
@@ -29,23 +29,25 @@ const PK_ENGINE = {
         const step = durationHours / this.RESOLUTION;
         let points = [];
         
-        // 1. Encontrar el valor de normalización (Pico en Steady State)
-        // Simulamos un sujeto que solo toma la dosis inicial durante 15 días
-        let testPauta = [];
+        // 1. Simulación de Control (Para hallar el 100% real en equilibrio)
+        let refPauta = [];
         const interval = params.frecuencia || 24;
-        for (let t = -360; t <= 0; t += interval) {
-            testPauta.push({ tiempo: t, cantidad: params.refDose });
+        for (let t = -480; t <= 0; t += interval) {
+            refPauta.push({ tiempo: t, cantidad: params.refDose });
         }
         
-        // El máximo nivel alcanzado justo en t=0 (después de 15 días de tratamiento)
+        // Buscamos el valor máximo alcanzado en el equilibrio justo antes de t=0
         let maxRef = 0;
-        for (let t = -interval; t <= 0; t += 0.5) {
+        for (let t = -interval; t <= 0; t += 0.2) {
             let c = 0;
-            testPauta.forEach(d => { if (t >= d.tiempo) c += this.bateman(t - d.tiempo, d.cantidad, ke, ka); });
+            refPauta.forEach(d => { if (t >= d.tiempo) c += this.bateman(t - d.tiempo, d.cantidad, ke, ka); });
             if (c > maxRef) maxRef = c;
         }
 
-        // 2. Generar la curva real con la pauta del usuario
+        // Si es un inicio de cero (START), maxRef será el pico de la primera dosis
+        if (maxRef === 0) maxRef = this.bateman(params.tmax, params.refDose, ke, ka);
+
+        // 2. Generar curva con la pauta real
         for (let t = 0; t <= durationHours; t += step) {
             let totalC = 0;
             params.pauta.forEach(d => {
@@ -62,30 +64,22 @@ const PK_ENGINE = {
         const durationHours = durationDays * 24;
         const interval = freq || 24;
         
-        // PASADO: Siempre inyectamos dosis de mantenimiento hasta t = -interval
-        // Esto garantiza que en t=0 el fármaco esté en equilibrio
+        // PASADO: Solo para el fármaco que ya estaba (F1 en STOP/SWITCH)
         if (!isF2 && mode !== 'START') {
-            for (let t = -360; t < 0; t += interval) {
+            for (let t = -480; t < 0; t += interval) {
                 pauta.push({ tiempo: t, cantidad: initialDose });
             }
         }
 
-        // FUTURO: A partir de t = 0
+        // FUTURO: Desde t=0 en adelante
         for (let t = 0; t < durationHours; t += interval) {
             let dose = initialDose;
             
-            // Si es F2 o START, la dosis empieza en 0
-            if (isF2 || mode === 'START') dose = initialDose;
+            // Si hay cambio de dosis programado
+            if (hasChange && t >= (changeDay * 24)) dose = changeDose;
 
-            // Lógica de cambio de dosis (Tapering / Escalada)
-            if (hasChange && t >= (changeDay * 24)) {
-                dose = changeDose;
-            }
-
-            // Lógica de STOP (Si existe día de parada)
-            if (stopDay !== null && t >= (stopDay * 24)) {
-                dose = 0;
-            }
+            // Si hay un stop programado
+            if (stopDay !== null && t >= (stopDay * 24)) dose = 0;
 
             if (dose > 0) pauta.push({ tiempo: t, cantidad: dose });
         }
@@ -124,7 +118,7 @@ function iniciarInterfazSSS() {
                 </select>
             </div>
             <div id="sss-inputs"></div>
-            <div class="chart-box"><canvas id="sssChartCanvas" style="max-height: 200px;"></canvas></div>
+            <div class="chart-box"><canvas id="sssChartCanvas" style="max-height: 190px;"></canvas></div>
             <div id="sss-alerts" style="margin-top:8px; padding:8px; border-radius:6px; background:rgba(67, 56, 202, 0.05); font-size:0.65rem; display:none; border-left: 3px solid var(--primary);"></div>
         </div>
     `;
@@ -143,9 +137,9 @@ function actualizarUI_SSS() {
                 <div><label>Familia</label><select id="${id}-fam" onchange="fillFarmacos('${id}')"><option value="" disabled selected>Elegir...</option>${familias.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
                 <div><label>Fármaco</label><select id="${id}-sel" onchange="renderSSS()"><option value="" disabled selected>-</option></select></div>
             </div>
-            ${id === 'f2' ? `<div><label>Día Inicio B</label><input type="number" id="f2-start" placeholder="3" oninput="renderSSS()"></div>` : ''}
+            ${id === 'f2' ? `<div><label>Día Inicio B</label><input type="number" id="f2-start" placeholder="Ej: 3" oninput="renderSSS()"></div>` : ''}
             <div class="grid-2">
-                <div><label>Dosis (mg)</label><input type="number" id="${id}-d" placeholder="Ej: 10" oninput="renderSSS()"></div>
+                <div><label>Dosis (mg)</label><input type="number" id="${id}-d" placeholder="Ej: 3" oninput="renderSSS()"></div>
                 <div><label>Cada (h)</label><input type="number" id="${id}-f" placeholder="Ej: 24" oninput="renderSSS()"></div>
             </div>
             <div class="check-row" onclick="const cb=document.getElementById('${id}-ch'); cb.checked=!cb.checked; toggleExt('${id}')">
@@ -154,11 +148,11 @@ function actualizarUI_SSS() {
             </div>
             <div id="${id}-ext" style="display:none; border-top:1px dashed var(--border); padding-top:4px; margin-top:2px;">
                 <div class="grid-2">
-                    <div><label>Nueva Dosis</label><input type="number" id="${id}-d2" placeholder="0" oninput="renderSSS()"></div>
-                    <div><label>Día Cambio</label><input type="number" id="${id}-day" placeholder="4" oninput="renderSSS()"></div>
+                    <div><label>Nueva Dosis</label><input type="number" id="${id}-d2" placeholder="Ej: 1" oninput="renderSSS()"></div>
+                    <div><label>Día Cambio</label><input type="number" id="${id}-day" placeholder="Ej: 4" oninput="renderSSS()"></div>
                 </div>
             </div>
-            ${(id === 'f1' && mode !== 'START') ? `<div><label>Día STOP Total</label><input type="number" id="f1-stop" placeholder="7" oninput="renderSSS()"></div>` : ''}
+            ${(id === 'f1' && mode !== 'START') ? `<div><label>Día STOP Total</label><input type="number" id="f1-stop" placeholder="Ej: 7" oninput="renderSSS()"></div>` : ''}
         </div>`;
 
     container.innerHTML = mode === 'SWITCH' ? renderCard('f1', 'Fármaco A (Saliente)', '#ef4444') + renderCard('f2', 'Fármaco B (Entrante)', '#3b82f6') : renderCard('f1', mode === 'START' ? 'Iniciar' : 'Retirar', 'var(--primary)');
@@ -176,8 +170,7 @@ function toggleExt(id) {
 function fillFarmacos(id) {
     const famSelect = document.getElementById(`${id}-fam`);
     if (!famSelect) return;
-    const fam = famSelect.value;
-    const list = PK_ENGINE.getFarmacosByFamilia(window.dbPK, fam);
+    const list = PK_ENGINE.getFarmacosByFamilia(window.dbPK, famSelect.value);
     const sel = document.getElementById(`${id}-sel`);
     sel.innerHTML = `<option value="" disabled selected>Seleccionar...</option>` + list.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
     renderSSS();
@@ -192,9 +185,8 @@ function renderSSS() {
     if (!f1Data || !d1Value) { if (sssChart) sssChart.destroy(); return; }
 
     const ctx = document.getElementById('sssChartCanvas').getContext('2d');
-    const durDays = 12; // VENTANA DE 12 DÍAS
+    const durDays = 12; // VENTANA FIJA DE 12 DÍAS
     
-    // F1 Pauta
     let p1 = PK_ENGINE.createPauta(
         mode, 
         parseFloat(d1Value), 
@@ -207,7 +199,9 @@ function renderSSS() {
         (mode !== 'START') ? parseFloat(document.getElementById('f1-stop')?.value || null) : null
     );
 
-    const d1Curve = PK_ENGINE.generateCurve({...f1Data, pauta: p1, frecuencia: parseFloat(document.getElementById('f1-f').value || 24), refDose: parseFloat(d1Value)}, durDays * 24);
+    const d1Curve = PK_ENGINE.generateCurve({
+        ...f1Data, pauta: p1, frecuencia: parseFloat(document.getElementById('f1-f').value || 24), refDose: parseFloat(d1Value)
+    }, durDays * 24);
 
     let datasets = [{ 
         label: f1Data.farmaco, data: d1Curve.map(p => ({x: p.x/24, y: p.y})), 
@@ -226,7 +220,10 @@ function renderSSS() {
             p2.forEach(d => d.tiempo += delay);
             p2 = p2.filter(d => d.tiempo >= delay);
 
-            const d2Curve = PK_ENGINE.generateCurve({...f2Data, pauta: p2, frecuencia: parseFloat(document.getElementById('f2-f').value || 24), refDose: parseFloat(document.getElementById('f2-d2')?.value || d2Value)}, durDays * 24);
+            const d2Curve = PK_ENGINE.generateCurve({
+                ...f2Data, pauta: p2, frecuencia: parseFloat(document.getElementById('f2-f').value || 24), refDose: parseFloat(document.getElementById('f2-d2')?.value || d2Value)
+            }, durDays * 24);
+
             datasets.push({ 
                 label: f2Data.farmaco, data: d2Curve.map(p => ({x: p.x/24, y: p.y})), 
                 borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4, pointRadius: 0 
@@ -252,3 +249,4 @@ function renderSSS() {
 }
 
 window.iniciarInterfazSSS = iniciarInterfazSSS;
+            
