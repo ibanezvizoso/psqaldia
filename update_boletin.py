@@ -14,7 +14,7 @@ try:
 
     # 2. Configuración del modelo (Ruta estable para evitar el 404 v1beta)
     # Importante: No forzamos la ruta manual, dejamos que la librería actualizada decida
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.0-flash')
 
     # 3. PROMPT DE ALTO RIGOR CIENTÍFICO (EL "CEREBRO" DEL BOLETÍN)
     prompt = """
