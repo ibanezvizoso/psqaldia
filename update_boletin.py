@@ -5,152 +5,112 @@ import json
 import re
 from datetime import datetime, timedelta
 
-# CONFIG
+# 1. CONFIGURACIÓN DE BÚSQUEDA REAL (PubMed)
 PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 PUBMED_FETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
 
-QUERY = "psychiatry OR depression OR schizophrenia OR bipolar disorder"
-MAX_ARTICLES = 5
-
+# Buscamos en las revistas que te interesan específicamente
+QUERY = "(JAMA Psychiatry[Journal] OR Lancet Psychiatry[Journal] OR American Journal of Psychiatry[Journal]) AND (last 7 days[dp])"
 
 def get_recent_pubmed_articles():
-    """Obtiene IDs de artículos recientes"""
-    
-    today = datetime.now()
-    last_week = today - timedelta(days=7)
-
     params = {
         "db": "pubmed",
         "term": QUERY,
-        "retmax": MAX_ARTICLES,
+        "retmax": 3,
         "sort": "pub date",
-        "retmode": "json",
-        "mindate": last_week.strftime("%Y/%m/%d"),
-        "maxdate": today.strftime("%Y/%m/%d")
+        "retmode": "json"
     }
-
     r = requests.get(PUBMED_SEARCH_URL, params=params)
     data = r.json()
-
-    return data["esearchresult"]["idlist"]
-
+    return data.get("esearchresult", {}).get("idlist", [])
 
 def get_article_details(id_list):
-    """Obtiene detalles de artículos"""
-    
-    if not id_list:
-        return []
-
+    if not id_list: return []
     params = {
         "db": "pubmed",
         "id": ",".join(id_list),
         "retmode": "json"
     }
-
     r = requests.get(PUBMED_FETCH_URL, params=params)
     data = r.json()
-
     articles = []
-
     for id in id_list:
-        item = data["result"][id]
-
+        item = data.get("result", {}).get(id, {})
         articles.append({
-            "title": item.get("title", ""),
-            "journal": item.get("fulljournalname", ""),
-            "date": item.get("pubdate", ""),
-            "authors": item.get("authors", [])
+            "title": item.get("title", "Sin título"),
+            "journal": item.get("fulljournalname", "Revista desconocida"),
+            "date": item.get("pubdate", "")
         })
-
     return articles
 
-
-def generate_summary_with_gemini(articles):
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("Falta GEMINI_API_KEY")
-
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel("gemini-2.0-flash")
-
-    articles_text = ""
-
-    for i, art in enumerate(articles, 1):
-        articles_text += f"""
-ARTÍCULO {i}
-Título: {art['title']}
-Revista: {art['journal']}
-Fecha: {art['date']}
-"""
-
-    prompt = f"""
-Eres un psiquiatra académico.
-
-Resume estos artículos reales de PubMed en formato boletín clínico.
-
-{articles_text}
-
-Formato JSON exacto:
-
-{{
-  "fecha": "AUTO",
-  "titulo": "Boletín semanal experimental",
-  "resumen": "Texto académico detallado",
-  "categoria": "BOLETINES",
-  "link": "https://pubmed.ncbi.nlm.nih.gov/"
-}}
-"""
-
-    response = model.generate_content(prompt)
-
-    if not response.text:
-        raise ValueError("Gemini devolvió respuesta vacía")
-
-    return response.text
-
-
 def main():
-
     try:
-
+        # Recuperar datos reales de PubMed
         ids = get_recent_pubmed_articles()
-
         if not ids:
-            raise ValueError("No se encontraron artículos recientes")
+            # Si no hay nada en las top, ampliamos búsqueda
+            print("Ampliando búsqueda...")
+            global QUERY
+            QUERY = "psychiatry[Journal] AND (last 7 days[dp])"
+            ids = get_recent_pubmed_articles()
 
         articles = get_article_details(ids)
+        
+        # Preparar texto para Gemini
+        articles_text = ""
+        for i, art in enumerate(articles, 1):
+            articles_text += f"\nARTÍCULO {i}\nTítulo: {art['title']}\nRevista: {art['journal']}\n"
 
-        summary_text = generate_summary_with_gemini(articles)
+        # 2. CONFIGURAR GEMINI (Uso de 1.5-flash para evitar Error 429)
+        api_key = os.environ.get("GEMINI_API_KEY")
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-1.5-flash")
 
-        json_match = re.search(r'\{.*\}', summary_text, re.DOTALL)
+        prompt = f"""
+        Actúa como un psiquiatra académico. Resume estos artículos REALES de PubMed para un boletín profesional.
+        
+        ARTÍCULOS:
+        {articles_text}
 
-        if json_match:
-            data = json.loads(json_match.group(0))
-        else:
-            data = json.loads(summary_text)
+        REQUISITOS:
+        - Tono serio y técnico (n, p-valor, hallazgos principales).
+        - Traduce los títulos al español.
+        - Estructura el 'resumen' con puntos numerados.
 
+        Responde ÚNICAMENTE con este JSON:
+        {{
+          "fecha": "AUTO",
+          "titulo": "Boletín semanal experimental",
+          "resumen": "Comienza con 'Boletín experimental no supervisado. Selección de artículos reales de PubMed:' seguido de los resúmenes.",
+          "categoria": "BOLETINES",
+          "link": "https://pubmed.ncbi.nlm.nih.gov/"
+        }}
+        """
+
+        response = model.generate_content(prompt)
+        
+        # Limpieza de JSON
+        json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        data = json.loads(json_match.group(0))
         data["fecha"] = datetime.now().strftime("%d/%m/%Y")
 
         with open("boletin.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-
-        print("Boletín generado correctamente con artículos reales.")
+        
+        print("✅ Boletín generado con artículos reales.")
 
     except Exception as e:
-
+        # Fallback por si PubMed o Gemini fallan
+        error_msg = str(e)
         fallback = {
             "fecha": datetime.now().strftime("%d/%m/%Y"),
             "titulo": "Boletín semanal experimental",
-            "resumen": f"Error: {str(e)}",
+            "resumen": f"Error técnico: {error_msg}. Por favor, intente actualizar manualmente.",
             "categoria": "BOLETINES",
             "link": "#"
         }
-
         with open("boletin.json", "w", encoding="utf-8") as f:
             json.dump(fallback, f, ensure_ascii=False, indent=2)
-
 
 if __name__ == "__main__":
     main()
