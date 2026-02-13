@@ -1,7 +1,7 @@
 {
   "fecha": "13/02/2026",
   "titulo": "Boletín semanal experimental",
-  "resumen": "AVISO TÉCNICO: La generación automática ha fallado. Motivo: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.. Se recomienda verificar la vigencia de la API Key y la conexión con Google AI Studio.",
+  "resumen": "AVISO DEL SISTEMA: La generación automática ha fallado. Motivo técnico: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.. Verifique la configuración en GitHub Actions.",
   "categoria": "BOLETINES",
   "link": "#"
 }
