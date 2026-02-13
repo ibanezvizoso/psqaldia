@@ -3,68 +3,59 @@ import google.generativeai as genai
 import json
 from datetime import datetime
 
-# ==========================================
-# 1. CONFIGURACIÓN TÉCNICA (El motor)
-# ==========================================
 try:
     api_key = os.environ.get("GEMINI_API_KEY")
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
 
-    # ==========================================
-    # 2. INSTRUCCIONES DE CONTENIDO (El encargo)
-    # ==========================================
-    # Aquí es donde le damos las órdenes clínicas que tú querías:
-    instrucciones_clinicas = """
-    Eres un experto en psiquiatría clínica y medicina basada en la evidencia.
-    Genera un boletín de actualidad científica de la última semana.
+    # PROMPT EXIGENTE Y ESPECÍFICO
+    prompt = """
+    Eres un experto en Psiquiatría de Enlace y Neuropsiquiatría con rigor académico. 
+    Tu tarea es redactar el 'Boletín semanal experimental'.
     
-    REGLAS DE ORO:
-    1. PRIORIDAD: Selecciona noticias de revistas de ALTO IMPACTO (The Lancet Psychiatry, JAMA Psychiatry, World Psychiatry, AJPsychiatry).
-    2. VERACIDAD: Los datos deben ser reales, actuales y comprobables.
-    3. REFERENCIAS: Cada noticia debe citar la fuente o el autor principal.
+    FUENTES REQUERIDAS: The Lancet Psychiatry, JAMA Psychiatry, World Psychiatry o NEJM.
+    CONTENIDO: Selecciona las 3 noticias o artículos más relevantes de los últimos 7 días.
     
-    FORMATO DE SALIDA:
-    Devuelve ÚNICAMENTE un objeto JSON con esta estructura exacta:
+    REQUISITOS DE REDACCIÓN:
+    - No inventes datos. Si no hay noticias de esta semana, selecciona las más recientes de alto impacto.
+    - Cada noticia debe incluir: Título del estudio, hallazgo principal (con datos estadísticos si existen) y la fuente bibliográfica.
+    
+    FORMATO JSON ESTRICTO (No incluyas texto fuera del JSON):
     {
-      "fecha": "DD/MM/YYYY",
+      "fecha": "FECHA_ACTUAL",
       "titulo": "Boletín semanal experimental",
-      "resumen": "Aquí el texto que te pedí: 'Boletín experimental no supervisado. Gemini ha seleccionado los artículos y noticias de interés y actualidad, y se ha automatizado la creación de la tarjeta.' Añade después las 3 noticias con sus fuentes.",
-      "link": "https://pubmed.ncbi.nlm.nih.gov/",
-      "categoria": "BOLETÍN"
+      "resumen": "Boletín experimental no supervisado. Gemini ha seleccionado los artículos y noticias de interés y actualidad, y se ha automatizado la creación de la tarjeta.\\n\\nNOTICIAS SELECCIONADAS:\\n\\n1. [Estudio]: [Hallazgo] (Fuente).\\n\\n2. [Estudio]: [Hallazgo] (Fuente).\\n\\n3. [Estudio]: [Hallazgo] (Fuente).",
+      "categoria": "BOLETINES",
+      "link": "https://pubmed.ncbi.nlm.nih.gov/"
     }
     """
 
-    # Llamada a la IA
-    response = model.generate_content(instrucciones_clinicas)
+    response = model.generate_content(prompt)
+    texto = response.text.strip()
     
-    # Limpiamos la respuesta (por si la IA pone texto extra)
-    texto_sucio = response.text.strip()
-    # Buscamos donde empieza y termina el JSON para ignorar cualquier otro texto
-    inicio = texto_sucio.find("{")
-    fin = texto_sucio.rfind("}") + 1
-    texto_limpio = texto_sucio[inicio:fin]
-    
-    data = json.loads(texto_limpio)
+    # Limpieza de markdown si la IA lo incluye
+    if "```json" in texto:
+        texto = texto.split("```json")[1].split("```")[0].strip()
+    elif "```" in texto:
+        texto = texto.split("```")[1].strip()
 
-    # ==========================================
-    # 3. CREACIÓN DEL ARCHIVO (La solución a la X)
-    # ==========================================
-    # Guardamos el archivo boletin.json. Al hacerlo así, GitHub siempre lo encontrará.
+    data = json.loads(texto)
+    data["fecha"] = datetime.now().strftime("%d/%m/%Y")
+
     with open('boletin.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print("✅ Archivo boletin.json generado correctamente.")
+    print("Éxito: boletin.json actualizado.")
 
 except Exception as e:
-    # Si algo falla, creamos un archivo de emergencia para que la acción NO de error
-    print(f"❌ Error detectado: {e}")
-    error_fallback = {
+    print(f"Error: {e}")
+    # Fallback para evitar que GitHub Actions marque error de archivo no encontrado
+    backup = {
         "fecha": datetime.now().strftime("%d/%m/%Y"),
         "titulo": "Boletín semanal experimental",
-        "resumen": "Error técnico al generar las noticias. Se intentará de nuevo en la próxima ejecución automática.",
-        "link": "#",
-        "categoria": "AVISO"
+        "resumen": "Error al recuperar noticias. Por favor, revisa las fuentes habituales directamente.",
+        "categoria": "BOLETINES",
+        "link": "#"
     }
     with open('boletin.json', 'w', encoding='utf-8') as f:
-        json.dump(error_fallback, f, ensure_ascii=False, indent=2)
+        json.dump(backup, f, ensure_ascii=False, indent=2)
