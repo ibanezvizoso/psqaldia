@@ -129,7 +129,17 @@ function iniciarInterfazSSS() {
                 </select>
             </div>
             <div id="sss-inputs"></div>
-            <div class="chart-box"><canvas id="sssChartCanvas" style="max-height: 190px;"></canvas></div>
+            <div class="chart-box">
+    <div style="display: flex; justify-content: flex-end; padding: 2px 5px; border-bottom: 1px solid var(--border); margin-bottom: 5px;">
+        <label style="font-size: 0.55rem; margin-right: 5px; color: var(--text-muted); align-self: center;">VISTA:</label>
+        <select id="sss-zoom" onchange="renderSSS()" style="width: auto; font-size: 0.65rem; padding: 1px 4px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text-main); cursor: pointer;">
+            <option value="5">5 Días</option>
+            <option value="12" selected>12 Días</option>
+            <option value="30">30 Días</option>
+        </select>
+    </div>
+    <canvas id="sssChartCanvas" style="max-height: 190px;"></canvas>
+</div>
           <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
             <div id="sss-alerts" style="padding:8px; border-radius:6px; background:rgba(67, 56, 202, 0.05); font-size:0.65rem; display:none; border-left:3px solid var(--primary); flex-grow:1;"></div>
             <div style="cursor:pointer; color:var(--primary); font-size:1.1rem; flex-shrink:0; padding:4px;" 
@@ -202,7 +212,7 @@ function renderSSS() {
     if (!f1Data || !d1Value) { if (sssChart) sssChart.destroy(); return; }
 
     const ctx = document.getElementById('sssChartCanvas').getContext('2d');
-    const durDays = 12; // VENTANA FIJA DE 12 DÍAS
+    const durDays = parseInt(document.getElementById('sss-zoom')?.value || 12);
     
     let p1 = PK_ENGINE.createPauta(
         mode, 
@@ -254,9 +264,9 @@ function renderSSS() {
         options: { 
             responsive: true, 
             scales: { 
-                x: { type: 'linear', min: 0, max: 12, title: { display: true, text: 'Días' } }, 
-                y: { min: 0, title: { display: true, text: 'Nivel (%)' } } 
-            }, 
+    x: { type: 'linear', min: 0, max: durDays, title: { display: true, text: 'Días' } },
+    y: { min: 0, title: { display: true, text: 'Nivel (%)' } }
+}, 
             plugins: { legend: { labels: { boxWidth: 8, font: {size: 10} } } } 
         } 
     });
