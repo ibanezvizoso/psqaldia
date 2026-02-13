@@ -254,18 +254,22 @@
         }
     }
     function createCard(item) {
-        // Añadimos isSSS e isBoletin a la lógica de detección
         const isFav = favorites.includes(item.id), 
               isTool = item.isCalc || item.isDiag || item.isAutoimmune || item.isSSS,
-              isBoletin = item.isBoletin; 
+              isBoletin = item.isBoletin;
 
-        const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
+        const card = document.createElement('div'); 
+        card.className = 'card'; 
+        card.id = 'anchor-' + item.id;
         
-        // Borde azul si es el boletín automático
         if(isBoletin) card.style.border = '2px solid var(--primary)';
 
-        card.onclick = () => { 
-            if (isBoletin) window.open(item.link, '_blank'); // Abre el link directo
+        // CAMBIO AQUÍ: Forzamos la apertura del link
+        card.onclick = (e) => { 
+            if (isBoletin) {
+                e.preventDefault();
+                window.open(item.link, '_blank');
+            }
             else if (item.isSSS) openSSSUI(); 
             else if (item.isCalc) openCalcUI(); 
             else if (item.isDiag) openDiagUI(); 
@@ -276,16 +280,19 @@
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         
+        // Imagen por defecto si img_boletin.jpg no existe todavía
+        const imgSrc = isBoletin ? (item.imagen || 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=500') : (item.imagen || 'https://via.placeholder.com/400x200?text=PSQ');
+
         card.innerHTML = `
             ${!isBoletin ? `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>` : ''}
-            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" onerror="this.src='https://via.placeholder.com/400x200?text=Boletin+IA'" loading="lazy">
+            <img src="${imgSrc}" class="card-img" loading="lazy">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
                 <div class="res">${item.resumen}</div>
                 <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
                 <div class="card-actions">
-                    <button class="btn btn-primary">${isTool ? 'CALCULAR' : (isBoletin ? 'VER NOTICIAS' : 'ACCEDER')}</button>
+                    <button class="btn btn-primary" style="pointer-events: none;">${isTool ? 'CALCULAR' : (isBoletin ? 'VER NOTICIAS' : 'ACCEDER')}</button>
                     ${!isBoletin ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
                 </div>
             </div>`;
