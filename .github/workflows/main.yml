@@ -4,6 +4,9 @@ on:
     - cron: '0 8 * * 1' # Todos los lunes a las 8:00 AM
   workflow_dispatch: # Esto activa un botón para probarlo manualmente
 
+permissions: # <--- ESTO ES LO QUE TE FALTA
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,8 +28,8 @@ jobs:
         
       - name: Guardar cambios en GitHub
         run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add boletin.json
           git commit -m "Actualización automática: Boletín experimental" || exit 0
           git push
