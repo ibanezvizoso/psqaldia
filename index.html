@@ -267,8 +267,14 @@
         // CAMBIO AQUÍ: Forzamos la apertura del link
         card.onclick = (e) => { 
             if (isBoletin) {
-                e.preventDefault();
-                window.open(item.link, '_blank');
+                e.stopPropagation();
+                // Si el link existe y empieza por http, lo abrimos
+                if (item.link && item.link.startsWith('http') && item.link !== window.location.origin + window.location.pathname) {
+                    window.open(item.link, '_blank');
+                } else {
+                    // Si el link falla, abrimos el modal para leer el resumen de Gemini
+                    openModal(item.id);
+                }
             }
             else if (item.isSSS) openSSSUI(); 
             else if (item.isCalc) openCalcUI(); 
