@@ -1,7 +1,7 @@
 {
   "fecha": "13/02/2026",
   "titulo": "Boletín semanal experimental",
-  "resumen": "Error técnico al generar las noticias. Se intentará de nuevo en la próxima ejecución automática.",
-  "link": "#",
-  "categoria": "AVISO"
+  "resumen": "Error al recuperar noticias. Por favor, revisa las fuentes habituales directamente.",
+  "categoria": "BOLETINES",
+  "link": "#"
 }
