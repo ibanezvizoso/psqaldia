@@ -1,7 +1,7 @@
 {
   "fecha": "13/02/2026",
   "titulo": "Boletín semanal experimental",
-  "resumen": "Error técnico: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.. Por favor, intente actualizar manualmente.",
+  "resumen": "Error técnico en el proceso: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}. Compruebe la configuración de la API y PubMed.",
   "categoria": "BOLETINES",
   "link": "#"
 }
