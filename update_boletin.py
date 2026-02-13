@@ -1,93 +1,156 @@
 import os
+import requests
 import google.generativeai as genai
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
-try:
-    # 1. Configuración de la API
+# CONFIG
+PUBMED_SEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+PUBMED_FETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+
+QUERY = "psychiatry OR depression OR schizophrenia OR bipolar disorder"
+MAX_ARTICLES = 5
+
+
+def get_recent_pubmed_articles():
+    """Obtiene IDs de artículos recientes"""
+    
+    today = datetime.now()
+    last_week = today - timedelta(days=7)
+
+    params = {
+        "db": "pubmed",
+        "term": QUERY,
+        "retmax": MAX_ARTICLES,
+        "sort": "pub date",
+        "retmode": "json",
+        "mindate": last_week.strftime("%Y/%m/%d"),
+        "maxdate": today.strftime("%Y/%m/%d")
+    }
+
+    r = requests.get(PUBMED_SEARCH_URL, params=params)
+    data = r.json()
+
+    return data["esearchresult"]["idlist"]
+
+
+def get_article_details(id_list):
+    """Obtiene detalles de artículos"""
+    
+    if not id_list:
+        return []
+
+    params = {
+        "db": "pubmed",
+        "id": ",".join(id_list),
+        "retmode": "json"
+    }
+
+    r = requests.get(PUBMED_FETCH_URL, params=params)
+    data = r.json()
+
+    articles = []
+
+    for id in id_list:
+        item = data["result"][id]
+
+        articles.append({
+            "title": item.get("title", ""),
+            "journal": item.get("fulljournalname", ""),
+            "date": item.get("pubdate", ""),
+            "authors": item.get("authors", [])
+        })
+
+    return articles
+
+
+def generate_summary_with_gemini(articles):
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("API KEY no detectada en los Secrets de GitHub")
-        
+        raise ValueError("Falta GEMINI_API_KEY")
+
     genai.configure(api_key=api_key)
 
-    # 2. Configuración del modelo (Ruta estable para evitar el 404 v1beta)
-    # Importante: No forzamos la ruta manual, dejamos que la librería actualizada decida
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel("gemini-2.0-flash")
 
-    # 3. PROMPT DE ALTO RIGOR CIENTÍFICO (EL "CEREBRO" DEL BOLETÍN)
-    prompt = """
-    ESTE ES UN ENCARGO PARA UN EXPERTO EN DOCUMENTACIÓN CLÍNICA Y PSIQUIATRÍA BASADA EN LA EVIDENCIA.
-    
-    TAREA: Elaborar el 'Boletín semanal experimental' para psiquiatras.
-    
-    CRITERIOS DE SELECCIÓN DE CONTENIDO:
-    - Identifica los 3 hitos más relevantes de los últimos 7 días en el campo de la psiquiatría y neurociencia clínica.
-    - PRIORIDAD DE FUENTES: The Lancet Psychiatry, JAMA Psychiatry, World Psychiatry, American Journal of Psychiatry y NEJM. 
-    - No obstante, puedes incluir otros hallazgos de revistas de alto impacto (Nature, Science) si la relevancia clínica es mayor.
-    - Temas de interés: Nuevos fármacos, cambios en guías clínicas, metaanálisis de alta potencia y estudios de neurobiología traslacional.
+    articles_text = ""
 
-    INSTRUCCIONES DE REDACCIÓN (Campo 'resumen'):
-    - Comienza con la frase institucional: "Boletín experimental no supervisado. Gemini ha seleccionado los artículos de interés y actualidad para la práctica clínica:"
-    - Formato de cada noticia:
-        1. [TÍTULO TRADUCIDO AL ESPAÑOL]: Redacta un párrafo denso y técnico. Debes incluir hallazgos específicos y métricas de validez estadística (n, p-valor, IC95%, Odds Ratio o Hazard Ratio) siempre que estén disponibles.
-        2. REFERENCIA: Cita obligatoriamente la revista, el año y, si es posible, el autor principal o el grupo de estudio.
-    - Tono: Puramente académico, profesional y seco. Evita el sensacionalismo.
+    for i, art in enumerate(articles, 1):
+        articles_text += f"""
+ARTÍCULO {i}
+Título: {art['title']}
+Revista: {art['journal']}
+Fecha: {art['date']}
+"""
 
-    REQUISITO TÉCNICO: Responde exclusivamente con un objeto JSON válido.
-    
-    {
-      "fecha": "FECHA_AUTO",
-      "titulo": "Boletín semanal experimental",
-      "resumen": "CONTENIDO_DETALLADO_AQUÍ",
-      "categoria": "BOLETINES",
-      "link": "https://pubmed.ncbi.nlm.nih.gov/"
-    }
-    """
+    prompt = f"""
+Eres un psiquiatra académico.
 
-    # 4. Generación con parámetros de seguridad para evitar bloqueos por palabras "sensibles"
-    response = model.generate_content(
-        prompt,
-        safety_settings=[
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
-        ]
-    )
-    
-    res_text = response.text.strip()
-    
-    # 5. Extracción de JSON blindada ante respuestas "charlatanas" de la IA
-    json_match = re.search(r'\{.*\}', res_text, re.DOTALL)
-    if json_match:
-        data = json.loads(json_match.group(0))
-    else:
-        # Intento de carga directa si falla el regex
-        data = json.loads(res_text)
+Resume estos artículos reales de PubMed en formato boletín clínico.
 
-    # Forzar metadatos correctos
-    data["fecha"] = datetime.now().strftime("%d/%m/%Y")
-    data["categoria"] = "BOLETINES"
+{articles_text}
 
-    # 6. Escritura del archivo físico
-    with open('boletin.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    
-    print("✅ Boletín generado con éxito.")
+Formato JSON exacto:
 
-except Exception as e:
-    error_msg = str(e)
-    print(f"❌ ERROR: {error_msg}")
-    
-    # Fallback con diagnóstico visual en la web si algo falla
-    fallback = {
-        "fecha": datetime.now().strftime("%d/%m/%Y"),
-        "titulo": "Boletín semanal experimental",
-        "resumen": f"AVISO DEL SISTEMA: La generación automática ha fallado. Motivo técnico: {error_msg}. Verifique la configuración en GitHub Actions.",
-        "categoria": "BOLETINES",
-        "link": "#"
-    }
-    with open('boletin.json', 'w', encoding='utf-8') as f:
-        json.dump(fallback, f, ensure_ascii=False, indent=2)
+{{
+  "fecha": "AUTO",
+  "titulo": "Boletín semanal experimental",
+  "resumen": "Texto académico detallado",
+  "categoria": "BOLETINES",
+  "link": "https://pubmed.ncbi.nlm.nih.gov/"
+}}
+"""
+
+    response = model.generate_content(prompt)
+
+    if not response.text:
+        raise ValueError("Gemini devolvió respuesta vacía")
+
+    return response.text
+
+
+def main():
+
+    try:
+
+        ids = get_recent_pubmed_articles()
+
+        if not ids:
+            raise ValueError("No se encontraron artículos recientes")
+
+        articles = get_article_details(ids)
+
+        summary_text = generate_summary_with_gemini(articles)
+
+        json_match = re.search(r'\{.*\}', summary_text, re.DOTALL)
+
+        if json_match:
+            data = json.loads(json_match.group(0))
+        else:
+            data = json.loads(summary_text)
+
+        data["fecha"] = datetime.now().strftime("%d/%m/%Y")
+
+        with open("boletin.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        print("Boletín generado correctamente con artículos reales.")
+
+    except Exception as e:
+
+        fallback = {
+            "fecha": datetime.now().strftime("%d/%m/%Y"),
+            "titulo": "Boletín semanal experimental",
+            "resumen": f"Error: {str(e)}",
+            "categoria": "BOLETINES",
+            "link": "#"
+        }
+
+        with open("boletin.json", "w", encoding="utf-8") as f:
+            json.dump(fallback, f, ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    main()
