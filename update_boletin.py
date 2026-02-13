@@ -1,61 +1,82 @@
 import os
 import google.generativeai as genai
 import json
+import re
 from datetime import datetime
 
 try:
     api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("API KEY no detectada en los Secrets de GitHub")
+        
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
 
-    # PROMPT EXIGENTE Y ESPECÍFICO
+    # Configuración de seguridad total para evitar bloqueos por términos médicos
+    model = genai.GenerativeModel(
+        model_name='gemini-1.5-flash',
+        safety_settings=[
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+        ]
+    )
+
+    # PROMPT DE ALTO RENDIMIENTO
     prompt = """
-    Eres un experto en Psiquiatría de Enlace y Neuropsiquiatría con rigor académico. 
-    Tu tarea es redactar el 'Boletín semanal experimental'.
+    CONTEXTO: Eres un Documentalista Científico especializado en Psiquiatría y Neurociencias.
+    TAREA: Generar un resumen ejecutivo de los 3 estudios más relevantes publicados en la última semana.
     
-    FUENTES REQUERIDAS: The Lancet Psychiatry, JAMA Psychiatry, World Psychiatry o NEJM.
-    CONTENIDO: Selecciona las 3 noticias o artículos más relevantes de los últimos 7 días.
+    FUENTES DE PRIORIDAD: 
+    1. The Lancet Psychiatry 
+    2. JAMA Psychiatry 
+    3. World Psychiatry 
+    4. American Journal of Psychiatry
     
-    REQUISITOS DE REDACCIÓN:
-    - No inventes datos. Si no hay noticias de esta semana, selecciona las más recientes de alto impacto.
-    - Cada noticia debe incluir: Título del estudio, hallazgo principal (con datos estadísticos si existen) y la fuente bibliográfica.
+    ESTRUCTURA DE CADA NOTICIA:
+    - Título del estudio (traducido al español).
+    - Hallazgo clave: Resumen de 2 frases con rigor clínico y datos si están disponibles.
+    - Cita: Referencia breve al autor o revista.
+
+    REGLA DE SALIDA: Debes responder ÚNICAMENTE con un objeto JSON. No añadas introducciones ni despedidas.
     
-    FORMATO JSON ESTRICTO (No incluyas texto fuera del JSON):
+    JSON SCHEMA:
     {
-      "fecha": "FECHA_ACTUAL",
+      "fecha": "FECHA_AUTOMATICA",
       "titulo": "Boletín semanal experimental",
-      "resumen": "Boletín experimental no supervisado. Gemini ha seleccionado los artículos y noticias de interés y actualidad, y se ha automatizado la creación de la tarjeta.\\n\\nNOTICIAS SELECCIONADAS:\\n\\n1. [Estudio]: [Hallazgo] (Fuente).\\n\\n2. [Estudio]: [Hallazgo] (Fuente).\\n\\n3. [Estudio]: [Hallazgo] (Fuente).",
+      "resumen": "Boletín experimental no supervisado. Gemini ha seleccionado los artículos de interés y actualidad:\\n\\n1. [Estudio 1]: [Hallazgo] (Fuente)\\n\\n2. [Estudio 2]: [Hallazgo] (Fuente)\\n\\n3. [Estudio 3]: [Hallazgo] (Fuente)",
       "categoria": "BOLETINES",
       "link": "https://pubmed.ncbi.nlm.nih.gov/"
     }
     """
 
     response = model.generate_content(prompt)
-    texto = response.text.strip()
+    res_text = response.text.strip()
     
-    # Limpieza de markdown si la IA lo incluye
-    if "```json" in texto:
-        texto = texto.split("```json")[1].split("```")[0].strip()
-    elif "```" in texto:
-        texto = texto.split("```")[1].strip()
+    # Extracción robusta del JSON usando Regex
+    json_match = re.search(r'\{.*\}', res_text, re.DOTALL)
+    if json_match:
+        data = json.loads(json_match.group(0))
+    else:
+        raise ValueError(f"Respuesta no válida. Texto recibido: {res_text[:100]}")
 
-    data = json.loads(texto)
+    # Aseguramos la fecha actual
     data["fecha"] = datetime.now().strftime("%d/%m/%Y")
 
     with open('boletin.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print("Éxito: boletin.json actualizado.")
+    print("✅ Boletín generado con éxito.")
 
 except Exception as e:
-    print(f"Error: {e}")
-    # Fallback para evitar que GitHub Actions marque error de archivo no encontrado
-    backup = {
+    error_msg = str(e)
+    print(f"❌ ERROR: {error_msg}")
+    fallback = {
         "fecha": datetime.now().strftime("%d/%m/%Y"),
         "titulo": "Boletín semanal experimental",
-        "resumen": "Error al recuperar noticias. Por favor, revisa las fuentes habituales directamente.",
+        "resumen": f"Error técnico en la generación de noticias: {error_msg}. Por favor, verifique la configuración de la API y los filtros de seguridad.",
         "categoria": "BOLETINES",
         "link": "#"
     }
     with open('boletin.json', 'w', encoding='utf-8') as f:
-        json.dump(backup, f, ensure_ascii=False, indent=2)
+        json.dump(fallback, f, ensure_ascii=False, indent=2)
