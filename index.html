@@ -1,3 +1,5 @@
+Código que funciona bien:
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -192,122 +194,51 @@
         return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
     }
 
-   async function loadData() {
+    async function loadData() {
         try {
-            // Triple carga de datos desde Google Sheets (Tu lógica original)
             const [res, resC, resPK] = await Promise.all([
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`)
             ]);
-            
             const [data, dataC, dataPK] = await Promise.all([res.json(), resC.json(), resPK.json()]);
-            
-            // Inicializamos la base de datos vacía para controlar el orden
-            db = [];
-
-            // 1. CARGA DEL BOLETÍN EXPERIMENTAL (Prioridad máxima)
-            try {
-                // El parámetro ?t= asegura que el navegador no guarde una versión vieja en caché
-                const resB = await fetch('boletin.json?t=' + Date.now());
-                if (resB.ok) {
-                    const bol = await resB.json();
-                    db.push({
-                        titulo: bol.titulo || "Boletín semanal experimental",
-                        resumen: bol.resumen,
-                        categoria: "BOLETINES", // Categoría solicitada
-                        fecha: bol.fecha,
-                        link: bol.link || "#",
-                        imagen: 'img_boletin.jpg', 
-                        id: 'auto-boletin',
-                        isBoletin: true
-                    });
-                }
-            } catch (e) { console.warn("Boletín IA no detectado aún."); }
-
-            // 2. RECURSOS GENERALES DESDE EXCEL
-            if (data.values) {
-                const excelItems = data.values.map(row => ({ 
-                    fecha: row[0]||'', 
-                    titulo: row[1]||'', 
-                    resumen: row[2]||'', 
-                    link: row[3]||'', 
-                    imagen: row[4]||'', 
-                    categoria: (row[5]||'Otros').trim().toUpperCase(), 
-                    id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
-                }));
-                db = [...db, ...excelItems];
-            }
-            
-            // 3. DATOS DE HERRAMIENTAS (Variables globales)
+            if (data.values) db = data.values.map(row => ({ fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'', categoria: (row[5]||'Otros').trim().toUpperCase(), id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() }));
             window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
-            
             if (dataPK.values) {
                 window.dbPK = dataPK.values.map(row => ({ 
                     farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' 
                 }));
             }
-            
-            // 4. INYECCIÓN DE HERRAMIENTAS MANUALES
             db.push(
                 { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos: Start, Stop y Switch entre fármacos.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley e INTEGRATE.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: window.location.origin + window.location.pathname }
             );
-
-            // Ordenar por fecha y renderizar
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-            createFilterButtons(); 
-            renderAll(); 
-            checkSharedResource();
-
+            createFilterButtons(); renderAll(); checkSharedResource();
         } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
     }
 
     function createCard(item) {
-        // Detectamos tipos de tarjeta (añadimos isSSS e isBoletin)
-        const isFav = favorites.includes(item.id);
-        const isTool = item.isCalc || item.isDiag || item.isAutoimmune || item.isSSS;
-        const isBoletin = item.isBoletin;
-
-        const card = document.createElement('div'); 
-        card.className = 'card'; 
-        card.id = 'anchor-' + item.id;
-        
-        // Estética: Borde destacado para el boletín experimental
-        if(isBoletin) card.style.border = '2px solid var(--primary)';
-
-        // Lógica de clic unificada
+        const isFav = favorites.includes(item.id), isTool = item.isCalc || item.isDiag || item.isAutoimmune;
+        const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
         card.onclick = () => { 
-            if (isBoletin) openModal(item.id); // Abre el modal con las noticias de la IA
-            else if (item.isSSS) openSSSUI(); 
+            if (item.isSSS) openSSSUI();
             else if (item.isCalc) openCalcUI(); 
             else if (item.isDiag) openDiagUI(); 
             else if (item.isAutoimmune) openAutoimmuneUI(); 
             else openModal(item.id); 
         };
-
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
-        
-        // Imagen: Si es boletín y falla img_boletin.jpg, ponemos una de medicina profesional
-        const backupImg = 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=500';
-        const displayImg = item.imagen || 'https://via.placeholder.com/400x200?text=PSQ';
-
-        card.innerHTML = `
-            ${!isBoletin ? `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>` : ''}
-            <img src="${displayImg}" class="card-img" onerror="this.src='${backupImg}'" loading="lazy">
-            <div class="card-content">
-                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-                <div class="tit">${item.titulo}</div>
-                <div class="res">${item.resumen}</div>
-                <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
-                <div class="card-actions">
-                    <button class="btn btn-primary" style="pointer-events: none;">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
-                    ${!isBoletin ? `<a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>` : ''}
-                </div>
-            </div>`;
+        card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
+            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
+            <div class="card-content"><span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+            <div class="tit">${item.titulo}</div><div class="res">${item.resumen}</div>
+            <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
+            <div class="card-actions"><button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
+            <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a></div></div>`;
         return card;
     }
 
