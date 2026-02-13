@@ -1,0 +1,32 @@
+name: Actualizar Boletín Semanal
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Todos los lunes a las 8:00 AM
+  workflow_dispatch: # Esto activa un botón para probarlo manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Instalar librerías
+        run: pip install google-generativeai
+        
+      - name: Ejecutar script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_boletin.py
+        
+      - name: Guardar cambios en GitHub
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add boletin.json
+          git commit -m "Actualización automática: Boletín experimental" || exit 0
+          git push
