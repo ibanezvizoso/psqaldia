@@ -1,15 +1,15 @@
-    // ope22_esp.js
+// ope22_esp.js
 let preguntasExamenEsp = [];
 let respuestasUsuarioEsp = {};
-let preguntasVisibles = 20; // Bloque inicial
+let preguntasVisibles = 20;
 
 async function openExamenEspUI() {
-    preguntasVisibles = 20; // Reiniciamos el contador al abrir
+    preguntasVisibles = 20; 
     const RANGO = 'Ope_Esp22!A2:G150'; 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGO}?key=${API_KEY}`;
 
     const modalData = document.getElementById('modalData');
-    modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Optimizando 110 preguntas...</b></div>`;
+    modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando examen...</b></div>`;
     document.getElementById('modal').style.display = 'flex';
 
     try {
@@ -34,27 +34,22 @@ async function openExamenEspUI() {
 
 function renderizarExamenEsp() {
     const container = document.getElementById('modalData');
-    
     let html = `
         <div style="padding:1.5rem; max-width:800px; margin:auto;">
             <div style="margin-bottom:2rem; border-bottom: 2px solid var(--border); padding-bottom:1.5rem;">
                 <h2 style="margin:0; font-weight:900; color:var(--primary); font-size:1.6rem;">OPE PSIQUIATRÍA 2022</h2>
-                <p style="margin:5px 0 0; font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Cargadas <span id="contador-preg">${preguntasVisibles}</span> de ${preguntasExamenEsp.length} preguntas</p>
+                <p style="margin:5px 0 0; font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Preguntas cargadas: <span id="contador-preg">${preguntasVisibles}</span> de ${preguntasExamenEsp.length}</p>
             </div>
-            <div id="contenedor-preguntas-esp">`;
+            <div id="contenedor-preguntas-esp">
+                ${generarBloquePreguntas(0, preguntasVisibles)}
+            </div>`;
 
-    // Solo renderizamos hasta el límite de preguntasVisibles
-    html += generarBloquePreguntas(0, preguntasVisibles);
-
-    html += `</div>`; // Cierre de contenedor-preguntas-esp
-
-    // Botón para cargar más si quedan
     if (preguntasVisibles < preguntasExamenEsp.length) {
-        html += `<button id="btn-cargar-mas" onclick="cargarMasPreguntas()" style="width:100%; padding:1rem; margin-bottom:2rem; border-radius:15px; border:2px dashed var(--border); background:none; color:var(--text-muted); font-weight:800; cursor:pointer;">CARGAR 20 MÁS...</button>`;
+        html += `<button id="btn-cargar-mas" onclick="cargarMasPreguntas()" style="width:100%; padding:1rem; margin-bottom:2rem; border-radius:15px; border:2px dashed var(--border); background:none; color:var(--text-muted); font-weight:800; cursor:pointer;">CARGAR MÁS PREGUNTAS...</button>`;
     }
 
     html += `
-            <button onclick="corregirExamenEsp()" class="btn btn-primary" style="width:100%; height:50px; border-radius:15px; font-size:1rem; margin-top:1rem; position:sticky; bottom:10px; z-index:100;">
+            <button onclick="corregirExamenEsp()" class="btn btn-primary" style="width:100%; height:50px; border-radius:15px; font-size:1rem; margin-top:1rem; position:sticky; bottom:10px; z-index:100; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
                 FINALIZAR Y CORREGIR TODO
             </button>
         </div>`;
@@ -74,17 +69,19 @@ function generarBloquePreguntas(inicio, fin) {
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     ${['A', 'B', 'C', 'D'].map((letra, idx) => `
                         <label style="display:flex; align-items:center; gap:12px; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text-main);">
-                            <input type="radio" name="preg-esp-${realIndex}" value="${letra}" style="accent-color:var(--primary); width:18px; height:18px;" onclick="respuestasUsuarioEsp[${realIndex}] = '${letra}'">
+                            <input type="radio" name="preg-esp-${realIndex}" value="${letra}" onclick="respuestasUsuarioEsp[${realIndex}] = '${letra}'">
                             <span style="font-size:0.95rem;">${p.opciones[idx]}</span>
                         </label>
                     `).join('')}
                 </div>
-                <button onclick="revelarIndividualEsp(${realIndex})" style="margin-top:1.5rem; background:none; border:none; color:var(--text-muted); font-weight:800; font-size:0.7rem; text-transform:uppercase; cursor:pointer;">
+                
+                <button onclick="revelarIndividualEsp(${realIndex})" style="margin-top:1.5rem; background:none; border:none; color:var(--text-muted); font-weight:800; font-size:0.7rem; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-lightbulb"></i> Ver explicación
                 </button>
-                <div id="feedback-esp-${realIndex}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid var(--primary); border-radius:12px; font-size:0.9rem;">
-                    <strong style="color:var(--primary); display:block; margin-bottom:8px;">RESPUESTA CORRECTA: ${p.correcta}</strong>
-                    ${p.explicacion}
+
+                <div id="feedback-esp-${realIndex}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid var(--primary); border-radius:12px; font-size:0.9rem; color:var(--text-main);">
+                    <strong style="color:var(--primary); display:block; margin-bottom:8px; font-weight:900;">RESPUESTA CORRECTA: ${p.correcta}</strong>
+                    <div style="opacity:0.9; line-height:1.5;">${p.explicacion}</div>
                 </div>
             </div>`;
     });
@@ -104,4 +101,33 @@ function cargarMasPreguntas() {
     }
 }
 
-// ... Mantén revelarIndividualEsp y corregirExamenEsp igual que antes
+// Función de revelado corregida
+function revelarIndividualEsp(idx) {
+    const fb = document.getElementById(`feedback-esp-${idx}`);
+    if (fb) {
+        fb.style.display = (fb.style.display === 'none' || fb.style.display === '') ? 'block' : 'none';
+    }
+}
+
+function corregirExamenEsp() {
+    let aciertos = 0;
+    preguntasExamenEsp.forEach((p, idx) => {
+        const bloque = document.getElementById(`bloque-esp-${idx}`);
+        const feedback = document.getElementById(`feedback-esp-${idx}`);
+        
+        // Si el bloque existe (ha sido cargado), lo marcamos
+        if (bloque && feedback) {
+            feedback.style.display = 'block';
+            if (respuestasUsuarioEsp[idx] === p.correcta) {
+                aciertos++;
+                bloque.style.borderColor = '#22c55e';
+                bloque.style.background = 'rgba(34, 197, 94, 0.05)';
+            } else {
+                bloque.style.borderColor = '#ef4444';
+                bloque.style.background = 'rgba(239, 68, 68, 0.05)';
+            }
+        }
+    });
+    alert(`Examen finalizado.\n\nAciertos: ${aciertos} de ${preguntasExamenEsp.length}`);
+    document.querySelector('.modal-content').scrollTo({top: 0, behavior: 'smooth'});
+}
