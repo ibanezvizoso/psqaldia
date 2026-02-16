@@ -242,6 +242,7 @@
     else if (item.isDiag) openDiagUI(); 
     else if (item.isAutoimmune) openAutoimmuneUI(); 
     else openModal(item.id); 
+            };
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
