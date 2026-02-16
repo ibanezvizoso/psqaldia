@@ -127,6 +127,7 @@
         <div id="modalData"></div>
     </div>
 </div>
+<script src="ope22_comun.js"></script>
 <script src="calculadora.js"></script>
 <script src="diagnostico.js"></script>
 <script src="autoinmune.js"></script>
@@ -208,6 +209,7 @@
                 }));
             }
             db.push(
+                { titulo: "Examen OPE Común 2022", resumen: "Pon a prueba tus conocimientos con 12 preguntas oficiales de legislación y organización sanitaria.", categoria: "EXAMEN", id: "ope-22-comun", imagen: "img_ope22comun.jpg", isOPE22: true, fecha: '16/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos: Start, Stop y Switch entre fármacos.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname },
@@ -222,12 +224,13 @@
         const isFav = favorites.includes(item.id), isTool = item.isCalc || item.isDiag || item.isAutoimmune;
         const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
         card.onclick = () => { 
-            if (item.isSSS) openSSSUI();
-            else if (item.isCalc) openCalcUI(); 
-            else if (item.isDiag) openDiagUI(); 
-            else if (item.isAutoimmune) openAutoimmuneUI(); 
-            else openModal(item.id); 
-        };
+    if (item.isOPE22) openExamenUI(); // <--- AÑADE ESTA LÍNEA
+    else if (item.isSSS) openSSSUI();
+    else if (item.isCalc) openCalcUI(); 
+    else if (item.isDiag) openDiagUI(); 
+    else if (item.isAutoimmune) openAutoimmuneUI(); 
+    else openModal(item.id); 
+};
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
