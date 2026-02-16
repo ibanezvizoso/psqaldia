@@ -48,12 +48,13 @@ function renderizarExamen() {
     preguntasExamen.forEach((p, index) => {
         html += `
             <div id="bloque-${index}" style="margin-bottom:2rem; padding:1.5rem; background:var(--bg); border-radius:1.5rem; border:1px solid var(--border); transition: 0.3s;">
-        <p style="font-weight:700; font-size:1.05rem; line-height:1.4; margin-bottom:1.5rem; color:var(--text-main);">${p.pregunta}</p>
-        <div style="display:flex; flex-direction:column; gap:10px;">
+                <p style="font-weight:700; font-size:1.05rem; line-height:1.4; margin-bottom:1.5rem; color:var(--text-main);">${p.pregunta}</p>
+                
+                <div style="display:flex; flex-direction:column; gap:10px;">
                     ${['A', 'B', 'C', 'D'].map((letra, i) => `
                         <label style="display:flex; align-items:center; gap:12px; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:12px; cursor:pointer; transition:0.2s; color:var(--text-main);">
                             <input type="radio" name="preg-${index}" value="${letra}" style="accent-color:var(--primary); width:18px; height:18px;" onclick="respuestasUsuario[${index}] = '${letra}'">
-                            <span style="font-size:0.95rem;"><strong>${letra})</strong> ${p.opciones[i]}</span>
+                            <span style="font-size:0.95rem;">${p.opciones[i]}</span>
                         </label>
                     `).join('')}
                 </div>
