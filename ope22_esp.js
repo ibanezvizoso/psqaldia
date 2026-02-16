@@ -54,7 +54,7 @@ function renderizarExamenEsp() {
     }
 
     html += `
-            <button onclick="corregirExamenEsp()" class="btn btn-primary" style="width:100%; height:70px; border-radius:18px; font-size:1.2rem; margin-top:1rem; position:sticky; bottom:10px; z-index:100;">
+            <button onclick="corregirExamenEsp()" class="btn btn-primary" style="width:100%; height:50px; border-radius:15px; font-size:1rem; margin-top:1rem; position:sticky; bottom:10px; z-index:100;">
                 FINALIZAR Y CORREGIR TODO
             </button>
         </div>`;
