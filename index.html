@@ -127,6 +127,7 @@
         <div id="modalData"></div>
     </div>
 </div>
+<script src="ope22_anest.js"></script>
 <script src="ope22_esp.js"></script>
 <script src="ope22_comun.js"></script>
 <script src="calculadora.js"></script>
@@ -211,6 +212,16 @@
             }
             db.push(
                 { 
+        titulo: "OPE Anestesia 2022 (Específico)", 
+        resumen: "Examen oficial del SERGAS para Anestesiología y Reanimación. 110 preguntas con respuestas explicadas.", 
+        categoria: "EXAMEN", 
+        id: "ope-22-anest", 
+        imagen: "img_ope22anest.jpg", 
+        isOPE22Anest: true, // Gatillo para Anestesia
+        fecha: '18/02/2026', 
+        link: window.location.origin + window.location.pathname 
+    },
+                { 
         titulo: "OPE Psiquiatría 2022 (Específico)", 
         resumen: "Examen oficial de la especialidad (SERGAS). Preguntas de psiquiatría con respuestas explicadas.", 
         categoria: "EXAMEN", 
@@ -235,14 +246,15 @@
         const isFav = favorites.includes(item.id), isTool = item.isCalc || item.isDiag || item.isAutoimmune;
         const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
         card.onclick = () => { 
-    if (item.isOPE22Esp) openExamenEspUI(); // Llama al específico
-    else if (item.isOPE22) openExamenUI();   // Llama al común
+    if (item.isOPE22Anest) openExamenAnestUI(); // <-- Llama a Anestesia
+    else if (item.isOPE22Esp) openExamenEspUI(); 
+    else if (item.isOPE22) openExamenUI(); 
     else if (item.isSSS) openSSSUI();
     else if (item.isCalc) openCalcUI(); 
     else if (item.isDiag) openDiagUI(); 
     else if (item.isAutoimmune) openAutoimmuneUI(); 
     else openModal(item.id); 
-            };
+};
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
