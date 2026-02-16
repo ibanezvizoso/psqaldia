@@ -19,11 +19,16 @@ async function openExamenUI() {
 
         // Mapeo con protección contra celdas vacías
         preguntasExamen = data.values.map(row => ({
-            pregunta: row[0] || "Pregunta sin texto",
-            opciones: [row[1] || "", row[2] || "", row[3] || "", row[4] || ""],
-            correcta: (row[5] || "").trim().toUpperCase(), 
-            explicacion: row[6] || "No hay explicación disponible para esta pregunta."
-        }));
+    pregunta: (row[0] || "").trim(), // .trim() elimina espacios y saltos de línea invisibles
+    opciones: [
+        (row[1] || "").trim(), 
+        (row[2] || "").trim(), 
+        (row[3] || "").trim(), 
+        (row[4] || "").trim()
+    ],
+    correcta: (row[5] || "").trim().toUpperCase(), 
+    explicacion: (row[6] || "No hay explicación disponible.").trim()
+}));
 
         renderizarExamen();
     } catch (error) {
