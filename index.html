@@ -128,6 +128,7 @@
     </div>
 </div>
 <script src="ope22_comun.js"></script>
+<script src="ope22_comun.js"></script>
 <script src="calculadora.js"></script>
 <script src="diagnostico.js"></script>
 <script src="autoinmune.js"></script>
@@ -209,6 +210,16 @@
                 }));
             }
             db.push(
+                { 
+        titulo: "OPE Psiquiatría 2022 (Específico)", 
+        resumen: "Examen oficial de la especialidad (SERGAS). Preguntas de psiquiatría con respuestas explicadas.", 
+        categoria: "EXAMEN", 
+        id: "ope-22-esp", 
+        imagen: "img_ope22esp.jpg", // Tu nueva foto
+        isOPE22Esp: true, 
+        fecha: '17/02/2026', 
+        link: window.location.origin + window.location.pathname 
+    },
                 { titulo: "Examen OPE Galicia, parte Común 2022", resumen: "Pon a prueba tus conocimientos con 12 preguntas oficiales de legislación y organización sanitaria.", categoria: "EXAMEN", id: "ope-22-comun", imagen: "img_ope22comun.jpg", isOPE22: true, fecha: '16/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos: Start, Stop y Switch entre fármacos.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
@@ -224,13 +235,13 @@
         const isFav = favorites.includes(item.id), isTool = item.isCalc || item.isDiag || item.isAutoimmune;
         const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
         card.onclick = () => { 
-    if (item.isOPE22) openExamenUI(); // <--- AÑADE ESTA LÍNEA
+    if (item.isOPE22Esp) openExamenEspUI(); // Llama al específico
+    else if (item.isOPE22) openExamenUI();   // Llama al común
     else if (item.isSSS) openSSSUI();
     else if (item.isCalc) openCalcUI(); 
     else if (item.isDiag) openDiagUI(); 
     else if (item.isAutoimmune) openAutoimmuneUI(); 
     else openModal(item.id); 
-};
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
