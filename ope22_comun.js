@@ -3,9 +3,12 @@ let preguntasExamen = [];
 let respuestasUsuario = {};
 
 async function openExamenUI() {
-    // Rango ampliado para que no se corte si añades preguntas
+  // 1. Apuntamos al Worker, no a Google
+    const WORKER_URL = "https://psqaldia-api.ibanez-vizoso.workers.dev/";
     const RANGO = 'Ope_Comun22!A2:G100'; 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGO}?key=${API_KEY}`;
+    
+    // Construimos la URL del Worker con el rango específico
+    const url = `${WORKER_URL}?range=${encodeURIComponent(RANGO)}`;
 
     const modalData = document.getElementById('modalData');
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando OPE 22...</b></div>`;
