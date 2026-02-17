@@ -198,62 +198,39 @@
     async function loadData() {
         try {
             const [res, resC, resPK] = await Promise.all([
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`),
+                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:H200?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`)
             ]);
             const [data, dataC, dataPK] = await Promise.all([res.json(), resC.json(), resPK.json()]);
-            if (data.values) db = data.values.map(row => ({ fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'', categoria: (row[5]||'Otros').trim().toUpperCase(), id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() }));
+            if (data.values) db = data.values.map(row => ({ 
+    fecha: row[0]||'', 
+    titulo: row[1]||'', 
+    resumen: row[2]||'', 
+    link: row[3]||'', 
+    imagen: row[4]||'', 
+    categoria: (row[5]||'Otros').trim().toUpperCase(),
+    accion: row[6]||'', // <--- Nueva columna
+    id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
+}));
             window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
             if (dataPK.values) {
                 window.dbPK = dataPK.values.map(row => ({ 
                     farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' 
                 }));
             }
-            db.push(
-                { 
-        titulo: "OPE Anestesia 2022 (Específico)", 
-        resumen: "Examen oficial del SERGAS para Anestesiología y Reanimación. 110 preguntas con respuestas explicadas.", 
-        categoria: "EXAMEN", 
-        id: "ope-22-anest", 
-        imagen: "img_ope22anest.jpg", 
-        isOPE22Anest: true, // Gatillo para Anestesia
-        fecha: '18/02/2026', 
-        link: window.location.origin + window.location.pathname 
-    },
-                { 
-        titulo: "OPE Psiquiatría 2022 (Específico)", 
-        resumen: "Examen oficial de la especialidad (SERGAS). Preguntas de psiquiatría con respuestas explicadas.", 
-        categoria: "EXAMEN", 
-        id: "ope-22-esp", 
-        imagen: "img_ope22esp.jpg", // Tu nueva foto
-        isOPE22Esp: true, 
-        fecha: '17/02/2026', 
-        link: window.location.origin + window.location.pathname 
-    },
-                { titulo: "Examen OPE Galicia, parte Común 2022", resumen: "Pon a prueba tus conocimientos con 12 preguntas oficiales de legislación y organización sanitaria.", categoria: "EXAMEN", id: "ope-22-comun", imagen: "img_ope22comun.jpg", isOPE22: true, fecha: '16/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos: Start, Stop y Switch entre fármacos.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley e INTEGRATE.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: window.location.origin + window.location.pathname }
-            );
-            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-            createFilterButtons(); renderAll(); checkSharedResource();
-        } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
-    }
+            
 
     function createCard(item) {
         const isFav = favorites.includes(item.id), isTool = item.isCalc || item.isDiag || item.isAutoimmune;
         const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
         card.onclick = () => { 
-    if (item.isOPE22Anest) openExamenAnestUI(); // <-- Llama a Anestesia
-    else if (item.isOPE22Esp) openExamenEspUI(); 
-    else if (item.isOPE22) openExamenUI(); 
-    else if (item.isSSS) openSSSUI();
-    else if (item.isCalc) openCalcUI(); 
-    else if (item.isDiag) openDiagUI(); 
-    else if (item.isAutoimmune) openAutoimmuneUI(); 
-    else openModal(item.id); 
+    if (item.accion && typeof window[item.accion] === 'function') {
+        document.getElementById('modal').style.display = 'flex';
+        window[item.accion](); 
+    } else {
+        openModal(item.id); 
+    }
 };
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
@@ -267,8 +244,6 @@
         return card;
     }
 
-    function openCalcUI() { document.getElementById('modal').style.display = 'flex'; if (typeof iniciarInterfazCalculadora === 'function') iniciarInterfazCalculadora(); }
-    function openSSSUI() { document.getElementById('modal').style.display = 'flex'; if (typeof iniciarInterfazSSS === 'function') iniciarInterfazSSS(); }
     function openModal(id) {
         const item = db.find(i => i.id === id); if (!item) return;
         document.getElementById('modalData').innerHTML = `<img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
