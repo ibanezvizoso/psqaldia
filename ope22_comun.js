@@ -2,12 +2,11 @@
 let preguntasExamen = [];
 let respuestasUsuario = {};
 
-async function openExamenUI() {
-  // 1. Apuntamos al Worker, no a Google
+async function openExamenUI() {// 1. Usamos la URL de tu Worker
     const WORKER_URL = "https://psqaldia-api.ibanez-vizoso.workers.dev/";
     const RANGO = 'Ope_Comun22!A2:G100'; 
     
-    // Construimos la URL del Worker con el rango específico
+    // 2. Construimos la URL apuntando al Worker
     const url = `${WORKER_URL}?range=${encodeURIComponent(RANGO)}`;
 
     const modalData = document.getElementById('modalData');
@@ -18,9 +17,7 @@ async function openExamenUI() {
         const response = await fetch(url);
         const data = await response.json();
         
-        if (!data.values || data.values.length === 0) throw new Error("No hay datos");
-
-        // Mapeo con protección contra celdas vacías
+        if (!data.values || data.values.length === 0) throw new Error("No hay datos en esta pestaña");
         preguntasExamen = data.values.map(row => ({
     pregunta: (row[0] || "").trim(), // .trim() elimina espacios y saltos de línea invisibles
     opciones: [
