@@ -353,7 +353,7 @@
         const item = db.find(i => i.id === sharedId);
         if (!item) return;
 
-        // VERIFICACIÓN DE CONTRASEÑA PARA LINKS COMPARTIDOS
+        // Si el recurso compartido tiene contraseña, se solicita antes de abrir
         if (item.password && item.password.trim() !== "") {
             const pass = prompt("Este recurso está protegido. Introduce la contraseña:");
             if (pass !== item.password) {
@@ -370,7 +370,9 @@
         }
         document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
     }, 800);
-    }
+}
+
+    
     
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
