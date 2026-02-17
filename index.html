@@ -138,8 +138,14 @@
     
     const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
     const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
-    let db = [], favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), currentCategory = 'TODOS', lastScrollY = window.scrollY, deferredPrompt;
+    
+    let db = [], 
+        favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), 
+        currentCategory = 'TODOS', 
+        lastScrollY = window.scrollY, 
+        deferredPrompt;
 
+    // --- FUNCIONES DE NAVEGACIÓN Y MENÚ ---
     function toggleMenu() {
         const menu = document.getElementById('sideMenu'), overlay = document.getElementById('menuOverlay');
         const isOpen = menu.classList.contains('open');
@@ -184,6 +190,7 @@
         lastScrollY = window.scrollY;
     });
 
+    // --- UTILIDADES ---
     function getPasteColor(str) {
         let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
         const h = Math.abs(hash) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -196,6 +203,7 @@
         return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
     }
 
+    // --- CARGA DE DATOS ---
     async function loadData() {
         try {
             const [res, resC, resPK] = await Promise.all([
@@ -213,7 +221,7 @@
                     link: row[3]||'', 
                     imagen: row[4]||'', 
                     categoria: (row[5]||'Otros').trim().toUpperCase(),
-                    accion: row[6]||'',
+                    accion: row[6]||'', 
                     id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
                 }));
             }
@@ -235,6 +243,7 @@
         } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
     }
 
+    // --- RENDERIZADO DE TARJETAS ---
     function createCard(item) {
         const isFav = favorites.includes(item.id);
         const isTool = item.accion !== ''; 
@@ -331,4 +340,6 @@
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
     document.getElementById('installBtn').addEventListener('click', () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
     
+    // Lanzamos la carga inicial
     loadData();
+</script>
