@@ -1,43 +1,83 @@
 // ope22_comun.js
+
 let preguntasExamen = [];
+
 let respuestasUsuario = {};
 
-async function openExamenUI() {// 1. Usamos la URL de tu Worker
-    const WORKER_URL = "https://psqaldia-api.ibanez-vizoso.workers.dev/";
+
+
+async function openExamenUI() {
+
+    // Rango ampliado para que no se corte si añades preguntas
+
     const RANGO = 'Ope_Comun22!A2:G100'; 
-    
-    // 2. Construimos la URL apuntando al Worker
-    const url = `${WORKER_URL}?range=${encodeURIComponent(RANGO)}`;
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGO}?key=${API_KEY}`;
+
+
 
     const modalData = document.getElementById('modalData');
+
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando OPE 22...</b></div>`;
+
     document.getElementById('modal').style.display = 'flex';
 
+
+
     try {
+
         const response = await fetch(url);
+
         const data = await response.json();
+
         
-        if (!data.values || data.values.length === 0) throw new Error("No hay datos en esta pestaña");
+
+        if (!data.values || data.values.length === 0) throw new Error("No hay datos");
+
+
+
+        // Mapeo con protección contra celdas vacías
+
         preguntasExamen = data.values.map(row => ({
+
     pregunta: (row[0] || "").trim(), // .trim() elimina espacios y saltos de línea invisibles
+
     opciones: [
+
         (row[1] || "").trim(), 
+
         (row[2] || "").trim(), 
+
         (row[3] || "").trim(), 
+
         (row[4] || "").trim()
+
     ],
+
     correcta: (row[5] || "").trim().toUpperCase(), 
+
     explicacion: (row[6] || "No hay explicación disponible.").trim()
+
 }));
 
+
+
         renderizarExamen();
+
     } catch (error) {
+
         console.error("Error Guardián:", error);
+
         modalData.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--text-main);">
+
             <i class="fas fa-exclamation-triangle fa-2x" style="color:#ef4444; margin-bottom:1rem;"></i><br>
+
             No se pudo cargar el examen.<br><small style="color:var(--text-muted);">Revisa que la pestaña se llame <b>Ope_Comun22</b></small>
+
         </div>`;
+
     }
+
 }
 
 function renderizarExamen() {
