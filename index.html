@@ -197,10 +197,11 @@
         try {
             const WORKER_URL = "https://psqaldia-api.ibanez-vizoso.workers.dev/";
             const [res, resC, resPK] = await Promise.all([
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`),
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`),
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`)
+                fetch(WORKER_URL), // Trae los recursos generales
+                fetch(`${WORKER_URL}?range=Data_APS!A2:F30`), // Trae la calculadora
+                fetch(`${WORKER_URL}?range=Data_Farmacocinetica!A2:F100`) // Trae la farmacocinética
             ]);
+
             const [data, dataC, dataPK] = await Promise.all([res.json(), resC.json(), resPK.json()]);
             if (data.values) db = data.values.map(row => ({ fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'', categoria: (row[5]||'Otros').trim().toUpperCase(), id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() }));
             window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
