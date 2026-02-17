@@ -197,7 +197,7 @@
         try {
             const WORKER_URL = "https://psqaldia-api.ibanez-vizoso.workers.dev/";
 
-            // Llamadas correctas al Worker (sin SHEET_ID ni API_KEY)
+            // CORRECCIÓN: Llamamos directamente al Worker, no a Google
             const [res, resC, resPK] = await Promise.all([
                 fetch(WORKER_URL), 
                 fetch(`${WORKER_URL}?range=Data_APS!A2:F30`),
@@ -206,10 +206,10 @@
 
             const [data, dataC, dataPK] = await Promise.all([res.json(), resC.json(), resPK.json()]);
 
-            // 1. Recursos del Excel (Añadimos .filter para evitar la tarjeta en blanco)
+            // 1. Recursos del Excel (Filtramos para evitar la tarjeta en blanco)
             if (data.values) {
                 db = data.values
-                    .filter(row => row[1] && row[1].trim() !== "") // <-- FILTRO: Si no hay título, ignora la fila
+                    .filter(row => row[1] && row[1].trim() !== "") // Si no hay título, no hay tarjeta
                     .map(row => ({ 
                         fecha: row[0]||'', 
                         titulo: row[1]||'', 
@@ -237,7 +237,7 @@
                 }));
             }
 
-            // 4. Tus herramientas manuales (OPEs y demás)
+            // 4. Inyectar herramientas manuales
             db.push(
                 { titulo: "OPE Anestesia 2022 (Específico)", resumen: "Examen oficial del SERGAS para Anestesiología y Reanimación.", categoria: "EXAMEN", id: "ope-22-anest", imagen: "img_ope22anest.jpg", isOPE22Anest: true, fecha: '18/02/2026', link: window.location.origin + window.location.pathname },
                 { titulo: "OPE Psiquiatría 2022 (Específico)", resumen: "Examen oficial de la especialidad (SERGAS).", categoria: "EXAMEN", id: "ope-22-esp", imagen: "img_ope22esp.jpg", isOPE22Esp: true, fecha: '17/02/2026', link: window.location.origin + window.location.pathname },
