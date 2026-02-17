@@ -348,20 +348,30 @@
     }
 
     function checkSharedResource() {
-        const sharedId = new URLSearchParams(window.location.search).get('id');
-        if (sharedId) setTimeout(() => {
-            const item = db.find(i => i.id === sharedId);
-            if (item) { 
-                if (item.accion && typeof window[item.accion] === 'function') {
-                    document.getElementById('modal').style.display = 'flex';
-                    window[item.accion]();
-                } else {
-                    openModal(sharedId);
-                }
-                document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
+    const sharedId = new URLSearchParams(window.location.search).get('id');
+    if (sharedId) setTimeout(() => {
+        const item = db.find(i => i.id === sharedId);
+        if (!item) return;
+
+        // VERIFICACIÓN DE CONTRASEÑA PARA LINKS COMPARTIDOS
+        if (item.password && item.password.trim() !== "") {
+            const pass = prompt("Este recurso está protegido. Introduce la contraseña:");
+            if (pass !== item.password) {
+                alert("Acceso denegado.");
+                return;
             }
-        }, 800);
+        }
+
+        if (item.accion && typeof window[item.accion] === 'function') {
+            document.getElementById('modal').style.display = 'flex';
+            window[item.accion]();
+        } else {
+            openModal(sharedId);
+        }
+        document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
+    }, 800);
     }
+    
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
