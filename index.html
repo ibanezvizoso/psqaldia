@@ -245,33 +245,48 @@
 
     // --- RENDERIZADO DE TARJETAS ---
     function createCard(item) {
-        const isFav = favorites.includes(item.id);
-        const isTool = item.accion !== ''; 
-        const card = document.createElement('div'); 
-        card.className = 'card'; 
-        card.id = 'anchor-' + item.id;
-        
-        card.onclick = () => { 
-            if (item.accion && typeof window[item.accion] === 'function') {
-                document.getElementById('modal').style.display = 'flex';
-                window[item.accion](); 
-            } else {
-                openModal(item.id); 
-            }
-        };
-
-        const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
-        const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
-        
-        card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
-            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
-            <div class="card-content"><span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-            <div class="tit">${item.titulo}</div><div class="res">${item.resumen}</div>
-            <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
-            <div class="card-actions"><button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
-            <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a></div></div>`;
-        return card;
+    const isFav = favorites.includes(item.id);
+    const card = document.createElement('div'); 
+    card.className = 'card'; 
+    card.id = 'anchor-' + item.id;
+    
+    // --- 1. LÓGICA DE TEXTO DEL BOTÓN ---
+    let textoBoton = "ACCEDER"; // Por defecto
+    if (item.accion && item.accion !== '') {
+        if (item.accion.includes('Examen')) {
+            textoBoton = "HACER EXAMEN";
+        } else if (item.accion.includes('iniciarInterfaz')) {
+            textoBoton = "CALCULAR";
+        } else {
+            textoBoton = "ABRIR";
+        }
     }
+
+    card.onclick = () => { 
+        if (item.accion && typeof window[item.accion] === 'function') {
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('modalData').innerHTML = ""; 
+            window[item.accion](); 
+        } else {
+            openModal(item.id); 
+        }
+    };
+
+    const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
+    const isTool = item.accion !== '';
+    const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
+    
+    // --- 2. USAR LA VARIABLE EN EL HTML ---
+    card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
+        <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
+        <div class="card-content"><span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+        <div class="tit">${item.titulo}</div><div class="res">${item.resumen}</div>
+        <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
+        <div class="card-actions">
+            <button class="btn btn-primary">${textoBoton}</button> <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
+        </div></div>`;
+    return card;
+}
 
     function openModal(id) {
         const item = db.find(i => i.id === id); if (!item) return;
