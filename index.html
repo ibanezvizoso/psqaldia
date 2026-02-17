@@ -135,6 +135,8 @@
 <script src="autoinmune.js"></script>
 <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
+    const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
     let db = [], favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), currentCategory = 'TODOS', lastScrollY = window.scrollY, deferredPrompt;
 
     function toggleMenu() {
@@ -194,107 +196,76 @@
     }
 
     async function loadData() {
-        // 1. Definimos las herramientas locales PRIMERO para que siempre estén disponibles
-        const herramientasLocales = [
-            { titulo: "OPE Anestesia 2022 (Específico)", resumen: "Examen oficial del SERGAS para Anestesiología y Reanimación. 110 preguntas con respuestas explicadas.", categoria: "EXAMEN", id: "ope-22-anest", imagen: "img_ope22anest.jpg", isOPE22Anest: true, fecha: '18/02/2026', link: window.location.origin + window.location.pathname },
-            { titulo: "OPE Psiquiatría 2022 (Específico)", resumen: "Examen oficial de la especialidad (SERGAS). Preguntas de psiquiatría con respuestas explicadas.", categoria: "EXAMEN", id: "ope-22-esp", imagen: "img_ope22esp.jpg", isOPE22Esp: true, fecha: '17/02/2026', link: window.location.origin + window.location.pathname },
-            { titulo: "Examen OPE Galicia, parte Común 2022", resumen: "Pon a prueba tus conocimientos con 12 preguntas oficiales de legislación.", categoria: "EXAMEN", id: "ope-22-comun", imagen: "img_ope22comun.jpg", isOPE22: true, fecha: '16/02/2026', link: window.location.origin + window.location.pathname },
-            { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos: Start, Stop y Switch.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
-            { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020).", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
-            { titulo: "Diferenciar síndrome serotoninérgico y neuroléptico maligno", resumen: "Herramienta diagnóstica basada en criterios de Hunter y Levenson.", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname },
-            { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: window.location.origin + window.location.pathname }
-        ];
-
         try {
-            const WORKER_URL = "https://psqaldia-api.ibanez-vizoso.workers.dev/";
-
-            // USAMOS EL WORKER CORRECTAMENTE
             const [res, resC, resPK] = await Promise.all([
-                fetch(`${WORKER_URL}?range=B2:G100`), 
-                fetch(`${WORKER_URL}?range=Data_APS!A2:F30`),
-                fetch(`${WORKER_URL}?range=Data_Farmacocinetica!A2:F100`)
+                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:G100?key=${API_KEY}`),
+                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`),
+                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`)
             ]);
-
             const [data, dataC, dataPK] = await Promise.all([res.json(), resC.json(), resPK.json()]);
-
-            if (data.values) {
-                db = data.values
-                    .filter(row => row[1] && row[1].trim() !== "")
-                    .map(row => ({ 
-                        fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'', 
-                        categoria: (row[5]||'Otros').trim().toUpperCase(), id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
-                    }));
-            }
-
-            if (dataC.values) {
-                window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
-            }
-
+            if (data.values) db = data.values.map(row => ({ fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'', categoria: (row[5]||'Otros').trim().toUpperCase(), id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() }));
+            window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
             if (dataPK.values) {
-                window.dbPK = dataPK.values.map(row => ({ farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' }));
+                window.dbPK = dataPK.values.map(row => ({ 
+                    farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' 
+                }));
             }
-
-        } catch (e) { 
-            console.error("Error cargando Excel, usando herramientas locales:", e); 
-        } finally {
-            // Esto se ejecuta SIEMPRE, haya error de red o no
-            db.push(...herramientasLocales);
+            db.push(
+                { 
+        titulo: "OPE Anestesia 2022 (Específico)", 
+        resumen: "Examen oficial del SERGAS para Anestesiología y Reanimación. 110 preguntas con respuestas explicadas.", 
+        categoria: "EXAMEN", 
+        id: "ope-22-anest", 
+        imagen: "img_ope22anest.jpg", 
+        isOPE22Anest: true, // Gatillo para Anestesia
+        fecha: '18/02/2026', 
+        link: window.location.origin + window.location.pathname 
+    },
+                { 
+        titulo: "OPE Psiquiatría 2022 (Específico)", 
+        resumen: "Examen oficial de la especialidad (SERGAS). Preguntas de psiquiatría con respuestas explicadas.", 
+        categoria: "EXAMEN", 
+        id: "ope-22-esp", 
+        imagen: "img_ope22esp.jpg", // Tu nueva foto
+        isOPE22Esp: true, 
+        fecha: '17/02/2026', 
+        link: window.location.origin + window.location.pathname 
+    },
+                { titulo: "Examen OPE Galicia, parte Común 2022", resumen: "Pon a prueba tus conocimientos con 12 preguntas oficiales de legislación y organización sanitaria.", categoria: "EXAMEN", id: "ope-22-comun", imagen: "img_ope22comun.jpg", isOPE22: true, fecha: '16/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos: Start, Stop y Switch entre fármacos.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley e INTEGRATE.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: window.location.origin + window.location.pathname }
+            );
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-            createFilterButtons(); 
-            renderAll(); 
-            checkSharedResource();
-        }
+            createFilterButtons(); renderAll(); checkSharedResource();
+        } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
     }
+
     function createCard(item) {
-    const isFav = favorites.includes(item.id);
-    
-    // 1. Definimos qué es cada cosa para el texto del botón
-    const isExam = item.isOPE22 || item.isOPE22Esp || item.isOPE22Anest;
-    const isTool = item.isCalc || item.isDiag || item.isAutoimmune || item.isSSS;
-
-    // 2. Elegimos el texto del botón
-    let btnText = "ACCEDER";
-    if (isExam) btnText = "HACER TEST";
-    else if (isTool) btnText = "CALCULAR";
-
-    const card = document.createElement('div'); 
-    card.className = 'card'; 
-    card.id = 'anchor-' + item.id;
-
-    // 3. Mapeo de clics (Aquí es donde se decide qué abrir)
-    card.onclick = () => { 
-        if (item.isOPE22Anest) openExamenAnestUI(); 
-        else if (item.isOPE22Esp) openExamenEspUI(); 
-        else if (item.isOPE22) openExamenUI(); 
-        else if (item.isSSS) openSSSUI();
-        else if (item.isCalc) openCalcUI(); 
-        else if (item.isDiag) openDiagUI(); 
-        else if (item.isAutoimmune) openAutoimmuneUI(); 
-        else openModal(item.id); 
-    };
-
-    const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
-    const shareText = (isExam || isTool) ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
-
-    card.innerHTML = `
-        <button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')">
-            <i class="fa${isFav?'s':'r'} fa-star"></i>
-        </button>
-        <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
-        <div class="card-content">
-            <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-            <div class="tit">${item.titulo}</div>
-            <div class="res">${item.resumen}</div>
+        const isFav = favorites.includes(item.id), isTool = item.isCalc || item.isDiag || item.isAutoimmune;
+        const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
+        card.onclick = () => { 
+    if (item.isOPE22Anest) openExamenAnestUI(); // <-- Llama a Anestesia
+    else if (item.isOPE22Esp) openExamenEspUI(); 
+    else if (item.isOPE22) openExamenUI(); 
+    else if (item.isSSS) openSSSUI();
+    else if (item.isCalc) openCalcUI(); 
+    else if (item.isDiag) openDiagUI(); 
+    else if (item.isAutoimmune) openAutoimmuneUI(); 
+    else openModal(item.id); 
+};
+        const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
+        const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
+        card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
+            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
+            <div class="card-content"><span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+            <div class="tit">${item.titulo}</div><div class="res">${item.resumen}</div>
             <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
-            <div class="card-actions">
-                <button class="btn btn-primary">${btnText}</button>
-                <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()">
-                    <i class="fab fa-whatsapp"></i>
-                </a>
-            </div>
-        </div>`;
-    return card;
-}
+            <div class="card-actions"><button class="btn btn-primary">${isTool ? 'CALCULAR' : 'ACCEDER'}</button>
+            <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a></div></div>`;
+        return card;
+    }
 
     function openCalcUI() { document.getElementById('modal').style.display = 'flex'; if (typeof iniciarInterfazCalculadora === 'function') iniciarInterfazCalculadora(); }
     function openSSSUI() { document.getElementById('modal').style.display = 'flex'; if (typeof iniciarInterfazSSS === 'function') iniciarInterfazSSS(); }
