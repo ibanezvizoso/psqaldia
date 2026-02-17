@@ -196,50 +196,66 @@
     async function loadData() {
         try {
             const WORKER_URL = "https://psqaldia-api.ibanez-vizoso.workers.dev/";
+
+            // Llamadas correctas al Worker (sin SHEET_ID ni API_KEY)
             const [res, resC, resPK] = await Promise.all([
-                fetch(WORKER_URL), // Trae los recursos generales
-                fetch(`${WORKER_URL}?range=Data_APS!A2:F30`), // Trae la calculadora
-                fetch(`${WORKER_URL}?range=Data_Farmacocinetica!A2:F100`) // Trae la farmacocinética
+                fetch(WORKER_URL), 
+                fetch(`${WORKER_URL}?range=Data_APS!A2:F30`),
+                fetch(`${WORKER_URL}?range=Data_Farmacocinetica!A2:F100`)
             ]);
 
             const [data, dataC, dataPK] = await Promise.all([res.json(), resC.json(), resPK.json()]);
-            if (data.values) db = data.values.map(row => ({ fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'', categoria: (row[5]||'Otros').trim().toUpperCase(), id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() }));
-            window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
-            if (dataPK.values) {
-                window.dbPK = dataPK.values.map(row => ({ 
-                    farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' 
+
+            // 1. Recursos del Excel (Añadimos .filter para evitar la tarjeta en blanco)
+            if (data.values) {
+                db = data.values
+                    .filter(row => row[1] && row[1].trim() !== "") // <-- FILTRO: Si no hay título, ignora la fila
+                    .map(row => ({ 
+                        fecha: row[0]||'', 
+                        titulo: row[1]||'', 
+                        resumen: row[2]||'', 
+                        link: row[3]||'', 
+                        imagen: row[4]||'', 
+                        categoria: (row[5]||'Otros').trim().toUpperCase(), 
+                        id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
+                    }));
+            }
+
+            // 2. Datos Calculadora
+            if (dataC.values) {
+                window.dbCalc = dataC.values.map(row => ({ 
+                    farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), 
+                    max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) 
                 }));
             }
+
+            // 3. Datos Farmacocinética
+            if (dataPK.values) {
+                window.dbPK = dataPK.values.map(row => ({ 
+                    farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), 
+                    vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' 
+                }));
+            }
+
+            // 4. Tus herramientas manuales (OPEs y demás)
             db.push(
-                { 
-        titulo: "OPE Anestesia 2022 (Específico)", 
-        resumen: "Examen oficial del SERGAS para Anestesiología y Reanimación. 110 preguntas con respuestas explicadas.", 
-        categoria: "EXAMEN", 
-        id: "ope-22-anest", 
-        imagen: "img_ope22anest.jpg", 
-        isOPE22Anest: true, // Gatillo para Anestesia
-        fecha: '18/02/2026', 
-        link: window.location.origin + window.location.pathname 
-    },
-                { 
-        titulo: "OPE Psiquiatría 2022 (Específico)", 
-        resumen: "Examen oficial de la especialidad (SERGAS). Preguntas de psiquiatría con respuestas explicadas.", 
-        categoria: "EXAMEN", 
-        id: "ope-22-esp", 
-        imagen: "img_ope22esp.jpg", // Tu nueva foto
-        isOPE22Esp: true, 
-        fecha: '17/02/2026', 
-        link: window.location.origin + window.location.pathname 
-    },
-                { titulo: "Examen OPE Galicia, parte Común 2022", resumen: "Pon a prueba tus conocimientos con 12 preguntas oficiales de legislación y organización sanitaria.", categoria: "EXAMEN", id: "ope-22-comun", imagen: "img_ope22comun.jpg", isOPE22: true, fecha: '16/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos: Start, Stop y Switch entre fármacos.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020) para determinar la probabilidad de etiología autoinmune.", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Diferenciar síndrome serotoninérgico y síndrome neuroléptico maligno", resumen: "Herramienta diagnóstica basada en criterios de Hunter (Serotoninérgico) y Levenson (Neuroléptico Maligno).", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname },
-                { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching basadas en Maudsley e INTEGRATE.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: window.location.origin + window.location.pathname }
+                { titulo: "OPE Anestesia 2022 (Específico)", resumen: "Examen oficial del SERGAS para Anestesiología y Reanimación.", categoria: "EXAMEN", id: "ope-22-anest", imagen: "img_ope22anest.jpg", isOPE22Anest: true, fecha: '18/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "OPE Psiquiatría 2022 (Específico)", resumen: "Examen oficial de la especialidad (SERGAS).", categoria: "EXAMEN", id: "ope-22-esp", imagen: "img_ope22esp.jpg", isOPE22Esp: true, fecha: '17/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Examen OPE Galicia, parte Común 2022", resumen: "Pon a prueba tus conocimientos con 12 preguntas oficiales de legislación.", categoria: "EXAMEN", id: "ope-22-comun", imagen: "img_ope22comun.jpg", isOPE22: true, fecha: '16/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Visualizador Farmacocinético SSS", resumen: "Simulador dinámico de niveles plasmáticos.", categoria: "HERRAMIENTAS", id: "tool-sss", imagen: "img_farmacocinetica.jpg", isSSS: true, fecha: '12/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Comprueba los criterios de psicosis autoinmune", resumen: "Criterios diagnósticos (Pollak et al., 2020).", categoria: "HERRAMIENTAS", id: "diag-autoimmune", imagen: "imagenautoinmunes.jpg", isAutoimmune: true, fecha: '09/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Diferenciar síndrome serotoninérgico y neuroléptico maligno", resumen: "Herramienta diagnóstica basada en criterios de Hunter y Levenson.", categoria: "HERRAMIENTAS", id: "diag-ss-snm", imagen: "fundicion.jpg", isDiag: true, fecha: '05/02/2026', link: window.location.origin + window.location.pathname },
+                { titulo: "Calculadora de Antipsicóticos", resumen: "Conversor de dosis equivalente y estrategias de switching.", categoria: "HERRAMIENTAS", id: "calc-aps", imagen: "calc.jpg", isCalc: true, fecha: '01/02/2026', link: window.location.origin + window.location.pathname }
             );
+
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-            createFilterButtons(); renderAll(); checkSharedResource();
-        } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
+            createFilterButtons(); 
+            renderAll(); 
+            checkSharedResource();
+
+        } catch (e) { 
+            console.error("Error cargando base de datos PSQ:", e); 
+        }
     }
 
     function createCard(item) {
