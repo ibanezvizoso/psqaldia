@@ -135,6 +135,7 @@
 <script src="autoinmune.js"></script>
 <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    
     const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
     const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
     let db = [], favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), currentCategory = 'TODOS', lastScrollY = window.scrollY, deferredPrompt;
@@ -203,37 +204,56 @@
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`)
             ]);
             const [data, dataC, dataPK] = await Promise.all([res.json(), resC.json(), resPK.json()]);
-            if (data.values) db = data.values.map(row => ({ 
-    fecha: row[0]||'', 
-    titulo: row[1]||'', 
-    resumen: row[2]||'', 
-    link: row[3]||'', 
-    imagen: row[4]||'', 
-    categoria: (row[5]||'Otros').trim().toUpperCase(),
-    accion: row[6]||'', // <--- Nueva columna
-    id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
-}));
-            window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
+            
+            if (data.values) {
+                db = data.values.map(row => ({ 
+                    fecha: row[0]||'', 
+                    titulo: row[1]||'', 
+                    resumen: row[2]||'', 
+                    link: row[3]||'', 
+                    imagen: row[4]||'', 
+                    categoria: (row[5]||'Otros').trim().toUpperCase(),
+                    accion: row[6]||'',
+                    id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
+                }));
+            }
+
+            if (dataC.values) {
+                window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
+            }
+
             if (dataPK.values) {
                 window.dbPK = dataPK.values.map(row => ({ 
                     farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' 
                 }));
             }
-            
+
+            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
+            createFilterButtons(); 
+            renderAll(); 
+            checkSharedResource();
+        } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
+    }
 
     function createCard(item) {
-        const isFav = favorites.includes(item.id), isTool = item.isCalc || item.isDiag || item.isAutoimmune;
-        const card = document.createElement('div'); card.className = 'card'; card.id = 'anchor-' + item.id;
+        const isFav = favorites.includes(item.id);
+        const isTool = item.accion !== ''; 
+        const card = document.createElement('div'); 
+        card.className = 'card'; 
+        card.id = 'anchor-' + item.id;
+        
         card.onclick = () => { 
-    if (item.accion && typeof window[item.accion] === 'function') {
-        document.getElementById('modal').style.display = 'flex';
-        window[item.accion](); 
-    } else {
-        openModal(item.id); 
-    }
-};
+            if (item.accion && typeof window[item.accion] === 'function') {
+                document.getElementById('modal').style.display = 'flex';
+                window[item.accion](); 
+            } else {
+                openModal(item.id); 
+            }
+        };
+
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
+        
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content"><span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
@@ -253,7 +273,14 @@
     }
 
     function closeModal() { document.getElementById('modal').style.display = 'none'; document.body.style.overflow = 'auto'; }
-    function toggleFavorite(e, id) { e.stopPropagation(); favorites = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id]; localStorage.setItem('psq_favs', JSON.stringify(favorites)); filter(); }
+    
+    function toggleFavorite(e, id) { 
+        e.stopPropagation(); 
+        favorites = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id]; 
+        localStorage.setItem('psq_favs', JSON.stringify(favorites)); 
+        filter(); 
+    }
+
     function filter() {
         const q = document.getElementById('search').value.toLowerCase().trim();
         const filtered = db.filter(i => (i.titulo.toLowerCase().includes(q) || i.resumen.toLowerCase().includes(q)) && (currentCategory === 'TODOS' || i.categoria === currentCategory));
@@ -264,8 +291,12 @@
         const favsApp = document.getElementById('favs-app'), app = document.getElementById('app');
         const favsList = dataToRender.filter(i => favorites.includes(i.id)), othersList = dataToRender.filter(i => !favorites.includes(i.id));
         favsApp.innerHTML = ''; app.innerHTML = '';
-        if (favsList.length > 0 && currentCategory === 'TODOS') { document.getElementById('favs-title').style.display = 'block'; favsList.forEach(i => favsApp.appendChild(createCard(i))); } 
-        else document.getElementById('favs-title').style.display = 'none';
+        if (favsList.length > 0 && currentCategory === 'TODOS') { 
+            document.getElementById('favs-title').style.display = 'block'; 
+            favsList.forEach(i => favsApp.appendChild(createCard(i))); 
+        } else {
+            document.getElementById('favs-title').style.display = 'none';
+        }
         document.getElementById('main-title').style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
         othersList.forEach(i => app.appendChild(createCard(i)));
     }
@@ -284,14 +315,20 @@
         const sharedId = new URLSearchParams(window.location.search).get('id');
         if (sharedId) setTimeout(() => {
             const item = db.find(i => i.id === sharedId);
-            if (item) { if (item.isCalc) openCalcUI(); else if (item.isDiag) openDiagUI(); else if (item.isAutoimmune) openAutoimmuneUI(); else openModal(sharedId); document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); }
+            if (item) { 
+                if (item.accion && typeof window[item.accion] === 'function') {
+                    document.getElementById('modal').style.display = 'flex';
+                    window[item.accion]();
+                } else {
+                    openModal(sharedId);
+                }
+                document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
+            }
         }, 800);
     }
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
     document.getElementById('installBtn').addEventListener('click', () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
+    
     loadData();
-</script>
-</body>
-</html>
