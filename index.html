@@ -127,14 +127,8 @@
         <div id="modalData"></div>
     </div>
 </div>
-<script src="ope22_anest.js"></script>
-<script src="ope22_esp.js"></script>
-<script src="ope22_comun.js"></script>
-<script src="calculadora.js"></script>
-<script src="diagnostico.js"></script>
-<script src="autoinmune.js"></script>
 <script>
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
     
     const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
     const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
@@ -145,7 +139,20 @@
         lastScrollY = window.scrollY, 
         deferredPrompt;
 
-    // --- FUNCIONES DE NAVEGACIÓN Y MENÚ ---
+    // --- CARGA DINÁMICA DE SCRIPTS ---
+    function cargarScript(nombreArchivo) {
+        return new Promise((resolve, reject) => {
+            if (!nombreArchivo || nombreArchivo.trim() === "") return resolve();
+            if (document.querySelector(`script[src="${nombreArchivo}"]`)) return resolve();
+            
+            const s = document.createElement('script');
+            s.src = nombreArchivo;
+            s.onload = resolve;
+            s.onerror = () => reject(new Error(`Error cargando ${nombreArchivo}`));
+            document.head.appendChild(s);
+        });
+    }
+
     function toggleMenu() {
         const menu = document.getElementById('sideMenu'), overlay = document.getElementById('menuOverlay');
         const isOpen = menu.classList.contains('open');
@@ -157,11 +164,11 @@
     async function openAbout() {
         toggleMenu();
         const modalData = document.getElementById('modalData');
-        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando información...</div>';
+        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
         document.getElementById('modal').style.display = 'flex';
         try {
             const response = await fetch('about.html');
-            modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar.</div>';
+            modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error.</div>';
         } catch (e) { modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>'; }
     }
 
@@ -171,13 +178,13 @@
         document.getElementById('modal').style.display = 'flex';
         try {
             const response = await fetch('legal.html');
-            modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error al cargar.</div>';
+            modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error.</div>';
         } catch (e) { modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>'; }
     }
 
     function openSettings() {
         toggleMenu();
-        document.getElementById('modalData').innerHTML = `<div style="padding:2.5rem;"><h2 style="margin-bottom:1.5rem;"><i class="fas fa-cog"></i> Ajustes</h2><button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button></div>`;
+        document.getElementById('modalData').innerHTML = `<div style="padding:2.5rem;"><h2>Ajustes</h2><button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button></div>`;
         document.getElementById('modal').style.display = 'flex';
     }
 
@@ -190,7 +197,6 @@
         lastScrollY = window.scrollY;
     });
 
-    // --- UTILIDADES ---
     function getPasteColor(str) {
         let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
         const h = Math.abs(hash) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -203,11 +209,11 @@
         return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
     }
 
-    // --- CARGA DE DATOS ---
+    // --- CARGA DE DATOS (AJUSTADO A COLUMNA A Y NUEVOS ÍNDICES) ---
     async function loadData() {
         try {
             const [res, resC, resPK] = await Promise.all([
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/B2:I200?key=${API_KEY}`),
+                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A2:I200?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`)
             ]);
@@ -223,19 +229,13 @@
                     categoria: (row[5]||'Otros').trim().toUpperCase(),
                     accion: row[6]||'', 
                     password: row[7]||'',
+                    script: row[8]||'', // Columna I
                     id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
                 }));
             }
 
-            if (dataC.values) {
-                window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
-            }
-
-            if (dataPK.values) {
-                window.dbPK = dataPK.values.map(row => ({ 
-                    farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' 
-                }));
-            }
+            if (dataC.values) window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
+            if (dataPK.values) window.dbPK = dataPK.values.map(row => ({ farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' }));
 
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
             createFilterButtons(); 
@@ -244,64 +244,63 @@
         } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
     }
 
-    // --- RENDERIZADO DE TARJETAS ---
     function createCard(item) {
-    const isFav = favorites.includes(item.id);
-    const card = document.createElement('div'); 
-    card.className = 'card'; 
-    card.id = 'anchor-' + item.id;
-    
-    // --- LÓGICA DE TEXTO Y ICONO ---
-    let textoBoton = "ACCEDER"; 
-    let iconoLock = ""; // Por defecto vacío
-
-    // Si tiene contraseña, ponemos candado y cambiamos texto del botón
-    if (item.password && item.password.trim() !== "") {
-        textoBoton = "DESBLOQUEAR";
-        iconoLock = '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>';
-    } else if (item.accion && item.accion !== '') {
-        if (item.accion.includes('Examen')) textoBoton = "HACER EXAMEN";
-        else if (item.accion.includes('iniciarInterfaz')) textoBoton = "CALCULAR";
-        else textoBoton = "ABRIR";
-    }
-
-    card.onclick = () => {
-    // Si la tarjeta tiene contraseña en el Excel
-    if (item.password && item.password.trim() !== "") {
-        const userPass = prompt("Este contenido está protegido. Introduce la contraseña:");
+        const isFav = favorites.includes(item.id);
+        const card = document.createElement('div'); 
+        card.className = 'card'; 
+        card.id = 'anchor-' + item.id;
         
-        if (userPass !== item.password) {
-            alert("Contraseña incorrecta. Acceso denegado.");
-            return; // Bloqueamos la ejecución
+        let textoBoton = "ACCEDER"; 
+        let iconoLock = ""; 
+
+        if (item.password && item.password.trim() !== "") {
+            textoBoton = "DESBLOQUEAR";
+            iconoLock = '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>';
+        } else if (item.accion && item.accion !== '') {
+            if (item.accion.includes('Examen')) textoBoton = "HACER EXAMEN";
+            else if (item.accion.includes('iniciarInterfaz')) textoBoton = "CALCULAR";
+            else textoBoton = "ABRIR";
         }
-    }
 
-    // Si no tiene contraseña o la puso bien, seguimos normal:
-    if (item.accion && typeof window[item.accion] === 'function') {
-        document.getElementById('modal').style.display = 'flex';
-        document.getElementById('modalData').innerHTML = ""; 
-        window[item.accion](); 
-    } else {
-        openModal(item.id); 
-    }
-};
+        card.onclick = async () => {
+            if (item.password && item.password.trim() !== "") {
+                const userPass = prompt("Contenido protegido. Introduce la contraseña:");
+                if (userPass !== item.password) { alert("Acceso denegado."); return; }
+            }
 
-    const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
-    const isTool = item.accion !== '';
-    const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
-    
-    card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
-        <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
-        <div class="card-content">
-            <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-            <div class="tit">${iconoLock}${item.titulo}</div> <div class="res">${item.resumen}</div>
-            <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
-            <div class="card-actions">
-                <button class="btn btn-primary">${textoBoton}</button> <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
-            </div>
-        </div>`;
-    return card;
-}
+            // Carga el script si existe en el Excel antes de ejecutar la acción
+            if (item.script) {
+                try { await cargarScript(item.script); } 
+                catch (e) { alert("Error al cargar el módulo técnico."); return; }
+            }
+
+            if (item.accion && typeof window[item.accion] === 'function') {
+                document.getElementById('modal').style.display = 'flex';
+                document.getElementById('modalData').innerHTML = ""; 
+                window[item.accion](); 
+            } else {
+                openModal(item.id); 
+            }
+        };
+
+        const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
+        const isTool = item.accion !== '';
+        const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
+        
+        card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
+            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
+            <div class="card-content">
+                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+                <div class="tit">${iconoLock}${item.titulo}</div>
+                <div class="res">${item.resumen}</div>
+                <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
+                <div class="card-actions">
+                    <button class="btn btn-primary">${textoBoton}</button> 
+                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>`;
+        return card;
+    }
 
     function openModal(id) {
         const item = db.find(i => i.id === id); if (!item) return;
@@ -350,38 +349,31 @@
         });
     }
 
-    function checkSharedResource() {
-    const sharedId = new URLSearchParams(window.location.search).get('id');
-    if (sharedId) setTimeout(() => {
-        const item = db.find(i => i.id === sharedId);
-        if (!item) return;
+    async function checkSharedResource() {
+        const sharedId = new URLSearchParams(window.location.search).get('id');
+        if (sharedId) setTimeout(async () => {
+            const item = db.find(i => i.id === sharedId);
+            if (!item) return;
 
-        // Si el recurso compartido tiene contraseña, se solicita antes de abrir
-        if (item.password && item.password.trim() !== "") {
-            const pass = prompt("Este recurso está protegido. Introduce la contraseña:");
-            if (pass !== item.password) {
-                alert("Acceso denegado.");
-                return;
+            if (item.password && item.password.trim() !== "") {
+                const pass = prompt("Recurso protegido. Introduce la contraseña:");
+                if (pass !== item.password) { alert("Acceso denegado."); return; }
             }
-        }
 
-        if (item.accion && typeof window[item.accion] === 'function') {
-            document.getElementById('modal').style.display = 'flex';
-            window[item.accion]();
-        } else {
-            openModal(sharedId);
-        }
-        document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
-    }, 800);
-}
+            if (item.script) await cargarScript(item.script);
 
-    
-    
+            if (item.accion && typeof window[item.accion] === 'function') {
+                document.getElementById('modal').style.display = 'flex';
+                window[item.accion]();
+            } else {
+                openModal(sharedId);
+            }
+            document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
+        }, 800);
+    }
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
     document.getElementById('installBtn').addEventListener('click', () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
     
-    // Lanzamos la carga inicial
     loadData();
-</script>
