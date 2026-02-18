@@ -1,5 +1,9 @@
-// --- 1. ESTILOS ESPECÍFICOS DE LA CALCULADORA ---
-// Los inyectamos dinámicamente para limpiar el index.html
+/**
+ * PSQALDÍA - Calculadora de Equivalencias APS
+ * Módulo independiente v2.0
+ */
+
+// 1. ESTILOS (Mantenemos los tuyos)
 const estilosCalculadora = `
     <style>
         .calc-ui { padding: 2.5rem; }
@@ -13,7 +17,7 @@ const estilosCalculadora = `
     </style>
 `;
 
-// --- 2. MATRIZ DE PROTOCOLOS (Lógica de cambio) ---
+// 2. MATRIZ INTEGRATE (Tu lógica intacta)
 const MATRIZ_INTEGRATE = {
     "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
     "RISPERIDONA-PALIPERIDONA": "Cambio Directo: Stop origen e iniciar dosis equivalente el Día 1.",
@@ -24,16 +28,17 @@ const MATRIZ_INTEGRATE = {
     "ORIGEN-AGONISTA_PARCIAL": "Stop & Start: Suspender origen el Día 1. Iniciar destino el Día 1 (titulando según fármaco)."
 };
 
-// --- 3. FUNCIÓN PRINCIPAL DE ENTRADA ---
-async function iniciarInterfazCalculadora() {
+// 3. FUNCIÓN DE ENTRADA (Ahora colgada de window)
+window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
     
-    // Mostramos estado de carga
-    container.innerHTML = estilosCalculadora + `<div class="calc-loader"><i class="fas fa-circle-notch fa-spin fa-2x"></i><p>Cargando datos de fármacos...</p></div>`;
+    // Mostramos estado de carga inicial
+    container.innerHTML = estilosCalculadora + `<div class="calc-loader"><i class="fas fa-circle-notch fa-spin fa-2x"></i><p>Cargando base de datos de fármacos...</p></div>`;
 
-    // Cargamos datos si no están ya en memoria (Usa las variables globales de index.html)
+    // Cargamos datos si no existen
     if (!window.dbCalc) {
         try {
+            // Nota: SHEET_ID y API_KEY se toman del index.html ya que son globales
             const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F100?key=${API_KEY}`);
             const data = await response.json();
             if (data.values) {
@@ -47,17 +52,16 @@ async function iniciarInterfazCalculadora() {
                 }));
             }
         } catch (e) {
-            container.innerHTML = `<div class="calc-ui">Error al conectar con la base de datos de fármacos.</div>`;
+            container.innerHTML = `<div class="calc-ui">Error crítico: No se pudo conectar con el Excel.</div>`;
             return;
         }
     }
 
-    // Una vez tenemos los datos, renderizamos la UI
-    renderizarCalculadora(container);
-}
+    // Dibujamos la interfaz
+    renderizarUI(container);
+};
 
-// --- 4. RENDERIZADO DE LA INTERFAZ ---
-function renderizarCalculadora(container) {
+function renderizarUI(container) {
     const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
     
     container.innerHTML = estilosCalculadora + `
@@ -73,7 +77,7 @@ function renderizarCalculadora(container) {
             <label>Fármaco Destino</label>
             <select id="f_dest">${options}</select>
             
-            <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
+            <button class="btn btn-primary" style="width:100%;" onclick="window.ejecutarCalculo()">CALCULAR</button>
             
             <div id="res-box" class="res-container">
                 <div id="res-val"></div>
@@ -86,7 +90,7 @@ function renderizarCalculadora(container) {
         </div>`;
 }
 
-// --- 5. LÓGICA DE CÁLCULO ---
+// 4. LÓGICA DE CÁLCULO (También colgada de window)
 window.ejecutarCalculo = function() {
     const fOrigName = document.getElementById('f_orig').value;
     const fDestName = document.getElementById('f_dest').value;
@@ -122,7 +126,7 @@ window.ejecutarCalculo = function() {
             <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} mg</div>
         </div>`;
 
-    // Lógica INTEGRATE mejorada
+    // Lógica de consejos (Tip)
     let tip = "";
     const oName = o.farmaco.toUpperCase(), dName = d.farmaco.toUpperCase(), parClave = `${oName}-${dName}`;
 
