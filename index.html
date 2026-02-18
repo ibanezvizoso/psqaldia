@@ -259,24 +259,31 @@ const data = await res.json();
         }
 
         card.onclick = async () => {
-            if (item.password && item.password.trim() !== "") {
-                const userPass = prompt("Contenido protegido. Introduce la contraseña:");
-                if (userPass !== item.password) { alert("Acceso denegado."); return; }
-            }
+    // 1. Password
+    if (item.password && item.password.trim() !== "") {
+        const userPass = prompt("Contenido protegido. Introduce la contraseña:");
+        if (userPass !== item.password) { alert("Acceso denegado."); return; }
+    }
 
-            if (item.script && item.script !== "" && item.script !== "#") {
-                try { await cargarScript(item.script); } 
-                catch (e) { alert("Error al cargar el módulo técnico."); return; }
-            }
+    // 2. Cargamos el Script y esperamos a que esté listo
+    if (item.script && item.script !== "" && item.script !== "#") {
+        try { 
+            await cargarScript(item.script); 
+        } catch (e) { 
+            alert("Error al cargar el módulo técnico."); 
+            return; 
+        }
+    }
 
-            if (item.accion && typeof window[item.accion] === 'function') {
-                document.getElementById('modal').style.display = 'flex';
-                document.getElementById('modalData').innerHTML = ""; 
-                window[item.accion](); 
-            } else {
-                openModal(item.id); 
-            }
-        };
+    // 3. Ejecutamos la acción (ahora con AWAIT por si la herramienta carga datos)
+    if (item.accion && typeof window[item.accion] === 'function') {
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('modalData').innerHTML = '<div style="padding:2rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x"></i><p>Iniciando herramienta...</p></div>';
+        await window[item.accion](); // <--- Añadimos await aquí
+    } else {
+        openModal(item.id); 
+    }
+};
 
         const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         const isTool = item.accion !== '';
@@ -347,27 +354,27 @@ const data = await res.json();
     }
 
     async function checkSharedResource() {
-        const sharedId = new URLSearchParams(window.location.search).get('id');
-        if (sharedId) setTimeout(async () => {
-            const item = db.find(i => i.id === sharedId);
-            if (!item) return;
+    const sharedId = new URLSearchParams(window.location.search).get('id');
+    if (sharedId) {
+        const item = db.find(i => i.id === sharedId);
+        if (!item) return;
 
+        setTimeout(async () => {
             if (item.password && item.password.trim() !== "") {
                 const pass = prompt("Recurso protegido. Introduce la contraseña:");
-                if (pass !== item.password) { alert("Acceso denegado."); return; }
+                if (pass !== item.password) return;
             }
-
             if (item.script && item.script !== "" && item.script !== "#") await cargarScript(item.script);
-
             if (item.accion && typeof window[item.accion] === 'function') {
                 document.getElementById('modal').style.display = 'flex';
-                window[item.accion]();
+                await window[item.accion]();
             } else {
                 openModal(sharedId);
             }
             document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
         }, 800);
     }
+}
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
