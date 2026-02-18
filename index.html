@@ -229,9 +229,6 @@ const data = await res.json();
                 }));
             }
 
-            if (dataC.values) window.dbCalc = dataC.values.map(row => ({ farmaco: row[0], factor: parseFloat(row[1]), ed95: parseFloat(row[2]), max: parseFloat(row[3]), min: parseFloat(row[4]), umbral: parseFloat(row[5]) }));
-            if (dataPK.values) window.dbPK = dataPK.values.map(row => ({ farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia' }));
-
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
             createFilterButtons(); 
             renderAll(); 
