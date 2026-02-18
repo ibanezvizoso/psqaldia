@@ -128,7 +128,7 @@
     </div>
 </div>
 <script>
-   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
     
     const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
     const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
@@ -142,7 +142,7 @@
     // --- CARGA DINÁMICA DE SCRIPTS ---
     function cargarScript(nombreArchivo) {
         return new Promise((resolve, reject) => {
-            if (!nombreArchivo || nombreArchivo.trim() === "") return resolve();
+            if (!nombreArchivo || nombreArchivo.trim() === "" || nombreArchivo === "#") return resolve();
             if (document.querySelector(`script[src="${nombreArchivo}"]`)) return resolve();
             
             const s = document.createElement('script');
@@ -153,6 +153,7 @@
         });
     }
 
+    // --- FUNCIONES DE NAVEGACIÓN ---
     function toggleMenu() {
         const menu = document.getElementById('sideMenu'), overlay = document.getElementById('menuOverlay');
         const isOpen = menu.classList.contains('open');
@@ -197,6 +198,7 @@
         lastScrollY = window.scrollY;
     });
 
+    // --- UTILIDADES ---
     function getPasteColor(str) {
         let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
         const h = Math.abs(hash) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -209,11 +211,12 @@
         return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
     }
 
-    // --- CARGA DE DATOS (AJUSTADO A COLUMNA A Y NUEVOS ÍNDICES) ---
+    // --- CARGA DE DATOS (IMPORTANTE: Nombre de pestaña 'Hoja 1') ---
     async function loadData() {
         try {
+            const range = encodeURIComponent("'Hoja 1'!A2:I200");
             const [res, resC, resPK] = await Promise.all([
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A2:I200?key=${API_KEY}`),
+                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F30?key=${API_KEY}`),
                 fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`)
             ]);
@@ -221,15 +224,15 @@
             
             if (data.values) {
                 db = data.values.map(row => ({ 
-                    fecha: row[0]||'', 
-                    titulo: row[1]||'', 
-                    resumen: row[2]||'', 
-                    link: row[3]||'', 
-                    imagen: row[4]||'', 
-                    categoria: (row[5]||'Otros').trim().toUpperCase(),
-                    accion: row[6]||'', 
-                    password: row[7]||'',
-                    script: row[8]||'', // Columna I
+                    fecha: row[0]||'',      // A
+                    titulo: row[1]||'',     // B
+                    resumen: row[2]||'',    // C
+                    link: row[3]||'',       // D
+                    imagen: row[4]||'',     // E
+                    categoria: (row[5]||'Otros').trim().toUpperCase(), // F
+                    accion: row[6]||'',     // G
+                    password: row[7]||'',   // H
+                    script: row[8]||'',     // I
                     id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
                 }));
             }
@@ -241,7 +244,10 @@
             createFilterButtons(); 
             renderAll(); 
             checkSharedResource();
-        } catch (e) { console.error("Error cargando base de datos PSQ:", e); }
+        } catch (e) { 
+            console.error("Error cargando base de datos PSQ:", e); 
+            document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos. Comprueba la conexión.</div>';
+        }
     }
 
     function createCard(item) {
@@ -257,8 +263,9 @@
             textoBoton = "DESBLOQUEAR";
             iconoLock = '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>';
         } else if (item.accion && item.accion !== '') {
-            if (item.accion.includes('Examen')) textoBoton = "HACER EXAMEN";
-            else if (item.accion.includes('iniciarInterfaz')) textoBoton = "CALCULAR";
+            const act = item.accion.toLowerCase();
+            if (act.includes('examen')) textoBoton = "HACER EXAMEN";
+            else if (act.includes('interfaz') || act.includes('calc')) textoBoton = "CALCULAR";
             else textoBoton = "ABRIR";
         }
 
@@ -268,8 +275,7 @@
                 if (userPass !== item.password) { alert("Acceso denegado."); return; }
             }
 
-            // Carga el script si existe en el Excel antes de ejecutar la acción
-            if (item.script) {
+            if (item.script && item.script !== "" && item.script !== "#") {
                 try { await cargarScript(item.script); } 
                 catch (e) { alert("Error al cargar el módulo técnico."); return; }
             }
@@ -329,12 +335,14 @@
         const favsApp = document.getElementById('favs-app'), app = document.getElementById('app');
         const favsList = dataToRender.filter(i => favorites.includes(i.id)), othersList = dataToRender.filter(i => !favorites.includes(i.id));
         favsApp.innerHTML = ''; app.innerHTML = '';
+        
         if (favsList.length > 0 && currentCategory === 'TODOS') { 
             document.getElementById('favs-title').style.display = 'block'; 
             favsList.forEach(i => favsApp.appendChild(createCard(i))); 
         } else {
             document.getElementById('favs-title').style.display = 'none';
         }
+        
         document.getElementById('main-title').style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
         othersList.forEach(i => app.appendChild(createCard(i)));
     }
@@ -360,7 +368,7 @@
                 if (pass !== item.password) { alert("Acceso denegado."); return; }
             }
 
-            if (item.script) await cargarScript(item.script);
+            if (item.script && item.script !== "" && item.script !== "#") await cargarScript(item.script);
 
             if (item.accion && typeof window[item.accion] === 'function') {
                 document.getElementById('modal').style.display = 'flex';
@@ -377,3 +385,4 @@
     document.getElementById('installBtn').addEventListener('click', () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
     
     loadData();
+</script>
