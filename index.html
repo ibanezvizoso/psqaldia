@@ -251,16 +251,19 @@
     card.className = 'card'; 
     card.id = 'anchor-' + item.id;
     
-    // --- 1. LÓGICA DE TEXTO DEL BOTÓN ---
-    let textoBoton = "ACCEDER"; // Por defecto
-    if (item.accion && item.accion !== '') {
-        if (item.accion.includes('Examen')) {
-            textoBoton = "HACER EXAMEN";
-        } else if (item.accion.includes('iniciarInterfaz')) {
-            textoBoton = "CALCULAR";
-        } else {
-            textoBoton = "ABRIR";
-        }
+    // --- LÓGICA DE TEXTO Y ICONO ---
+    let textoBoton = "ACCEDER"; 
+    let iconoLock = ""; // Por defecto vacío
+
+    // Si tiene contraseña, ponemos candado y cambiamos texto del botón
+    if (item.password && item.password.trim() !== "") {
+        textoBoton = "DESBLOQUEAR";
+        iconoLock = '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>';
+    } else if (item.accion && item.accion !== '') {
+        if (item.accion.includes('Examen')) textoBoton = "HACER EXAMEN";
+        else if (item.accion.includes('iniciarInterfaz')) textoBoton = "CALCULAR";
+        else textoBoton = "ABRIR";
+    }
     }
 
     card.onclick = () => {
@@ -288,15 +291,16 @@
     const isTool = item.accion !== '';
     const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
     
-    // --- 2. USAR LA VARIABLE EN EL HTML ---
     card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
         <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
-        <div class="card-content"><span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-        <div class="tit">${item.titulo}</div><div class="res">${item.resumen}</div>
-        <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
-        <div class="card-actions">
-            <button class="btn btn-primary">${textoBoton}</button> <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
-        </div></div>`;
+        <div class="card-content">
+            <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+            <div class="tit">${iconoLock}${item.titulo}</div> <div class="res">${item.resumen}</div>
+            <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
+            <div class="card-actions">
+                <button class="btn btn-primary">${textoBoton}</button> <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-wa" onclick="event.stopPropagation()"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>`;
     return card;
 }
 
