@@ -126,8 +126,7 @@
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   // CAMBIA ESTO:
-window.API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
-window.SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
+window.WORKER_URL = 'https://psqaldia-api.ibanez-vizoso.workers.dev';
 
     let db = [], 
         favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), 
@@ -209,36 +208,40 @@ window.SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
 
     // --- CARGA DE DATOS (IMPORTANTE: Nombre de pestaña 'Hoja 1') ---
     async function loadData() {
-        try {
-         const range = encodeURIComponent("'Hoja 1'!A2:I200");
-const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`);
-
-const data = await res.json();
+    try {
+        // Llamamos al Worker pidiendo la Hoja 1
+        const res = await fetch(`${window.WORKER_URL}?sheet=Hoja 1`);
+        const data = await res.json();
             
-            if (data.values) {
-                db = data.values.map(row => ({ 
-                    fecha: row[0]||'',      // A
-                    titulo: row[1]||'',     // B
-                    resumen: row[2]||'',    // C
-                    link: row[3]||'',       // D
-                    imagen: row[4]||'',     // E
-                    categoria: (row[5]||'Otros').trim().toUpperCase(), // F
-                    accion: row[6]||'',     // G
-                    password: row[7]||'',   // H
-                    script: row[8]||'',     // I
-                    id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
-                }));
-            }
-
-            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-            createFilterButtons(); 
-            renderAll(); 
-            checkSharedResource();
-        } catch (e) { 
-            console.error("Error cargando base de datos PSQ:", e); 
-            document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos. Comprueba la conexión.</div>';
+        if (data.error) {
+            console.error("Error del Worker:", data.error);
+            throw new Error(data.error);
         }
+            
+        if (data.values) {
+            db = data.values.map(row => ({ 
+                fecha: row[0]||'',      // A
+                titulo: row[1]||'',     // B
+                resumen: row[2]||'',    // C
+                link: row[3]||'',       // D
+                imagen: row[4]||'',     // E
+                categoria: (row[5]||'Otros').trim().toUpperCase(), // F
+                accion: row[6]||'',     // G
+                password: row[7]||'',   // H
+                script: row[8]||'',     // I
+                id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
+            }));
+        }
+
+        db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
+        createFilterButtons(); 
+        renderAll(); 
+        checkSharedResource();
+    } catch (e) { 
+        console.error("Error cargando base de datos PSQ:", e); 
+        document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos a través del Worker.</div>';
     }
+}
 
     function createCard(item) {
         const isFav = favorites.includes(item.id);
