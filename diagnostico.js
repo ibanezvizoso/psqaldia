@@ -1,23 +1,47 @@
-const SINTOMAS_SSSNM = [
-    { id: 'exp_serot', label: 'Exposición a serotoninérgicos', cat: 'Antecedente' },
-    { id: 'fiebre', label: 'Fiebre', cat: 'Autonómico' },
-    { id: 'rigidez', label: 'Hipertonía / Rigidez', cat: 'Motor' },
-    { id: 'diaforesis', label: 'Diaforesis', cat: 'Autonómico' },
-    { id: 'clonus_esp', label: 'Clonus espontáneo', cat: 'Motor' },
-    { id: 'clonus_ind', label: 'Clonus inducible', cat: 'Motor' },
-    { id: 'clonus_ocu', label: 'Clonus ocular', cat: 'Motor' },
-    { id: 'temblor', label: 'Temblor', cat: 'Motor' },
-    { id: 'hiperreflexia', label: 'Hiperreflexia', cat: 'Motor' },
-    { id: 'agitacion', label: 'Agitación', cat: 'Mental' },
-    { id: 'cpk', label: 'Elevación de CPK', cat: 'Laboratorio' },
-    { id: 'leucocitos', label: 'Leucocitosis', cat: 'Laboratorio' },
-    { id: 'taquicardia', label: 'Taquicardia', cat: 'Autonómico' },
-    { id: 'ta_anormal', label: 'Presión arterial anormal', cat: 'Autonómico' },
-    { id: 'taquipnea', label: 'Taquipnea', cat: 'Autonómico' },
-    { id: 'conciencia', label: 'Alteración de la conciencia', cat: 'Mental' }
-];
+/**
+ * Herramienta de Diagnóstico Diferencial SS vs SNM
+ * PSQALDÍA © 2026
+ */
 
-function openDiagUI() {
+let dbDiag = []; // Se llenará con los datos del Sheets
+
+// --- 1. FUNCIÓN DE APERTURA Y CARGA ---
+async function openDiagUI() {
+    const modalData = document.getElementById('modalData');
+    modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x" style="color:var(--primary);"></i><p style="margin-top:1rem; font-weight:700;">Cargando criterios desde la nube...</p></div>`;
+    document.getElementById('modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    if (dbDiag.length === 0) {
+        try {
+            const pestaña = 'SSSNM';
+            const res = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const data = await res.json();
+
+            if (data.error) throw new Error(data.details || data.error);
+
+            if (data.values) {
+                // Mapeamos las columnas según tu Excel
+                dbDiag = data.values.map(row => ({
+                    id: row[0],                 // ID (exp_serot, fiebre...)
+                    label: row[1],              // Etiqueta
+                    cat: row[2],                // Categoría
+                    esMayor: row[3] === 'TRUE', // Columna Es_Mayor_SNM
+                    esMenor: row[4] === 'TRUE', // Columna Es_Menor_SNM
+                    rutaHunter: row[5]          // Columna Ruta_Hunter
+                }));
+            }
+        } catch (e) {
+            console.error("Error en Diagnóstico:", e);
+            modalData.innerHTML = `<div style="padding:2rem; text-align:center;"><i class="fas fa-exclamation-triangle fa-2x" style="color:#ef4444;"></i><p>Error: ${e.message}</p></div>`;
+            return;
+        }
+    }
+    renderizarUI_Diag();
+}
+
+// --- 2. FUNCIÓN DE RENDERIZADO (Mantiene tu diseño original) ---
+function renderizarUI_Diag() {
     const modalData = document.getElementById('modalData');
     
     let html = `
@@ -44,7 +68,7 @@ function openDiagUI() {
             </div>
 
             <div id="check-list-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 1rem;">
-                ${SINTOMAS_SSSNM.map(s => `
+                ${dbDiag.map(s => `
                     <label style="display: flex; align-items: center; gap: 6px; background: var(--bg); padding: 0.5rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); font-size: 0.75rem; line-height: 1.1;">
                         <input type="checkbox" value="${s.id}" onchange="actualizarDiagnostico()" style="width:14px; height:14px; flex-shrink: 0;">
                         ${s.label}
@@ -59,59 +83,63 @@ function openDiagUI() {
     `;
     
     modalData.innerHTML = html;
-    document.getElementById('modal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
 }
 
+// --- 3. LÓGICA DE CÁLCULO (Mantiene escrupulosamente tus reglas) ---
 function actualizarDiagnostico() {
     const checks = Array.from(document.querySelectorAll('#check-list-container input:checked')).map(c => c.value);
     const alertBox = document.getElementById('diag-alert');
     
-    // --- LÓGICA HUNTER (SS) CORREGIDA ---
-    const hasExp = checks.includes('exp_serot');
-    const r1 = checks.includes('clonus_esp');
-    // Corregido a AND (&&) según criterios estrictos:
-    const r2 = checks.includes('clonus_ind') && checks.includes('agitacion') && checks.includes('diaforesis');
-    const r3 = checks.includes('clonus_ocu') && checks.includes('agitacion') && checks.includes('diaforesis');
-    const r4 = checks.includes('temblor') && checks.includes('hiperreflexia');
-    const r5 = checks.includes('rigidez') && checks.includes('fiebre') && (checks.includes('clonus_ocu') || checks.includes('clonus_ind'));
-    
+    // Obtenemos los objetos completos de los síntomas seleccionados
+    const activos = dbDiag.filter(s => checks.includes(s.id));
+
+    // --- LÓGICA HUNTER (SS) ---
+    const hasExp = activos.some(s => s.rutaHunter === 'EXPOSICION');
+    const r1 = activos.some(s => s.rutaHunter === 'RUTA_1'); // Clonus espontáneo
+    const r2 = activos.some(s => s.rutaHunter === 'RUTA_2') && checks.includes('agitacion') && checks.includes('diaforesis');
+    const r3 = activos.some(s => s.rutaHunter === 'RUTA_3') && checks.includes('agitacion') && checks.includes('diaforesis');
+    const r4 = activos.some(s => s.rutaHunter === 'RUTA_4'); // Temblor + Hiperreflexia (debe estar marcado en Excel)
+    const r5 = activos.some(s => s.rutaHunter === 'RUTA_5') && (checks.includes('clonus_ocu') || checks.includes('clonus_ind'));
+
     const cumpleHunter = hasExp && (r1 || r2 || r3 || r4 || r5);
+    
+    // Progreso SS
     let progresoSS = (hasExp ? 25 : 0) + (checks.length * 4); 
     if (r1 || r2 || r3 || r4 || r5) progresoSS += 35;
-    
     if (cumpleHunter) progresoSS = 100;
-    else progresoSS = Math.min(progresoSS, 95);
 
     // --- LÓGICA LEVENSON (SNM) ---
-    const mayores = ['fiebre', 'rigidez', 'cpk'].filter(id => checks.includes(id));
-    const menores = ['taquicardia', 'ta_anormal', 'taquipnea', 'conciencia', 'diaforesis', 'leucocitos'].filter(id => checks.includes(id));
+    const mayores = activos.filter(s => s.esMayor);
+    const menores = activos.filter(s => s.esMenor);
     
     const cumpleLevenson = (mayores.length === 3) || (mayores.length >= 2 && menores.length >= 4);
-    let progresoSNM = (mayores.length * 25) + (menores.length * 5);
     
+    // Progreso SNM
+    let progresoSNM = (mayores.length * 25) + (menores.length * 5);
     if (cumpleLevenson) progresoSNM = 100;
-    else progresoSNM = Math.min(progresoSNM, 90);
 
     // --- ACTUALIZAR UI ---
-    document.getElementById('bar-ss').style.width = progresoSS + '%';
-    document.getElementById('bar-ss').style.background = progresoSS === 100 ? '#fda4af' : '#bae6fd'; 
+    const barSS = document.getElementById('bar-ss');
+    const barSNM = document.getElementById('bar-snm');
+
+    barSS.style.width = Math.min(progresoSS, 100) + '%';
+    barSS.style.background = progresoSS >= 100 ? '#fda4af' : '#bae6fd'; 
     
-    document.getElementById('bar-snm').style.width = progresoSNM + '%';
-    document.getElementById('bar-snm').style.background = progresoSNM === 100 ? '#fda4af' : '#fef08a';
+    barSNM.style.width = Math.min(progresoSNM, 100) + '%';
+    barSNM.style.background = progresoSNM >= 100 ? '#fda4af' : '#fef08a';
 
     if (cumpleHunter || cumpleLevenson) {
         alertBox.style.display = 'block';
         alertBox.style.background = '#fee2e2';
         alertBox.style.color = '#991b1b';
         alertBox.innerText = cumpleHunter && cumpleLevenson ? "Criterios compatibles con AMBOS cuadros" : 
-                            (cumpleHunter ? "CRITERIOS DE HUNTER CUMPLIDOS" : "CRITERIOS DE LEVENSON CUMPLIDOS");
+                            (cumpleHunter ? "CRITERIOS DE HUNTER CUMPLIDOS (SS)" : "CRITERIOS DE LEVENSON CUMPLIDOS (SNM)");
     } else {
         alertBox.style.display = 'none';
     }
 }
 
-// --- FUNCIÓN DE RESET CORREGIDA ---
+// --- 4. FUNCIÓN DE RESET ---
 function resetDiag() {
     const checkBoxes = document.querySelectorAll('#check-list-container input[type="checkbox"]');
     checkBoxes.forEach(cb => cb.checked = false);
