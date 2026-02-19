@@ -125,8 +125,9 @@
 </div>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-    const API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
-const SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
+  // CAMBIA ESTO:
+window.API_KEY = 'AIzaSyDgMOlwLqa6f01AB4oHDPjjZDXgHLGbFig';
+window.SHEET_ID = '18tWsnm5_hUN6oDA-DpzXMJMgIffcMkOJOyr8ugoLgEY';
 
     let db = [], 
         favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), 
