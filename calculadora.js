@@ -1,20 +1,44 @@
+// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
+
+    // A. INYECCIÓN DE ESTILOS (Para que el diseño sea autónomo)
+    if (!document.getElementById('calc-internal-styles')) {
+        const styleTag = document.createElement('style');
+        styleTag.id = 'calc-internal-styles';
+        styleTag.innerHTML = `
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
+            .calc-ui label { 
+                font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
+                color: var(--text-muted); margin-top: 0.8rem; display: block; 
+            }
+            .calc-ui select, .calc-ui input { 
+                width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
+                background: var(--bg); color: var(--text-main); font-size: 1rem; 
+                font-family: inherit; outline: none; box-sizing: border-box;
+            }
+            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
+            .res-container { 
+                padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; 
+                display: none; border: 1px solid rgba(0,0,0,0.05); 
+            }
+            .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
+        `;
+        document.head.appendChild(styleTag);
+    }
     
+    // 1. CARGA AUTÓNOMA DE DATOS (Solo si no existen)
     if (!window.dbCalc) {
         try {
-            const pestaña = "Data_APS"; // <--- ¿Seguro que en Excel se llama así?
+            const pestaña = "Data_APS"; 
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${window.SHEET_ID}/values/${pestaña}!A2:F100?key=${window.API_KEY}`;
             
-            console.log("URL generada:", url);
-
             const response = await fetch(url);
             const data = await response.json();
 
             if (data.error) {
-                // ESTO NOS DIRÁ EL ERROR REAL DE GOOGLE
                 alert("Error de Google Sheets: " + data.error.message);
-                console.error("Detalle:", data.error);
                 throw new Error(data.error.message);
             }
 
@@ -29,13 +53,11 @@ window.iniciarInterfazCalculadora = async function() {
                 }));
             }
         } catch (e) {
-            // Esto nos dirá si es un error de red o de programación
             alert("Fallo crítico en la carga: " + e.message);
             container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
             return;
         }
     }
-    // ... resto del código ...
 
     // 2. TU CÓDIGO ORIGINAL DE RENDERIZADO
     const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
@@ -69,15 +91,10 @@ window.iniciarInterfazCalculadora = async function() {
 
 // --- TU MATRIZ ORIGINAL ---
 const MATRIZ_INTEGRATE = {
-  // 1. Parejas Específicas
   "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
   "RISPERIDONA-PALIPERIDONA": "Cambio Directo: Stop origen e iniciar dosis equivalente el Día 1.",
-
-  // 2. Destinos Específicos
   "DESTINO-CARIPRAZINA": "Cambio Lento (4 sem): Iniciar 1.5 mg. Mantener origen total 21 días. Reducir origen al 50% día 22. Stop día 29.",
   "DESTINO-BREXPIPRAZOL": "Solapamiento 12d: Día 1: 1 mg, Día 2: 2 mg. Reducir origen al 50% y suspender el Día 12.",
-
-  // 3. Orígenes Específicos
   "ORIGEN-ARIPIPRAZOL": "Elección: A) Stop Día 1 o B) Reducir al 50% el Día 1 y Stop el Día 14.",
   "ORIGEN-QUETIAPINA": "Si dosis > 300 mg: IR: Reducir 25% cada 4 días (Stop día 13). MR: Reducir 50% 1 semana (Stop día 8).",
   "ORIGEN-AGONISTA_PARCIAL": "Stop & Start: Suspender origen el Día 1. Iniciar destino el Día 1 (titulando según fármaco)."
@@ -85,7 +102,6 @@ const MATRIZ_INTEGRATE = {
 
 // --- TU FUNCIÓN DE CÁLCULO ORIGINAL (Globalizada) ---
 window.ejecutarCalculo = function() {
-    // 1. CAPTURA Y VALIDACIÓN
     const fOrigName = document.getElementById('f_orig').value;
     const fDestName = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
@@ -98,12 +114,10 @@ window.ejecutarCalculo = function() {
         return;
     }
 
-    // 2. CÁLCULOS MATEMÁTICOS COMPLETOS
     let Maudsley = (dosisO / o.factor) * d.factor;
     let porcentajeRango = (dosisO / o.max) * 100;
     let dosisRango = (porcentajeRango / 100) * d.max;
     
-    // 3. ESTADOS DE ALERTA Y COLORES
     let bgColor = ""; let textColor = ""; let alertText = "";
 
     if (Maudsley > d.max) {
@@ -120,7 +134,6 @@ window.ejecutarCalculo = function() {
         alertText = "✅ RANGO ESTÁNDAR";
     }
 
-    // 4. PREPARACIÓN DE UI
     const resBox = document.getElementById('res-box');
     const resVal = document.getElementById('res-val');
     const resAlert = document.getElementById('res-alert');
@@ -128,9 +141,8 @@ window.ejecutarCalculo = function() {
 
     resBox.style.display = 'block';
     resBox.style.background = bgColor;
-    if(resAlert) resAlert.innerHTML = ""; // Limpieza de seguridad
+    if(resAlert) resAlert.innerHTML = ""; 
 
-    // 5. RENDERIZADO UX (Incluyendo el porcentaje recuperado)
     resVal.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
             <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
@@ -149,15 +161,13 @@ window.ejecutarCalculo = function() {
         </div>
     `;
 
-   // 6. ESTRATEGIA DE CAMBIO (Lógica INTEGRATE)
     let tip = "";
     const oName = o.farmaco.toUpperCase();
     const dName = d.farmaco.toUpperCase();
     const parClave = `${oName}-${dName}`;
 
-    // A. Lógica de selección de protocolo por niveles
     if (MATRIZ_INTEGRATE[parClave]) {
-        tip = MATRIZ_INTEGRATE[parClave]; // Parejas específicas
+        tip = MATRIZ_INTEGRATE[parClave];
     } else if (dName === "CARIPRAZINA") {
         tip = MATRIZ_INTEGRATE["DESTINO-CARIPRAZINA"];
     } else if (dName === "BREXPIPRAZOL") {
@@ -169,7 +179,6 @@ window.ejecutarCalculo = function() {
     } else if (oName === "QUETIAPINA") {
         tip = MATRIZ_INTEGRATE["ORIGEN-QUETIAPINA"];
     } else {
-        // Regla Umbral Dinámica (Haloperidol, Olanzapina, etc.)
         if (dosisO <= o.umbral) {
             tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
         } else {
@@ -177,7 +186,6 @@ window.ejecutarCalculo = function() {
         }
     }
 
-    // B. NOTA DE TITULACIÓN (Fármacos específicos de destino)
     if (dName === "QUETIAPINA") {
         tip += "<br><br>Iniciar Quetiapina de forma gradual (ej. 25-50mg) y subir hasta la dosis objetivo en 4-7 días.";
     }
