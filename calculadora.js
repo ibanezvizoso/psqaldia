@@ -29,35 +29,34 @@ window.iniciarInterfazCalculadora = async function() {
     }
     
     // 1. CARGA AUTÓNOMA DE DATOS (Solo si no existen)
-    if (!window.dbCalc) {
-        try {
-            const pestaña = "Data_APS"; 
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${window.SHEET_ID}/values/${pestaña}!A2:F100?key=${window.API_KEY}`;
-            
-            const response = await fetch(url);
-            const data = await response.json();
+   // 1. CARGA AUTÓNOMA DE DATOS (Vía Worker)
+if (!window.dbCalc) {
+    try {
+        const pestaña = "Data_APS"; 
+        // IMPORTANTE: window.WORKER_URL debe estar definida en tu index.html
+        const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+        const data = await response.json();
 
-            if (data.error) {
-                alert("Error de Google Sheets: " + data.error.message);
-                throw new Error(data.error.message);
-            }
-
-            if (data.values) {
-                window.dbCalc = data.values.map(row => ({
-                    farmaco: row[0],
-                    factor: parseFloat(row[1]) || 1,
-                    ed95: parseFloat(row[2]) || 0,
-                    max: parseFloat(row[3]) || 0,
-                    min: parseFloat(row[4]) || 0,
-                    umbral: parseFloat(row[5]) || 0
-                }));
-            }
-        } catch (e) {
-            alert("Fallo crítico en la carga: " + e.message);
-            container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
-            return;
+        if (data.error) {
+            throw new Error(data.details || data.error);
         }
+
+        if (data.values) {
+            window.dbCalc = data.values.map(row => ({
+                farmaco: row[0],
+                factor: parseFloat(row[1]) || 1,
+                ed95: parseFloat(row[2]) || 0,
+                max: parseFloat(row[3]) || 0,
+                min: parseFloat(row[4]) || 0,
+                umbral: parseFloat(row[5]) || 0
+            }));
+        }
+    } catch (e) {
+        console.error("Error en la calculadora:", e);
+        container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
+        return;
     }
+}
 
     // 2. TU CÓDIGO ORIGINAL DE RENDERIZADO
     const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
