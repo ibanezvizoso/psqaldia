@@ -7,64 +7,38 @@ let respuestasUsuario = {};
 
 
 async function openExamenUI() {
-
-    // Rango ampliado para que no se corte si añades preguntas
-
-    const RANGO = 'Ope_Comun22!A2:G100'; 
-
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGO}?key=${API_KEY}`;
-
-
+    // Ya no necesitamos el SHEET_ID ni el API_KEY aquí
+    const pestaña = 'Ope_Comun22'; 
+    const url = `${window.WORKER_URL}?sheet=${pestaña}`;
 
     const modalData = document.getElementById('modalData');
-
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando OPE 22...</b></div>`;
-
     document.getElementById('modal').style.display = 'flex';
 
-
-
     try {
-
         const response = await fetch(url);
-
         const data = await response.json();
-
         
+        // Verificamos si el Worker reporta algún error (ej. pestaña mal escrita)
+        if (data.error) throw new Error(data.details || data.error);
+        if (!data.values || data.values.length === 0) throw new Error("No hay datos en la pestaña Ope_Comun22");
 
-        if (!data.values || data.values.length === 0) throw new Error("No hay datos");
-
-
-
-        // Mapeo con protección contra celdas vacías
-
+        // El mapeo se mantiene igual que antes
         preguntasExamen = data.values.map(row => ({
-
-    pregunta: (row[0] || "").trim(), // .trim() elimina espacios y saltos de línea invisibles
-
-    opciones: [
-
-        (row[1] || "").trim(), 
-
-        (row[2] || "").trim(), 
-
-        (row[3] || "").trim(), 
-
-        (row[4] || "").trim()
-
-    ],
-
-    correcta: (row[5] || "").trim().toUpperCase(), 
-
-    explicacion: (row[6] || "No hay explicación disponible.").trim()
-
-}));
-
-
+            pregunta: (row[0] || "").trim(),
+            opciones: [
+                (row[1] || "").trim(), 
+                (row[2] || "").trim(), 
+                (row[3] || "").trim(), 
+                (row[4] || "").trim()
+            ],
+            correcta: (row[5] || "").trim().toUpperCase(), 
+            explicacion: (row[6] || "No hay explicación disponible.").trim()
+        }));
 
         renderizarExamen();
-
     } catch (error) {
+        // ... (el resto del catch se queda igual)
 
         console.error("Error Guardián:", error);
 
