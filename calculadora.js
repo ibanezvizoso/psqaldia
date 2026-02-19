@@ -1,20 +1,20 @@
-// --- CARGA DE DATOS Y FUNCIÓN PRINCIPAL ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
     
-    // 1. CARGA AUTÓNOMA DE DATOS (Solo si no existen)
     if (!window.dbCalc) {
         try {
-            const pestaña = "Data_APS"; // <--- ASEGÚRATE QUE EN EXCEL SE LLAME IGUAL
+            const pestaña = "Data_APS"; // <--- ¿Seguro que en Excel se llama así?
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${window.SHEET_ID}/values/${pestaña}!A2:F100?key=${window.API_KEY}`;
             
-            console.log("Intentando conectar a:", url); // Esto nos dirá si SHEET_ID llega bien
-            
+            console.log("URL generada:", url);
+
             const response = await fetch(url);
             const data = await response.json();
-            
+
             if (data.error) {
-                console.error("Error de Google Sheets:", data.error.message);
+                // ESTO NOS DIRÁ EL ERROR REAL DE GOOGLE
+                alert("Error de Google Sheets: " + data.error.message);
+                console.error("Detalle:", data.error);
                 throw new Error(data.error.message);
             }
 
@@ -29,11 +29,13 @@ window.iniciarInterfazCalculadora = async function() {
                 }));
             }
         } catch (e) {
-            console.error("Fallo detallado:", e);
-            container.innerHTML = `<div style="padding:2.5rem;">Error al conectar con la base de datos de fármacos.</div>`;
+            // Esto nos dirá si es un error de red o de programación
+            alert("Fallo crítico en la carga: " + e.message);
+            container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
             return;
         }
     }
+    // ... resto del código ...
 
     // 2. TU CÓDIGO ORIGINAL DE RENDERIZADO
     const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
