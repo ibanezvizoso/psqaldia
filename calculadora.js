@@ -5,20 +5,32 @@ window.iniciarInterfazCalculadora = async function() {
     // 1. CARGA AUTÓNOMA DE DATOS (Solo si no existen)
     if (!window.dbCalc) {
         try {
-            const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F100?key=${API_KEY}`);
+            const pestaña = "Data_APS"; // <--- ASEGÚRATE QUE EN EXCEL SE LLAME IGUAL
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${window.SHEET_ID}/values/${pestaña}!A2:F100?key=${window.API_KEY}`;
+            
+            console.log("Intentando conectar a:", url); // Esto nos dirá si SHEET_ID llega bien
+            
+            const response = await fetch(url);
             const data = await response.json();
+            
+            if (data.error) {
+                console.error("Error de Google Sheets:", data.error.message);
+                throw new Error(data.error.message);
+            }
+
             if (data.values) {
                 window.dbCalc = data.values.map(row => ({
                     farmaco: row[0],
-                    factor: parseFloat(row[1]),
-                    ed95: parseFloat(row[2]),
-                    max: parseFloat(row[3]),
-                    min: parseFloat(row[4]),
-                    umbral: parseFloat(row[5])
+                    factor: parseFloat(row[1]) || 1,
+                    ed95: parseFloat(row[2]) || 0,
+                    max: parseFloat(row[3]) || 0,
+                    min: parseFloat(row[4]) || 0,
+                    umbral: parseFloat(row[5]) || 0
                 }));
             }
         } catch (e) {
-            container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos de fármacos.</div>`;
+            console.error("Fallo detallado:", e);
+            container.innerHTML = `<div style="padding:2.5rem;">Error al conectar con la base de datos de fármacos.</div>`;
             return;
         }
     }
