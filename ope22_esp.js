@@ -5,8 +5,9 @@ let preguntasVisibles = 20;
 
 async function openExamenEspUI() {
     preguntasVisibles = 20; 
-    const RANGO = 'Ope_Esp22!A2:G150'; 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGO}?key=${API_KEY}`;
+    // Definimos solo la pestaña, el Worker ya se encarga del resto
+    const pestaña = 'Ope_Esp22'; 
+    const url = `${window.WORKER_URL}?sheet=${pestaña}`;
 
     const modalData = document.getElementById('modalData');
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando examen...</b></div>`;
@@ -15,20 +16,33 @@ async function openExamenEspUI() {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        if (!data.values) throw new Error("No hay datos");
+
+        // Control de errores del Worker
+        if (data.error) throw new Error(data.details || data.error);
+        if (!data.values) throw new Error("No se encontraron preguntas en Ope_Esp22");
 
         preguntasExamenEsp = data.values
             .filter(row => row[0] && row[0].trim() !== "")
             .map(row => ({
                 pregunta: (row[0] || "").trim(),
-                opciones: [(row[1]||"").trim(), (row[2]||"").trim(), (row[3]||"").trim(), (row[4]||"").trim()],
+                opciones: [
+                    (row[1] || "").trim(), 
+                    (row[2] || "").trim(), 
+                    (row[3] || "").trim(), 
+                    (row[4] || "").trim()
+                ],
                 correcta: (row[5] || "").trim().toUpperCase(), 
                 explicacion: (row[6] || "No hay explicación disponible.").trim()
             }));
 
         renderizarExamenEsp();
     } catch (error) {
-        modalData.innerHTML = `<div style="padding:2rem; text-align:center;">Error de carga.</div>`;
+        console.error("Error en Ope_Esp:", error);
+        modalData.innerHTML = `<div style="padding:2.5rem; text-align:center; color:var(--text-main);">
+            <i class="fas fa-exclamation-circle fa-2x" style="color:#ef4444; margin-bottom:1rem;"></i><br>
+            Error al cargar el examen.<br>
+            <small style="color:var(--text-muted);">${error.message}</small>
+        </div>`;
     }
 }
 
