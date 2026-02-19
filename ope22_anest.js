@@ -5,17 +5,23 @@ let preguntasVisiblesAnest = 20;
 
 async function openExamenAnestUI() {
     preguntasVisiblesAnest = 20; 
-    const RANGO = 'Ope_Anest22!A2:G150'; 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGO}?key=${API_KEY}`;
+    // Solo necesitamos el nombre de la pestaña, el Worker ya pide el rango A2:Z500
+const pestaña = 'Ope_Anest22'; 
+const url = `${window.WORKER_URL}?sheet=${pestaña}`;
 
-    const modalData = document.getElementById('modalData');
-    modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando Examen de Anestesia...</b></div>`;
-    document.getElementById('modal').style.display = 'flex';
+const modalData = document.getElementById('modalData');
+modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando Examen de Anestesia...</b></div>`;
+document.getElementById('modal').style.display = 'flex';
 
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (!data.values) throw new Error("No hay datos en Ope_Anest22");
+try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // Verificamos si el Worker nos devuelve un error
+    if (data.error) throw new Error(data.details || data.error);
+    if (!data.values) throw new Error("No hay datos en Ope_Anest22");
+    
+    // ... resto del mapeo (se mantiene igual)
 
         preguntasExamenAnest = data.values
             .filter(row => row[0] && row[0].trim() !== "")
