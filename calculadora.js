@@ -5,7 +5,8 @@ window.iniciarInterfazCalculadora = async function() {
     // 1. CARGA AUTÓNOMA DE DATOS (Solo si no existen)
     if (!window.dbCalc) {
         try {
-           const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_APS!A2:F100?key=${API_KEY}`);
+         // Cambia la línea del fetch por esta:
+const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${window.SHEET_ID}/values/Data_APS!A2:F100?key=${window.API_KEY}`);
             const data = await response.json();
             if (data.values) {
                 window.dbCalc = data.values.map(row => ({
