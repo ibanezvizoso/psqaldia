@@ -100,13 +100,31 @@ window.iniciarInterfazSSS = async function() {
 
     if (!window.dbPK) {
         try {
-            const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Data_Farmacocinetica!A2:F100?key=${API_KEY}`);
+            // Usamos el Worker para pedir la pestaña Data_Farmacocinetica
+            const pestaña = 'Data_Farmacocinetica';
+            const res = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
             const data = await res.json();
-            window.dbPK = data.values.map(row => ({
-                farmaco: row[0], t12: parseFloat(row[1]), tmax: parseFloat(row[2]), vd: parseFloat(row[3]), comentario: row[4] || '', familia: row[5] || 'Sin Familia'
-            }));
+
+            // Verificamos errores del Worker
+            if (data.error) throw new Error(data.details || data.error);
+
+            if (data.values) {
+                window.dbPK = data.values.map(row => ({
+                    farmaco: row[0], 
+                    t12: parseFloat(row[1]), 
+                    tmax: parseFloat(row[2]), 
+                    vd: parseFloat(row[3]), 
+                    comentario: row[4] || '', 
+                    familia: row[5] || 'Sin Familia'
+                }));
+            }
         } catch (e) {
-            container.innerHTML = "Error de conexión con Google Sheets.";
+            console.error("Error en Simulador SSS:", e);
+            container.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--text-main);">
+                <i class="fas fa-exclamation-triangle fa-2x" style="color:#ef4444; margin-bottom:1rem;"></i><br>
+                Error de conexión con el motor cinético.<br>
+                <small style="color:var(--text-muted);">${e.message}</small>
+            </div>`;
             return;
         }
     }
