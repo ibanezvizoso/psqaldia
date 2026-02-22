@@ -1,20 +1,19 @@
-const CACHE_NAME = 'psq-v1';
-// Lista de archivos vitales para que la web no se rompa sin red
+const CACHE_NAME = 'psq-v2'; // Cambiamos a v2 para forzar la actualización
 const ASSETS = [
   '/',
-  '/index.html',
-  '/Logo.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+  '/Logo.png'
 ];
 
-// 1. INSTALACIÓN: Guardamos los archivos en la "mochila" del navegador
+// Instalación: No bloqueamos si falla un archivo
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS).catch(err => console.log("Fallo preventivo de caché:", err));
+    })
   );
+  self.skipWaiting();
 });
 
-// 2. ACTIVACIÓN: Limpiamos cachés antiguas si actualizamos la versión
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
@@ -23,16 +22,15 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 3. ESTRATEGIA: Cache First (Si lo tengo guardado, lo doy ya. Si no, lo pido a red)
 self.addEventListener('fetch', event => {
-  // No cacheamos las peticiones al Excel (queremos datos frescos)
-  if (event.request.url.includes('sheet=')) {
-    return event.respondWith(fetch(event.request));
-  }
+  // Ignoramos peticiones que no sean GET (como las de analíticas o POST)
+  if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .catch(() => {
+        // Solo si falla INTERNET por completo, buscamos en la caché
+        return caches.match(event.request);
+      })
   );
 });
