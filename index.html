@@ -229,7 +229,7 @@ window.WORKER_URL = '';
                 accion: row[6]||'',     // G
                 password: row[7]||'',   // H
                 script: row[8]||'',     // I
-                id: (row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
+                id: (row[1]||'item').trim().replace(/\s+/g,'-').toLowerCase() 
             }));
         }
 
@@ -289,9 +289,10 @@ window.WORKER_URL = '';
 };
 
 // Actualizamos el link de WhatsApp para que no use ?id=
+// Dentro de createCard, antes del innerHTML
 const shareUrl = window.location.origin + '/' + item.id;
-        const isTool = item.accion !== '';
-        const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
+const isTool = item.accion !== '';
+const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
@@ -366,30 +367,52 @@ const shareUrl = window.location.origin + '/' + item.id;
     }
 
     async function checkSharedResource() {
-    // Sacamos el ID de la URL (ej: de psqaldia.com/calculadora sacamos "calculadora")
-    const pathId = window.location.pathname.replace(/^\/|\/$/g, '');
+    // 1. Intentamos sacar el ID de la ruta limpia (/calculadora-aps)
+    let sharedId = window.location.pathname.replace(/^\/|\/$/g, '');
     
-    // Si hay un ID y no es la home ni un archivo real
-    if (pathId && pathId !== "" && pathId !== "index.html" && !pathId.includes('.')) {
-        const item = db.find(i => i.id === pathId);
-        if (!item) return;
-
-        setTimeout(async () => {
-            if (item.password && item.password.trim() !== "") {
-                const pass = prompt("Recurso protegido. Introduce la contraseña:");
-                if (pass !== item.password) return;
-            }
-            if (item.script && item.script !== "" && item.script !== "#") await cargarScript(item.script);
-            if (item.accion && typeof window[item.accion] === 'function') {
-                document.getElementById('modal').style.display = 'flex';
-                await window[item.accion]();
-            } else {
-                openModal(item.id);
-            }
-            // Hacemos scroll hasta el recurso para que el usuario se ubique
-            document.getElementById('anchor-' + item.id)?.scrollIntoView({ behavior: 'smooth' }); 
-        }, 500);
+    // 2. Si no hay nada en la ruta, intentamos sacarlo del parámetro antiguo (?id=...)
+    if (!sharedId || sharedId === "" || sharedId === "index.html") {
+        sharedId = new URLSearchParams(window.location.search).get('id');
     }
+    
+    // 3. Si sigue sin haber nada, nos vamos
+    if (!sharedId) return;
+
+    // 4. Limpiamos el ID por si trae el prefijo antiguo "psq-"
+    const cleanId = sharedId.replace('psq-', '');
+
+    // 5. Buscamos el recurso
+    const item = db.find(i => i.id === cleanId);
+    
+    if (!item) {
+        console.warn("Recurso no encontrado en DB:", cleanId);
+        return;
+    }
+
+    // 6. Abrimos con un pelín de retardo para que la web cargue visualmente
+    setTimeout(async () => {
+        // Manejo de contraseña
+        if (item.password && item.password.trim() !== "") {
+            const pass = prompt("Recurso protegido. Introduce la contraseña:");
+            if (pass !== item.password) return;
+        }
+
+        // Carga de scripts
+        if (item.script && item.script !== "" && item.script !== "#") {
+            await cargarScript(item.script);
+        }
+
+        // Apertura del modal o ejecución de acción
+        if (item.accion && typeof window[item.accion] === 'function') {
+            document.getElementById('modal').style.display = 'flex';
+            await window[item.accion]();
+        } else {
+            openModal(item.id);
+        }
+
+        // Scroll suave hasta la tarjeta
+        document.getElementById('anchor-' + item.id)?.scrollIntoView({ behavior: 'smooth' }); 
+    }, 600);
 }
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
