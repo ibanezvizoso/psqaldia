@@ -125,7 +125,15 @@
 </div>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-  // CAMBIA ESTO:
+  
+  // 1. AÑADE LA FUNCIÓN AQUÍ (ARRIBA DEL TODO)
+  function slugify(text) {
+      return text.toString().toLowerCase().trim()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Quita acentos
+          .replace(/[^a-z0-9\s-]/g, '')                   // Quita símbolos (parentesis, comas...)
+          .replace(/\s+/g, '-')                            // Espacios por guiones
+          .replace(/-+/g, '-');                           // Evita guiones dobles
+  }
 window.WORKER_URL = '';
 
     let db = [], 
@@ -229,7 +237,7 @@ window.WORKER_URL = '';
                 accion: row[6]||'',     // G
                 password: row[7]||'',   // H
                 script: row[8]||'',     // I
-                id: (row[1]||'item').trim().replace(/\s+/g,'-').toLowerCase() 
+                id: slugify(row[1] || 'item') 
             }));
         }
 
