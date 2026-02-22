@@ -1,8 +1,8 @@
 {
   "name": "PSQALDÍA",
   "short_name": "PSQALDÍA",
-  "description": "Recursos para Psiquiatría",
-  "start_url": "index.html",
+  "description": "Actualidad y recursos para psiquiatría",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#4338ca",
@@ -10,7 +10,8 @@
     {
       "src": "Logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "Logo.png",
