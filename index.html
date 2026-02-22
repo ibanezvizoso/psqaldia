@@ -229,7 +229,7 @@ window.WORKER_URL = 'https://psqaldia-api.ibanez-vizoso.workers.dev';
                 accion: row[6]||'',     // G
                 password: row[7]||'',   // H
                 script: row[8]||'',     // I
-                id: 'psq-'+(row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
+                id: (row[1]||'item').replace(/\s+/g,'-').toLowerCase() 
             }));
         }
 
@@ -269,27 +269,27 @@ window.WORKER_URL = 'https://psqaldia-api.ibanez-vizoso.workers.dev';
         if (userPass !== item.password) { alert("Acceso denegado."); return; }
     }
 
-    // 2. Cargamos el Script y esperamos a que esté listo
+    // --- NUEVO: CAMBIAR URL EN EL NAVEGADOR ---
+    window.history.pushState({}, '', `/${item.id}`); 
+
+    // 2. Cargamos el Script
     if (item.script && item.script !== "" && item.script !== "#") {
-        try { 
-            await cargarScript(item.script); 
-        } catch (e) { 
-            alert("Error al cargar el módulo técnico."); 
-            return; 
-        }
+        try { await cargarScript(item.script); } 
+        catch (e) { alert("Error al cargar el módulo técnico."); return; }
     }
 
-    // 3. Ejecutamos la acción (ahora con AWAIT por si la herramienta carga datos)
+    // 3. Ejecutamos acción
     if (item.accion && typeof window[item.accion] === 'function') {
         document.getElementById('modal').style.display = 'flex';
-        document.getElementById('modalData').innerHTML = '<div style="padding:2rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x"></i><p>Iniciando herramienta...</p></div>';
-        await window[item.accion](); // <--- Añadimos await aquí
+        document.getElementById('modalData').innerHTML = '<div style="padding:2rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x"></i><p>Iniciando...</p></div>';
+        await window[item.accion](); 
     } else {
         openModal(item.id); 
     }
 };
 
-        const shareUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
+// Actualizamos el link de WhatsApp para que no use ?id=
+const shareUrl = window.location.origin + '/' + item.id;
         const isTool = item.accion !== '';
         const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         
@@ -316,7 +316,15 @@ window.WORKER_URL = 'https://psqaldia-api.ibanez-vizoso.workers.dev';
         document.getElementById('modal').style.display = 'flex';
     }
 
-    function closeModal() { document.getElementById('modal').style.display = 'none'; document.body.style.overflow = 'auto'; }
+    function closeModal() { 
+    document.getElementById('modal').style.display = 'none'; 
+    document.body.style.overflow = 'auto';
+    
+    // Volvemos a la raíz sin recargar la página
+    if (window.location.pathname !== '/') {
+        window.history.pushState({}, '', '/');
+    }
+}
     
     function toggleFavorite(e, id) { 
         e.stopPropagation(); 
@@ -358,9 +366,12 @@ window.WORKER_URL = 'https://psqaldia-api.ibanez-vizoso.workers.dev';
     }
 
     async function checkSharedResource() {
-    const sharedId = new URLSearchParams(window.location.search).get('id');
-    if (sharedId) {
-        const item = db.find(i => i.id === sharedId);
+    // Sacamos el ID de la URL (ej: de psqaldia.com/calculadora sacamos "calculadora")
+    const pathId = window.location.pathname.replace(/^\/|\/$/g, '');
+    
+    // Si hay un ID y no es la home ni un archivo real
+    if (pathId && pathId !== "" && pathId !== "index.html" && !pathId.includes('.')) {
+        const item = db.find(i => i.id === pathId);
         if (!item) return;
 
         setTimeout(async () => {
@@ -373,10 +384,11 @@ window.WORKER_URL = 'https://psqaldia-api.ibanez-vizoso.workers.dev';
                 document.getElementById('modal').style.display = 'flex';
                 await window[item.accion]();
             } else {
-                openModal(sharedId);
+                openModal(item.id);
             }
-            document.getElementById('anchor-' + sharedId)?.scrollIntoView({ behavior: 'smooth' }); 
-        }, 800);
+            // Hacemos scroll hasta el recurso para que el usuario se ubique
+            document.getElementById('anchor-' + item.id)?.scrollIntoView({ behavior: 'smooth' }); 
+        }, 500);
     }
 }
 
