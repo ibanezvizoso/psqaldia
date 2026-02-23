@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psq-v2'; // Cambiamos a v2 para forzar la actualización
+const CACHE_NAME = 'psq-v3'; // Cambiamos a v3 para forzar la actualización
 const ASSETS = [
   '/',
   '/Logo.png'
