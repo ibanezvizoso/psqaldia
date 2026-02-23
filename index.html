@@ -170,7 +170,7 @@
         modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
         document.getElementById('modal').style.display = 'flex';
         try {
-            const response = await fetch('about.html');
+            const response = await fetch('/about.html');
             modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error.</div>';
         } catch (e) { modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>'; }
     }
@@ -180,7 +180,7 @@
         modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
         document.getElementById('modal').style.display = 'flex';
         try {
-            const response = await fetch('legal.html');
+            const response = await fetch('/legal.html');
             modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error.</div>';
         } catch (e) { modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>'; }
     }
