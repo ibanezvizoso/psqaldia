@@ -1,221 +1,185 @@
-// --- CARGA DE DATOS Y FUNCIÓN PRINCIPAL ---
+// --- INTERFAZ CATATONIA (VERSIÓN CLINICAL GRID) ---
 window.iniciarInterfazCatatonia = async function() {
     const container = document.getElementById('modalData');
 
-    // A. ESTILOS REVISADOS (Sin solapamientos y con rejilla real)
-    if (!document.getElementById('cat-internal-styles')) {
-        const styleTag = document.createElement('style');
-        styleTag.id = 'cat-internal-styles';
-        styleTag.innerHTML = `
-            .cat-ui { padding: 1rem; font-family: inherit; position: relative; color: var(--text-main); }
+    // 1. ESTILOS (Maquetación exacta a la imagen y protección de UI)
+    if (!document.getElementById('cat-styles')) {
+        const style = document.createElement('style');
+        style.id = 'cat-styles';
+        style.innerHTML = `
+            .cat-container { padding: 1rem; font-family: 'Segoe UI', system-ui, sans-serif; position: relative; }
+            .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-right: 50px; }
+            .cat-header h2 { margin: 0; font-size: 1.3rem; color: #1e293b; font-weight: 800; }
             
-            /* Cabecera con espacio para la X del modal */
-            .cat-header { 
-                display: flex; align-items: center; justify-content: space-between; 
-                margin-bottom: 1.5rem; padding-right: 40px; 
+            /* Botón Checklist */
+            .btn-chk-mode { 
+                background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; 
+                border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s;
             }
-            .cat-header h2 { margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+            .btn-chk-mode:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-            /* Botón Checklist más estilizado */
-            .btn-toggle-view {
-                background: var(--primary); color: white; border: none;
-                padding: 8px 14px; border-radius: 8px; font-size: 0.7rem;
-                font-weight: 700; cursor: pointer; text-transform: uppercase;
+            /* LA TABLA (Basada en imagen) */
+            .cat-table { 
+                display: grid; grid-template-columns: 90px repeat(3, 1fr); 
+                border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: white;
             }
+            .cell { padding: 8px; border: 0.5px solid #f1f5f9; min-height: 90px; }
+            .h-cell { background: #f8fafc; text-align: center; font-weight: 700; font-size: 0.75rem; color: #64748b; padding: 12px 4px; border-bottom: 2px solid #e2e8f0; }
+            .s-cell { background: #f8fafc; font-weight: 800; font-size: 0.7rem; color: #94a3b8; display: flex; align-items: center; justify-content: center; writing-mode: vertical-lr; transform: rotate(180deg); }
 
-            /* LA CUADRÍCULA (Estilo Imagen) */
-            .cat-grid {
-                display: grid;
-                grid-template-columns: 80px repeat(3, 1fr);
-                border: 1.5px solid var(--border);
-                border-radius: 12px; overflow: hidden;
-                background: var(--bg);
+            /* Síntomas (Badges verdes como en la imagen) */
+            .sym-list { display: flex; flex-direction: column; gap: 4px; }
+            .sym-badge { 
+                background: #f0fdf4; color: #166534; border: 1px solid #dcfce7; padding: 5px 8px; 
+                border-radius: 4px; font-size: 0.78rem; cursor: pointer; text-align: center; transition: 0.2s;
             }
-            .cat-cell { 
-                padding: 12px 8px; border: 0.5px solid var(--border); 
-                min-height: 100px; display: flex; flex-direction: column; gap: 6px;
-            }
-            .cat-header-cell {
-                background: #f8fafc; text-align: center; font-weight: 800;
-                font-size: 0.7rem; text-transform: uppercase; color: #64748b;
-                padding: 12px 5px; border-bottom: 2px solid var(--border);
-            }
-            .cat-side-cell {
-                background: #f8fafc; font-weight: 800; font-size: 0.75rem;
-                color: #dc2626; display: flex; align-items: center; justify-content: center;
-                writing-mode: vertical-lr; transform: rotate(180deg); border-right: 2px solid var(--border);
-            }
+            .sym-badge:hover { border-color: #22c55e; transform: translateY(-1px); }
+            .sym-badge.active { background: #22c55e !important; color: white !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
 
-            /* Los Síntomas (Badges) */
-            .sym-badge {
-                padding: 6px 8px; border-radius: 6px; background: #f0fdf4; 
-                border: 1px solid #dcfce7; font-size: 0.75rem; cursor: pointer;
-                transition: all 0.2s; color: #166534; text-align: center; line-height: 1.2;
+            /* Detalles */
+            .info-box { 
+                margin-top: 1rem; padding: 1rem; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; display: none;
+                animation: slideIn 0.3s ease;
             }
-            .sym-badge:hover { border-color: var(--primary); background: #f0fdf4; transform: scale(1.02); }
-            .sym-badge.active { background: var(--primary) !important; color: white !important; border-color: var(--primary); box-shadow: 0 4px 10px var(--primary-alpha); }
+            @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-            /* Info Card */
-            .info-card { 
-                padding: 1rem; border-radius: 12px; margin-top: 1rem; 
-                display: none; background: var(--bg-alt); border: 1px solid var(--border);
-                animation: fadeIn 0.3s ease;
-            }
-
-            /* Checklist (Grid de 2 columnas para que no sea un pegote) */
-            .checklist-ui { display: none; padding-right: 40px; }
-            .chk-container { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 1rem; }
-            .chk-item {
-                display: flex; align-items: center; gap: 10px; padding: 10px;
-                background: var(--bg-alt); border-radius: 8px; border: 1px solid var(--border);
-                font-size: 0.8rem; cursor: pointer;
-            }
-            .chk-item input { width: 18px; height: 18px; accent-color: var(--primary); }
-            .counter-pill { background: var(--primary); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; }
-
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-            @media (max-width: 600px) { .chk-container { grid-template-columns: 1fr; } .cat-grid { grid-template-columns: 50px 1fr 1fr 1fr; } }
+            /* Checklist */
+            .checklist-view { display: none; padding-right: 50px; }
+            .chk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 1rem; }
+            .chk-card { display: flex; align-items: center; gap: 10px; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; }
+            .chk-card input { width: 18px; height: 18px; accent-color: #22c55e; }
         `;
-        document.head.appendChild(styleTag);
+        document.head.appendChild(style);
     }
 
-    // 1. CARGA Y NORMALIZACIÓN DE DATOS
+    // 2. MAPEO DE SÍNTOMAS (Siguiendo la imagen exactamente)
+    const mapaClinico = {
+        "Observation": {
+            "Increased": ["Agitación / Excitación", "Impulsividad", "Combatividad"],
+            "Abnormal": ["Muecas (Grimacing)", "Estereotipias", "Manierismos", "Posturismo", "Perseveración"],
+            "Decreased": ["Estupor", "Ambitendencia", "Mirada fija (Staring)"]
+        },
+        "Interview": {
+            "Increased": [],
+            "Abnormal": ["Ecolalia", "Ecopraxia", "Verbigeración", "Obediencia automática"],
+            "Decreased": ["Negativismo", "Mutismo", "Retraimiento (Withdrawal)"]
+        },
+        "Physical examination": {
+            "Increased": [],
+            "Abnormal": ["Flexibilidad cérea", "Catalepsia", "Rigidez", "Gegenhalten", "Mitgehen", "Reflejo de prensión (Grasp)"],
+            "Decreased": []
+        }
+    };
+
+    // 3. CARGA DE DATOS DEL EXCEL
     if (!window.dbCatatonia) {
         try {
-            const pestaña = "catatonia"; 
-            const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const response = await fetch(`${window.WORKER_URL}?sheet=catatonia`);
             const data = await response.json();
-            
-            window.dbCatatonia = data.values.map(row => ({
-                sintoma: row[0],
-                // Normalizamos para evitar fallos de matching
-                actividad: String(row[1]).trim().toLowerCase(), 
-                metodo: String(row[2]).trim().toLowerCase(),
-                exploracion: row[3] || "Sin datos de exploración.",
-                definicion: row[4] || "Sin definición."
-            }));
+            // Creamos un diccionario rápido para buscar definiciones por nombre
+            window.dbCatatonia = {};
+            data.values.forEach(row => {
+                window.dbCatatonia[row[0].trim()] = {
+                    def: row[4] || "Sin definición.",
+                    expl: row[3] || "Observación clínica estándar."
+                };
+            });
         } catch (e) {
-            container.innerHTML = `<div style="padding:2rem;">Error cargando datos: ${e.message}</div>`;
-            return;
+            console.error("Error cargando DB:", e);
         }
     }
 
-    // 2. RENDERIZADO
+    // 4. RENDERIZADO
+    const renderCell = (metodo, actividad) => {
+        const sintomas = mapaClinico[metodo][actividad];
+        return `
+            <div class="cell">
+                <div class="sym-list">
+                    ${sintomas.map(s => `<div class="sym-badge" onclick="window.verSintoma('${s}', this)">${s}</div>`).join('')}
+                </div>
+            </div>
+        `;
+    };
+
     container.innerHTML = `
-        <div class="cat-ui" id="cat-explorer">
+        <div id="cat-explorer" class="cat-container">
             <div class="cat-header">
-                <h2>Catatonía (DSM-5 / Bush-Francis)</h2>
-                <button class="btn-toggle-view" onclick="window.switchCatView('checklist')">Crear Checklist</button>
-            </div>
-            
-            <div class="cat-grid">
-                <div class="cat-header-cell" style="background:transparent; border:none;"></div>
-                <div class="cat-header-cell">Observation</div>
-                <div class="cat-header-cell">Interview</div>
-                <div class="cat-header-cell">Physical Exam</div>
-
-                <div class="cat-side-cell" style="color:#ef4444;">Increased</div>
-                ${renderGridCell('aumentada', 'observation')}
-                ${renderGridCell('aumentada', 'interview')}
-                ${renderGridCell('aumentada', 'physical examination')}
-
-                <div class="cat-side-cell" style="color:#f59e0b;">Abnormal</div>
-                ${renderGridCell('anormal', 'observation')}
-                ${renderGridCell('anormal', 'interview')}
-                ${renderGridCell('anormal', 'physical examination')}
-
-                <div class="cat-side-cell" style="color:#3b82f6;">Decreased</div>
-                ${renderGridCell('disminuida', 'observation')}
-                ${renderGridCell('disminuida', 'interview')}
-                ${renderGridCell('disminuida', 'physical examination')}
+                <h2>Catatonía</h2>
+                <button class="btn-chk-mode" onclick="window.viewCat('chk')">CREAR CHECKLIST</button>
             </div>
 
-            <div class="info-card" id="cat-info-box">
-                <div id="info-title" style="font-weight:800; color:var(--primary); margin-bottom:5px; font-size:1rem;"></div>
-                <div id="info-def" style="font-size:0.9rem; line-height:1.4; margin-bottom:10px;"></div>
-                <div style="font-size:0.7rem; text-transform:uppercase; font-weight:800; color:var(--text-muted);">Exploración:</div>
-                <div id="info-expl" style="font-size:0.85rem; font-style:italic;"></div>
+            <div class="cat-table">
+                <div class="h-cell" style="border:none; background:transparent;"></div>
+                <div class="h-cell">Observation</div>
+                <div class="h-cell">Interview</div>
+                <div class="h-cell">Physical exam</div>
+
+                <div class="s-cell">Increased</div>
+                ${renderCell('Observation', 'Increased')}
+                ${renderCell('Interview', 'Increased')}
+                ${renderCell('Physical examination', 'Increased')}
+
+                <div class="s-cell">Abnormal</div>
+                ${renderCell('Observation', 'Abnormal')}
+                ${renderCell('Interview', 'Abnormal')}
+                ${renderCell('Physical examination', 'Abnormal')}
+
+                <div class="s-cell">Decreased</div>
+                ${renderCell('Observation', 'Decreased')}
+                ${renderCell('Interview', 'Decreased')}
+                ${renderCell('Physical examination', 'Decreased')}
+            </div>
+
+            <div id="cat-info" class="info-box">
+                <h4 id="info-name" style="margin:0 0 8px 0; color:#166534;"></h4>
+                <p id="info-def" style="margin:0 0 10px 0; font-size:0.9rem; line-height:1.4; color:#334155;"></p>
+                <div style="font-size:0.7rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Exploración:</div>
+                <div id="info-expl" style="font-size:0.85rem; font-style:italic; color:#475569;"></div>
             </div>
         </div>
 
-        <div class="cat-ui checklist-ui" id="cat-checklist-view">
+        <div id="cat-checklist" class="cat-container checklist-view">
             <div class="cat-header">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="btn" onclick="window.switchCatView('explorer')" style="padding:5px 10px;"><i class="fas fa-arrow-left"></i></button>
-                    <h3 style="margin:0;">Checklist</h3>
-                    <div class="counter-pill"><span id="chk-count">0</span> seleccionados</div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button class="btn-chk-mode" onclick="window.viewCat('exp')"><i class="fas fa-arrow-left"></i></button>
+                    <h2 style="margin:0;">Checklist de Evaluación</h2>
                 </div>
+                <div id="cat-count" style="background:#22c55e; color:white; padding:4px 12px; border-radius:20px; font-weight:800; font-size:0.8rem;">0 Seleccionados</div>
             </div>
-            <div id="chk-list-content"></div>
+            <div class="chk-grid" id="chk-items"></div>
         </div>
     `;
 
-    renderChecklist();
+    // Preparar checklist
+    const allSymptoms = Object.values(mapaClinico).flatMap(m => Object.values(m).flat());
+    document.getElementById('chk-items').innerHTML = allSymptoms.map(s => `
+        <label class="chk-card">
+            <input type="checkbox" onchange="window.updateCatCount()">
+            <span>${s}</span>
+        </label>
+    `).join('');
 };
 
-// --- FUNCIONES DE APOYO ---
+// --- LOGICA DE INTERACCIÓN ---
 
-function renderGridCell(actividad, metodo) {
-    // Buscamos síntomas que coincidan con la fila y la columna
-    const sintomas = window.dbCatatonia.filter(s => s.actividad === actividad && s.metodo.includes(metodo));
-    
-    return `
-        <div class="cat-cell">
-            ${sintomas.map(s => `
-                <div class="sym-badge" onclick="window.showCatSymptom('${s.sintoma.replace(/'/g, "\\'")}', this)">
-                    ${s.sintoma}
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderChecklist() {
-    const listContainer = document.getElementById('chk-list-content');
-    const categorias = [
-        { id: 'aumentada', label: 'Actividad Aumentada' },
-        { id: 'anormal', label: 'Actividad Anormal' },
-        { id: 'disminuida', label: 'Actividad Disminuida' }
-    ];
-
-    listContainer.innerHTML = categorias.map(cat => `
-        <div style="margin-top:1rem;">
-            <div style="font-size:0.65rem; font-weight:900; color:var(--primary); text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:3px; margin-bottom:8px;">${cat.label}</div>
-            <div class="chk-container">
-                ${window.dbCatatonia.filter(s => s.actividad === cat.id).map(s => `
-                    <label class="chk-item">
-                        <input type="checkbox" onchange="window.updateCatCount()">
-                        <span>${s.sintoma}</span>
-                    </label>
-                `).join('')}
-            </div>
-        </div>
-    `).join('');
-}
-
-window.showCatSymptom = function(name, el) {
-    const data = window.dbCatatonia.find(s => s.sintoma === name);
-    if (!data) return;
-
+window.verSintoma = function(name, el) {
     document.querySelectorAll('.sym-badge').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
-
-    const box = document.getElementById('cat-info-box');
-    box.style.display = 'block';
-    document.getElementById('info-title').innerText = name;
-    document.getElementById('info-def').innerText = data.definicion;
-    document.getElementById('info-expl').innerText = data.exploracion;
     
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const info = window.dbCatatonia[name] || { def: "Definición no encontrada en el Excel.", expl: "Consulte manual clínico." };
+    const box = document.getElementById('cat-info');
+    box.style.display = 'block';
+    document.getElementById('info-name').innerText = name;
+    document.getElementById('info-def').innerText = info.def;
+    document.getElementById('info-expl').innerText = info.expl;
 };
 
-window.switchCatView = function(view) {
-    const isCheck = view === 'checklist';
-    document.getElementById('cat-explorer').style.display = isCheck ? 'none' : 'block';
-    document.getElementById('cat-checklist-view').style.display = isCheck ? 'block' : 'none';
+window.viewCat = function(mode) {
+    document.getElementById('cat-explorer').style.display = mode === 'exp' ? 'block' : 'none';
+    document.getElementById('cat-checklist').style.display = mode === 'chk' ? 'block' : 'none';
 };
 
 window.updateCatCount = function() {
-    const n = document.querySelectorAll('#cat-checklist-view input:checked').length;
-    document.getElementById('chk-count').innerText = n;
+    const count = document.querySelectorAll('#cat-checklist input:checked').length;
+    document.getElementById('cat-count').innerText = `${count} Seleccionados`;
 };
