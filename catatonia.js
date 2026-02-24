@@ -20,14 +20,14 @@ window.iniciarInterfazCatatonia = async function() {
             
             /* Botón CREAR CHECKLIST extremadamente estrecho horizontalmente */
             .btn-narrow-hor { 
-                padding: 2px 5px; 
-                font-size: 0.6rem; 
+                padding: 4px 10px; 
+                font-size: 0.8rem; 
                 font-weight: 800; 
                 text-transform: uppercase; 
-                border-radius: 4px; 
+                border-radius: 5px; 
                 width: fit-content; /* Se ajusta solo al texto */
                 line-height: 1;
-                border: 1px solid var(--primary);
+                border: 1.3px solid var(--primary);
                 background: transparent;
                 color: var(--primary);
             }
