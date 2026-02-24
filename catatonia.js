@@ -1,14 +1,13 @@
-// --- INTERFAZ CATATONIA (VERSIÓN FINAL PULIDA) ---
+// --- INTERFAZ CATATONIA (BOTÓN NARROW + COLORES SEMÁFORO) ---
 window.iniciarInterfazCatatonia = async function() {
     const container = document.getElementById('modalData');
 
-    // Mapeo fijo de colores pastel según la lógica solicitada
     const getColorByActividad = (act) => {
         const normalized = String(act).toLowerCase().trim();
         if (normalized.includes('aumentada') || normalized.includes('aumento')) return 'hsla(140, 70%, 92%, 1)'; // Verde
         if (normalized.includes('anormal')) return 'hsla(50, 85%, 90%, 1)'; // Amarillo
         if (normalized.includes('disminuida') || normalized.includes('disminuido')) return 'hsla(0, 80%, 92%, 1)'; // Rojo
-        return 'hsla(210, 20%, 95%, 1)'; // Gris/Azul neutro
+        return 'hsla(210, 20%, 95%, 1)'; 
     };
 
     if (!document.getElementById('cat-styles')) {
@@ -19,8 +18,19 @@ window.iniciarInterfazCatatonia = async function() {
             .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-right: 45px; }
             .cat-header h2 { font-size: 1.1rem; font-weight: 800; margin: 0; }
             
-            /* Botón Checklist más pequeño */
-            .btn-mini { padding: 4px 8px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border-radius: 6px; }
+            /* Botón CREAR CHECKLIST extremadamente estrecho horizontalmente */
+            .btn-narrow-hor { 
+                padding: 2px 5px; 
+                font-size: 0.6rem; 
+                font-weight: 800; 
+                text-transform: uppercase; 
+                border-radius: 4px; 
+                width: fit-content; /* Se ajusta solo al texto */
+                line-height: 1;
+                border: 1px solid var(--primary);
+                background: transparent;
+                color: var(--primary);
+            }
 
             .cat-scroll-container { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); }
             .cat-table { display: grid; grid-template-columns: 80px repeat(3, minmax(140px, 1fr)); min-width: 580px; }
@@ -39,7 +49,15 @@ window.iniciarInterfazCatatonia = async function() {
             .chk-card { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; cursor: pointer; }
             .chk-card input { width: 16px; height: 16px; accent-color: var(--primary); margin: 0; }
 
+            /* Info Box y Maniobra con tono Azul/Púrpura */
             .info-box { margin-top: 1rem; padding: 1rem; border-radius: 12px; background: var(--bg-alt); border: 1px solid var(--border); display: none; }
+            .maneuver-box { 
+                margin-top: 10px; padding: 10px; border-radius: 8px; 
+                background: #f0f4ff; border: 1px solid #dbeafe; 
+                border-left: 4px solid #7c3aed; /* Púrpura para destacar */
+            }
+            .maneuver-header { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: #6d28d9; display: block; margin-bottom: 4px; }
+            
             .counter-pill { background: var(--primary); color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; }
         `;
         document.head.appendChild(style);
@@ -57,7 +75,7 @@ window.iniciarInterfazCatatonia = async function() {
                 window.dbCatatonia[nombre] = {
                     actividad: row[1],
                     def: row[4] || "Sin definición.",
-                    expl: row[3] || "Observación estándar.",
+                    expl: row[3] || "Sin datos de maniobra.",
                     color: getColorByActividad(row[1])
                 };
             });
@@ -88,7 +106,7 @@ window.iniciarInterfazCatatonia = async function() {
         <div id="cat-explorer" class="cat-ui-wrapper">
             <div class="cat-header">
                 <h2>Catatonía</h2>
-                <button class="btn btn-primary btn-mini" onclick="window.viewCat('chk')">Checklist</button>
+                <button class="btn-narrow-hor" onclick="window.viewCat('chk')">Crear checklist</button>
             </div>
 
             <div class="cat-scroll-container">
@@ -117,16 +135,19 @@ window.iniciarInterfazCatatonia = async function() {
 
             <div id="cat-info" class="info-box">
                 <h4 id="info-name" style="margin:0 0 5px 0; font-size:0.95rem; color:var(--primary);"></h4>
-                <p id="info-def" style="font-size:0.85rem; margin-bottom:10px; line-height:1.4;"></p>
-                <small id="info-expl" style="color:var(--text-muted); display:block; border-top:1px solid var(--border); padding-top:8px; font-style:italic;"></small>
+                <p id="info-def" style="font-size:0.85rem; margin-bottom:5px; line-height:1.4;"></p>
+                <div class="maneuver-box">
+                    <span class="maneuver-header">Maniobra de exploración</span>
+                    <div id="info-expl" style="font-size:0.82rem; font-style:italic; color:#1e293b;"></div>
+                </div>
             </div>
         </div>
 
         <div id="cat-checklist" class="cat-ui-wrapper checklist-view">
             <div class="cat-header">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="btn btn-mini" onclick="window.viewCat('exp')">←</button>
-                    <h3>Checklist</h3>
+                    <button class="btn-narrow-hor" style="min-width:30px;" onclick="window.viewCat('exp')">←</button>
+                    <h3 style="margin:0; font-size:1rem;">Checklist</h3>
                 </div>
                 <div id="cat-count" class="counter-pill">0 / ${window.totalSintomas || 0}</div>
             </div>
@@ -149,7 +170,7 @@ window.verSintoma = function(name, el) {
     document.getElementById('cat-info').style.display = 'block';
     document.getElementById('info-name').innerText = name;
     document.getElementById('info-def').innerText = info?.def || "";
-    document.getElementById('info-expl').innerText = "Maniobra: " + (info?.expl || "");
+    document.getElementById('info-expl').innerText = info?.expl || "";
 };
 
 window.viewCat = function(mode) {
