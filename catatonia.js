@@ -1,84 +1,46 @@
-// --- INTERFAZ CATATONIA (VERSIÓN COLOR Y RESPONSIVA) ---
+// --- INTERFAZ CATATONIA (VERSIÓN FINAL PULIDA) ---
 window.iniciarInterfazCatatonia = async function() {
     const container = document.getElementById('modalData');
 
-    // Función para generar colores pastel aleatorios pero consistentes
-    const getPastelColor = (str) => {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const h = Math.abs(hash % 360);
-        return `hsla(${h}, 70%, 90%, 1)`; // Tono variable, saturación media, mucha luminosidad
+    // Mapeo fijo de colores pastel según la lógica solicitada
+    const getColorByActividad = (act) => {
+        const normalized = String(act).toLowerCase().trim();
+        if (normalized.includes('aumentada') || normalized.includes('aumento')) return 'hsla(140, 70%, 92%, 1)'; // Verde
+        if (normalized.includes('anormal')) return 'hsla(50, 85%, 90%, 1)'; // Amarillo
+        if (normalized.includes('disminuida') || normalized.includes('disminuido')) return 'hsla(0, 80%, 92%, 1)'; // Rojo
+        return 'hsla(210, 20%, 95%, 1)'; // Gris/Azul neutro
     };
 
     if (!document.getElementById('cat-styles')) {
         const style = document.createElement('style');
         style.id = 'cat-styles';
         style.innerHTML = `
-            .cat-ui-wrapper { 
-                padding: 1rem; 
-                font-family: inherit; 
-                max-width: 100%; 
-                box-sizing: border-box;
-            }
-            .cat-header { 
-                display: flex; justify-content: space-between; align-items: center; 
-                margin-bottom: 1rem; padding-right: 45px; 
-            }
+            .cat-ui-wrapper { padding: 1rem; font-family: inherit; max-width: 100%; box-sizing: border-box; }
+            .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-right: 45px; }
+            .cat-header h2 { font-size: 1.1rem; font-weight: 800; margin: 0; }
             
-            /* Contenedor con scroll para que no se corte a la derecha */
-            .cat-scroll-container { 
-                width: 100%; 
-                overflow-x: auto; 
-                border-radius: 12px;
-                border: 1px solid var(--border);
-                background: var(--bg);
-            }
+            /* Botón Checklist más pequeño */
+            .btn-mini { padding: 4px 8px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border-radius: 6px; }
 
-            .cat-table { 
-                display: grid; 
-                grid-template-columns: 80px repeat(3, minmax(150px, 1fr)); 
-                min-width: 600px; /* Asegura que la tabla no se colapse */
-            }
+            .cat-scroll-container { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); }
+            .cat-table { display: grid; grid-template-columns: 80px repeat(3, minmax(140px, 1fr)); min-width: 580px; }
+            .cell { padding: 8px; border: 0.5px solid var(--border); min-height: 90px; }
+            .h-cell { background: var(--bg-alt); text-align: center; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; color: var(--primary); padding: 10px; border-bottom: 2px solid var(--border); }
+            .s-cell { background: var(--bg-alt); font-weight: 900; font-size: 0.6rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; writing-mode: vertical-lr; transform: rotate(180deg); }
 
-            .cell { padding: 10px; border: 0.5px solid var(--border); min-height: 100px; }
-            .h-cell { 
-                background: var(--bg-alt); text-align: center; font-weight: 800; 
-                font-size: 0.7rem; text-transform: uppercase; color: var(--primary); 
-                padding: 12px; border-bottom: 2px solid var(--border);
-            }
-            .s-cell { 
-                background: var(--bg-alt); font-weight: 900; font-size: 0.65rem; 
-                color: var(--text-muted); display: flex; align-items: center; 
-                justify-content: center; writing-mode: vertical-lr; transform: rotate(180deg);
-            }
+            .sym-list { display: flex; flex-direction: column; gap: 4px; }
+            .sym-badge { padding: 5px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; text-align: center; transition: 0.2s; border: 1px solid rgba(0,0,0,0.04); color: #1e293b; line-height: 1.1; }
+            .sym-badge:hover { filter: brightness(0.95); transform: scale(1.02); }
+            .sym-badge.active { outline: 2px solid var(--primary); font-weight: 800; }
 
-            .sym-list { display: flex; flex-direction: column; gap: 6px; }
-            .sym-badge { 
-                padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; 
-                cursor: pointer; text-align: center; transition: 0.2s; 
-                border: 1px solid rgba(0,0,0,0.05); font-weight: 500;
-                color: #1e293b;
-            }
-            .sym-badge:hover { filter: brightness(0.9); transform: scale(1.02); }
-            .sym-badge.active { outline: 2px solid var(--primary); outline-offset: 2px; font-weight: 800; }
-
-            /* Checklist */
+            /* Checklist en 2 columnas */
             .checklist-view { display: none; padding-right: 45px; }
-            .chk-grid { 
-                display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-                gap: 10px; margin-top: 1rem; 
-            }
-            .chk-card { 
-                display: flex; align-items: center; gap: 10px; padding: 10px; 
-                border-radius: 10px; border: 1px solid var(--border); font-size: 0.85rem; 
-            }
+            .chk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem; }
+            .chk-card { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; cursor: pointer; }
+            .chk-card input { width: 16px; height: 16px; accent-color: var(--primary); margin: 0; }
 
-            .info-box { 
-                margin-top: 1.5rem; padding: 1.2rem; border-radius: 12px; 
-                background: var(--bg-alt); border: 1px solid var(--border); display: none;
-            }
+            .info-box { margin-top: 1rem; padding: 1rem; border-radius: 12px; background: var(--bg-alt); border: 1px solid var(--border); display: none; }
+            .counter-pill { background: var(--primary); color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; }
         `;
         document.head.appendChild(style);
     }
@@ -88,18 +50,18 @@ window.iniciarInterfazCatatonia = async function() {
         try {
             const response = await fetch(`${window.WORKER_URL}?sheet=catatonia`);
             const data = await response.json();
-            window.rawCatData = data.values; // Guardamos para el checklist
+            window.totalSintomas = data.values.length;
             window.dbCatatonia = {};
             data.values.forEach(row => {
-                window.dbCatatonia[row[0].trim()] = {
-                    metodo: row[2],
+                const nombre = row[0].trim();
+                window.dbCatatonia[nombre] = {
                     actividad: row[1],
                     def: row[4] || "Sin definición.",
                     expl: row[3] || "Observación estándar.",
-                    color: getPastelColor(row[1] || "General") // Color basado en la actividad/categoría
+                    color: getColorByActividad(row[1])
                 };
             });
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error DB:", e); }
     }
 
     const mapaClinico = {
@@ -114,8 +76,8 @@ window.iniciarInterfazCatatonia = async function() {
             <div class="cell">
                 <div class="sym-list">
                     ${sintomas.map(s => {
-                        const color = window.dbCatatonia[s]?.color || '#f1f5f9';
-                        return `<div class="sym-badge" style="background:${color}" onclick="window.verSintoma('${s}', this)">${s}</div>`;
+                        const sData = window.dbCatatonia[s];
+                        return `<div class="sym-badge" style="background:${sData?.color || '#eee'}" onclick="window.verSintoma('${s}', this)">${s}</div>`;
                     }).join('')}
                 </div>
             </div>
@@ -126,7 +88,7 @@ window.iniciarInterfazCatatonia = async function() {
         <div id="cat-explorer" class="cat-ui-wrapper">
             <div class="cat-header">
                 <h2>Catatonía</h2>
-                <button class="btn btn-primary" onclick="window.viewCat('chk')" style="font-size:0.7rem;">CREAR CHECKLIST</button>
+                <button class="btn btn-primary btn-mini" onclick="window.viewCat('chk')">Checklist</button>
             </div>
 
             <div class="cat-scroll-container">
@@ -154,19 +116,19 @@ window.iniciarInterfazCatatonia = async function() {
             </div>
 
             <div id="cat-info" class="info-box">
-                <h4 id="info-name" style="margin:0 0 5px 0;"></h4>
-                <p id="info-def" style="font-size:0.9rem; margin-bottom:10px;"></p>
-                <small id="info-expl" style="color:var(--text-muted); display:block; border-top:1px solid var(--border); padding-top:8px;"></small>
+                <h4 id="info-name" style="margin:0 0 5px 0; font-size:0.95rem; color:var(--primary);"></h4>
+                <p id="info-def" style="font-size:0.85rem; margin-bottom:10px; line-height:1.4;"></p>
+                <small id="info-expl" style="color:var(--text-muted); display:block; border-top:1px solid var(--border); padding-top:8px; font-style:italic;"></small>
             </div>
         </div>
 
         <div id="cat-checklist" class="cat-ui-wrapper checklist-view">
             <div class="cat-header">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="btn" onclick="window.viewCat('exp')">←</button>
-                    <h3>Evaluación</h3>
+                    <button class="btn btn-mini" onclick="window.viewCat('exp')">←</button>
+                    <h3>Checklist</h3>
                 </div>
-                <div id="cat-count" class="badge">0 Seleccionados</div>
+                <div id="cat-count" class="counter-pill">0 / ${window.totalSintomas || 0}</div>
             </div>
             <div class="chk-grid">
                 ${Object.keys(window.dbCatatonia).map(s => `
@@ -197,5 +159,5 @@ window.viewCat = function(mode) {
 
 window.updateCatCount = function() {
     const n = document.querySelectorAll('#cat-checklist input:checked').length;
-    document.getElementById('cat-count').innerText = `${n} Seleccionados`;
+    document.getElementById('cat-count').innerText = `${n} / ${window.totalSintomas}`;
 };
