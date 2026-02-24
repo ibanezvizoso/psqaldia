@@ -71,12 +71,9 @@
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
         .modal-content { background: var(--card); color: var(--text-main); width: 100%; max-width: 600px; border-radius: 2rem; position: relative; overflow-y: auto; max-height: 90vh; }
-        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--card); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 20; }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--card); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 1020; }
         
     </style>
-    <script type="application/ld+json">
-        { "@context": "https://schema.org", "@type": "WebSite", "name": "PSQ al día", "url": "https://psqaldia.com/" }
-    </script>
 </head>
 <body>
 <header id="mainHeader">
@@ -123,17 +120,17 @@
         <div id="modalData"></div>
     </div>
 </div>
+
 <script>
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-  
-  // 1. AÑADE LA FUNCIÓN AQUÍ (ARRIBA DEL TODO)
-  function slugify(text) {
-      return text.toString().toLowerCase().trim()
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Quita acentos
-          .replace(/[^a-z0-9\s-]/g, '')                   // Quita símbolos (parentesis, comas...)
-          .replace(/\s+/g, '-')                            // Espacios por guiones
-          .replace(/-+/g, '-');                           // Evita guiones dobles
-  }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+    function slugify(text) {
+        return text.toString().toLowerCase().trim()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    }
 
     let db = [], 
         favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), 
@@ -146,7 +143,6 @@
         return new Promise((resolve, reject) => {
             if (!nombreArchivo || nombreArchivo.trim() === "" || nombreArchivo === "#") return resolve();
             if (document.querySelector(`script[src="${nombreArchivo}"]`)) return resolve();
-            
             const s = document.createElement('script');
             s.src = nombreArchivo;
             s.onload = resolve;
@@ -213,42 +209,26 @@
         return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
     }
 
-    // --- CARGA DE DATOS (IMPORTANTE: Nombre de pestaña 'Hoja 1') ---
+    // --- CARGA DE DATOS ---
     async function loadData() {
-    try {
-        // Llamamos al Worker pidiendo la Hoja 1
-        const res = await fetch(`/?sheet=${encodeURIComponent('Hoja 1')}&v=${Date.now()}`);
-        const data = await res.json();
-            
-        if (data.error) {
-            console.error("Error del Worker:", data.error);
-            throw new Error(data.error);
+        try {
+            const res = await fetch(`/?sheet=${encodeURIComponent('Hoja 1')}&v=${Date.now()}`);
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            if (data.values) {
+                db = data.values.map(row => ({ 
+                    fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'',
+                    categoria: (row[5]||'Otros').trim().toUpperCase(), accion: row[6]||'', password: row[7]||'',
+                    script: row[8]||'', id: slugify(row[1] || 'item') 
+                }));
+            }
+            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
+            createFilterButtons(); renderAll(); checkSharedResource();
+        } catch (e) { 
+            console.error("Error cargando base de datos:", e); 
+            document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos.</div>';
         }
-            
-        if (data.values) {
-            db = data.values.map(row => ({ 
-                fecha: row[0]||'',      // A
-                titulo: row[1]||'',     // B
-                resumen: row[2]||'',    // C
-                link: row[3]||'',       // D
-                imagen: row[4]||'',     // E
-                categoria: (row[5]||'Otros').trim().toUpperCase(), // F
-                accion: row[6]||'',     // G
-                password: row[7]||'',   // H
-                script: row[8]||'',     // I
-                id: slugify(row[1] || 'item') 
-            }));
-        }
-
-        db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
-        createFilterButtons(); 
-        renderAll(); 
-        checkSharedResource();
-    } catch (e) { 
-        console.error("Error cargando base de datos PSQ:", e); 
-        document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos a través del Worker.</div>';
     }
-}
 
     function createCard(item) {
         const isFav = favorites.includes(item.id);
@@ -257,49 +237,26 @@
         card.id = 'anchor-' + item.id;
         
         let textoBoton = "ACCEDER"; 
-        let iconoLock = ""; 
+        let iconoLock = item.password ? '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>' : ""; 
 
-        if (item.password && item.password.trim() !== "") {
-            textoBoton = "DESBLOQUEAR";
-            iconoLock = '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>';
-        } else if (item.accion && item.accion !== '') {
+        if (item.accion && item.accion !== '') {
             const act = item.accion.toLowerCase();
             if (act.includes('examen')) textoBoton = "HACER EXAMEN";
             else if (act.includes('interfaz') || act.includes('calc')) textoBoton = "CALCULAR";
             else textoBoton = "ABRIR";
         }
 
-        card.onclick = async () => {
-    // 1. Password
-    if (item.password && item.password.trim() !== "") {
-        const userPass = prompt("Contenido protegido. Introduce la contraseña:");
-        if (userPass !== item.password) { alert("Acceso denegado."); return; }
-    }
+        card.onclick = () => {
+            if (item.password && item.password.trim() !== "") {
+                const userPass = prompt("Contenido protegido. Introduce la contraseña:");
+                if (userPass !== item.password) { alert("Acceso denegado."); return; }
+            }
+            window.history.pushState({}, '', `/${item.id}`); 
+            openModal(item.id); 
+        };
 
-    // --- NUEVO: CAMBIAR URL EN EL NAVEGADOR ---
-    window.history.pushState({}, '', `/${item.id}`); 
-
-    // 2. Cargamos el Script
-    if (item.script && item.script !== "" && item.script !== "#") {
-        try { await cargarScript(item.script); } 
-        catch (e) { alert("Error al cargar el módulo técnico."); return; }
-    }
-
-    // 3. Ejecutamos acción
-    if (item.accion && typeof window[item.accion] === 'function') {
-        document.getElementById('modal').style.display = 'flex';
-        document.getElementById('modalData').innerHTML = '<div style="padding:2rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x"></i><p>Iniciando...</p></div>';
-        await window[item.accion](); 
-    } else {
-        openModal(item.id); 
-    }
-};
-
-// Actualizamos el link de WhatsApp para que no use ?id=
-// Dentro de createCard, antes del innerHTML
-const shareUrl = window.location.origin + '/' + item.id;
-const isTool = item.accion !== '';
-const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
+        const shareUrl = window.location.origin + '/' + item.id;
+        const shareText = item.accion !== '' ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}* en PSQALDÍA: ${shareUrl}`;
         
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
@@ -318,113 +275,29 @@ const shareText = isTool ? `🛠️ *Herramienta PSQALDÍA*: ${item.titulo}\n${s
 
     function openModal(id) {
         const item = db.find(i => i.id === id); if (!item) return;
-        document.getElementById('modalData').innerHTML = `<img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
-            <div style="padding:2rem;"><span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span><h2 style="margin:1rem 0;">${item.titulo}</h2><p style="color:var(--text-muted);">${item.resumen}</p>
-            <div class="card-actions"><a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a></div></div>`;
+
+        let actionButton = '';
+        if (item.accion && item.accion !== '') {
+            actionButton = `<button class="btn btn-primary" onclick="ejecutarAccion('${item.id}')">ABRIR HERRAMIENTA</button>`;
+        } else {
+            actionButton = `<a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER AL RECURSO</a>`;
+        }
+
+        document.getElementById('modalData').innerHTML = `
+            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
+            <div style="padding:2rem;">
+                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+                <h2 style="margin:1rem 0;">${item.titulo}</h2>
+                <p style="color:var(--text-muted); line-height:1.6;">${item.resumen}</p>
+                <div class="card-actions" style="margin-top:2rem;">
+                    ${actionButton}
+                </div>
+            </div>`;
         document.getElementById('modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
 
-    function closeModal() { 
-    document.getElementById('modal').style.display = 'none'; 
-    document.body.style.overflow = 'auto';
-    
-    // Volvemos a la raíz sin recargar la página
-    if (window.location.pathname !== '/') {
-        window.history.pushState({}, '', '/');
-    }
-}
-    
-    function toggleFavorite(e, id) { 
-        e.stopPropagation(); 
-        favorites = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id]; 
-        localStorage.setItem('psq_favs', JSON.stringify(favorites)); 
-        filter(); 
-    }
-
-    function filter() {
-        const q = document.getElementById('search').value.toLowerCase().trim();
-        const filtered = db.filter(i => (i.titulo.toLowerCase().includes(q) || i.resumen.toLowerCase().includes(q)) && (currentCategory === 'TODOS' || i.categoria === currentCategory));
-        renderAll(filtered);
-    }
-
-    function renderAll(dataToRender = db) {
-        const favsApp = document.getElementById('favs-app'), app = document.getElementById('app');
-        const favsList = dataToRender.filter(i => favorites.includes(i.id)), othersList = dataToRender.filter(i => !favorites.includes(i.id));
-        favsApp.innerHTML = ''; app.innerHTML = '';
-        
-        if (favsList.length > 0 && currentCategory === 'TODOS') { 
-            document.getElementById('favs-title').style.display = 'block'; 
-            favsList.forEach(i => favsApp.appendChild(createCard(i))); 
-        } else {
-            document.getElementById('favs-title').style.display = 'none';
-        }
-        
-        document.getElementById('main-title').style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
-        othersList.forEach(i => app.appendChild(createCard(i)));
-    }
-
-    function createFilterButtons() {
-        const container = document.getElementById('filterContainer'), cats = ['TODOS', ...new Set(db.map(i => i.categoria))];
-        container.innerHTML = '';
-        cats.forEach(cat => {
-            const btn = document.createElement('button'); btn.className = `f-btn ${cat === currentCategory ? 'active' : ''}`; btn.textContent = cat;
-            btn.onclick = () => { currentCategory = cat; document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); filter(); };
-            container.appendChild(btn);
-        });
-    }
-
-    async function checkSharedResource() {
-    // 1. Intentamos sacar el ID de la ruta limpia (/calculadora-aps)
-    let sharedId = window.location.pathname.replace(/^\/|\/$/g, '');
-    
-    // 2. Si no hay nada en la ruta, intentamos sacarlo del parámetro antiguo (?id=...)
-    if (!sharedId || sharedId === "" || sharedId === "index.html") {
-        sharedId = new URLSearchParams(window.location.search).get('id');
-    }
-    
-    // 3. Si sigue sin haber nada, nos vamos
-    if (!sharedId) return;
-
-    // 4. Limpiamos el ID por si trae el prefijo antiguo "psq-"
-    const cleanId = sharedId.replace('psq-', '');
-
-    // 5. Buscamos el recurso
-    const item = db.find(i => i.id === cleanId);
-    
-    if (!item) {
-        console.warn("Recurso no encontrado en DB:", cleanId);
-        return;
-    }
-
-    // 6. Abrimos con un pelín de retardo para que la web cargue visualmente
-    setTimeout(async () => {
-        // Manejo de contraseña
-        if (item.password && item.password.trim() !== "") {
-            const pass = prompt("Recurso protegido. Introduce la contraseña:");
-            if (pass !== item.password) return;
-        }
-
-        // Carga de scripts
-        if (item.script && item.script !== "" && item.script !== "#") {
-            await cargarScript(item.script);
-        }
-
-        // Apertura del modal o ejecución de acción
-        if (item.accion && typeof window[item.accion] === 'function') {
-            document.getElementById('modal').style.display = 'flex';
-            await window[item.accion]();
-        } else {
-            openModal(item.id);
-        }
-
-        // Scroll suave hasta la tarjeta
-        document.getElementById('anchor-' + item.id)?.scrollIntoView({ behavior: 'smooth' }); 
-    }, 600);
-}
-
-    window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
-    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
-    document.getElementById('installBtn').addEventListener('click', () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
-    
-    loadData();
-</script>
+    async function ejecutarAccion(id) {
+        const item = db.find(i => i.id === id);
+        const modalData = document.getElementById('modalData');
+        modalData.innerHTML = '<div style="padding:5rem; text-align:center;"><i class="fas
