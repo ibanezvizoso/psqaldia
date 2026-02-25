@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equivalencias entre Antipsicóticos | PSQALDÍA</title>
-    <meta name="description" content="Herramienta clínica para comparar antipsicóticos: Maudsley 2025, dosis máxima en ficha técnica y dosis mínima eficaz en primer episodio.">
+    <meta name="description" content="Herramienta clínica para comparar antipsicóticos: Maudsley 2025, dosis máxima en ficha técnica y dosis mínima eficaz en primer episodio psicótico.">
     <link rel="canonical" href="https://psqaldia.com/equivalencias">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,7 +14,6 @@
         :root {
             --primary: #2563eb;
             --primary-light: #eff6ff;
-            --secondary: #6366f1;
             --bg: #fcfdfe;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -33,14 +32,20 @@
             background: var(--bg); 
         }
 
-        /* Navbar */
+        /* Navbar con Logo Real */
         .nav-header {
             padding: 1.5rem 2rem;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
         }
-        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .logo img {
+            height: 45px;
+            width: auto;
+            display: block;
+            transition: transform 0.2s ease;
+        }
+        .logo:hover img { transform: scale(1.02); }
 
         /* Hero */
         .hero {
@@ -49,9 +54,9 @@
             background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%);
         }
         .hero h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; color: var(--text-main); }
-        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: auto; }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 750px; margin: auto; }
 
-        /* Cards Layout */
+        /* Contenido Principal */
         .main-content { padding: 0 1.5rem 4rem 1.5rem; }
         
         .card {
@@ -86,13 +91,13 @@
         /* Botón Principal */
         .cta-box { text-align: center; margin: 3rem 0; }
         .btn-main {
-            padding: 1.25rem 3rem;
+            padding: 1.25rem 3.5rem;
             border-radius: 100px;
             border: none;
             background: var(--text-main);
             color: white;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
@@ -100,19 +105,20 @@
             gap: 12px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
-        .btn-main:hover { transform: scale(1.03); background: var(--primary); }
+        .btn-main:hover { transform: translateY(-3px) scale(1.02); background: var(--primary); }
 
-        /* Links de navegación */
-        .footer-links { text-align: center; margin-top: 4rem; padding: 2rem; border-top: 1px solid var(--border); }
-        .link-back { color: var(--primary); font-weight: 700; text-decoration: none; font-size: 1rem; transition: opacity 0.2s; }
+        /* Footer & Links */
+        .footer-links { text-align: center; margin-top: 4rem; padding: 2.5rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; }
         .link-back:hover { text-decoration: underline; }
 
-        /* Ref section */
-        .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 10px; padding-left: 0; }
+        .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 10px; }
         
         @media (max-width: 600px) {
             .hero h1 { font-size: 2.2rem; }
+            .nav-header { justify-content: center; }
             .card { padding: 1.5rem; }
+            .btn-main { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -120,77 +126,82 @@
 
     <nav class="nav-header">
         <a href="https://psqaldia.com" class="logo">
-            <i class="fas fa-brain"></i> PSQALDÍA
+            <img src="/Logo.png" alt="PSQALDÍA">
         </a>
     </nav>
 
     <header class="hero">
         <h1>Equivalencias APS</h1>
-        <p>Referencia técnica para la rotación de antipsicóticos basada en evidencia de 2025.</p>
+        <p>Herramienta técnica avanzada para el ajuste de dosis y rotación de antipsicóticos basada en las guías más recientes.</p>
     </header>
 
     <main class="main-content">
         <div class="info-grid">
             <div class="card">
-                <h2><i class="fas fa-check-circle"></i> Métricas Incluidas</h2>
+                <h2><i class="fas fa-microscope"></i> Evidencia y Seguridad</h2>
                 <ul class="feature-list">
-                    <li><i class="fas fa-check"></i> <strong>Maudsley 2025:</strong> Equivalencias actualizadas.</li>
-                    <li><i class="fas fa-check"></i> <strong>Ficha Técnica:</strong> Dosis máxima recomendada.</li>
+                    <li><i class="fas fa-check"></i> <strong>Maudsley 2025:</strong> Últimas equivalencias publicadas.</li>
+                    <li><i class="fas fa-check"></i> <strong>Dosis Máxima:</strong> Límites según Ficha Técnica.</li>
                     <li><i class="fas fa-check"></i> <strong>Primer Episodio:</strong> Dosis mínima eficaz recomendada.</li>
-                    <li><i class="fas fa-check"></i> <strong>ED95:</strong> Umbral de respuesta terapéutica óptima.</li>
+                    <li><i class="fas fa-check"></i> <strong>ED95:</strong> Referencia de saturación de receptores D2.</li>
                 </ul>
             </div>
             
             <div class="card">
-                <h2><i class="fas fa-stethoscope"></i> Uso Clínico</h2>
+                <h2><i class="fas fa-user-md"></i> Aplicación Clínica</h2>
                 <ul class="feature-list">
-                    <li><i class="fas fa-sync-alt"></i> <strong>Rotación:</strong> Estrategias de solapamiento (cross-tapering).</li>
-                    <li><i class="fas fa-shield-alt"></i> <strong>Seguridad:</strong> Alertas de infradosificación o exceso.</li>
-                    <li><i class="fas fa-chart-line"></i> <strong>Optimización:</strong> Ajuste basado en el rango terapéutico.</li>
+                    <li><i class="fas fa-sync-alt"></i> <strong>Rotación:</strong> Protocolos de <em>cross-tapering</em> seguros.</li>
+                    <li><i class="fas fa-exclamation-triangle"></i> <strong>Alertas:</strong> Detección de rangos fuera de seguridad.</li>
+                    <li><i class="fas fa-lightbulb"></i> <strong>Optimización:</strong> Ajuste fino en psicosis refractaria o estable.</li>
                 </ul>
             </div>
         </div>
 
         <div class="cta-box">
             <button id="abrirCalculadora" class="btn-main">
-                <i class="fas fa-calculator"></i> INICIAR HERRAMIENTA
+                <i class="fas fa-calculator"></i> INICIAR CALCULADORA
             </button>
         </div>
 
         <div id="modalData"></div>
 
-        <footer class="card" style="margin-top: 4rem;">
-            <h2 style="font-size: 1.1rem;"><i class="fas fa-book-medical"></i> Bibliografía de Referencia</h2>
+        <footer class="card" style="margin-top: 5rem; background: var(--primary-light); border: none;">
+            <h2 style="font-size: 1.1rem;"><i class="fas fa-book-medical"></i> Bibliografía</h2>
             <ul class="ref-section">
-                <li><strong>Taylor D, et al.</strong> <em>The Maudsley Prescribing Guidelines in Psychiatry</em>, 15ª Ed. (2025).</li>
-                <li><strong>Leucht S, et al.</strong> Dose-Response Meta-Analysis. Am J Psychiatry. 2020;177(4):342‑353.</li>
-                <li><strong>McCutcheon R, et al.</strong> INTEGRATE Guidelines. The Lancet Psychiatry. 2025;12(5):384‑394.</li>
+                <li><strong>Taylor D, et al.</strong> <em>The Maudsley Prescribing Guidelines</em>, 15ª Ed. (2025).</li>
+                <li><strong>Leucht S, et al.</strong> Meta-Analysis of Antipsychotic Dose-Response. Am J Psychiatry. 2020.</li>
+                <li><strong>McCutcheon R, et al.</strong> INTEGRATE Guidelines. The Lancet Psychiatry. 2025.</li>
             </ul>
         </footer>
 
         <div class="footer-links">
-            <p style="color: var(--text-muted); margin-bottom: 1rem;">¿Buscas otras calculadoras?</p>
+            <p style="color: var(--text-muted); margin-bottom: 1.2rem;">¿Necesitas otras herramientas clínicas?</p>
             <a href="https://psqaldia.com" class="link-back">
-                Explora el resto de herramientas en PSQALDÍA <i class="fas fa-arrow-right"></i>
+                Busca el resto de herramientas en psqaldia.com <i class="fas fa-arrow-right"></i>
             </a>
         </div>
     </main>
 
     <script>
+        // Configuración de comunicación con el Worker
         window.WORKER_URL = "https://psqaldia.com/"; 
 
         document.getElementById('abrirCalculadora').addEventListener('click', function() {
             if(window.iniciarInterfazCalculadora) {
+                // Ocultamos el contenedor del botón para centrar la atención en la calculadora
                 this.parentElement.style.display = 'none';
                 window.iniciarInterfazCalculadora();
+                
+                // Scroll suave para que la calculadora aparezca en primer plano
                 setTimeout(() => {
                     document.getElementById('modalData').scrollIntoView({behavior:'smooth', block:'start'});
                 }, 100);
             } else {
-                alert("Cargando datos médicos...");
+                alert("Sincronizando con la base de datos de fármacos...");
             }
         });
     </script>
+    
     <script src="/calculadora.js"></script>
 </body>
 </html>
