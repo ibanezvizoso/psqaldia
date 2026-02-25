@@ -4,175 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equivalencias entre Antipsicóticos | PSQALDÍA</title>
-    <meta name="description" content="Herramienta clínica para comparar antipsicóticos según equivalencias Maudsley 2025, dosis máxima, mínima eficaz y ED95.">
+    <meta name="description" content="Herramienta clínica para comparar antipsicóticos: Maudsley 2025, dosis máxima en ficha técnica y dosis mínima eficaz en primer episodio.">
     <link rel="canonical" href="https://psqaldia.com/equivalencias">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
-    <meta property="og:title" content="Equivalencias entre Antipsicóticos | PSQALDÍA">
-    <meta property="og:description" content="Comparativa avanzada de dosis y estrategias de cambio (cross-tapering) basadas en guías internacionales.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://psqaldia.com/equivalencias">
-    
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "Equivalencias entre Antipsicóticos",
-      "description": "Comparar antipsicóticos según equivalencias, dosis máxima, mínima eficaz y ED95.",
-      "url": "https://psqaldia.com/equivalencias"
-    }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --bg: #f8fafc;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --secondary: #6366f1;
+            --bg: #fcfdfe;
             --card-bg: #ffffff;
             --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.25rem;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
-            max-width: 900px; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            max-width: 1000px; 
             margin: auto; 
-            padding: 1.5rem; 
+            padding: 0; 
             line-height: 1.6; 
             color: var(--text-main); 
             background: var(--bg); 
         }
 
-        /* Hero Section */
+        /* Navbar */
+        .nav-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+
+        /* Hero */
         .hero {
             text-align: center;
-            padding: 3rem 1rem;
+            padding: 4rem 1.5rem;
+            background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%);
         }
-        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; color: #1e293b; }
-        .hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: auto; }
+        .hero h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; color: var(--text-main); }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: auto; }
 
         /* Cards Layout */
+        .main-content { padding: 0 1.5rem 4rem 1.5rem; }
+        
         .card {
             background: var(--card-bg);
-            border-radius: 1.5rem;
-            padding: 2rem;
+            border-radius: var(--radius);
+            padding: 2.5rem;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
             margin-bottom: 2rem;
         }
 
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
         }
 
-        h2 { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; margin-top: 0; }
-        h2 i { color: var(--primary); }
+        h2 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-top: 0; margin-bottom: 1.2rem; }
+        h2 i { color: var(--primary); font-size: 1.1rem; }
 
-        ul { padding-left: 1.2rem; margin: 0; }
-        li { margin-bottom: 0.5rem; }
+        .feature-list { list-style: none; padding: 0; margin: 0; }
+        .feature-list li { 
+            margin-bottom: 1rem; 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 12px;
+            font-size: 1.05rem;
+        }
+        .feature-list li i { color: #10b981; margin-top: 5px; font-size: 0.9rem; }
 
-        /* CTA Button */
-        .cta-container { text-align: center; margin: 2rem 0; }
+        /* Botón Principal */
+        .cta-box { text-align: center; margin: 3rem 0; }
         .btn-main {
-            padding: 1.2rem 2.5rem;
-            border-radius: 1.2rem;
+            padding: 1.25rem 3rem;
+            border-radius: 100px;
             border: none;
-            background: var(--primary);
+            background: var(--text-main);
             color: white;
             font-weight: 700;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+            gap: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
-        .btn-main:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-main:hover { transform: scale(1.03); background: var(--primary); }
 
-        /* Contenedor de la Calculadora */
-        #modalData { margin-top: 1rem; }
+        /* Links de navegación */
+        .footer-links { text-align: center; margin-top: 4rem; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 700; text-decoration: none; font-size: 1rem; transition: opacity 0.2s; }
+        .link-back:hover { text-decoration: underline; }
 
-        .ref-section { background: none; border: none; padding: 1rem 0; border-top: 1px solid var(--border); border-radius: 0; }
-        .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 0.8rem; }
+        /* Ref section */
+        .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 10px; padding-left: 0; }
         
         @media (max-width: 600px) {
-            .hero h1 { font-size: 1.8rem; }
-            body { padding: 1rem; }
+            .hero h1 { font-size: 2.2rem; }
+            .card { padding: 1.5rem; }
         }
     </style>
 </head>
 <body>
 
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo">
+            <i class="fas fa-brain"></i> PSQALDÍA
+        </a>
+    </nav>
+
     <header class="hero">
         <h1>Equivalencias APS</h1>
-        <p>Herramienta avanzada de ayuda a la prescripción y rotación de antipsicóticos.</p>
+        <p>Referencia técnica para la rotación de antipsicóticos basada en evidencia de 2025.</p>
     </header>
 
-    <div class="info-grid">
-        <div class="card">
-            <h2><i class="fas fa-info-circle"></i> ¿Qué calcula?</h2>
-            <p>Obtén la dosis equivalente aproximada utilizando múltiples métricas de seguridad:</p>
-            <ul>
-                <li><strong>Maudsley:</strong> Equivalencia clínica estándar.</li>
-                <li><strong>ED95:</strong> Dosis para respuesta máxima probable.</li>
-                <li><strong>Rango:</strong> Posición relativa en dosis mín/máx.</li>
-            </ul>
+    <main class="main-content">
+        <div class="info-grid">
+            <div class="card">
+                <h2><i class="fas fa-check-circle"></i> Métricas Incluidas</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> <strong>Maudsley 2025:</strong> Equivalencias actualizadas.</li>
+                    <li><i class="fas fa-check"></i> <strong>Ficha Técnica:</strong> Dosis máxima recomendada.</li>
+                    <li><i class="fas fa-check"></i> <strong>Primer Episodio:</strong> Dosis mínima eficaz recomendada.</li>
+                    <li><i class="fas fa-check"></i> <strong>ED95:</strong> Umbral de respuesta terapéutica óptima.</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-stethoscope"></i> Uso Clínico</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-sync-alt"></i> <strong>Rotación:</strong> Estrategias de solapamiento (cross-tapering).</li>
+                    <li><i class="fas fa-shield-alt"></i> <strong>Seguridad:</strong> Alertas de infradosificación o exceso.</li>
+                    <li><i class="fas fa-chart-line"></i> <strong>Optimización:</strong> Ajuste basado en el rango terapéutico.</li>
+                </ul>
+            </div>
         </div>
-        <div class="card">
-            <h2><i class="fas fa-Exchange-alt"></i> Aplicación</h2>
-            <ul>
-                <li>Cambio por falta de efectividad.</li>
-                <li>Rotación por efectos adversos (Metabólicos, SEP).</li>
-                <li>Optimización de polifarmacia.</li>
-            </ul>
+
+        <div class="cta-box">
+            <button id="abrirCalculadora" class="btn-main">
+                <i class="fas fa-calculator"></i> INICIAR HERRAMIENTA
+            </button>
         </div>
-    </div>
 
-    <div class="cta-container">
-        <button id="abrirCalculadora" class="btn-main">
-            <i class="fas fa-calculator"></i> INICIAR CALCULADORA APS
-        </button>
-    </div>
+        <div id="modalData"></div>
 
-    <div id="modalData"></div>
+        <footer class="card" style="margin-top: 4rem;">
+            <h2 style="font-size: 1.1rem;"><i class="fas fa-book-medical"></i> Bibliografía de Referencia</h2>
+            <ul class="ref-section">
+                <li><strong>Taylor D, et al.</strong> <em>The Maudsley Prescribing Guidelines in Psychiatry</em>, 15ª Ed. (2025).</li>
+                <li><strong>Leucht S, et al.</strong> Dose-Response Meta-Analysis. Am J Psychiatry. 2020;177(4):342‑353.</li>
+                <li><strong>McCutcheon R, et al.</strong> INTEGRATE Guidelines. The Lancet Psychiatry. 2025;12(5):384‑394.</li>
+            </ul>
+        </footer>
 
-    <footer class="card ref-section">
-        <h2 style="font-size: 1rem;"><i class="fas fa-book-medical"></i> Referencias Clínicas</h2>
-        <ul>
-            <li><strong>Taylor D, Barnes TRE, Young AH.</strong> <em>The Maudsley Prescribing Guidelines in Psychiatry</em>, 15ª edición, 2025.</li>
-            <li><strong>Leucht S, et al.</strong> Dose-Response Meta-Analysis of Antipsychotic Drugs for Acute Schizophrenia. Am J Psychiatry. 2020;177(4):342‑353.</li>
-            <li><strong>McCutcheon R, et al.</strong> INTEGRATE: international guidelines for the algorithmic treatment of schizophrenia. The Lancet Psychiatry. 2025;12(5):384‑394.</li>
-        </ul>
-    </footer>
+        <div class="footer-links">
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">¿Buscas otras calculadoras?</p>
+            <a href="https://psqaldia.com" class="link-back">
+                Explora el resto de herramientas en PSQALDÍA <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </main>
 
     <script>
-        // CONFIGURACIÓN PARA EL SCRIPT EXTERNO
         window.WORKER_URL = "https://psqaldia.com/"; 
 
         document.getElementById('abrirCalculadora').addEventListener('click', function() {
             if(window.iniciarInterfazCalculadora) {
-                // Suavizamos la transición ocultando el botón
                 this.parentElement.style.display = 'none';
                 window.iniciarInterfazCalculadora();
-                
-                // Scroll suave al resultado
                 setTimeout(() => {
                     document.getElementById('modalData').scrollIntoView({behavior:'smooth', block:'start'});
                 }, 100);
             } else {
-                alert("Cargando base de datos médica...");
+                alert("Cargando datos médicos...");
             }
         });
     </script>
-
     <script src="/calculadora.js"></script>
-
 </body>
 </html>
