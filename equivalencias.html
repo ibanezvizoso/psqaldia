@@ -2,80 +2,172 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equivalencias entre Antipsicóticos | PSQALDÍA</title>
-    <meta name="description" content="Comparar antipsicóticos según equivalencias, dosis máxima, mínima eficaz y ED95.">
+    <meta name="description" content="Herramienta clínica para comparar antipsicóticos según equivalencias Maudsley 2025, dosis máxima, mínima eficaz y ED95.">
     <link rel="canonical" href="https://psqaldia.com/equivalencias">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <meta property="og:title" content="Equivalencias entre Antipsicóticos | PSQALDÍA">
+    <meta property="og:description" content="Comparativa avanzada de dosis y estrategias de cambio (cross-tapering) basadas en guías internacionales.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://psqaldia.com/equivalencias">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Equivalencias entre Antipsicóticos",
+      "description": "Comparar antipsicóticos según equivalencias, dosis máxima, mínima eficaz y ED95.",
+      "url": "https://psqaldia.com/equivalencias"
+    }
+    </script>
 
     <style>
-        /* 1. DEFINICIÓN DE VARIABLES (Necesarias para tu calculadora.js) */
         :root {
             --primary: #3b82f6;
-            --bg: #ffffff;
-            --border: #e2e8f0;
-            --text-main: #1e293b;
+            --primary-dark: #2563eb;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
             --text-muted: #64748b;
+            --border: #e2e8f0;
         }
 
-        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 2rem; line-height: 1.6; color: var(--text-main); background: #f9fafb; }
-        h1, h2 { color: #0f172a; }
-        
-        /* Estilo del botón de activación */
-        .btn-trigger { 
-            padding: 1rem 2rem; border-radius: 1rem; border: none; 
-            background: var(--primary); color: white; font-weight: 700; 
-            cursor: pointer; margin-top: 1rem; font-size: 1.1rem;
-            transition: transform 0.2s;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            max-width: 900px; 
+            margin: auto; 
+            padding: 1.5rem; 
+            line-height: 1.6; 
+            color: var(--text-main); 
+            background: var(--bg); 
         }
-        .btn-trigger:hover { transform: scale(1.02); background: #2563eb; }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; color: #1e293b; }
+        .hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: auto; }
+
+        /* Cards Layout */
+        .card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; margin-top: 0; }
+        h2 i { color: var(--primary); }
+
+        ul { padding-left: 1.2rem; margin: 0; }
+        li { margin-bottom: 0.5rem; }
+
+        /* CTA Button */
+        .cta-container { text-align: center; margin: 2rem 0; }
+        .btn-main {
+            padding: 1.2rem 2.5rem;
+            border-radius: 1.2rem;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+        .btn-main:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        /* Contenedor de la Calculadora */
+        #modalData { margin-top: 1rem; }
+
+        .ref-section { background: none; border: none; padding: 1rem 0; border-top: 1px solid var(--border); border-radius: 0; }
+        .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 0.8rem; }
         
-        .ref { font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; }
-        
-        /* Contenedor donde se inyectará la calculadora */
-        #modalData { 
-            margin-top: 2rem; 
-            background: white; 
-            border-radius: 2rem; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            overflow: hidden;
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            body { padding: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Equivalencias entre Antipsicóticos</h1>
-    <p>Comparar antipsicóticos según sus <strong>equivalencias</strong>, poniendo en contexto las dosis con la <strong>dosis máxima</strong>, <strong>dosis mínima eficaz</strong> y <strong>ED95</strong>.</p>
-    
-    <h2>¿Cuándo usarla?</h2>
-    <ul>
-        <li>Cambio de antipsicótico por efectos adversos o falta de efectividad.</li>
-        <li>Ajuste de dosis según guías Maudsley 2025.</li>
-    </ul>
+    <header class="hero">
+        <h1>Equivalencias APS</h1>
+        <p>Herramienta avanzada de ayuda a la prescripción y rotación de antipsicóticos.</p>
+    </header>
 
-    <button id="abrirCalculadora" class="btn-trigger">
-        <i class="fas fa-calculator"></i> Abrir Calculadora APS
-    </button>
+    <div class="info-grid">
+        <div class="card">
+            <h2><i class="fas fa-info-circle"></i> ¿Qué calcula?</h2>
+            <p>Obtén la dosis equivalente aproximada utilizando múltiples métricas de seguridad:</p>
+            <ul>
+                <li><strong>Maudsley:</strong> Equivalencia clínica estándar.</li>
+                <li><strong>ED95:</strong> Dosis para respuesta máxima probable.</li>
+                <li><strong>Rango:</strong> Posición relativa en dosis mín/máx.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h2><i class="fas fa-Exchange-alt"></i> Aplicación</h2>
+            <ul>
+                <li>Cambio por falta de efectividad.</li>
+                <li>Rotación por efectos adversos (Metabólicos, SEP).</li>
+                <li>Optimización de polifarmacia.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="cta-container">
+        <button id="abrirCalculadora" class="btn-main">
+            <i class="fas fa-calculator"></i> INICIAR CALCULADORA APS
+        </button>
+    </div>
 
     <div id="modalData"></div>
 
-    <h2>Referencias clínicas</h2>
-    <ul class="ref">
-        <li>Taylor D, Barnes TRE, Young AH. <em>The Maudsley Prescribing Guidelines in Psychiatry</em>, 15ª edición, 2025.</li>
-        <li>Leucht S, et al. Am J Psychiatry. 2020;177(4):342‑353.</li>
-        <li>McCutcheon R, et al. The Lancet Psychiatry. 2025;12(5):384‑394.</li>
-    </ul>
+    <footer class="card ref-section">
+        <h2 style="font-size: 1rem;"><i class="fas fa-book-medical"></i> Referencias Clínicas</h2>
+        <ul>
+            <li><strong>Taylor D, Barnes TRE, Young AH.</strong> <em>The Maudsley Prescribing Guidelines in Psychiatry</em>, 15ª edición, 2025.</li>
+            <li><strong>Leucht S, et al.</strong> Dose-Response Meta-Analysis of Antipsychotic Drugs for Acute Schizophrenia. Am J Psychiatry. 2020;177(4):342‑353.</li>
+            <li><strong>McCutcheon R, et al.</strong> INTEGRATE: international guidelines for the algorithmic treatment of schizophrenia. The Lancet Psychiatry. 2025;12(5):384‑394.</li>
+        </ul>
+    </footer>
 
     <script>
-        // 2. DEFINIR URL DEL WORKER (Vital para que el fetch de calculadora.js no de error)
+        // CONFIGURACIÓN PARA EL SCRIPT EXTERNO
         window.WORKER_URL = "https://psqaldia.com/"; 
 
         document.getElementById('abrirCalculadora').addEventListener('click', function() {
             if(window.iniciarInterfazCalculadora) {
-                this.style.display = 'none'; // Ocultamos el botón al abrir
+                // Suavizamos la transición ocultando el botón
+                this.parentElement.style.display = 'none';
                 window.iniciarInterfazCalculadora();
+                
+                // Scroll suave al resultado
+                setTimeout(() => {
+                    document.getElementById('modalData').scrollIntoView({behavior:'smooth', block:'start'});
+                }, 100);
             } else {
-                alert("Cargando componentes... reintenta en un segundo.");
+                alert("Cargando base de datos médica...");
             }
         });
     </script>
