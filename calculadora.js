@@ -1,12 +1,12 @@
 /**
  * CALCULADORA APS (Antipsychotic Switch)
- * Versión: Definitiva - Coordenadas G=6
+ * Versión: Fix Índices Matriz G=6 y Limpieza de Nombres
  */
 
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // 1. INYECCIÓN DE ESTILOS (Estética Timeline + Colores Pastel)
+    // 1. INYECCIÓN DE ESTILOS (Timeline + Colores)
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
@@ -26,12 +26,9 @@ window.iniciarInterfazCalculadora = async function() {
                 letter-spacing: 0.5px; transition: opacity 0.2s;
             }
             .btn-ejecutar:hover { opacity: 0.9; }
-            
             .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); overflow: hidden; }
             .res-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
             .res-pauta { padding: 1.5rem; background: var(--bg); }
-
-            /* Estética de la Pauta (Timeline) */
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
             .pauta-step:not(:last-child)::after { 
                 content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; 
@@ -51,83 +48,69 @@ window.iniciarInterfazCalculadora = async function() {
         document.head.appendChild(styleTag);
     }
 
-    // Función para colores pastel aleatorios (Memoria: [2026-02-02])
-    const getPastelColor = (cat) => {
-        let hash = 0;
-        const str = cat || "G";
-        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        return `hsl(${Math.abs(hash) % 360}, 75%, 92%)`;
-    };
-
-    // 2. CARGA DE DATOS
+    // 2. CARGA DE DATOS DESDE EL WORKER
     if (!window.dbCalc) {
         try {
             const pestaña = "Data_APS";
             const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
             const data = await response.json();
+            
             if (data.values) {
                 window.dbRaw = data.values;
-                
-                // --- AJUSTE DE ÍNDICES ---
-                // Fila 1 (A2) es Haloperidol
-                // Columna 6 (G) es el inicio de la matriz
-                window.idxRowStart = 1; 
-                window.idxColStart = 6; 
-
-                // Extraer lista de fármacos y sus parámetros
                 window.dbCalc = [];
                 window.listaFarmacos = [];
                 
-                // Recorremos desde la fila 2 (índice 1) para capturar desde Haloperidol
-                for (let i = window.idxRowStart; i < data.values.length; i++) {
+                // Empezamos en i=1 para saltar la cabecera (Fila 1)
+                // Columna A (0) = Nombre, B (1) = Factor, C (2) = ED95, D (3) = Max
+                for (let i = 1; i < data.values.length; i++) {
                     const row = data.values[i];
-                    if (row && row[0] && row[0].toString().trim() !== "" && row[0] !== "Farmaco") {
-                        const nombre = row[0].toString().trim();
+                    const nombre = row[0] ? row[0].toString().trim() : "";
+                    
+                    if (nombre !== "" && nombre !== "Farmaco") {
                         window.listaFarmacos.push(nombre);
                         window.dbCalc.push({
                             farmaco: nombre,
                             factor: parseFloat(row[1]) || 1,
                             ed95: parseFloat(row[2]) || 0,
                             max: parseFloat(row[3]) || 0,
-                            categoria: row[11] || "Antipsicótico" // Columna L si existe
+                            categoria: "Antipsicótico" 
                         });
                     }
                 }
+                window.idxRowStart = 1; // Fila donde empieza Haloperidol (Fila 2)
+                window.idxColStart = 6; // Columna G (Índice 6)
             }
         } catch (e) {
-            container.innerHTML = `<div style="padding:2rem;">Error: ${e.message}</div>`;
+            container.innerHTML = `<div style="padding:2rem;">Error de conexión: ${e.message}</div>`;
             return;
         }
     }
 
-    // 3. RENDERIZADO INTERFAZ
+    // 3. RENDERIZADO DE LA INTERFAZ
     const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
     container.innerHTML = `
         <div class="calc-ui">
             <h2><i class="fas fa-random"></i> APS Switch Manager</h2>
-            
             <label>Fármaco Origen</label>
             <select id="f_orig">${options}</select>
-            
             <label>Dosis Actual (mg/día)</label>
             <input type="number" id="d_orig" placeholder="0.00" step="any">
-            
             <label>Fármaco Destino</label>
             <select id="f_dest">${options}</select>
-            
             <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
-            
             <div id="res-box" class="res-container">
                 <div id="res-header" class="res-header"></div>
                 <div id="res-pauta" class="res-pauta"></div>
             </div>
         </div>`;
-}
+};
 
-// --- 4. FUNCIÓN TRADUCTORA DE PASOS ---
+// 4. TRADUCTOR DE INSTRUCCIONES (D1:ACTUAL:STOP...)
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
     if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") {
-        return `<div style="color:var(--text-muted); font-style:italic;">No se han definido pasos específicos para este cruce. Se recomienda switch cruzado conservador.</div>`;
+        return `<div style="color:var(--text-muted); font-style:italic; padding: 10px; border: 1px dashed var(--border); border-radius: 10px;">
+            No hay una pauta específica en la matriz para este cambio. Se sugiere descenso gradual del origen e inicio lento del destino.
+        </div>`;
     }
 
     const bloques = rawStr.split('|').map(b => b.trim()).filter(Boolean);
@@ -136,14 +119,14 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
     bloques.forEach(bloque => {
         let texto = bloque;
         
-        // Manejo de lógica condicional (IF_ACTUAL)
+        // Lógica condicional (IF_ACTUAL_<300mg:...)
         if (texto.startsWith("IF_ACTUAL_")) {
             const m = texto.match(/IF_ACTUAL_([<>]=?)([\d.]+)(?:mg)?:(.*)/);
             if (m) {
                 const op = m[1], corte = parseFloat(m[2]), resto = m[3];
                 const cumple = (op === '<' && dOrig < corte) || (op === '>' && dOrig > corte) || 
                                (op === '<=' && dOrig <= corte) || (op === '>=' && dOrig >= corte);
-                if (!cumple) return; // Si no cumple la dosis actual, saltamos este paso
+                if (!cumple) return; 
                 texto = resto.trim();
             }
         }
@@ -159,17 +142,16 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
         let desc = '';
         if (sujeto === 'ACTUAL') {
             if (accion === 'STOP') desc = 'Suspender completamente el fármaco de origen.';
-            else if (accion === 'REDUCIR') desc = `Reducir fármaco de origen al ${valor} (<b>${(dOrig * parseFloat(valor) / 100).toFixed(1)} mg</b>).`;
+            else if (accion === 'REDUCIR') desc = `Reducir origen al ${valor} (<b>${(dOrig * parseFloat(valor) / 100).toFixed(1)} mg</b>).`;
             else desc = `${accion} ${valor}`;
         } else {
-            // Lógica para el fármaco NUEVO
             if (accion === 'TITULAR_PROGRESIVO' || valor === 'TARGET' || (valor.includes('TARGET') && !valor.includes('%'))) {
                 desc = `Alcanzar dosis objetivo de <b>${targetMg.toFixed(1)} mg</b>.`;
             } else if (valor.includes('%_TARGET')) {
                 const pct = parseFloat(valor);
-                desc = `Iniciar fármaco nuevo al ${pct}% de la dosis objetivo (<b>${(targetMg * pct / 100).toFixed(1)} mg</b>).`;
+                desc = `Iniciar nuevo al ${pct}% de la dosis objetivo (<b>${(targetMg * pct / 100).toFixed(1)} mg</b>).`;
             } else {
-                desc = `Iniciar/Ajustar fármaco nuevo a <b>${valor}</b>.`;
+                desc = `Iniciar/Ajustar nuevo a <b>${valor}</b>.`;
             }
         }
 
@@ -183,18 +165,18 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
             </div>`;
     });
     return html;
-}
+};
 
-// --- 5. LÓGICA DE CÁLCULO Y MATRIZ ---
+// 5. CÁLCULO Y LOCALIZACIÓN EN MATRIZ
 window.ejecutarCalculo = function() {
-    const fOrig = document.getElementById('f_orig').value;
-    const fDest = document.getElementById('f_dest').value;
+    const fOrigNom = document.getElementById('f_orig').value;
+    const fDestNom = document.getElementById('f_dest').value;
     const dosis = parseFloat(document.getElementById('d_orig').value);
     
-    const o = window.dbCalc.find(f => f.farmaco === fOrig);
-    const d = window.dbCalc.find(f => f.farmaco === fDest);
+    const o = window.dbCalc.find(f => f.farmaco === fOrigNom);
+    const d = window.dbCalc.find(f => f.farmaco === fDestNom);
     
-    if (!dosis || isNaN(dosis) || !o || !d) {
+    if (isNaN(dosis) || dosis <= 0) {
         alert("Por favor, introduce una dosis válida.");
         return;
     }
@@ -206,13 +188,13 @@ window.ejecutarCalculo = function() {
     const header = document.getElementById('res-header');
     resBox.style.display = 'block';
 
-    // Aplicar color pastel según categoría
-    const pastel = (cat) => {
+    // Color pastel basado en el nombre del fármaco destino
+    const getPastel = (str) => {
         let hash = 0;
-        for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
         return `hsl(${Math.abs(hash) % 360}, 80%, 94%)`;
     };
-    header.style.background = pastel(d.categoria);
+    header.style.background = getPastel(fDestNom);
 
     header.innerHTML = `
         <div style="font-size:0.7rem; font-weight:800; color:rgba(0,0,0,0.4); text-transform:uppercase; margin-bottom:4px;">Dosis Objetivo Estimada</div>
@@ -222,19 +204,18 @@ window.ejecutarCalculo = function() {
         </div>
     `;
 
-    // --- CRUCE DE MATRIZ (G=6) ---
-    const indexO = window.listaFarmacos.indexOf(fOrig);
-    const indexD = window.listaFarmacos.indexOf(fDest);
+    // Localizar en la matriz dbRaw
+    const indexO = window.listaFarmacos.indexOf(fOrigNom);
+    const indexD = window.listaFarmacos.indexOf(fDestNom);
 
-    // Fila: Haloperidol está en Fila 2 (índice 1). indexO=0 -> Fila 1. Correcto.
+    // Fila: idxRowStart(1) + posición. Columna: idxColStart(6) + posición
     const fila = window.idxRowStart + indexO;
-    // Columna: G es índice 6. indexD=0 -> Col 6. Correcto.
     const col = window.idxColStart + indexD;
 
-    const rawInstr = (window.dbRaw[fila] && window.dbRaw[fila][col]) ? window.dbRaw[fila][col] : "";
+    const rawInstr = (window.dbRaw[fila] && window.dbRaw[fila][col]) ? window.dbRaw[fila][col].toString() : "";
 
     document.getElementById('res-pauta').innerHTML = `
         <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Estrategia Sugerida</h4>
-        ${window.traducirPasos(rawInstr, dosis, Maudsley)}
+        ${fOrigNom === fDestNom ? '<div class="step-txt">No es necesario realizar un switch entre el mismo fármaco.</div>' : window.traducirPasos(rawInstr, dosis, Maudsley)}
     `;
-}
+};
