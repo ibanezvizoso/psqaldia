@@ -1,284 +1,199 @@
-/* ============================================================
-   CALCULADORA APS – MOTOR COMPLETO CORREGIDO
-============================================================ */
-
-(async function() {
-
-    const container = document.getElementById("calc-container");
-    if (!container) return;
-
-    /* =========================
-       1️⃣ ESTILOS AUTÓNOMOS
-    ========================== */
+// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
+window.iniciarInterfazCalculadora = async function() {
+    const container = document.getElementById('modalData');
 
     if (!document.getElementById('calc-internal-styles')) {
-
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
-
         styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display:flex; flex-direction:column; gap:0.6rem; }
-            .calc-ui label { font-size:0.75rem; font-weight:800; text-transform:uppercase; opacity:0.6; margin-top:0.8rem; }
-            .calc-ui select, .calc-ui input {
-                width:100%;
-                padding:0.9rem;
-                border-radius:1rem;
-                border:2px solid #e5e7eb;
-                font-size:1rem;
-                box-sizing:border-box;
-            }
-            .calc-ui select:focus, .calc-ui input:focus {
-                outline:none;
-                border-color:#6366f1;
-            }
-            .res-container { margin-top:1.5rem; display:none; }
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; font-family: inherit; }
+            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
+            .calc-ui label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.8rem; display: block; }
+            .calc-ui select, .calc-ui input { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; box-sizing: border-box; }
+            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
+            .res-container { padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.05); }
         `;
         document.head.appendChild(styleTag);
     }
-
-    /* =========================
-       2️⃣ CARGA DESDE WORKER
-    ========================== */
-
+    
     if (!window.dbCalc) {
+        try {
+            const pestaña = "Data_APS"; 
+            const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const data = await response.json();
 
-        const pestaña = "Data_APS";
+            if (data.error) throw new Error(data.details || data.error);
 
-        const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
-        const data = await response.json();
-
-        if (data.error) {
-            container.innerHTML = "Error cargando datos";
+            if (data.values) {
+                // Guardamos los valores brutos para las instrucciones
+                window.dbRaw = data.values; 
+                // Mapeamos los datos numéricos (asumiendo que los datos empiezan en la fila 1)
+                window.dbCalc = data.values.slice(1).map(row => ({
+                    farmaco: row[0],
+                    factor: parseFloat(row[1]) || 1,
+                    ed95: parseFloat(row[2]) || 0,
+                    max: parseFloat(row[3]) || 0,
+                    min: parseFloat(row[4]) || 0,
+                    umbral: parseFloat(row[5]) || 0
+                })).filter(f => f.farmaco);
+            }
+        } catch (e) {
+            console.error("Error cargando datos:", e);
+            container.innerHTML = `<div style="padding:2.5rem;">Error: ${e.message}</div>`;
             return;
         }
-
-        window.dbRaw = data.values;
-
-        window.dbCalc = data.values.slice(1).map(row => ({
-            farmaco: row[0],
-            factor: parseFloat(row[1]) || 1,
-            ed95: parseFloat(row[2]) || 0,
-            max: parseFloat(row[3]) || 0,
-            min: parseFloat(row[4]) || 0,
-            umbral: parseFloat(row[5]) || 0
-        }));
     }
 
-    const options = window.dbCalc
-        .map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`)
-        .join('');
-
-    /* =========================
-       3️⃣ RENDER UI
-    ========================== */
-
+    const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
+    
     container.innerHTML = `
         <div class="calc-ui">
-
-            <h2>Calculadora APS</h2>
-
+            <h2><i class="fas fa-calculator"></i> Calculadora APS</h2>
             <label>Fármaco Origen</label>
             <select id="f_orig">${options}</select>
-
-            <label>Dosis actual (mg/día)</label>
-            <input type="number" id="d_orig" placeholder="0">
-
+            <label>Dosis Actual (mg/día)</label>
+            <input type="number" id="d_orig" placeholder="0.00">
             <label>Fármaco Destino</label>
             <select id="f_dest">${options}</select>
-
-            <button onclick="ejecutarCalculo()" style="
-                margin-top:1rem;
-                padding:1rem;
-                border-radius:1rem;
-                border:none;
-                background:#111827;
-                color:white;
-                font-weight:800;
-                cursor:pointer;
-            ">
-                CALCULAR
-            </button>
-
+            <button class="btn btn-primary" style="width:100%; margin-top:1.2rem;" onclick="ejecutarCalculo()">CALCULAR</button>
             <div id="res-box" class="res-container">
                 <div id="res-val"></div>
                 <div id="res-tip"></div>
             </div>
+        </div>`;
+}
 
-        </div>
-    `;
+// --- MOTOR DE TRADUCCIÓN LÓGICA ---
+window.traducirInstrucciones = function(rawString, dOrig, nombreDestino, targetMg) {
+    if (!rawString || rawString.trim() === "") return `<div style="opacity:0.5;">No hay pauta definida en el Excel para este cruce.</div>`;
 
-})();
+    let instruccion = rawString;
 
-/* ============================================================
-   4️⃣ PARSER DE INSTRUCCIONES
-============================================================ */
+    // 1. Lógica IF_ACTUAL
+    if (instruccion.startsWith("IF_ACTUAL_")) {
+        const regex = /IF_ACTUAL_([<>])(\d+):/;
+        const match = instruccion.match(regex);
+        if (match) {
+            const operador = match[1];
+            const valorCorte = parseFloat(match[2]);
+            const cumple = (operador === '<') ? dOrig < valorCorte : dOrig > valorCorte;
+            
+            if (cumple) {
+                instruccion = instruccion.replace(/IF_ACTUAL_[<>]\d+:/, '');
+            } else {
+                return `<div style="padding:10px; opacity:0.7;">Dosis fuera de rango para pauta automática. Ajustar según criterio clínico.</div>`;
+            }
+        }
+    }
 
-window.traducirInstrucciones = function(rawString, targetMg, nombreDestino) {
-
-    if (!rawString) return "";
-
-    const pasos = rawString
-        .split('|')
-        .map(p => p.trim())
-        .filter(Boolean);
-
+    const pasos = instruccion.split('|').map(p => p.trim()).filter(Boolean);
     const timeline = {};
+    let objetivoAlcanzado = false;
 
     pasos.forEach(p => {
-
         const partes = p.split(':');
         if (partes.length < 3) return;
 
-        const dia = partes[0].replace('D','').trim();
-        const sujeto = partes[1];
-        const accion = partes[2];
-        const valor = partes[3] || null;
+        const dia = partes[0].replace('D', '').trim();
+        const sujeto = partes[1]; // ACTUAL o NUEVO
+        const accion = partes[2]; // STOP, INICIAR, SUBIR, etc.
+        const valor = partes[3] || "";
 
-        if (!timeline[dia]) {
-            timeline[dia] = { ACTUAL: [], NUEVO: [] };
-        }
-
-        let texto = "";
+        if (!timeline[dia]) timeline[dia] = { ACTUAL: [], NUEVO: [] };
 
         if (sujeto === "ACTUAL") {
-
-            if (accion === "STOP")
-                texto = "Suspender completamente";
-
-            if (accion === "REDUCIR")
-                texto = `Reducir al ${valor}`;
-
-            if (accion === "MANTENER")
-                texto = "Mantener dosis actual";
-
-            if (texto) timeline[dia].ACTUAL.push(texto);
-        }
-
-        if (sujeto === "NUEVO") {
-
-            if (accion === "INICIAR") {
-                if (valor === "TARGET")
-                    texto = `Alcanzar dosis objetivo (${targetMg.toFixed(1)} mg)`;
-                else
-                    texto = `Ajustar a ${valor}`;
+            if (accion === "STOP") timeline[dia].ACTUAL.push("Suspender completamente");
+            if (accion === "REDUCIR") timeline[dia].ACTUAL.push(`Reducir al ${valor}`);
+            if (accion === "MANTENER") timeline[dia].ACTUAL.push("Mantener dosis");
+        } 
+        else if (sujeto === "NUEVO" && !objetivoAlcanzado) {
+            if (accion === "INICIAR" || accion === "SUBIR") {
+                const mgPaso = parseFloat(valor);
+                if (valor === "TARGET" || (!isNaN(mgPaso) && mgPaso >= targetMg)) {
+                    timeline[dia].NUEVO.push(`Alcanzar dosis objetivo de <b>${targetMg.toFixed(1)} mg</b>`);
+                    objetivoAlcanzado = true;
+                } else {
+                    timeline[dia].NUEVO.push(`${accion === "INICIAR" ? "Iniciar" : "Subir"} a ${valor}`);
+                }
             }
-
-            if (accion === "SUBIR") {
-                if (valor === "TARGET")
-                    texto = `Alcanzar dosis objetivo (${targetMg.toFixed(1)} mg)`;
-                else
-                    texto = `Subir a ${valor}`;
-            }
-
             if (accion === "TITULAR_PROGRESIVO") {
-                texto = `Desde este día, titulación progresiva hasta ${targetMg.toFixed(1)} mg`;
+                timeline[dia].NUEVO.push(`Desde este día, titular hasta <b>${targetMg.toFixed(1)} mg</b>`);
+                objetivoAlcanzado = true;
             }
-
-            if (texto) timeline[dia].NUEVO.push(texto);
         }
-
     });
 
-    /* ===== RENDER VISUAL ===== */
-
-    let html = `<div style="margin-top:20px;display:flex;flex-direction:column;gap:18px;">`;
-
-    Object.keys(timeline)
-        .sort((a,b)=>parseInt(a)-parseInt(b))
-        .forEach(dia => {
-
-            html += `
-                <div style="border:1px solid #e5e7eb;border-radius:20px;padding:20px;background:white;">
-
-                    <div style="font-weight:800;opacity:0.6;margin-bottom:15px;">
-                        Día ${dia}
+    // Renderizado en tarjetas
+    let html = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">`;
+    Object.keys(timeline).sort((a,b) => a-b).forEach(d => {
+        html += `
+            <div style="background:white; border-radius:12px; padding:12px; border:1px solid rgba(0,0,0,0.06);">
+                <div style="font-size:0.65rem; font-weight:900; color:var(--primary); text-transform:uppercase; margin-bottom:8px;">Día ${d}</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <div style="background:#fff1f2; padding:8px; border-radius:8px; font-size:0.85rem;">
+                        <div style="font-size:0.6rem; font-weight:800; opacity:0.4; text-transform:uppercase;">Origen</div>
+                        ${timeline[d].ACTUAL.length ? timeline[d].ACTUAL.join('<br>') : '—'}
                     </div>
-
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-
-                        <div style="background:#fff1f2;border:1px solid #fecdd3;padding:14px;border-radius:14px;">
-                            <div style="font-weight:800;margin-bottom:8px;">
-                                Fármaco de origen
-                            </div>
-                            ${
-                                timeline[dia].ACTUAL.length
-                                ? timeline[dia].ACTUAL.map(t=>`<div style="margin-bottom:6px;">• ${t}</div>`).join('')
-                                : `<div style="opacity:0.3;">—</div>`
-                            }
-                        </div>
-
-                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:14px;border-radius:14px;">
-                            <div style="font-weight:800;margin-bottom:8px;">
-                                ${nombreDestino}
-                            </div>
-                            ${
-                                timeline[dia].NUEVO.length
-                                ? timeline[dia].NUEVO.map(t=>`<div style="margin-bottom:6px;">• ${t}</div>`).join('')
-                                : `<div style="opacity:0.3;">—</div>`
-                            }
-                        </div>
-
+                    <div style="background:#f0fdf4; padding:8px; border-radius:8px; font-size:0.85rem;">
+                        <div style="font-size:0.6rem; font-weight:800; opacity:0.4; text-transform:uppercase;">${nombreDestino}</div>
+                        ${timeline[d].NUEVO.length ? timeline[d].NUEVO.join('<br>') : '—'}
                     </div>
                 </div>
-            `;
-        });
+            </div>`;
+    });
+    return html + `</div>`;
+}
 
-    html += `</div>`;
-
-    return html;
-};
-
-/* ============================================================
-   5️⃣ FUNCIÓN PRINCIPAL
-============================================================ */
-
+// --- FUNCIÓN DE CÁLCULO FINAL ---
 window.ejecutarCalculo = function() {
-
     const fOrigName = document.getElementById('f_orig').value;
     const fDestName = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
-
-    const oIndex = window.dbCalc.findIndex(f => f.farmaco === fOrigName);
-    const dIndex = window.dbCalc.findIndex(f => f.farmaco === fDestName);
-
-    const o = window.dbCalc[oIndex];
-    const d = window.dbCalc[dIndex];
-
+    
+    const o = window.dbCalc.find(f => f.farmaco === fOrigName);
+    const d = window.dbCalc.find(f => f.farmaco === fDestName);
+    
     if (!dosisO || isNaN(dosisO) || !o || !d) {
-        alert("Introduce una dosis válida");
+        alert("Introduce una dosis válida.");
         return;
     }
 
-    /* ===== CÁLCULO ===== */
-
     const Maudsley = (dosisO / o.factor) * d.factor;
+    const porcentajeRango = (dosisO / o.max) * 100;
+    const dosisRango = (porcentajeRango / 100) * d.max;
+    
+    // Alertas visuales
+    let color = Maudsley > d.max ? "#b91c1c" : (Maudsley > d.ed95 ? "#b45309" : "#15803d");
+    let bg = Maudsley > d.max ? "#fee2e2" : (Maudsley > d.ed95 ? "#fef3c7" : "#dcfce7");
+    let txt = Maudsley > d.max ? "⚠️ EXCEDE MÁXIMA" : (Maudsley > d.ed95 ? "⚠️ SUPERIOR ED95" : "✅ RANGO ESTÁNDAR");
 
-    const resBox = document.getElementById('res-box');
-    const resVal = document.getElementById('res-val');
-    const resTip = document.getElementById('res-tip');
-
-    resBox.style.display = 'block';
-
-    resVal.innerHTML = `
-        <div style="background:#f9fafb;padding:20px;border-radius:20px;margin-top:20px;">
-            <div style="font-size:0.75rem;font-weight:800;opacity:0.6;margin-bottom:6px;">
-                Dosis equivalente (Maudsley)
-            </div>
-            <div style="font-size:2.5rem;font-weight:900;">
-                ${Maudsley.toFixed(1)} mg/día
-            </div>
+    document.getElementById('res-box').style.display = 'block';
+    document.getElementById('res-box').style.background = bg;
+    
+    document.getElementById('res-val').innerHTML = `
+        <div style="background:rgba(255,255,255,0.6); padding:1rem; border-radius:1rem; text-align:center; border:1px solid rgba(0,0,0,0.05);">
+            <div style="font-size:0.65rem; font-weight:800; text-transform:uppercase; color:var(--text-muted);">Dosis Maudsley</div>
+            <div style="font-size:2.2rem; font-weight:900;">${Maudsley.toFixed(1)} <span style="font-size:1rem;">mg/d</span></div>
+            <div style="font-size:0.7rem; font-weight:800; color:${color}; border:1px solid ${color}; display:inline-block; padding:2px 8px; border-radius:20px; margin-top:5px;">${txt}</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:10px; padding:0 5px; opacity:0.8; font-size:0.8rem;">
+            <span>Equivalencia Rango (${porcentajeRango.toFixed(0)}%)</span>
+            <b>${dosisRango.toFixed(1)} mg</b>
         </div>
     `;
 
-    /* ===== LEER INSTRUCCIÓN CORRECTA ===== */
+    // Localizar la instrucción en dbRaw
+    // Fila: Buscamos el fármaco de origen (saltando cabecera)
+    const rowIndex = window.dbRaw.findIndex(row => row[0] === fOrigName);
+    // Columna: Buscamos el nombre del destino en la fila de cabecera (Fila 0)
+    const colIndex = window.dbRaw[0].findIndex(cell => cell && cell.toString().trim().toUpperCase() === fDestName.toUpperCase());
 
-    const rawInstruction = window.dbRaw[oIndex + 1][6 + dIndex];
-
-    const timelineHTML = window.traducirInstrucciones(
-        rawInstruction,
-        Maudsley,
-        fDestName
-    );
-
-    resTip.innerHTML = timelineHTML;
-};
+    const rawStr = (rowIndex > -1 && colIndex > -1) ? window.dbRaw[rowIndex][colIndex] : "";
+    
+    document.getElementById('res-tip').innerHTML = `
+        <div style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
+            <span style="font-size:0.7rem; font-weight:900; text-transform:uppercase; opacity:0.5;">Estrategia de Cambio</span>
+            ${window.traducirInstrucciones(rawStr, dosisO, fDestName, Maudsley)}
+        </div>
+    `;
+}
