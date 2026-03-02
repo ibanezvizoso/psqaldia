@@ -80,10 +80,11 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 }
 
-// --- MOTOR DE TRADUCCIÓN (VERSIÓN CORREGIDA) ---
+// --- MOTOR DE TRADUCCIÓN (VERSIÓN CORREGIDA Y MEJORADA) ---
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "" || rawStr === "undefined") 
-        return "Pauta no definida en la matriz.";
+    if (!rawStr || rawStr.trim() === "" || rawStr === "undefined") {
+        return "<span style='color: #999;'>No hay instrucciones de cambio disponibles para esta combinación.</span>";
+    }
 
     const pasos = rawStr.split('|').map(p => p.trim()).filter(p => p.length > 0);
     let html = '<ul style="list-style:none; padding:0; margin:0;">';
@@ -94,6 +95,7 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
 
         let instruccion = paso;
         let incluirPaso = true;
+        let dosisActualModificada = dOrig; // Para seguir la pista de la dosis del fármaco actual si se reduce
 
         // Comprobar si el paso tiene condición IF_ACTUAL_
         if (instruccion.startsWith('IF_ACTUAL_')) {
@@ -102,7 +104,7 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
             if (match) {
                 const op = match[1];
                 const valorCorte = parseFloat(match[2]);
-                const resto = match[3]; // el resto después de la condición (incluye el día y lo demás)
+                const resto = match[3]; // el resto después de la condición
 
                 // Evaluar condición
                 let cumple = false;
@@ -112,39 +114,43 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
                 else if (op === '>=') cumple = dOrig >= valorCorte;
 
                 if (!cumple) {
-                    incluirPaso = false; // no incluir este paso
+                    incluirPaso = false;
                 } else {
-                    instruccion = resto; // usar el resto como instrucción
+                    instruccion = resto;
                 }
             } else {
-                // Si no se puede parsear la condición, se omite el paso por seguridad
-                incluirPaso = false;
+                incluirPaso = false; // formato no reconocido
             }
         }
 
         if (!incluirPaso) return;
 
-        // Ahora instruccion tiene el formato Día:Sujeto:Acción:Valor (puede tener más partes si el valor contiene ":" pero no es el caso)
+        // Ahora instruccion tiene el formato Día:Sujeto:Acción:Valor (puede tener más partes si el valor contiene ":" pero no debería)
         const partes = instruccion.split(':').map(s => s.trim());
         if (partes.length < 3) return;
 
         const dia = partes[0].replace('D', 'Día ');
         const sujeto = partes[1];
         const accion = partes[2];
-        const valor = partes.slice(3).join(':'); // por si el valor contiene ":" (no debería)
+        let valor = partes.slice(3).join(':'); // el valor puede ser algo como "50%", "50%_TARGET", "5mg", "TARGET", etc.
 
         let texto = `<b>${dia}:</b> `;
 
         if (sujeto === 'ACTUAL') {
             if (accion === 'STOP') {
-                texto += 'Suspender origen.';
+                texto += 'Suspender fármaco origen.';
             } else if (accion === 'REDUCIR') {
-                // El valor puede ser algo como "50%" o "50%_TARGET"? En los datos vienen como "REDUCIR:50%"
-                // Pero en la matriz aparece "REDUCIR:50%" (sin _TARGET). Lo manejamos.
-                let reduccion = valor.replace('%', '');
-                texto += `Reducir origen al ${reduccion}% de la dosis actual (aprox. ${(dOrig * parseFloat(reduccion) / 100).toFixed(1)} mg).`;
+                // El valor viene como "50%" (porcentaje de reducción? o porcentaje al que se reduce?)
+                // En los datos, "REDUCIR:50%" significa reducir al 50% de la dosis actual.
+                const porcentaje = parseFloat(valor.replace('%', ''));
+                if (!isNaN(porcentaje)) {
+                    const nuevaDosis = dOrig * porcentaje / 100;
+                    texto += `Reducir fármaco origen a ${nuevaDosis.toFixed(1)} mg.`;
+                } else {
+                    texto += `Reducir fármaco origen (${valor}).`;
+                }
             } else if (accion === 'MANTENER') {
-                texto += 'Mantener dosis origen.';
+                texto += 'Mantener dosis actual del fármaco origen.';
             } else {
                 texto += `Acción desconocida sobre origen: ${accion}`;
             }
@@ -152,34 +158,34 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
             if (accion === 'INICIAR' || accion === 'SUBIR') {
                 // Valor puede ser "TARGET", "Xmg", "X%_TARGET", "X%"
                 if (valor === 'TARGET') {
-                    texto += `Alcanzar dosis objetivo (<b>${targetMg.toFixed(1)} mg</b>).`;
+                    texto += `Alcanzar dosis objetivo de ${targetMg.toFixed(1)} mg.`;
                     objetivoAlcanzado = true;
                 } else if (valor.includes('%_TARGET')) {
                     const porcentaje = parseFloat(valor.replace('%_TARGET', ''));
                     const mgCalculado = targetMg * porcentaje / 100;
-                    texto += `Iniciar a ${mgCalculado.toFixed(1)} mg (${porcentaje}% de la dosis objetivo).`;
+                    texto += `Iniciar fármaco nuevo a ${mgCalculado.toFixed(1)} mg.`;
                 } else if (valor.includes('%') && !valor.includes('_TARGET')) {
-                    // Por si acaso aparece "50%" directamente (aunque en los datos no)
+                    // Por si acaso aparece un porcentaje sin _TARGET (no debería)
                     const porcentaje = parseFloat(valor.replace('%', ''));
                     const mgCalculado = targetMg * porcentaje / 100;
-                    texto += `Iniciar a ${mgCalculado.toFixed(1)} mg (${porcentaje}% de la dosis objetivo).`;
+                    texto += `Iniciar fármaco nuevo a ${mgCalculado.toFixed(1)} mg.`;
                 } else if (valor.includes('mg')) {
                     const mgPaso = parseFloat(valor.replace(/[^0-9.]/g, ''));
                     if (!isNaN(mgPaso)) {
                         if (mgPaso >= targetMg) {
-                            texto += `Alcanzar dosis objetivo (<b>${targetMg.toFixed(1)} mg</b>).`;
+                            texto += `Alcanzar dosis objetivo de ${targetMg.toFixed(1)} mg.`;
                             objetivoAlcanzado = true;
                         } else {
-                            texto += `Iniciar a ${mgPaso.toFixed(1)} mg.`;
+                            texto += `Iniciar fármaco nuevo a ${mgPaso.toFixed(1)} mg.`;
                         }
                     } else {
-                        texto += `Iniciar a ${valor}.`;
+                        texto += `Iniciar fármaco nuevo a ${valor}.`;
                     }
                 } else {
-                    texto += `Iniciar a ${valor}.`;
+                    texto += `Iniciar fármaco nuevo a ${valor}.`;
                 }
             } else if (accion === 'TITULAR_PROGRESIVO') {
-                texto += `Desde este día, titular progresivamente hasta <b>${targetMg.toFixed(1)} mg</b>.`;
+                texto += `Desde este día, titular progresivamente hasta alcanzar ${targetMg.toFixed(1)} mg.`;
                 objetivoAlcanzado = true;
             } else {
                 texto += `Acción desconocida sobre nuevo: ${accion}`;
@@ -194,7 +200,7 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
     return html + '</ul>';
 }
 
-// --- FUNCIÓN DE CÁLCULO (Lógica idéntica + Cruce en Fila 13) ---
+// --- FUNCIÓN DE CÁLCULO (CORREGIDA EN LA OBTENCIÓN DE INSTRUCCIONES) ---
 window.ejecutarCalculo = function() {
     const fOrigName = document.getElementById('f_orig').value;
     const fDestName = document.getElementById('f_dest').value;
@@ -240,18 +246,30 @@ window.ejecutarCalculo = function() {
         </div>
     `;
 
-    // --- CRUCE DE INSTRUCCIONES ---
-    // Fila: Buscamos el nombre de Origen en la Columna A de dbRaw (índice 0)
+    // --- CRUCE DE INSTRUCCIONES (CORREGIDO) ---
+    // Buscar el fármaco origen en la columna A (índice 0)
     const rowIndex = window.dbRaw.findIndex(row => row[0] && row[0].toString().trim() === fOrigName);
-    // Columna: Buscamos el nombre de Destino en la FILA 13 (índice 12) de dbRaw
-    const headerRow = window.dbRaw[12]; // Fila 13 (0‑based 12)
-    const colIndex = headerRow.findIndex(cell => cell && cell.toString().trim() === fDestName);
+    
+    // Buscar el fármaco destino en la fila de encabezados (fila 13, índice 12) a partir de la columna G (índice 6)
+    const headerRow = window.dbRaw[12]; // Fila 13
+    let colIndex = -1;
+    if (headerRow) {
+        // Buscar desde la columna 6 hasta el final
+        for (let i = 6; i < headerRow.length; i++) {
+            if (headerRow[i] && headerRow[i].toString().trim() === fDestName) {
+                colIndex = i;
+                break;
+            }
+        }
+    }
 
     let instruccionRaw = "";
     if (rowIndex > -1 && colIndex > -1) {
         instruccionRaw = window.dbRaw[rowIndex][colIndex];
-        // Si está vacío o es undefined, dejamos string vacío
         if (!instruccionRaw) instruccionRaw = "";
+        console.log(`Instrucción encontrada: ${instruccionRaw}`); // Para depurar
+    } else {
+        console.warn(`No se encontró instrucción para ${fOrigName} -> ${fDestName}`);
     }
     
     document.getElementById('res-tip').innerHTML = `
