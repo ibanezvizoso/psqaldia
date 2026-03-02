@@ -2,7 +2,7 @@
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // A. INYECCIÓN DE ESTILOS (Idéntico a tu original)
+    // A. INYECCIÓN DE ESTILOS
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
@@ -40,7 +40,7 @@ window.iniciarInterfazCalculadora = async function() {
             if (data.values) {
                 // Guardamos el bruto para el cruce de instrucciones
                 window.dbRaw = data.values; 
-                // Mapeo idéntico al tuyo
+                // Mapeo para los datos básicos de los fármacos
                 window.dbCalc = data.values.map(row => ({
                     farmaco: row[0],
                     factor: parseFloat(row[1]) || 1,
@@ -48,7 +48,7 @@ window.iniciarInterfazCalculadora = async function() {
                     max: parseFloat(row[3]) || 0,
                     min: parseFloat(row[4]) || 0,
                     umbral: parseFloat(row[5]) || 0
-                })).filter(f => f.farmaco && f.farmaco !== "Farmaco"); // Filtro básico para el select
+                })).filter(f => f.farmaco && f.farmaco !== "Farmaco");
             }
         } catch (e) {
             console.error("Error en la calculadora:", e);
@@ -80,60 +80,117 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 }
 
-// --- MOTOR DE TRADUCCIÓN (LISTA LIMPIA + TECHO) ---
+// --- MOTOR DE TRADUCCIÓN (VERSIÓN CORREGIDA) ---
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "" || rawStr === "undefined") return "Pauta no definida en la matriz.";
+    if (!rawStr || rawStr.trim() === "" || rawStr === "undefined") 
+        return "Pauta no definida en la matriz.";
 
-    let instruccion = rawStr.trim();
-
-    // Procesar IF_ACTUAL
-    if (instruccion.startsWith("IF_ACTUAL_")) {
-        const match = instruccion.match(/IF_ACTUAL_([<>]=?)(\d+):/);
-        if (match) {
-            const op = match[1], corte = parseFloat(match[2]);
-            const cumple = (op === '<' && dOrig < corte) || (op === '>' && dOrig > corte) || 
-                           (op === '<=' && dOrig <= corte) || (op === '>=' && dOrig >= corte);
-            if (cumple) instruccion = instruccion.split(':').slice(1).join(':');
-            else return "Dosis actual fuera de rango para pauta automática.";
-        }
-    }
-
-    const pasos = instruccion.split('|').map(p => p.trim()).filter(Boolean);
+    const pasos = rawStr.split('|').map(p => p.trim()).filter(p => p.length > 0);
     let html = '<ul style="list-style:none; padding:0; margin:0;">';
     let objetivoAlcanzado = false;
 
-    pasos.forEach(p => {
+    pasos.forEach(paso => {
         if (objetivoAlcanzado) return;
-        const partes = p.split(':');
+
+        let instruccion = paso;
+        let incluirPaso = true;
+
+        // Comprobar si el paso tiene condición IF_ACTUAL_
+        if (instruccion.startsWith('IF_ACTUAL_')) {
+            // Expresión regular: IF_ACTUAL_([<>]=?)(\d+)mg?:(.*)
+            const match = instruccion.match(/IF_ACTUAL_([<>]=?)(\d+)mg?:(.*)/);
+            if (match) {
+                const op = match[1];
+                const valorCorte = parseFloat(match[2]);
+                const resto = match[3]; // el resto después de la condición (incluye el día y lo demás)
+
+                // Evaluar condición
+                let cumple = false;
+                if (op === '<') cumple = dOrig < valorCorte;
+                else if (op === '>') cumple = dOrig > valorCorte;
+                else if (op === '<=') cumple = dOrig <= valorCorte;
+                else if (op === '>=') cumple = dOrig >= valorCorte;
+
+                if (!cumple) {
+                    incluirPaso = false; // no incluir este paso
+                } else {
+                    instruccion = resto; // usar el resto como instrucción
+                }
+            } else {
+                // Si no se puede parsear la condición, se omite el paso por seguridad
+                incluirPaso = false;
+            }
+        }
+
+        if (!incluirPaso) return;
+
+        // Ahora instruccion tiene el formato Día:Sujeto:Acción:Valor (puede tener más partes si el valor contiene ":" pero no es el caso)
+        const partes = instruccion.split(':').map(s => s.trim());
         if (partes.length < 3) return;
 
         const dia = partes[0].replace('D', 'Día ');
         const sujeto = partes[1];
         const accion = partes[2];
-        const valor = partes[3] || "";
+        const valor = partes.slice(3).join(':'); // por si el valor contiene ":" (no debería)
 
         let texto = `<b>${dia}:</b> `;
 
-        if (sujeto === "ACTUAL") {
-            if (accion === "STOP") texto += "Suspender origen.";
-            else if (accion === "REDUCIR") texto += `Reducir origen al ${valor}.`;
-            else if (accion === "MANTENER") texto += "Mantener dosis origen.";
-        } else {
-            if (accion === "INICIAR" || accion === "SUBIR") {
-                const mgPaso = parseFloat(valor.replace(/[^0-9.]/g, ''));
-                if (valor === "TARGET" || (!isNaN(mgPaso) && mgPaso >= targetMg)) {
+        if (sujeto === 'ACTUAL') {
+            if (accion === 'STOP') {
+                texto += 'Suspender origen.';
+            } else if (accion === 'REDUCIR') {
+                // El valor puede ser algo como "50%" o "50%_TARGET"? En los datos vienen como "REDUCIR:50%"
+                // Pero en la matriz aparece "REDUCIR:50%" (sin _TARGET). Lo manejamos.
+                let reduccion = valor.replace('%', '');
+                texto += `Reducir origen al ${reduccion}% de la dosis actual (aprox. ${(dOrig * parseFloat(reduccion) / 100).toFixed(1)} mg).`;
+            } else if (accion === 'MANTENER') {
+                texto += 'Mantener dosis origen.';
+            } else {
+                texto += `Acción desconocida sobre origen: ${accion}`;
+            }
+        } else if (sujeto === 'NUEVO') {
+            if (accion === 'INICIAR' || accion === 'SUBIR') {
+                // Valor puede ser "TARGET", "Xmg", "X%_TARGET", "X%"
+                if (valor === 'TARGET') {
                     texto += `Alcanzar dosis objetivo (<b>${targetMg.toFixed(1)} mg</b>).`;
                     objetivoAlcanzado = true;
+                } else if (valor.includes('%_TARGET')) {
+                    const porcentaje = parseFloat(valor.replace('%_TARGET', ''));
+                    const mgCalculado = targetMg * porcentaje / 100;
+                    texto += `Iniciar a ${mgCalculado.toFixed(1)} mg (${porcentaje}% de la dosis objetivo).`;
+                } else if (valor.includes('%') && !valor.includes('_TARGET')) {
+                    // Por si acaso aparece "50%" directamente (aunque en los datos no)
+                    const porcentaje = parseFloat(valor.replace('%', ''));
+                    const mgCalculado = targetMg * porcentaje / 100;
+                    texto += `Iniciar a ${mgCalculado.toFixed(1)} mg (${porcentaje}% de la dosis objetivo).`;
+                } else if (valor.includes('mg')) {
+                    const mgPaso = parseFloat(valor.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(mgPaso)) {
+                        if (mgPaso >= targetMg) {
+                            texto += `Alcanzar dosis objetivo (<b>${targetMg.toFixed(1)} mg</b>).`;
+                            objetivoAlcanzado = true;
+                        } else {
+                            texto += `Iniciar a ${mgPaso.toFixed(1)} mg.`;
+                        }
+                    } else {
+                        texto += `Iniciar a ${valor}.`;
+                    }
                 } else {
-                    texto += `${accion === "INICIAR" ? "Iniciar" : "Subir"} a ${valor}.`;
+                    texto += `Iniciar a ${valor}.`;
                 }
-            } else if (accion === "TITULAR_PROGRESIVO") {
+            } else if (accion === 'TITULAR_PROGRESIVO') {
                 texto += `Desde este día, titular progresivamente hasta <b>${targetMg.toFixed(1)} mg</b>.`;
                 objetivoAlcanzado = true;
+            } else {
+                texto += `Acción desconocida sobre nuevo: ${accion}`;
             }
+        } else {
+            texto += `Sujeto desconocido: ${sujeto}`;
         }
+
         html += `<li style="margin-bottom:6px; line-height:1.4;">${texto}</li>`;
     });
+
     return html + '</ul>';
 }
 
@@ -151,7 +208,7 @@ window.ejecutarCalculo = function() {
         return;
     }
 
-    // CÁLCULOS IDÉNTICOS A LOS TUYOS
+    // CÁLCULOS
     let Maudsley = (dosisO / o.factor) * d.factor;
     let porcentajeRango = (dosisO / o.max) * 100;
     let dosisRango = (porcentajeRango / 100) * d.max;
@@ -166,7 +223,7 @@ window.ejecutarCalculo = function() {
     resBox.style.display = 'block';
     resBox.style.background = bgColor;
 
-    // UI DE RESULTADOS (Idéntica a la tuya)
+    // UI DE RESULTADOS
     document.getElementById('res-val').innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
             <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
@@ -184,12 +241,18 @@ window.ejecutarCalculo = function() {
     `;
 
     // --- CRUCE DE INSTRUCCIONES ---
-    // Fila: Buscamos el nombre de Origen en la Columna A de dbRaw
+    // Fila: Buscamos el nombre de Origen en la Columna A de dbRaw (índice 0)
     const rowIndex = window.dbRaw.findIndex(row => row[0] && row[0].toString().trim() === fOrigName);
     // Columna: Buscamos el nombre de Destino en la FILA 13 (índice 12) de dbRaw
-    const colIndex = window.dbRaw[12].findIndex(cell => cell && cell.toString().trim() === fDestName);
+    const headerRow = window.dbRaw[12]; // Fila 13 (0‑based 12)
+    const colIndex = headerRow.findIndex(cell => cell && cell.toString().trim() === fDestName);
 
-    const instruccionRaw = (rowIndex > -1 && colIndex > -1) ? window.dbRaw[rowIndex][colIndex] : "";
+    let instruccionRaw = "";
+    if (rowIndex > -1 && colIndex > -1) {
+        instruccionRaw = window.dbRaw[rowIndex][colIndex];
+        // Si está vacío o es undefined, dejamos string vacío
+        if (!instruccionRaw) instruccionRaw = "";
+    }
     
     document.getElementById('res-tip').innerHTML = `
         <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
