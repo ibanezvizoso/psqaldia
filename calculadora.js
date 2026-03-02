@@ -1,12 +1,11 @@
 /**
- * CALCULADORA APS - VERSIÓN FINAL CORREGIDA
- * Sin errores de desplazamiento (Mapeo por nombres de cabecera)
+ * CALCULADORA APS - VERSIÓN FINAL (MAPEO FILA 13)
  */
 
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // 1. ESTILOS (Timeline + UI)
+    // 1. ESTILOS (Timeline + Estética)
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
@@ -43,7 +42,7 @@ window.iniciarInterfazCalculadora = async function() {
         document.head.appendChild(styleTag);
     }
 
-    // 2. CARGA DE DATOS
+    // 2. CARGA DE DATOS Y MAPEO DE FILA 13
     if (!window.dbCalc) {
         try {
             const pestaña = "Data_APS";
@@ -51,23 +50,34 @@ window.iniciarInterfazCalculadora = async function() {
             const data = await response.json();
             
             if (data.values) {
-                window.dbRaw = data.values; // Matriz completa para buscar instrucciones
+                window.dbRaw = data.values;
                 window.dbCalc = [];
                 window.listaFarmacos = [];
-                
-                // Procesamos desde la Fila 2 (i=1) para saltar la cabecera
+                window.mapColDestino = {};
+
+                // --- MAPEO DE COLUMNAS DESDE LA FILA 13 (Índice 12) ---
+                const fila13 = data.values[12]; // Row 13 en Excel
+                if (fila13) {
+                    fila13.forEach((nombre, idx) => {
+                        if (nombre) {
+                            window.mapColDestino[nombre.toString().trim()] = idx;
+                        }
+                    });
+                }
+
+                // --- CARGA DE FÁRMACOS (Desde Columna A, Fila 2) ---
                 for (let i = 1; i < data.values.length; i++) {
                     const row = data.values[i];
                     if (!row[0]) continue;
                     
                     const nombre = row[0].toString().trim();
+                    // Ignoramos filas de cabecera si el nombre es genérico
                     if (nombre !== "" && nombre.toLowerCase() !== "farmaco") {
                         window.listaFarmacos.push(nombre);
                         window.dbCalc.push({
                             nombre: nombre,
-                            filaIdx: i, // Guardamos su fila real
+                            filaIdx: i, // Guardamos la fila real del Excel (0-indexed)
                             factor: parseFloat(row[1]) || 1,
-                            ed95: parseFloat(row[2]) || 0,
                             max: parseFloat(row[3]) || 0
                         });
                     }
@@ -79,7 +89,7 @@ window.iniciarInterfazCalculadora = async function() {
         }
     }
 
-    // 3. RENDER
+    // 3. RENDERIZADO
     const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
     container.innerHTML = `
         <div class="calc-ui">
@@ -87,7 +97,7 @@ window.iniciarInterfazCalculadora = async function() {
             <label>Fármaco Origen</label>
             <select id="f_orig">${options}</select>
             <label>Dosis Actual (mg/día)</label>
-            <input type="number" id="d_orig" placeholder="0.00">
+            <input type="number" id="d_orig" placeholder="0.00" step="any">
             <label>Fármaco Destino</label>
             <select id="f_dest">${options}</select>
             <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
@@ -98,7 +108,7 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 };
 
-// 4. LÓGICA DE CÁLCULO (Busca en la matriz por NOMBRE)
+// 4. EJECUCIÓN DEL CÁLCULO
 window.ejecutarCalculo = function() {
     const fOrigNom = document.getElementById('f_orig').value;
     const fDestNom = document.getElementById('f_dest').value;
@@ -108,39 +118,26 @@ window.ejecutarCalculo = function() {
     const d = window.dbCalc.find(f => f.nombre === fDestNom);
     
     if (isNaN(dosisO) || !o || !d) {
-        alert("Introduce una dosis válida."); return;
+        alert("Por favor, introduce una dosis."); return;
     }
 
-    // Cálculo dosis Maudsley
     const Maudsley = (dosisO / o.factor) * d.factor;
-    
-    const resBox = document.getElementById('res-box');
-    resBox.style.display = 'block';
+    document.getElementById('res-box').style.display = 'block';
 
     const header = document.getElementById('res-header');
-    header.style.background = `hsl(${(fDestNom.length * 45) % 360}, 80%, 94%)`;
+    header.style.background = `hsl(${(fDestNom.length * 55) % 360}, 80%, 94%)`;
     header.innerHTML = `
-        <div style="font-size:0.7rem; font-weight:800; color:rgba(0,0,0,0.4); text-transform:uppercase;">Dosis Objetivo Maudsley</div>
+        <div style="font-size:0.7rem; font-weight:800; opacity:0.6; text-transform:uppercase;">Dosis Objetivo</div>
         <div style="font-size:2.8rem; font-weight:900;">${Maudsley.toFixed(1)} <span style="font-size:1.2rem;">mg/día</span></div>
     `;
 
-    // --- EL BUSCADOR DE COORDENADAS (Aquí está el truco) ---
-    const cabeceraFila1 = window.dbRaw[0]; 
-    let colDestinoIdx = -1;
+    // LOCALIZACIÓN: Fila del fármaco A vs Columna mapeada en Fila 13
+    const fila = o.filaIdx;
+    const col = window.mapColDestino[fDestNom];
 
-    // Buscamos en toda la fila 1 en qué columna está exactamente el nombre del destino
-    for (let c = 0; c < cabeceraFila1.length; c++) {
-        if (cabeceraFila1[c] && cabeceraFila1[c].toString().trim() === fDestNom) {
-            colDestinoIdx = c;
-            break;
-        }
-    }
-
-    // Si encontramos la columna y tenemos la fila del origen...
     let rawInstr = "";
-    if (colDestinoIdx !== -1) {
-        rawInstr = (window.dbRaw[o.filaIdx] && window.dbRaw[o.filaIdx][colDestinoIdx]) 
-                   ? window.dbRaw[o.filaIdx][colDestinoIdx].toString() : "";
+    if (col !== undefined && window.dbRaw[fila]) {
+        rawInstr = window.dbRaw[fila][col] ? window.dbRaw[fila][col].toString() : "";
     }
 
     document.getElementById('res-pauta').innerHTML = `
@@ -149,35 +146,28 @@ window.ejecutarCalculo = function() {
     `;
 };
 
-// 5. TRADUCTOR DE PASOS
+// 5. TRADUCTOR DE PASOS (Mismo que antes, es fiable)
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") return "No hay pauta específica para este cruce.";
-
+    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") return "Sin pauta específica en matriz.";
     const bloques = rawStr.split('|').map(b => b.trim()).filter(Boolean);
     let html = '';
-
     bloques.forEach(bloque => {
         let texto = bloque;
-        
         if (texto.startsWith("IF_ACTUAL_")) {
             const m = texto.match(/IF_ACTUAL_([<>]=?)([\d.]+)(?:mg)?:(.*)/);
             if (m) {
                 const op = m[1], corte = parseFloat(m[2]), resto = m[3];
                 const cumple = (op === '<' && dOrig < corte) || (op === '>' && dOrig > corte) || 
                                (op === '<=' && dOrig <= corte) || (op === '>=' && dOrig >= corte);
-                if (!cumple) return; 
-                texto = resto.trim();
+                if (!cumple) return; texto = resto.trim();
             }
         }
-
         const p = texto.split(':').map(s => s.trim());
         if (p.length < 3) return;
-
         const dia = p[0].replace('D', 'Día ');
         const sujeto = p[1];
         const accion = p[2];
         const valor = p[3] || "";
-
         let desc = '';
         if (sujeto === 'ACTUAL') {
             if (accion === 'STOP') desc = 'Suspender origen.';
@@ -186,20 +176,10 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
         } else {
             if (valor.includes('TARGET')) {
                 const pct = valor.includes('%') ? parseFloat(valor) : 100;
-                desc = `Nuevo fármaco al ${pct}% de la dosis (<b>${(targetMg * pct / 100).toFixed(1)} mg</b>).`;
-            } else {
-                desc = `Iniciar/Ajustar nuevo a ${valor}.`;
-            }
+                desc = `Nuevo fármaco al ${pct}% (<b>${(targetMg * pct / 100).toFixed(1)} mg</b>).`;
+            } else { desc = `Iniciar nuevo a ${valor}.`; }
         }
-
-        html += `
-            <div class="pauta-step">
-                <div class="step-idx">${dia.replace('Día ', '')}</div>
-                <div class="step-body">
-                    <span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto === 'ACTUAL' ? 'Origen' : 'Nuevo'}</span>
-                    <div class="step-txt">${desc}</div>
-                </div>
-            </div>`;
+        html += `<div class="pauta-step"><div class="step-idx">${dia.replace('Día ', '')}</div><div class="step-body"><span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto}</span><div class="step-txt">${desc}</div></div></div>`;
     });
     return html;
 };
