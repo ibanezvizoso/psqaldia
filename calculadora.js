@@ -1,8 +1,8 @@
-// --- CARGA DE DATOS Y DEPURACIÓN TOTAL ---
+// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // Inyección de estilos (igual, no los toco)
+    // Inyección de estilos (igual)
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
@@ -24,85 +24,118 @@ window.iniciarInterfazCalculadora = async function() {
                 display: none; border: 1px solid rgba(0,0,0,0.05); 
             }
             .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
+            .debug-info { 
+                background: #f0f0f0; padding: 1rem; border-radius: 0.5rem; 
+                font-family: monospace; font-size: 0.8rem; margin-top: 1rem;
+                white-space: pre-wrap; max-height: 200px; overflow: auto;
+            }
         `;
         document.head.appendChild(styleTag);
     }
     
-    try {
-        const pestaña = "Data_APS"; 
-        const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
-        const data = await response.json();
-        if (data.error) throw new Error(data.details || data.error);
-        if (data.values) {
-            window.dbRaw = data.values;
-            
-            // --- IMPRIMIR TODO EN CONSOLA PARA DEPURAR ---
-            console.log("========== MATRIZ COMPLETA ==========");
-            for (let i = 0; i < window.dbRaw.length; i++) {
-                let fila = window.dbRaw[i].map(celda => celda ? celda.toString().substring(0,20) : "(vacío)");
-                console.log(`Fila ${i}:`, fila);
-            }
-            console.log("======================================");
-            
-            // Extraer fármacos desde columna A (índice 0) desde la fila que TÚ creas que empiezan
-            // Por defecto, empezamos en fila 1 (índice 1) porque la 0 suele ser "Farmaco"
-            window.listaFarmacos = [];
-            for (let i = 1; i < data.values.length; i++) {
-                const nombre = data.values[i]?.[0];
-                if (nombre && nombre.toString().trim() !== "") {
-                    window.listaFarmacos.push(nombre.toString().trim());
+    if (!window.dbCalc) {
+        try {
+            const pestaña = "Data_APS"; 
+            const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const data = await response.json();
+            if (data.error) throw new Error(data.details || data.error);
+            if (data.values) {
+                window.dbRaw = data.values;
+                
+                // Mostrar información de depuración en consola
+                console.log("Total filas:", window.dbRaw.length);
+                console.log("Fila 0:", window.dbRaw[0]);
+                console.log("Fila 1:", window.dbRaw[1]);
+                console.log("Fila 2:", window.dbRaw[2]);
+                console.log("Fila 12 (fila 13):", window.dbRaw[12]);
+                
+                // Extraer lista de fármacos desde columna A, pero sin asumir dónde empiezan
+                window.listaFarmacos = [];
+                window.filasConNombre = [];
+                for (let i = 0; i < window.dbRaw.length; i++) {
+                    const valor = window.dbRaw[i]?.[0];
+                    if (valor && valor.toString().trim() !== "" && valor !== "Farmaco" && !valor.toString().match(/^\d/)) {
+                        // Filtramos para evitar filas con números o encabezados
+                        window.listaFarmacos.push(valor.toString().trim());
+                        window.filasConNombre.push(i);
+                    }
                 }
-            }
-            console.log("📌 Lista de fármacos (desde fila 1):", window.listaFarmacos);
-            
-            // Mostrar los nombres en la fila 13 (índice 12) desde columna G (índice 6)
-            const headerRow = data.values[12];
-            if (headerRow) {
-                let destinos = [];
-                for (let i = 6; i < headerRow.length; i++) {
-                    if (headerRow[i]) destinos.push(headerRow[i].toString().trim());
+                console.log("Lista de fármacos (extraída):", window.listaFarmacos);
+                console.log("Filas correspondientes:", window.filasConNombre);
+                
+                // Ahora, buscar en la fila 12 los nombres de destino que coincidan
+                const headerRow = window.dbRaw[12];
+                window.destinos = [];
+                window.columnasDestino = [];
+                if (headerRow) {
+                    for (let i = 0; i < headerRow.length; i++) {
+                        const val = headerRow[i];
+                        if (val && val.toString().trim() !== "" && window.listaFarmacos.includes(val.toString().trim())) {
+                            window.destinos.push(val.toString().trim());
+                            window.columnasDestino.push(i);
+                        }
+                    }
                 }
-                console.log("📌 Destinos en fila 13 (desde col 6):", destinos);
+                console.log("Destinos en fila 13:", window.destinos);
+                console.log("Columnas correspondientes:", window.columnasDestino);
+                
+                // Crear dbCalc para factores
+                window.dbCalc = window.listaFarmacos.map((nombre, idx) => {
+                    const fila = window.filasConNombre[idx];
+                    return {
+                        farmaco: nombre,
+                        factor: parseFloat(window.dbRaw[fila]?.[1]) || 1,
+                        ed95: parseFloat(window.dbRaw[fila]?.[2]) || 0,
+                        max: parseFloat(window.dbRaw[fila]?.[3]) || 0,
+                        min: parseFloat(window.dbRaw[fila]?.[4]) || 0,
+                        umbral: parseFloat(window.dbRaw[fila]?.[5]) || 0,
+                    };
+                });
+                
+                console.log("dbCalc:", window.dbCalc);
             }
-            
-            // Crear dbCalc para factores
-            window.dbCalc = data.values.map((row, idx) => ({
-                farmaco: row[0] ? row[0].toString().trim() : "",
-                factor: parseFloat(row[1]) || 1,
-                ed95: parseFloat(row[2]) || 0,
-                max: parseFloat(row[3]) || 0,
-                min: parseFloat(row[4]) || 0,
-                umbral: parseFloat(row[5]) || 0
-            })).filter(f => f.farmaco && f.farmaco !== "");
-            
-            // Generar interfaz
-            const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
-            container.innerHTML = `
-                <div class="calc-ui">
-                    <h2><i class="fas fa-calculator"></i> Calculadora APS</h2>
-                    <label>Fármaco Origen</label>
-                    <select id="f_orig">${options}</select>
-                    <label>Dosis Actual (mg/día)</label>
-                    <input type="number" id="d_orig" placeholder="0.00">
-                    <label>Fármaco Destino</label>
-                    <select id="f_dest">${options}</select>
-                    <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
-                    <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
-                        <div id="res-val"></div>
-                        <div id="res-alert"></div>
-                        <div id="res-tip"></div>
-                    </div>
-                    <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
-                        Basado en Taylor (Maudsley Prescribing Guidelines), Leucht et al. e INTEGRATE. Juicio clínico indispensable.
-                    </p>
-                </div>`;
+        } catch (e) {
+            container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
+            return;
         }
-    } catch (e) {
-        container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
     }
+
+    const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
+    
+    // Crear un div para depuración
+    const debugHTML = `
+        <div class="debug-info">
+            <strong>Depuración:</strong><br>
+            Filas con nombres: ${window.filasConNombre.join(', ')}<br>
+            Nombres: ${window.listaFarmacos.join(', ')}<br>
+            Destinos en fila 13: ${window.destinos.join(', ')}<br>
+            Columnas destino: ${window.columnasDestino.join(', ')}
+        </div>
+    `;
+    
+    container.innerHTML = `
+        <div class="calc-ui">
+            <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
+            <label>Fármaco Origen</label>
+            <select id="f_orig">${options}</select>
+            <label>Dosis Actual (mg/día)</label>
+            <input type="number" id="d_orig" placeholder="0.00">
+            <label>Fármaco Destino</label>
+            <select id="f_dest">${options}</select>
+            <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
+            <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
+                <div id="res-val"></div>
+                <div id="res-alert"></div>
+                <div id="res-tip"></div>
+            </div>
+            ${debugHTML}
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
+                Basado en Taylor (Maudsley Prescribing Guidelines), Leucht et al. e INTEGRATE. Juicio clínico indispensable.
+            </p>
+        </div>`;
 }
 
-// --- TRADUCCIÓN DE PASOS (sin cambios) ---
+// --- TRADUCCIÓN DE PASOS (igual) ---
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
     if (!rawStr || rawStr.trim() === "") {
         return "<span style='color: #999;'>No hay instrucciones de cambio para esta combinación.</span>";
@@ -182,7 +215,7 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
     return html + '</ul>';
 }
 
-// --- FUNCIÓN DE CÁLCULO CON BÚSQUEDA DIRECTA (AJUSTA TÚ LOS ÍNDICES) ---
+// --- FUNCIÓN DE CÁLCULO (CON ÍNDICES DINÁMICOS) ---
 window.ejecutarCalculo = function() {
     const fOrigName = document.getElementById('f_orig').value.trim();
     const fDestName = document.getElementById('f_dest').value.trim();
@@ -192,10 +225,11 @@ window.ejecutarCalculo = function() {
     const d = window.dbCalc.find(f => f.farmaco === fDestName);
     
     if (!dosisO || isNaN(dosisO) || !o || !d) {
-        alert("Dosis inválida.");
+        alert("Por favor, introduce una dosis válida.");
         return;
     }
 
+    // Cálculo de dosis equivalente
     let Maudsley = (dosisO / o.factor) * d.factor;
     let porcentajeRango = (dosisO / o.max) * 100;
     let dosisRango = (porcentajeRango / 100) * d.max;
@@ -206,36 +240,59 @@ window.ejecutarCalculo = function() {
     else if (Maudsley < d.min) { bgColor = '#f1f5f9'; textColor = "#475569"; alertText = "🔍 POR DEBAJO DE MÍNIMO"; }
     else { bgColor = '#dcfce7'; textColor = "#15803d"; alertText = "✅ RANGO ESTÁNDAR"; }
 
-    document.getElementById('res-box').style.display = 'block';
-    document.getElementById('res-box').style.background = bgColor;
-    document.getElementById('res-val').innerHTML = `...`; // (lo mismo de antes, lo omito por espacio)
+    const resBox = document.getElementById('res-box');
+    resBox.style.display = 'block';
+    resBox.style.background = bgColor;
 
-    // --- BÚSQUEDA MANUAL: TÚ AJUSTAS ESTOS VALORES SEGÚN LA CONSOLA ---
-    // Índices de fármacos en la lista (empiezan en 0)
+    document.getElementById('res-val').innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.5px;">Dosis de prescripción (Maudsley)</div>
+                <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
+                <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor}; line-height: 1.2;">
+                    ${alertText}
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
+                <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
+            </div>
+        </div>
+    `;
+
+    // --- OBTENER ÍNDICES DINÁMICAMENTE ---
     const indiceOrigen = window.listaFarmacos.indexOf(fOrigName);
     const indiceDestino = window.listaFarmacos.indexOf(fDestName);
-    
-    // Parámetros que TÚ debes ajustar según lo que veas en consola
-    const offsetFilaOrigen = 1;    // ¿En qué fila empiezan los fármacos en columna A? (0=primera fila, 1=segunda, etc.)
-    const offsetColumnaDestino = 6; // ¿En qué columna empiezan los destinos en fila 13? (0=A, 1=B, ..., 6=G)
-    
-    const filaOrigen = offsetFilaOrigen + indiceOrigen;
-    const columnaDestino = offsetColumnaDestino + indiceDestino;
-    
-    console.log(`🔍 Buscando en dbRaw[${filaOrigen}][${columnaDestino}] (fila ${filaOrigen}, col ${columnaDestino})`);
-    
-    let instruccion = "";
-    if (filaOrigen < window.dbRaw.length && columnaDestino < window.dbRaw[filaOrigen].length) {
-        instruccion = window.dbRaw[filaOrigen][columnaDestino];
-        console.log("📦 Valor encontrado:", instruccion);
-    } else {
-        console.error("❌ Índices fuera de rango");
+
+    if (indiceOrigen === -1 || indiceDestino === -1) {
+        document.getElementById('res-tip').innerHTML = `<div style="color:#999;">Error: fármaco no encontrado en la lista.</div>`;
+        return;
     }
+
+    // La fila en dbRaw es la que corresponde según window.filasConNombre
+    const filaOrigen = window.filasConNombre[indiceOrigen];
+    // La columna en dbRaw es la que corresponde según window.columnasDestino
+    const columnaDestino = window.columnasDestino[indiceDestino];
+
+    console.log(`Origen: ${fOrigName} (fila ${filaOrigen}), Destino: ${fDestName} (col ${columnaDestino})`);
+
+    let instruccionRaw = "";
+    if (filaOrigen !== undefined && columnaDestino !== undefined && 
+        filaOrigen < window.dbRaw.length && columnaDestino < window.dbRaw[filaOrigen].length) {
+        instruccionRaw = window.dbRaw[filaOrigen][columnaDestino];
+        console.log("Instrucción:", instruccionRaw);
+    } else {
+        console.error("Índices fuera de rango");
+    }
+
+    let contenidoEstrategia = instruccionRaw && instruccionRaw.toString().trim() !== ""
+        ? window.traducirPasos(instruccionRaw, dosisO, Maudsley)
+        : `<span style="color: #999;">No hay instrucciones de cambio para ${fOrigName} → ${fDestName} (celda vacía).</span>`;
 
     document.getElementById('res-tip').innerHTML = `
         <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
             <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px;">Estrategia de Cambio</b>
-            ${instruccion ? window.traducirPasos(instruccion, dosisO, Maudsley) : "<span style='color:#999'>Celda vacía</span>"}
+            ${contenidoEstrategia}
         </div>
     `;
 }
