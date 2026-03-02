@@ -2,7 +2,7 @@
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // Inyección de estilos (igual que antes)
+    // Inyección de estilos
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
@@ -37,19 +37,36 @@ window.iniciarInterfazCalculadora = async function() {
             if (data.values) {
                 window.dbRaw = data.values;
                 
-                // Extraer lista de fármacos desde columna A, empezando en la fila 2 (índice 1) porque la fila 0 son cabeceras
+                // --- PARÁMETROS FIJOS (SEGÚN TU ESTRUCTURA) ---
+                // Origen: columna A, desde fila 2 (índice 1)
+                window.primerFilaOrigen = 1; // A2
+                // Destino: fila 13 (índice 12), desde columna G (índice 6)
+                window.filaDestinos = 12; // fila 13
+                window.primerColumnaDestino = 6; // col G
+                
+                // Extraer lista de fármacos desde columna A, empezando en primerFilaOrigen
                 window.listaFarmacos = [];
-                for (let i = 1; i < data.values.length; i++) {
+                for (let i = window.primerFilaOrigen; i < data.values.length; i++) {
                     const nombre = data.values[i]?.[0];
-                    if (nombre && nombre.trim() !== "") {
-                        window.listaFarmacos.push(nombre.trim());
+                    if (nombre && nombre.toString().trim() !== "") {
+                        window.listaFarmacos.push(nombre.toString().trim());
                     }
                 }
-                console.log("📌 Lista de fármacos (desde fila 2):", window.listaFarmacos);
+                console.log("📌 LISTA DE FÁRMACOS (debe empezar por Haloperidol):", window.listaFarmacos);
                 
-                // Crear dbCalc para factores (necesario para cálculos)
+                // Mostrar los destinos en fila 13 para verificar orden
+                const headerRow = data.values[window.filaDestinos];
+                if (headerRow) {
+                    let destinos = [];
+                    for (let i = window.primerColumnaDestino; i < headerRow.length; i++) {
+                        if (headerRow[i]) destinos.push({col: i, nombre: headerRow[i].toString().trim()});
+                    }
+                    console.log("📌 DESTINOS EN FILA 13 (debe coincidir con lista):", destinos);
+                }
+                
+                // Crear dbCalc para factores
                 window.dbCalc = data.values.map((row, idx) => ({
-                    farmaco: row[0] ? row[0].trim() : "",
+                    farmaco: row[0] ? row[0].toString().trim() : "",
                     factor: parseFloat(row[1]) || 1,
                     ed95: parseFloat(row[2]) || 0,
                     max: parseFloat(row[3]) || 0,
@@ -57,9 +74,6 @@ window.iniciarInterfazCalculadora = async function() {
                     umbral: parseFloat(row[5]) || 0,
                     fila: idx
                 })).filter(f => f.farmaco && f.farmaco !== "");
-                
-                console.log("📌 dbCalc (primeros 3):", window.dbCalc.slice(0,3));
-                console.log("📌 Fila 13 (destinos) - índice 12:", window.dbRaw[12]);
             }
         } catch (e) {
             container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
@@ -67,7 +81,6 @@ window.iniciarInterfazCalculadora = async function() {
         }
     }
 
-    // Generar opciones del select con la lista extraída
     const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
     
     container.innerHTML = `
@@ -91,7 +104,7 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 }
 
-// --- TRADUCCIÓN DE PASOS (siempre en mg) ---
+// --- TRADUCCIÓN DE PASOS (igual, sin cambios) ---
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
     if (!rawStr || rawStr.trim() === "") {
         return "<span style='color: #999;'>No hay instrucciones de cambio para esta combinación.</span>";
@@ -106,7 +119,6 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
         let instruccion = paso;
         let incluirPaso = true;
 
-        // Evaluar condiciones IF_ACTUAL_ (pueden estar al principio)
         while (instruccion.startsWith('IF_ACTUAL_')) {
             const match = instruccion.match(/IF_ACTUAL_([<>]=?)(\d+)mg?:(.*)/);
             if (!match) { incluirPaso = false; break; }
@@ -172,7 +184,7 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
     return html + '</ul>';
 }
 
-// --- FUNCIÓN DE CÁLCULO (CON ÍNDICES, NO NOMBRES) ---
+// --- FUNCIÓN DE CÁLCULO (CON ÍNDICES FIJOS Y VERIFICACIÓN) ---
 window.ejecutarCalculo = function() {
     const fOrigName = document.getElementById('f_orig').value.trim();
     const fDestName = document.getElementById('f_dest').value.trim();
@@ -220,7 +232,7 @@ window.ejecutarCalculo = function() {
         </div>
     `;
 
-    // --- OBTENER ÍNDICES POR ORDEN (NO POR NOMBRE EN FILA 13) ---
+    // --- OBTENER ÍNDICES POR ORDEN EN LA LISTA ---
     const indiceOrigen = window.listaFarmacos.indexOf(fOrigName);
     const indiceDestino = window.listaFarmacos.indexOf(fDestName);
 
@@ -231,23 +243,28 @@ window.ejecutarCalculo = function() {
         return;
     }
 
-    // Calcular fila y columna en dbRaw
-    const filaOrigen = indiceOrigen + 1;  // porque la fila 0 son cabeceras, la 1 es el primer fármaco
-    const columnaDestino = 6 + indiceDestino; // col G = índice 6
+    // Calcular fila y columna usando los parámetros fijos
+    const filaOrigen = window.primerFilaOrigen + indiceOrigen; // A2 + índice
+    const columnaDestino = window.primerColumnaDestino + indiceDestino; // G + índice
 
-    console.log(`📍 Accediendo a dbRaw[${filaOrigen}][${columnaDestino}]`);
+    console.log(`📍 Accediendo a dbRaw[${filaOrigen}][${columnaDestino}] (fila ${filaOrigen+1}, columna ${columnaDestino+1} en Excel)`);
 
     let instruccionRaw = "";
-    if (filaOrigen < window.dbRaw.length && columnaDestino < window.dbRaw[filaOrigen].length) {
+    if (filaOrigen >= 0 && filaOrigen < window.dbRaw.length && columnaDestino >= 0 && columnaDestino < window.dbRaw[filaOrigen].length) {
         instruccionRaw = window.dbRaw[filaOrigen][columnaDestino];
         console.log("📦 Instrucción en bruto:", instruccionRaw);
+        
+        // Verificar si la celda está vacía
+        if (!instruccionRaw || instruccionRaw.toString().trim() === "") {
+            console.warn("⚠️ La celda está vacía (esperado para mismo fármaco o sin datos)");
+        }
     } else {
         console.error("❌ Índices fuera de rango");
     }
 
     let contenidoEstrategia = instruccionRaw && instruccionRaw.toString().trim() !== ""
         ? window.traducirPasos(instruccionRaw, dosisO, Maudsley)
-        : `<span style="color: #999;">No hay instrucciones de cambio para ${fOrigName} → ${fDestName} (celda vacía o sin coincidencia).</span>`;
+        : `<span style="color: #999;">No hay instrucciones de cambio para ${fOrigName} → ${fDestName} (celda vacía).</span>`;
 
     document.getElementById('res-tip').innerHTML = `
         <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
