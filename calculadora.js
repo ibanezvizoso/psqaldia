@@ -1,4 +1,6 @@
-
+// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
+window.iniciarInterfazCalculadora = async function() {
+    const container = document.getElementById('modalData');
     // A. INYECCIÓN DE ESTILOS (Para que el diseño sea autónomo)
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
