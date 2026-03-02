@@ -1,19 +1,18 @@
 // ==========================================
-// 1. MOTOR DE TRADUCCIÓN DE INSTRUCCIONES (DSL)
+// 1. MOTOR DE TRADUCCIÓN (EL NUEVO SWITCH)
 // ==========================================
 window.traducirInstrucciones = function(rawString, dOrig, dTarget, targetMg) {
     if (!rawString || rawString.trim() === "" || rawString === "-") 
-        return "No hay pauta específica definida para este cambio.";
+        return "No hay pauta específica definida.";
 
     let instruccion = rawString;
 
-    // A. Manejo de condicionales: IF_ACTUAL_<5mg:RESTO_DEL_CODIGO
+    // A. Manejo de condicionales (Ej: IF_ACTUAL_<5mg:...)
     if (instruccion.startsWith("IF_ACTUAL_")) {
         const partes = instruccion.split(':');
-        const condicion = partes[0]; // Ej: IF_ACTUAL_<5mg o IF_ACTUAL_<=37mg
-        
-        // Extraer operador y valor
+        const condicion = partes[0]; 
         const match = condicion.match(/(<=|>=|<|>|=)(\d+)/);
+        
         if (match) {
             const operador = match[1];
             const valorCorte = parseFloat(match[2]);
@@ -40,7 +39,6 @@ window.traducirInstrucciones = function(rawString, dOrig, dTarget, targetMg) {
 
     for (let p of pasos) {
         if (objetivoAlcanzado) break;
-
         const partes = p.split(':');
         if (partes.length < 3) continue;
 
@@ -71,32 +69,31 @@ window.traducirInstrucciones = function(rawString, dOrig, dTarget, targetMg) {
         }
         htmlPasos += `<li style="margin-bottom:8px; line-height:1.4;">${textoPaso}</li>`;
     }
-
-    htmlPasos += '</ul>';
-    return htmlPasos;
+    return htmlPasos + '</ul>';
 };
 
 // ==========================================
-// 2. INTERFAZ Y CARGA DE DATOS
+// 2. CARGA DE DATOS Y ESTILOS
 // ==========================================
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // Inyectar Estilos
+    // Inyectar Estilos (Tus estilos originales)
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
         styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; font-family: sans-serif; }
-            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; color: #1e293b; }
-            .calc-ui label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; display: block; }
-            .calc-ui select, .calc-ui input { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; background: #fff; font-size: 1rem; outline: none; box-sizing: border-box; }
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
+            .calc-ui label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.8rem; display: block; }
+            .calc-ui select, .calc-ui input { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; font-family: inherit; outline: none; box-sizing: border-box; }
+            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
             .res-container { padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.05); }
+            .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
         `;
         document.head.appendChild(styleTag);
     }
-    
-    // Carga vía Worker
+
     if (!window.dbCalc) {
         try {
             const pestaña = "Data_APS"; 
@@ -104,7 +101,9 @@ window.iniciarInterfazCalculadora = async function() {
             const data = await response.json();
 
             if (data.values) {
-                window.dbRaw = data.values; // Guardamos la matriz completa (importante para instrucciones)
+                // GUARDAMOS EL RAW (Matriz completa para instrucciones)
+                window.dbRaw = data.values; 
+                // GUARDAMOS EL PROCESADO (Para matemáticas)
                 window.dbCalc = data.values.slice(1).map(row => ({
                     farmaco: row[0],
                     factor: parseFloat(row[1]) || 1,
@@ -115,13 +114,12 @@ window.iniciarInterfazCalculadora = async function() {
                 })).filter(f => f.farmaco);
             }
         } catch (e) {
-            container.innerHTML = `<div style="padding:2.5rem;">Error de conexión: ${e.message}</div>`;
+            container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
             return;
         }
     }
 
     const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
-    
     container.innerHTML = `
         <div class="calc-ui">
             <h2><i class="fas fa-calculator"></i> Calculadora APS</h2>
@@ -131,16 +129,19 @@ window.iniciarInterfazCalculadora = async function() {
             <input type="number" id="d_orig" placeholder="0.00">
             <label>Fármaco Destino</label>
             <select id="f_dest">${options}</select>
-            <button class="btn btn-primary" style="margin-top:1.5rem; width:100%; padding:1rem; border-radius:1rem; font-weight:bold; cursor:pointer;" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
+            <button class="btn btn-primary" onclick="ejecutarCalculo()">CALCULAR</button>
             <div id="res-box" class="res-container">
                 <div id="res-val"></div>
                 <div id="res-tip"></div>
             </div>
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
+                Basado en Maudsley Prescribing Guidelines e INTEGRATE. Juicio clínico indispensable.
+            </p>
         </div>`;
-}
+};
 
 // ==========================================
-// 3. FUNCIÓN DE CÁLCULO FINAL
+// 3. FUNCIÓN DE CÁLCULO (LA NUEVA LÓGICA)
 // ==========================================
 window.ejecutarCalculo = function() {
     const fOrigName = document.getElementById('f_orig').value;
@@ -157,15 +158,16 @@ window.ejecutarCalculo = function() {
         return;
     }
 
-    // Cálculos
+    // Fórmula de Maudsley:
+    // $$Dosis_{Objetivo} = \frac{Dosis_{Origen}}{Factor_{Origen}} \times Factor_{Destino}$$
     let Maudsley = (dosisO / o.factor) * d.factor;
     
-    // Semáforo de seguridad
+    // Semáforo visual
     let bgColor = Maudsley > d.max ? '#fee2e2' : (Maudsley > d.ed95 ? '#fef3c7' : '#dcfce7');
     let textColor = Maudsley > d.max ? '#b91c1c' : (Maudsley > d.ed95 ? '#b45309' : '#15803d');
-    let alertText = Maudsley > d.max ? "⚠️ EXCEDE MÁXIMA" : (Maudsley > d.ed95 ? "⚠️ RANGO ED95" : "✅ RANGO SEGURO");
+    let alertText = Maudsley > d.max ? "⚠️ EXCEDE MÁXIMA" : (Maudsley > d.ed95 ? "⚠️ RANGO ALTO" : "✅ RANGO ESTÁNDAR");
 
-    // Localizar instrucción en la matriz (Columna G es índice 6)
+    // BUSCAR INSTRUCCIÓN: Columna G (índice 6) + índice del fármaco destino
     const dColIndex = 6 + dIndex; 
     const rawInstruction = window.dbRaw[oIndex + 1][dColIndex]; 
     
@@ -176,15 +178,15 @@ window.ejecutarCalculo = function() {
     resBox.style.background = bgColor;
 
     document.getElementById('res-val').innerHTML = `
-        <div style="background: rgba(255,255,255,0.6); padding: 1.2rem; border-radius: 1rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">DOSIS EQUIVALENTE (MAUDSLEY)</div>
-            <div style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">${Maudsley.toFixed(1)} <span style="font-size: 1rem;">mg/día</span></div>
-            <div style="margin-top: 10px; display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; background: #fff; color: ${textColor}; border: 1px solid ${textColor};">${alertText}</div>
+        <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center;">
+            <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted);">Dosis de prescripción</div>
+            <div style="font-size: 2.8rem; font-weight: 900; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg</span></div>
+            <div style="margin-top: 10px; display: inline-block; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor};">${alertText}</div>
         </div>`;
 
     document.getElementById('res-tip').innerHTML = `
         <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px;">
-            <b style="font-size: 0.7rem; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 10px;">Estrategia de Cambio (Automática)</b>
+            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 10px;">Estrategia Automática</b>
             ${tipTraducido}
         </div>`;
 };
