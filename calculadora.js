@@ -25,10 +25,9 @@ window.iniciarInterfazCalculadora = async function() {
             if (data.error) throw new Error(data.details || data.error);
 
             if (data.values) {
-                // Guardamos los valores brutos para las instrucciones
                 window.dbRaw = data.values; 
-                // Mapeamos los datos numéricos (asumiendo que los datos empiezan en la fila 1)
-                window.dbCalc = data.values.slice(1).map(row => ({
+                // Procesamos los fármacos de las filas 2 a 12 (índices 1 a 11)
+                window.dbCalc = data.values.slice(1, 12).map(row => ({
                     farmaco: row[0],
                     factor: parseFloat(row[1]) || 1,
                     ed95: parseFloat(row[2]) || 0,
@@ -63,23 +62,30 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 }
 
-// --- MOTOR DE TRADUCCIÓN LÓGICA ---
+// --- MOTOR DE TRADUCCIÓN LÓGICA (Corregido para tu Excel) ---
 window.traducirInstrucciones = function(rawString, dOrig, nombreDestino, targetMg) {
-    if (!rawString || rawString.trim() === "") return `<div style="opacity:0.5;">No hay pauta definida en el Excel para este cruce.</div>`;
+    if (!rawString || rawString.trim() === "" || rawString === "undefined") 
+        return `<div style="opacity:0.5;">No hay pauta definida para este cruce.</div>`;
 
     let instruccion = rawString;
 
-    // 1. Lógica IF_ACTUAL
+    // 1. Lógica IF_ACTUAL (Soporta <, >, <=, >=)
     if (instruccion.startsWith("IF_ACTUAL_")) {
-        const regex = /IF_ACTUAL_([<>])(\d+):/;
+        const regex = /IF_ACTUAL_([<>]=?)(\d+):/;
         const match = instruccion.match(regex);
         if (match) {
             const operador = match[1];
             const valorCorte = parseFloat(match[2]);
-            const cumple = (operador === '<') ? dOrig < valorCorte : dOrig > valorCorte;
+            let cumple = false;
+            
+            if (operador === '<') cumple = dOrig < valorCorte;
+            else if (operador === '>') cumple = dOrig > valorCorte;
+            else if (operador === '<=') cumple = dOrig <= valorCorte;
+            else if (operador === '>=') cumple = dOrig >= valorCorte;
             
             if (cumple) {
-                instruccion = instruccion.replace(/IF_ACTUAL_[<>]\d+:/, '');
+                // Quitamos el prefijo IF_ACTUAL_...: para procesar el resto
+                instruccion = instruccion.split(':').slice(1).join(':');
             } else {
                 return `<div style="padding:10px; opacity:0.7;">Dosis fuera de rango para pauta automática. Ajustar según criterio clínico.</div>`;
             }
@@ -95,20 +101,21 @@ window.traducirInstrucciones = function(rawString, dOrig, nombreDestino, targetM
         if (partes.length < 3) return;
 
         const dia = partes[0].replace('D', '').trim();
-        const sujeto = partes[1]; // ACTUAL o NUEVO
-        const accion = partes[2]; // STOP, INICIAR, SUBIR, etc.
+        const sujeto = partes[1]; 
+        const accion = partes[2]; 
         const valor = partes[3] || "";
 
         if (!timeline[dia]) timeline[dia] = { ACTUAL: [], NUEVO: [] };
 
         if (sujeto === "ACTUAL") {
             if (accion === "STOP") timeline[dia].ACTUAL.push("Suspender completamente");
-            if (accion === "REDUCIR") timeline[dia].ACTUAL.push(`Reducir al ${valor}`);
-            if (accion === "MANTENER") timeline[dia].ACTUAL.push("Mantener dosis");
+            else if (accion === "REDUCIR") timeline[dia].ACTUAL.push(`Reducir al ${valor}`);
+            else if (accion === "MANTENER") timeline[dia].ACTUAL.push("Mantener dosis");
         } 
         else if (sujeto === "NUEVO" && !objetivoAlcanzado) {
             if (accion === "INICIAR" || accion === "SUBIR") {
                 const mgPaso = parseFloat(valor);
+                // REGLA DEL TECHO: Si el paso del Excel supera el target calculado
                 if (valor === "TARGET" || (!isNaN(mgPaso) && mgPaso >= targetMg)) {
                     timeline[dia].NUEVO.push(`Alcanzar dosis objetivo de <b>${targetMg.toFixed(1)} mg</b>`);
                     objetivoAlcanzado = true;
@@ -116,16 +123,15 @@ window.traducirInstrucciones = function(rawString, dOrig, nombreDestino, targetM
                     timeline[dia].NUEVO.push(`${accion === "INICIAR" ? "Iniciar" : "Subir"} a ${valor}`);
                 }
             }
-            if (accion === "TITULAR_PROGRESIVO") {
+            else if (accion === "TITULAR_PROGRESIVO") {
                 timeline[dia].NUEVO.push(`Desde este día, titular hasta <b>${targetMg.toFixed(1)} mg</b>`);
                 objetivoAlcanzado = true;
             }
         }
     });
 
-    // Renderizado en tarjetas
     let html = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">`;
-    Object.keys(timeline).sort((a,b) => a-b).forEach(d => {
+    Object.keys(timeline).sort((a,b) => parseInt(a)-parseInt(b)).forEach(d => {
         html += `
             <div style="background:white; border-radius:12px; padding:12px; border:1px solid rgba(0,0,0,0.06);">
                 <div style="font-size:0.65rem; font-weight:900; color:var(--primary); text-transform:uppercase; margin-bottom:8px;">Día ${d}</div>
@@ -162,7 +168,6 @@ window.ejecutarCalculo = function() {
     const porcentajeRango = (dosisO / o.max) * 100;
     const dosisRango = (porcentajeRango / 100) * d.max;
     
-    // Alertas visuales
     let color = Maudsley > d.max ? "#b91c1c" : (Maudsley > d.ed95 ? "#b45309" : "#15803d");
     let bg = Maudsley > d.max ? "#fee2e2" : (Maudsley > d.ed95 ? "#fef3c7" : "#dcfce7");
     let txt = Maudsley > d.max ? "⚠️ EXCEDE MÁXIMA" : (Maudsley > d.ed95 ? "⚠️ SUPERIOR ED95" : "✅ RANGO ESTÁNDAR");
@@ -176,17 +181,13 @@ window.ejecutarCalculo = function() {
             <div style="font-size:2.2rem; font-weight:900;">${Maudsley.toFixed(1)} <span style="font-size:1rem;">mg/d</span></div>
             <div style="font-size:0.7rem; font-weight:800; color:${color}; border:1px solid ${color}; display:inline-block; padding:2px 8px; border-radius:20px; margin-top:5px;">${txt}</div>
         </div>
-        <div style="display:flex; justify-content:space-between; margin-top:10px; padding:0 5px; opacity:0.8; font-size:0.8rem;">
-            <span>Equivalencia Rango (${porcentajeRango.toFixed(0)}%)</span>
-            <b>${dosisRango.toFixed(1)} mg</b>
-        </div>
     `;
 
-    // Localizar la instrucción en dbRaw
-    // Fila: Buscamos el fármaco de origen (saltando cabecera)
+    // CORRECCIÓN DE LOCALIZACIÓN: 
+    // Fila: Buscamos el fármaco de origen en la columna A
     const rowIndex = window.dbRaw.findIndex(row => row[0] === fOrigName);
-    // Columna: Buscamos el nombre del destino en la fila de cabecera (Fila 0)
-    const colIndex = window.dbRaw[0].findIndex(cell => cell && cell.toString().trim().toUpperCase() === fDestName.toUpperCase());
+    // Columna: Buscamos el destino en la FILA 13 (índice 12 en JS) según tu imagen
+    const colIndex = window.dbRaw[12].findIndex(cell => cell && cell.toString().trim().toLowerCase() === fDestName.toLowerCase());
 
     const rawStr = (rowIndex > -1 && colIndex > -1) ? window.dbRaw[rowIndex][colIndex] : "";
     
