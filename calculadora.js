@@ -1,83 +1,39 @@
-/* =========================================================
-   MOTOR DE SWITCH PSQALDÍA – VERSION LIMPIA Y ROBUSTA
-   ========================================================= */
-
-/* ------------------------------
-   PARSER DE CONDICIONALES
---------------------------------*/
-
-function resolverCondicional(rawString, dosisActual) {
-    if (!rawString) return "";
-
-    let bloques = rawString.split('|').map(b => b.trim()).filter(Boolean);
-    let resultado = [];
-
-    for (let bloque of bloques) {
-
-        if (bloque.startsWith("IF_ACTUAL_")) {
-            // Ejemplo: IF_ACTUAL_<5mg:D1:ACTUAL:STOP
-            const match = bloque.match(/IF_ACTUAL_([<>]=?)(\d+)mg:(.+)/);
-
-            if (match) {
-                const operador = match[1];
-                const valor = parseFloat(match[2]);
-                const resto = match[3];
-
-                let cumple = false;
-
-                if (operador === "<") cumple = dosisActual < valor;
-                if (operador === ">") cumple = dosisActual > valor;
-                if (operador === "<=") cumple = dosisActual <= valor;
-                if (operador === ">=") cumple = dosisActual >= valor;
-
-                if (cumple) resultado.push(resto);
-            }
-
-        } else {
-            resultado.push(bloque);
-        }
-    }
-
-    return resultado;
-}
-
-/* ------------------------------
-   TRADUCTOR A ESTRUCTURA POR DÍAS
---------------------------------*/
+/* =====================================================
+   MOTOR VISUAL DE SWITCH APS
+===================================================== */
 
 window.traducirInstrucciones = function(rawString, dosisActual, nombreDestino, targetMg) {
 
     if (!rawString || rawString.trim() === "")
-        return `<div style="opacity:0.7;">No hay pauta específica definida.</div>`;
+        return `<div style="opacity:0.6;">No hay pauta automática definida.</div>`;
 
-    const pasosProcesados = resolverCondicional(rawString, dosisActual);
+    const pasos = rawString
+        .split('|')
+        .map(p => p.trim())
+        .filter(Boolean);
 
-    if (!pasosProcesados.length)
-        return `<div style="opacity:0.7;">Dosis fuera de rango de pauta automática.</div>`;
-
-    // Estructura por día
     const timeline = {};
 
-    pasosProcesados.forEach(p => {
-        const partes = p.split(':');
+    pasos.forEach(p => {
 
+        const partes = p.split(':');
         if (partes.length < 3) return;
 
-        const dia = partes[0].replace('D', '');
+        const diaNum = partes[0].replace('D', '').trim();
         const sujeto = partes[1];
         const accion = partes[2];
         const valor = partes[3] || null;
 
-        if (!timeline[dia]) {
-            timeline[dia] = {
-                ACTUAL: [],
-                NUEVO: []
-            };
+        if (!timeline[diaNum]) {
+            timeline[diaNum] = { ACTUAL: [], NUEVO: [] };
         }
 
         let texto = "";
 
-        /* ----- ACCIONES ORIGEN ----- */
+        /* =========================
+           FÁRMACO ACTUAL
+        ========================== */
+
         if (sujeto === "ACTUAL") {
 
             if (accion === "STOP")
@@ -89,38 +45,47 @@ window.traducirInstrucciones = function(rawString, dosisActual, nombreDestino, t
             if (accion === "MANTENER")
                 texto = "Mantener dosis actual";
 
-            timeline[dia].ACTUAL.push(texto);
+            if (texto) timeline[diaNum].ACTUAL.push(texto);
         }
 
-        /* ----- ACCIONES NUEVO ----- */
+        /* =========================
+           FÁRMACO NUEVO
+        ========================== */
+
         if (sujeto === "NUEVO") {
 
             if (accion === "INICIAR") {
+
                 if (valor === "TARGET") {
-                    texto = `Iniciar directamente a dosis objetivo (${targetMg.toFixed(1)} mg)`;
+                    texto = `Alcanzar dosis objetivo (${targetMg.toFixed(1)} mg)`;
                 } else {
-                    texto = `Iniciar a ${valor}`;
+                    texto = `Ajustar a ${valor}`;
                 }
             }
 
-            if (accion === "TITULAR_PROGRESIVO")
-                texto = `Iniciar titulación progresiva hasta ${targetMg.toFixed(1)} mg`;
+            if (accion === "SUBIR") {
 
-            if (accion === "SUBIR")
-                texto = `Subir a ${valor}`;
+                if (valor === "TARGET") {
+                    texto = `Alcanzar dosis objetivo (${targetMg.toFixed(1)} mg)`;
+                } else {
+                    texto = `Subir a ${valor}`;
+                }
+            }
 
-            timeline[dia].NUEVO.push(texto);
+            if (accion === "TITULAR_PROGRESIVO") {
+                texto = `Desde este día, titulación progresiva hasta ${targetMg.toFixed(1)} mg`;
+            }
+
+            if (texto) timeline[diaNum].NUEVO.push(texto);
         }
 
     });
 
-    /* ------------------------------
+    /* =========================
        RENDER VISUAL
-    --------------------------------*/
+    ========================== */
 
-    let html = `
-    <div style="margin-top:20px; display:flex; flex-direction:column; gap:12px;">
-    `;
+    let html = `<div style="margin-top:20px;display:flex;flex-direction:column;gap:16px;">`;
 
     Object.keys(timeline)
         .sort((a,b)=>parseInt(a)-parseInt(b))
@@ -129,47 +94,46 @@ window.traducirInstrucciones = function(rawString, dosisActual, nombreDestino, t
             html += `
             <div style="
                 border:1px solid rgba(0,0,0,0.08);
-                border-radius:16px;
-                padding:14px;
+                border-radius:18px;
+                padding:18px;
                 background:white;
-                box-shadow:0 2px 8px rgba(0,0,0,0.04);
             ">
-                <div style="
-                    font-size:0.75rem;
-                    font-weight:800;
-                    text-transform:uppercase;
-                    margin-bottom:10px;
-                    opacity:0.6;
-                ">
+                <div style="font-size:0.75rem;font-weight:800;opacity:0.6;margin-bottom:14px;">
                     Día ${dia}
                 </div>
 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
                     <div style="
                         background:#fff1f2;
                         border:1px solid #fecdd3;
-                        padding:10px;
-                        border-radius:12px;
-                        font-size:0.85rem;
+                        padding:14px;
+                        border-radius:14px;
                     ">
-                        <div style="font-weight:700; margin-bottom:6px;">Fármaco de origen</div>
-                        ${timeline[dia].ACTUAL.length 
-                            ? timeline[dia].ACTUAL.map(t=>`<div>• ${t}</div>`).join('')
-                            : `<div style="opacity:0.4;">—</div>`}
+                        <div style="font-weight:800;margin-bottom:8px;">
+                            Fármaco de origen
+                        </div>
+                        ${
+                            timeline[dia].ACTUAL.length
+                                ? timeline[dia].ACTUAL.map(t=>`<div style="margin-bottom:6px;">• ${t}</div>`).join('')
+                                : `<div style="opacity:0.35;">—</div>`
+                        }
                     </div>
 
                     <div style="
                         background:#f0fdf4;
                         border:1px solid #bbf7d0;
-                        padding:10px;
-                        border-radius:12px;
-                        font-size:0.85rem;
+                        padding:14px;
+                        border-radius:14px;
                     ">
-                        <div style="font-weight:700; margin-bottom:6px;">${nombreDestino}</div>
-                        ${timeline[dia].NUEVO.length 
-                            ? timeline[dia].NUEVO.map(t=>`<div>• ${t}</div>`).join('')
-                            : `<div style="opacity:0.4;">—</div>`}
+                        <div style="font-weight:800;margin-bottom:8px;">
+                            ${nombreDestino}
+                        </div>
+                        ${
+                            timeline[dia].NUEVO.length
+                                ? timeline[dia].NUEVO.map(t=>`<div style="margin-bottom:6px;">• ${t}</div>`).join('')
+                                : `<div style="opacity:0.35;">—</div>`
+                        }
                     </div>
 
                 </div>
@@ -183,9 +147,9 @@ window.traducirInstrucciones = function(rawString, dosisActual, nombreDestino, t
 };
 
 
-/* =========================================================
-   FUNCIÓN PRINCIPAL DE CÁLCULO
-   ========================================================= */
+/* =====================================================
+   FUNCIÓN DE CÁLCULO COMPLETA
+===================================================== */
 
 window.ejecutarCalculo = function() {
 
@@ -194,30 +158,45 @@ window.ejecutarCalculo = function() {
     const dosisO = parseFloat(document.getElementById('d_orig').value);
 
     const oIndex = window.dbCalc.findIndex(f => f.farmaco === fOrigName);
-    const o = window.dbCalc[oIndex];
-    const d = window.dbCalc.find(f => f.farmaco === fDestName);
+    const dIndex = window.dbCalc.findIndex(f => f.farmaco === fDestName);
 
-    const dColIndex = 6 + window.dbCalc.findIndex(f => f.farmaco === fDestName);
+    const o = window.dbCalc[oIndex];
+    const d = window.dbCalc[dIndex];
 
     if (!dosisO || isNaN(dosisO) || !o || !d) {
-        alert("Introduce una dosis válida.");
+        alert("Por favor, introduce una dosis válida.");
         return;
     }
 
-    /* --- CÁLCULO MAUDSLEY --- */
+    /* =========================
+       CÁLCULO MAUDSLEY
+    ========================== */
+
     let Maudsley = (dosisO / o.factor) * d.factor;
+    let porcentajeRango = (dosisO / o.max) * 100;
+    let dosisRango = (porcentajeRango / 100) * d.max;
 
-    let bgColor = Maudsley > d.max ? '#fee2e2'
-                 : (Maudsley > d.ed95 ? '#fef3c7'
-                 : '#dcfce7');
+    /* =========================
+       ALERTAS
+    ========================== */
 
-    let textColor = Maudsley > d.max ? '#b91c1c'
-                   : (Maudsley > d.ed95 ? '#b45309'
-                   : '#15803d');
+    let bgColor = "";
+    let textColor = "";
+    let alertText = "";
 
-    let alertText = Maudsley > d.max
-        ? "⚠️ EXCEDE DOSIS MÁXIMA"
-        : "✅ RANGO ESTÁNDAR";
+    if (Maudsley > d.max) {
+        bgColor = '#fee2e2';
+        textColor = "#b91c1c";
+        alertText = "⚠️ EXCEDE DOSIS MÁXIMA";
+    } else if (Maudsley > d.ed95) {
+        bgColor = '#fef3c7';
+        textColor = "#b45309";
+        alertText = "⚠️ SUPERIOR A ED95";
+    } else {
+        bgColor = '#dcfce7';
+        textColor = "#15803d";
+        alertText = "✅ RANGO ESTÁNDAR";
+    }
 
     const resBox = document.getElementById('res-box');
     const resVal = document.getElementById('res-val');
@@ -227,45 +206,41 @@ window.ejecutarCalculo = function() {
     resBox.style.background = bgColor;
 
     resVal.innerHTML = `
-        <div style="text-align:center;">
-            <div style="font-size:0.75rem; font-weight:800; opacity:0.6;">
-                Dosis equivalente (Maudsley)
+        <div style="background:white;padding:1.5rem;border-radius:1.2rem;text-align:center;">
+            <div style="font-size:0.75rem;font-weight:800;opacity:0.6;margin-bottom:8px;">
+                Dosis equivalente estimada
             </div>
-            <div style="font-size:2.8rem; font-weight:900;">
+            <div style="font-size:2.8rem;font-weight:900;">
                 ${Maudsley.toFixed(1)} mg/día
             </div>
-            <div style="
-                margin-top:10px;
-                font-size:0.75rem;
-                font-weight:800;
-                color:${textColor};
-            ">
+            <div style="margin-top:12px;font-weight:800;color:${textColor};">
                 ${alertText}
             </div>
         </div>
     `;
 
-    const rawInstruction = window.dbRaw[oIndex + 1][dColIndex];
+    /* =========================
+       LECTURA CORRECTA DEL SHEET
+    ========================== */
 
-    const tipTraducido = window.traducirInstrucciones(
-        rawInstruction,
-        dosisO,
-        fDestName,
-        Maudsley
-    );
+    // dbRaw debe contener la hoja completa incluyendo cabeceras
+    // Primera fila = cabecera
+    // Primera columna = nombre fármaco
+
+    const rawInstruction =
+        window.dbRaw[oIndex + 1][dIndex + 6]; 
+        // +1 por cabecera
+        // +6 porque las instrucciones empiezan en columna G
+
+    const timelineHTML =
+        window.traducirInstrucciones(rawInstruction, dosisO, fDestName, Maudsley);
 
     resTip.innerHTML = `
         <div style="margin-top:20px;">
-            <div style="
-                font-size:0.75rem;
-                font-weight:800;
-                text-transform:uppercase;
-                opacity:0.6;
-                margin-bottom:10px;
-            ">
-                Estrategia automática de cambio
+            <div style="font-size:0.75rem;font-weight:800;opacity:0.6;margin-bottom:10px;">
+                Estrategia de Cambio
             </div>
-            ${tipTraducido}
+            ${timelineHTML}
         </div>
     `;
 };
