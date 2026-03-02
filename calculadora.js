@@ -1,196 +1,187 @@
-// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
+/**
+ * CALCULADORA APS (Antipsychotic Switch)
+ * Versión: Corrección Final - Origen A2 / Destino Fila 13
+ */
+
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
-    // A. INYECCIÓN DE ESTILOS (Para que el diseño sea autónomo)
+
+    // 1. ESTILOS
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
         styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
-            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
-            .calc-ui label { 
-                font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
-                color: var(--text-muted); margin-top: 0.8rem; display: block; 
-            }
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+            .calc-ui h2 { margin: 0 0 1rem 0; font-weight: 800; display: flex; align-items: center; gap: 12px; color: var(--text-main); }
+            .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.6rem; display: block; }
             .calc-ui select, .calc-ui input { 
                 width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
-                background: var(--bg); color: var(--text-main); font-size: 1rem; 
-                font-family: inherit; outline: none; box-sizing: border-box;
+                background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; box-sizing: border-box;
             }
-            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
-            .res-container { 
-                padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; 
-                display: none; border: 1px solid rgba(0,0,0,0.05); 
+            .btn-ejecutar { 
+                margin-top: 1rem; padding: 1.1rem; background: var(--primary); color: white; 
+                border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1rem;
             }
-            .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
+            .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); overflow: hidden; }
+            .res-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+            .res-pauta { padding: 1.5rem; background: var(--bg); }
+            .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
+            .pauta-step:not(:last-child)::after { 
+                content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; 
+                width: 2px; background: var(--border); opacity: 0.5; 
+            }
+            .step-idx { 
+                min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); 
+                border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                font-weight: 900; font-size: 0.8rem; z-index: 1;
+            }
+            .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
+            .tag-orig { background: #fee2e2; color: #b91c1c; }
+            .tag-dest { background: #dcfce7; color: #15803d; }
+            .step-txt { font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
         `;
         document.head.appendChild(styleTag);
     }
-    
-    // 1. CARGA AUTÓNOMA DE DATOS (Solo si no existen)
-   // 1. CARGA AUTÓNOMA DE DATOS (Vía Worker)
-if (!window.dbCalc) {
-    try {
-        const pestaña = "Data_APS"; 
-        // IMPORTANTE: window.WORKER_URL debe estar definida en tu index.html
-        const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
-        const data = await response.json();
 
-        if (data.error) {
-            throw new Error(data.details || data.error);
-        }
+    // 2. CARGA DE DATOS
+    if (!window.dbCalc) {
+        try {
+            const pestaña = "Data_APS";
+            const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const data = await response.json();
+            
+            if (data.values) {
+                window.dbRaw = data.values;
+                window.dbCalc = [];
+                window.listaFarmacos = [];
+                window.mapColSwitch = {};
 
-        if (data.values) {
-            window.dbCalc = data.values.map(row => ({
-                farmaco: row[0],
-                factor: parseFloat(row[1]) || 1,
-                ed95: parseFloat(row[2]) || 0,
-                max: parseFloat(row[3]) || 0,
-                min: parseFloat(row[4]) || 0,
-                umbral: parseFloat(row[5]) || 0
-            }));
+                // --- MAPEO DE COLUMNAS (Fila 13 -> Índice 12) ---
+                const fila13 = data.values[12]; 
+                if (fila13) {
+                    fila13.forEach((val, idx) => {
+                        if (val && val.toString().trim() !== "") {
+                            window.mapColSwitch[val.toString().trim().toUpperCase()] = idx;
+                        }
+                    });
+                }
+
+                // --- MAPEO DE FILAS (Columna A, desde A2 -> Índice 1) ---
+                for (let i = 1; i < data.values.length; i++) {
+                    const row = data.values[i];
+                    if (row && row[0]) {
+                        const nombre = row[0].toString().trim();
+                        if (nombre !== "" && nombre.toLowerCase() !== "farmaco") {
+                            window.listaFarmacos.push(nombre);
+                            window.dbCalc.push({
+                                farmaco: nombre,
+                                filaIdx: i, 
+                                factor: parseFloat(row[1]) || 1,
+                                max: parseFloat(row[3]) || 0,
+                                categoria: row[11] || "Antipsicótico"
+                            });
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            container.innerHTML = `<div style="padding:2rem;">Error: ${e.message}</div>`;
+            return;
         }
-    } catch (e) {
-        console.error("Error en la calculadora:", e);
-        container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
-        return;
     }
-}
 
-    // 2. TU CÓDIGO ORIGINAL DE RENDERIZADO
-    const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
-    
+    // 3. RENDERIZADO (Haloperidol será el primero porque es el primero en dbCalc)
+    const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
     container.innerHTML = `
         <div class="calc-ui">
-            <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
-            
+            <h2><i class="fas fa-random"></i> APS Switch Manager</h2>
             <label>Fármaco Origen</label>
             <select id="f_orig">${options}</select>
-            
             <label>Dosis Actual (mg/día)</label>
-            <input type="number" id="d_orig" placeholder="0.00">
-            
+            <input type="number" id="d_orig" placeholder="0.00" step="any">
             <label>Fármaco Destino</label>
             <select id="f_dest">${options}</select>
-            
-            <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
-            
-            <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
-                <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
-                <div id="res-alert"></div>
-                <div id="res-tip"></div>
+            <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
+            <div id="res-box" class="res-container">
+                <div id="res-header" class="res-header"></div>
+                <div id="res-pauta" class="res-pauta"></div>
             </div>
-            
-            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
-                Basado en Taylor (Maudsley Prescribing Guidelines), Leucht et al. e INTEGRATE. Juicio clínico indispensable.
-            </p>
         </div>`;
-}
-
-// --- TU MATRIZ ORIGINAL ---
-const MATRIZ_INTEGRATE = {
-  "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
-  "RISPERIDONA-PALIPERIDONA": "Cambio Directo: Stop origen e iniciar dosis equivalente el Día 1.",
-  "DESTINO-CARIPRAZINA": "Cambio Lento (4 sem): Iniciar 1.5 mg. Mantener origen total 21 días. Reducir origen al 50% día 22. Stop día 29.",
-  "DESTINO-BREXPIPRAZOL": "Solapamiento 12d: Día 1: 1 mg, Día 2: 2 mg. Reducir origen al 50% y suspender el Día 12.",
-  "ORIGEN-ARIPIPRAZOL": "Elección: A) Stop Día 1 o B) Reducir al 50% el Día 1 y Stop el Día 14.",
-  "ORIGEN-QUETIAPINA": "Si dosis > 300 mg: IR: Reducir 25% cada 4 días (Stop día 13). MR: Reducir 50% 1 semana (Stop día 8).",
-  "ORIGEN-AGONISTA_PARCIAL": "Stop & Start: Suspender origen el Día 1. Iniciar destino el Día 1 (titulando según fármaco)."
 };
 
-// --- TU FUNCIÓN DE CÁLCULO ORIGINAL (Globalizada) ---
+// 4. LÓGICA DE CÁLCULO
 window.ejecutarCalculo = function() {
-    const fOrigName = document.getElementById('f_orig').value;
-    const fDestName = document.getElementById('f_dest').value;
+    const fOrigNom = document.getElementById('f_orig').value;
+    const fDestNom = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
     
-    const o = window.dbCalc.find(f => f.farmaco === fOrigName);
-    const d = window.dbCalc.find(f => f.farmaco === fDestName);
+    const o = window.dbCalc.find(f => f.farmaco === fOrigNom);
+    const d = window.dbCalc.find(f => f.farmaco === fDestNom);
     
-    if (!dosisO || isNaN(dosisO) || !o || !d) {
-        alert("Por favor, introduce una dosis válida.");
-        return;
+    if (isNaN(dosisO) || !o || !d) {
+        alert("Por favor, introduce una dosis válida."); return;
     }
 
-    let Maudsley = (dosisO / o.factor) * d.factor;
-    let porcentajeRango = (dosisO / o.max) * 100;
-    let dosisRango = (porcentajeRango / 100) * d.max;
+    // Cálculo Maudsley
+    const Maudsley = (dosisO / o.factor) * d.factor;
     
-    let bgColor = ""; let textColor = ""; let alertText = "";
-
-    if (Maudsley > d.max) {
-        bgColor = '#fee2e2'; textColor = "#b91c1c"; 
-        alertText = "⚠️ EXCEDE DOSIS MÁXIMA en ficha técnica";
-    } else if (Maudsley > d.ed95) {
-        bgColor = '#fef3c7'; textColor = "#b45309"; 
-        alertText = "⚠️ SUPERIOR A ED95 (dosis para 95% respuesta)";
-    } else if (Maudsley < d.min) {
-        bgColor = '#f1f5f9'; textColor = "#475569"; 
-        alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO";
-    } else {
-        bgColor = '#dcfce7'; textColor = "#15803d"; 
-        alertText = "✅ RANGO ESTÁNDAR";
-    }
-
     const resBox = document.getElementById('res-box');
-    const resVal = document.getElementById('res-val');
-    const resAlert = document.getElementById('res-alert');
-    const resTip = document.getElementById('res-tip');
-
+    const header = document.getElementById('res-header');
     resBox.style.display = 'block';
-    resBox.style.background = bgColor;
-    if(resAlert) resAlert.innerHTML = ""; 
-
-    resVal.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.5px;">Dosis de prescripción (Maudsley)</div>
-                <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
-                
-                <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor}; line-height: 1.2;">
-                    ${alertText}
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
-                <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
-            </div>
-        </div>
+    
+    header.style.background = `hsl(${(fDestNom.length * 60) % 360}, 80%, 94%)`;
+    header.innerHTML = `
+        <div style="font-size:0.7rem; font-weight:800; opacity:0.6; text-transform:uppercase;">Dosis Objetivo Maudsley</div>
+        <div style="font-size:2.8rem; font-weight:900;">${Maudsley.toFixed(1)} <span style="font-size:1.2rem;">mg/día</span></div>
     `;
 
-    let tip = "";
-    const oName = o.farmaco.toUpperCase();
-    const dName = d.farmaco.toUpperCase();
-    const parClave = `${oName}-${dName}`;
+    // CRUCE DE MATRIZ: Fila de Columna A vs Columna de Fila 13
+    const filaIdx = o.filaIdx;
+    const colIdx = window.mapColSwitch[fDestNom.toUpperCase()];
 
-    if (MATRIZ_INTEGRATE[parClave]) {
-        tip = MATRIZ_INTEGRATE[parClave];
-    } else if (dName === "CARIPRAZINA") {
-        tip = MATRIZ_INTEGRATE["DESTINO-CARIPRAZINA"];
-    } else if (dName === "BREXPIPRAZOL") {
-        tip = MATRIZ_INTEGRATE["DESTINO-BREXPIPRAZOL"];
-    } else if (oName === "ARIPIPRAZOL") {
-        tip = MATRIZ_INTEGRATE["ORIGEN-ARIPIPRAZOL"];
-    } else if (oName === "CARIPRAZINA" || oName === "BREXPIPRAZOL") {
-        tip = MATRIZ_INTEGRATE["ORIGEN-AGONISTA_PARCIAL"];
-    } else if (oName === "QUETIAPINA") {
-        tip = MATRIZ_INTEGRATE["ORIGEN-QUETIAPINA"];
-    } else {
-        if (dosisO <= o.umbral) {
-            tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
-        } else {
-            tip = `Reducción gradual: Reducir ${o.farmaco} al 50% el Día 1 y suspender tras 7 días de solapamiento con el nuevo fármaco.`;
+    let rawInstr = "";
+    if (colIdx !== undefined && window.dbRaw[filaIdx]) {
+        rawInstr = window.dbRaw[filaIdx][colIdx] ? window.dbRaw[filaIdx][colIdx].toString() : "";
+    }
+
+    document.getElementById('res-pauta').innerHTML = `
+        <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>
+        ${fOrigNom === fDestNom ? 'El fármaco de origen y destino es el mismo.' : window.traducirPasos(rawInstr, dosisO, Maudsley)}
+    `;
+};
+
+// 5. TRADUCTOR DE PASOS
+window.traducirPasos = function(rawStr, dOrig, targetMg) {
+    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") return "No se ha definido una pauta específica en la matriz.";
+    
+    const bloques = rawStr.split('|').map(b => b.trim()).filter(Boolean);
+    let html = '';
+    bloques.forEach(bloque => {
+        let texto = bloque;
+        if (texto.startsWith("IF_ACTUAL_")) {
+            const m = texto.match(/IF_ACTUAL_([<>]=?)([\d.]+)(?:mg)?:(.*)/);
+            if (m) {
+                const op = m[1], corte = parseFloat(m[2]), resto = m[3];
+                const cumple = eval(`${dOrig} ${op === '=' ? '==' : op} ${corte}`);
+                if (!cumple) return; 
+                texto = resto.trim();
+            }
         }
-    }
-
-    if (dName === "QUETIAPINA") {
-        tip += "<br><br>Iniciar Quetiapina de forma gradual (ej. 25-50mg) y subir hasta la dosis objetivo en 4-7 días.";
-    }
-    resTip.innerHTML = `
-        <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
-            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px;">Estrategia de Cambio</b>
-            ${tip}
-        </div>
-    `;
-}
+        const p = texto.split(':').map(s => s.trim());
+        if (p.length < 3) return;
+        const dia = p[0].replace('D', 'Día '), sujeto = p[1], accion = p[2], valor = p[3] || "";
+        let desc = '';
+        if (sujeto === 'ACTUAL') {
+            if (accion === 'STOP') desc = 'Suspender origen.';
+            else if (accion === 'REDUCIR') desc = `Bajar origen al ${valor} (<b>${(dOrig * parseFloat(valor) / 100).toFixed(1)} mg</b>).`;
+            else desc = `${accion} ${valor}`;
+        } else {
+            if (valor.includes('TARGET')) {
+                const pct = valor.includes('%') ? parseFloat(valor) : 100;
+                desc = `Nuevo fármaco al ${pct}% de la dosis objetivo (<b>${(targetMg * pct / 100).toFixed(1)} mg</b>).`;
+            } else desc = `Iniciar nuevo fármaco a ${valor}.`;
+        }
+        html += `<div class="pauta-step"><div class="step-idx">${dia.replace('Día ', '')}</div><div class="step-body"><span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto === 'ACTUAL' ? 'Origen' : 'Nuevo'}</span><div class="step-txt">${desc}</div></div></div>`;
+    });
+    return html;
+};
