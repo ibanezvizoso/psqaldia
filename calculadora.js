@@ -1,8 +1,7 @@
-// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
+// --- 1. INICIALIZACIÓN Y CARGA DE DATOS ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // A. INYECCIÓN DE ESTILOS (Idénticos a tu original)
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
@@ -28,7 +27,6 @@ window.iniciarInterfazCalculadora = async function() {
         document.head.appendChild(styleTag);
     }
     
-    // 1. CARGA DE DATOS
     if (!window.dbCalc) {
         try {
             const pestaña = "Data_APS"; 
@@ -38,18 +36,19 @@ window.iniciarInterfazCalculadora = async function() {
             if (data.error) throw new Error(data.details || data.error);
 
             if (data.values) {
-                window.dbRaw = data.values; // Almacenamos el Excel bruto para el cruce
-                window.dbCalc = data.values.map(row => ({
+                window.dbRaw = data.values; // Guardamos el Excel completo
+                // Mapeamos datos de fármacos (Filas 2 a 12 de la Columna A)
+                window.dbCalc = data.values.slice(1, 12).map(row => ({
                     farmaco: row[0] ? row[0].toString().trim() : "",
                     factor: parseFloat(row[1]) || 1,
                     ed95: parseFloat(row[2]) || 0,
                     max: parseFloat(row[3]) || 0,
                     min: parseFloat(row[4]) || 0,
                     umbral: parseFloat(row[5]) || 0
-                })).filter(f => f.farmaco && f.farmaco !== "Farmaco");
+                })).filter(f => f.farmaco !== "");
             }
         } catch (e) {
-            container.innerHTML = `<div style="padding:2.5rem;">Error: ${e.message}</div>`;
+            container.innerHTML = `<div style="padding:2.5rem;">Error cargando Excel: ${e.message}</div>`;
             return;
         }
     }
@@ -67,16 +66,18 @@ window.iniciarInterfazCalculadora = async function() {
             <select id="f_dest">${options}</select>
             <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
             <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
-                <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
-                <div id="res-alert"></div>
+                <div id="res-val"></div>
                 <div id="res-tip"></div>
             </div>
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
+                Basado en Taylor (Maudsley), Leucht e INTEGRATE. Juicio clínico indispensable.
+            </p>
         </div>`;
 }
 
-// --- MOTOR DE TRADUCCIÓN (TRADUCE EL FORMATO D1:ACTUAL...) ---
+// --- 2. MOTOR DE TRADUCCIÓN (LISTA LIMPIA + REGLA DEL TECHO) ---
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "") return "Pauta no definida.";
+    if (!rawStr || rawStr.trim() === "") return "<span style='opacity:0.5;'>Pauta no definida en el cruce del Excel.</span>";
 
     const bloques = rawStr.split('|').map(b => b.trim()).filter(Boolean);
     let htmlPasos = '<ul style="list-style:none; padding:0; margin:0;">';
@@ -85,14 +86,13 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
     bloques.forEach(bloque => {
         let instruccion = bloque;
         
-        // Procesar IF_ACTUAL_ para cada bloque individualmente
         if (instruccion.startsWith("IF_ACTUAL_")) {
             const match = instruccion.match(/IF_ACTUAL_([<>]=?)(\d+)(?:mg)?:(.*)/);
             if (match) {
                 const op = match[1], corte = parseFloat(match[2]), resto = match[3];
                 const cumple = (op === '<' && dOrig < corte) || (op === '>' && dOrig > corte) || 
                                (op === '<=' && dOrig <= corte) || (op === '>=' && dOrig >= corte);
-                if (!cumple) return; // Ignorar este bloque si no cumple
+                if (!cumple) return; 
                 instruccion = resto.trim();
             }
         }
@@ -102,7 +102,6 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
 
         const dia = partes[0].replace('D', 'Día ');
         const sujeto = partes[1], accion = partes[2], valor = partes[3] || "";
-
         let texto = `<b>${dia}:</b> `;
 
         if (sujeto === "ACTUAL") {
@@ -115,27 +114,25 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
             if (accion === "INICIAR" || accion === "SUBIR") {
                 const mgPaso = parseFloat(valor.replace(/[^0-9.]/g, ''));
                 if (valor === "TARGET" || (!isNaN(mgPaso) && mgPaso >= targetMg)) {
-                    texto += `Alcanzar dosis objetivo de <b>${targetMg.toFixed(1)} mg</b>.`;
+                    texto += `Alcanzar dosis objetivo (<b>${targetMg.toFixed(1)} mg</b>).`;
                     targetAlcanzado = true;
                 } else if (valor.includes('%_TARGET')) {
-                    const percT = parseFloat(valor);
-                    texto += `Iniciar nuevo a ${(targetMg * percT / 100).toFixed(1)} mg.`;
+                    texto += `Iniciar nuevo a ${(targetMg * parseFloat(valor) / 100).toFixed(1)} mg.`;
                 } else {
                     texto += `${accion === "INICIAR" ? "Iniciar" : "Subir"} nuevo a ${valor}.`;
                 }
             } else if (accion === "TITULAR_PROGRESIVO") {
-                texto += `Desde este día, titular hasta <b>${targetMg.toFixed(1)} mg</b>.`;
+                texto += `Desde este día, titular hasta alcanzar <b>${targetMg.toFixed(1)} mg</b>.`;
                 targetAlcanzado = true;
             }
-        } else { return; } // Saltamos si el nuevo ya llegó al target
+        } else { return; }
 
         htmlPasos += `<li style="margin-bottom:6px;">${texto}</li>`;
     });
-
     return htmlPasos + '</ul>';
 }
 
-// --- FUNCIÓN DE CÁLCULO Y CRUCE ---
+// --- 3. FUNCIÓN DE CÁLCULO Y CRUCE DE MATRIZ ---
 window.ejecutarCalculo = function() {
     const fOrigName = document.getElementById('f_orig').value;
     const fDestName = document.getElementById('f_dest').value;
@@ -146,12 +143,10 @@ window.ejecutarCalculo = function() {
     
     if (!dosisO || isNaN(dosisO) || !o || !d) return alert("Dosis no válida.");
 
-    // CÁLCULOS
     const Maudsley = (dosisO / o.factor) * d.factor;
     const porcentajeRango = (dosisO / o.max) * 100;
     const dosisRango = (porcentajeRango / 100) * d.max;
     
-    // UI Y ALERTAS
     let color = Maudsley > d.max ? "#b91c1c" : (Maudsley > d.ed95 ? "#b45309" : "#15803d");
     let bg = Maudsley > d.max ? "#fee2e2" : (Maudsley > d.ed95 ? "#fef3c7" : "#dcfce7");
     let txt = Maudsley > d.max ? "⚠️ EXCEDE MÁXIMA" : (Maudsley > d.ed95 ? "⚠️ SUPERIOR ED95" : "✅ RANGO ESTÁNDAR");
@@ -168,24 +163,25 @@ window.ejecutarCalculo = function() {
                 <div style="display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${color}; border: 1px solid ${color};">${txt}</div>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 0 10px; font-size: 0.85rem; opacity: 0.8;">
-                <span>Equivalencia Rango (${porcentajeRango.toFixed(0)}%)</span>
+                <span>Equivalencia por Rango (${porcentajeRango.toFixed(0)}%)</span>
                 <b>${dosisRango.toFixed(1)} mg</b>
             </div>
         </div>`;
 
-    // --- EL CRUCE DEFINITIVO ---
-    // 1. Buscamos la fila: Nombre en Columna A
-    const rowIndex = window.dbRaw.findIndex(row => row[0] && row[0].toString().trim() === fOrigName);
+    // --- CRUCE DE LA MATRIZ ---
+    // Fila: Buscamos el nombre de Origen en la Columna A (índice 0)
+    const rowIndex = window.dbRaw.findIndex(row => row[0] && row[0].toString().trim().toLowerCase() === fOrigName.toLowerCase());
     
-    // 2. Buscamos la columna: Nombre en Fila 13 (Índice 12), buscando desde la columna G (Índice 6)
+    // Columna: Buscamos el Destino específicamente en la Fila 13 (índice 12 del array dbRaw)
     const fila13 = window.dbRaw[12] || [];
-    const colIndex = fila13.findIndex((cell, idx) => idx >= 6 && cell && cell.toString().trim().toLowerCase() === fDestName.toLowerCase());
+    const colIndex = fila13.findIndex(cell => cell && cell.toString().trim().toLowerCase() === fDestName.toLowerCase());
 
-    const rawStr = (rowIndex > -1 && colIndex > -1) ? window.dbRaw[rowIndex][colIndex] : "";
+    const instruccionRaw = (rowIndex > -1 && colIndex > -1) ? window.dbRaw[rowIndex][colIndex] : "";
     
     document.getElementById('res-tip').innerHTML = `
-        <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
-            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px;">Estrategia de Cambio</b>
-            ${window.traducirPasos(rawStr, dosisO, Maudsley)}
-        </div>`;
+        <div style="margin-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
+            <span style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; opacity: 0.5; display: block; margin-bottom: 10px;">Estrategia de Cambio</span>
+            ${window.traducirPasos(instruccionRaw, dosisO, Maudsley)}
+        </div>
+    `;
 }
