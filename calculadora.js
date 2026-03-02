@@ -1,12 +1,12 @@
 /**
  * CALCULADORA APS (Antipsychotic Switch)
- * Versión: Corrección Maestra de Índices (Fila 13 + Columna A)
+ * Versión: "Bedtime Fix" - Mapeo Fila 13 & Haloperidol Visible
  */
 
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // 1. ESTILOS (Timeline + Colores Pastel)
+    // 1. ESTILOS (Timeline + UI)
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
@@ -17,15 +17,11 @@ window.iniciarInterfazCalculadora = async function() {
             .calc-ui select, .calc-ui input { 
                 width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
                 background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; box-sizing: border-box;
-                transition: border-color 0.2s;
             }
-            .calc-ui select:focus { border-color: var(--primary); }
             .btn-ejecutar { 
                 margin-top: 1rem; padding: 1.1rem; background: var(--primary); color: white; 
                 border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1rem;
-                letter-spacing: 0.5px; transition: opacity 0.2s;
             }
-            .btn-ejecutar:hover { opacity: 0.9; }
             .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); overflow: hidden; }
             .res-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
             .res-pauta { padding: 1.5rem; background: var(--bg); }
@@ -37,9 +33,8 @@ window.iniciarInterfazCalculadora = async function() {
             .step-idx { 
                 min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); 
                 border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-                font-weight: 900; font-size: 0.8rem; z-index: 1; box-shadow: var(--shadow-sm);
+                font-weight: 900; font-size: 0.8rem; z-index: 1;
             }
-            .step-body { flex: 1; padding-top: 4px; }
             .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
@@ -48,7 +43,7 @@ window.iniciarInterfazCalculadora = async function() {
         document.head.appendChild(styleTag);
     }
 
-    // 2. CARGA Y MAPEO DE DATOS
+    // 2. CARGA DE DATOS
     if (!window.dbCalc) {
         try {
             const pestaña = "Data_APS";
@@ -61,26 +56,26 @@ window.iniciarInterfazCalculadora = async function() {
                 window.listaFarmacos = [];
                 window.mapColDestino = {};
 
-                // --- MAPEO DE COLUMNAS (Fila 13 -> Índice 12) ---
-                const fila13 = data.values[12];
-                if (fila13) {
-                    fila13.forEach((val, idx) => {
-                        if (val && val.toString().trim() !== "") {
-                            window.mapColDestino[val.toString().trim()] = idx;
-                        }
+                // --- MAPEO DE COLUMNAS DESDE LA FILA 13 (Índice 12) ---
+                const filaHeaderInstruct = data.values[12]; 
+                if (filaHeaderInstruct) {
+                    filaHeaderInstruct.forEach((nombre, idx) => {
+                        if (nombre) window.mapColDestino[nombre.toString().trim()] = idx;
                     });
                 }
 
-                // --- CARGA DE FÁRMACOS (Columna A, desde Fila 2) ---
+                // --- LEER COLUMNA A (Desde A2 para que aparezca Haloperidol) ---
                 for (let i = 1; i < data.values.length; i++) {
                     const row = data.values[i];
-                    const nombre = row[0] ? row[0].toString().trim() : "";
+                    if (!row[0]) continue;
                     
+                    const nombre = row[0].toString().trim();
+                    // Solo saltamos si es explícitamente el encabezado "Farmaco"
                     if (nombre !== "" && nombre.toLowerCase() !== "farmaco") {
                         window.listaFarmacos.push(nombre);
                         window.dbCalc.push({
-                            farmaco: nombre,
-                            filaIdx: i, // Guardamos su fila real para el cruce
+                            nombre: nombre,
+                            filaIdx: i, // Guardamos su fila real
                             factor: parseFloat(row[1]) || 1,
                             max: parseFloat(row[3]) || 0,
                             categoria: row[11] || "Antipsicótico"
@@ -94,7 +89,7 @@ window.iniciarInterfazCalculadora = async function() {
         }
     }
 
-    // 3. RENDER
+    // 3. RENDERIZADO
     const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
     container.innerHTML = `
         <div class="calc-ui">
@@ -113,39 +108,30 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 };
 
-// 4. LÓGICA DE CÁLCULO MEJORADA
+// 4. LÓGICA DE CÁLCULO
 window.ejecutarCalculo = function() {
     const fOrigNom = document.getElementById('f_orig').value;
     const fDestNom = document.getElementById('f_dest').value;
-    const dosis = parseFloat(document.getElementById('d_orig').value);
+    const dosisO = parseFloat(document.getElementById('d_orig').value);
     
-    const o = window.dbCalc.find(f => f.farmaco === fOrigNom);
-    const d = window.dbCalc.find(f => f.farmaco === fDestNom);
+    const o = window.dbCalc.find(f => f.nombre === fOrigNom);
+    const d = window.dbCalc.find(f => f.nombre === fDestNom);
     
-    if (isNaN(dosis) || !o || !d) {
-        alert("Datos inválidos."); return;
+    if (isNaN(dosisO) || !o || !d) {
+        alert("Introduce una dosis válida."); return;
     }
 
-    const Maudsley = (dosis / o.factor) * d.factor;
-    const resBox = document.getElementById('res-box');
-    resBox.style.display = 'block';
+    const Maudsley = (dosisO / o.factor) * d.factor;
+    document.getElementById('res-box').style.display = 'block';
 
-    // Pastel colors según categoría
-    const getPastel = (cat) => {
-        let hash = 0;
-        for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
-        return `hsl(${Math.abs(hash) % 360}, 80%, 94%)`;
-    };
-    
     const header = document.getElementById('res-header');
-    header.style.background = getPastel(d.categoria);
+    header.style.background = `hsl(${(fDestNom.length * 50) % 360}, 80%, 94%)`;
     header.innerHTML = `
-        <div style="font-size:0.7rem; font-weight:800; opacity:0.6; text-transform:uppercase;">Dosis Objetivo Estimada</div>
+        <div style="font-size:0.7rem; font-weight:800; opacity:0.6; text-transform:uppercase;">Dosis Objetivo Maudsley</div>
         <div style="font-size:2.8rem; font-weight:900;">${Maudsley.toFixed(1)} <span style="font-size:1.2rem;">mg/día</span></div>
     `;
 
-    // --- CRUCE DE MATRIZ PRECISO ---
-    // Fila del origen (A) y Columna del destino según el mapa de la Fila 13
+    // LOCALIZACIÓN: Fila del origen (A) y Columna del destino (mapeada en Fila 13)
     const fila = o.filaIdx;
     const col = window.mapColDestino[fDestNom];
 
@@ -156,13 +142,13 @@ window.ejecutarCalculo = function() {
 
     document.getElementById('res-pauta').innerHTML = `
         <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>
-        ${fOrigNom === fDestNom ? 'Origen y destino iguales.' : window.traducirPasos(rawInstr, dosis, Maudsley)}
+        ${fOrigNom === fDestNom ? 'Mismo fármaco.' : window.traducirPasos(rawInstr, dosisO, Maudsley)}
     `;
 };
 
 // 5. TRADUCTOR DE PASOS
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") return "No hay pauta definida.";
+    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") return "Pauta no definida en la matriz.";
     const bloques = rawStr.split('|').map(b => b.trim()).filter(Boolean);
     let html = '';
     bloques.forEach(bloque => {
