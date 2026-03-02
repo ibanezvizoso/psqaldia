@@ -1,298 +1,479 @@
-// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
+ /**
+
+ * CALCULADORA APS (Antipsychotic Switch)
+
+ * Versión: Definitiva - Coordenadas G=6
+
+ */
+
+
+
 window.iniciarInterfazCalculadora = async function() {
+
     const container = document.getElementById('modalData');
 
-    // Inyección de estilos (igual)
+
+
+    // 1. INYECCIÓN DE ESTILOS (Estética Timeline + Colores Pastel)
+
     if (!document.getElementById('calc-internal-styles')) {
+
         const styleTag = document.createElement('style');
+
         styleTag.id = 'calc-internal-styles';
+
         styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
-            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
-            .calc-ui label { 
-                font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
-                color: var(--text-muted); margin-top: 0.8rem; display: block; 
-            }
+
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+
+            .calc-ui h2 { margin: 0 0 1rem 0; font-weight: 800; display: flex; align-items: center; gap: 12px; color: var(--text-main); }
+
+            .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.6rem; display: block; }
+
             .calc-ui select, .calc-ui input { 
+
                 width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
-                background: var(--bg); color: var(--text-main); font-size: 1rem; 
-                font-family: inherit; outline: none; box-sizing: border-box;
+
+                background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; box-sizing: border-box;
+
+                transition: border-color 0.2s;
+
             }
-            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
-            .res-container { 
-                padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; 
-                display: none; border: 1px solid rgba(0,0,0,0.05); 
+
+            .calc-ui select:focus { border-color: var(--primary); }
+
+            .btn-ejecutar { 
+
+                margin-top: 1rem; padding: 1.1rem; background: var(--primary); color: white; 
+
+                border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1rem;
+
+                letter-spacing: 0.5px; transition: opacity 0.2s;
+
             }
-            .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
-            .debug-info { 
-                background: #f0f0f0; padding: 1rem; border-radius: 0.5rem; 
-                font-family: monospace; font-size: 0.8rem; margin-top: 1rem;
-                white-space: pre-wrap; max-height: 200px; overflow: auto;
+
+            .btn-ejecutar:hover { opacity: 0.9; }
+
+            
+
+            .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); overflow: hidden; }
+
+            .res-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+            .res-pauta { padding: 1.5rem; background: var(--bg); }
+
+
+
+            /* Estética de la Pauta (Timeline) */
+
+            .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
+
+            .pauta-step:not(:last-child)::after { 
+
+                content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; 
+
+                width: 2px; background: var(--border); opacity: 0.5; 
+
             }
+
+            .step-idx { 
+
+                min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); 
+
+                border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+
+                font-weight: 900; font-size: 0.8rem; z-index: 1; box-shadow: var(--shadow-sm);
+
+            }
+
+            .step-body { flex: 1; padding-top: 4px; }
+
+            .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
+
+            .tag-orig { background: #fee2e2; color: #b91c1c; }
+
+            .tag-dest { background: #dcfce7; color: #15803d; }
+
+            .step-txt { font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
+
         `;
+
         document.head.appendChild(styleTag);
+
     }
-    
+
+
+
+    // Función para colores pastel aleatorios (Memoria: [2026-02-02])
+
+    const getPastelColor = (cat) => {
+
+        let hash = 0;
+
+        const str = cat || "G";
+
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+
+        return `hsl(${Math.abs(hash) % 360}, 75%, 92%)`;
+
+    };
+
+
+
+    // 2. CARGA DE DATOS
+
     if (!window.dbCalc) {
+
         try {
-            const pestaña = "Data_APS"; 
+
+            const pestaña = "Data_APS";
+
             const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+
             const data = await response.json();
-            if (data.error) throw new Error(data.details || data.error);
+
             if (data.values) {
+
                 window.dbRaw = data.values;
+
                 
-                // Mostrar información de depuración en consola
-                console.log("Total filas:", window.dbRaw.length);
-                console.log("Fila 0:", window.dbRaw[0]);
-                console.log("Fila 1:", window.dbRaw[1]);
-                console.log("Fila 2:", window.dbRaw[2]);
-                console.log("Fila 12 (fila 13):", window.dbRaw[12]);
-                
-                // Extraer lista de fármacos desde columna A, pero sin asumir dónde empiezan
+
+                // --- AJUSTE DE ÍNDICES ---
+
+                // Fila 1 (A2) es Haloperidol
+
+                // Columna 6 (G) es el inicio de la matriz
+
+                window.idxRowStart = 1; 
+
+                window.idxColStart = 6; 
+
+
+
+                // Extraer lista de fármacos y sus parámetros
+
+                window.dbCalc = [];
+
                 window.listaFarmacos = [];
-                window.filasConNombre = [];
-                for (let i = 0; i < window.dbRaw.length; i++) {
-                    const valor = window.dbRaw[i]?.[0];
-                    if (valor && valor.toString().trim() !== "" && valor !== "Farmaco" && !valor.toString().match(/^\d/)) {
-                        // Filtramos para evitar filas con números o encabezados
-                        window.listaFarmacos.push(valor.toString().trim());
-                        window.filasConNombre.push(i);
+
+                
+
+                // Recorremos desde la fila 2 (índice 1) para capturar desde Haloperidol
+
+                for (let i = window.idxRowStart; i < data.values.length; i++) {
+
+                    const row = data.values[i];
+
+                    if (row && row[0] && row[0].toString().trim() !== "" && row[0] !== "Farmaco") {
+
+                        const nombre = row[0].toString().trim();
+
+                        window.listaFarmacos.push(nombre);
+
+                        window.dbCalc.push({
+
+                            farmaco: nombre,
+
+                            factor: parseFloat(row[1]) || 1,
+
+                            ed95: parseFloat(row[2]) || 0,
+
+                            max: parseFloat(row[3]) || 0,
+
+                            categoria: row[11] || "Antipsicótico" // Columna L si existe
+
+                        });
+
                     }
+
                 }
-                console.log("Lista de fármacos (extraída):", window.listaFarmacos);
-                console.log("Filas correspondientes:", window.filasConNombre);
-                
-                // Ahora, buscar en la fila 12 los nombres de destino que coincidan
-                const headerRow = window.dbRaw[12];
-                window.destinos = [];
-                window.columnasDestino = [];
-                if (headerRow) {
-                    for (let i = 0; i < headerRow.length; i++) {
-                        const val = headerRow[i];
-                        if (val && val.toString().trim() !== "" && window.listaFarmacos.includes(val.toString().trim())) {
-                            window.destinos.push(val.toString().trim());
-                            window.columnasDestino.push(i);
-                        }
-                    }
-                }
-                console.log("Destinos en fila 13:", window.destinos);
-                console.log("Columnas correspondientes:", window.columnasDestino);
-                
-                // Crear dbCalc para factores
-                window.dbCalc = window.listaFarmacos.map((nombre, idx) => {
-                    const fila = window.filasConNombre[idx];
-                    return {
-                        farmaco: nombre,
-                        factor: parseFloat(window.dbRaw[fila]?.[1]) || 1,
-                        ed95: parseFloat(window.dbRaw[fila]?.[2]) || 0,
-                        max: parseFloat(window.dbRaw[fila]?.[3]) || 0,
-                        min: parseFloat(window.dbRaw[fila]?.[4]) || 0,
-                        umbral: parseFloat(window.dbRaw[fila]?.[5]) || 0,
-                    };
-                });
-                
-                console.log("dbCalc:", window.dbCalc);
+
             }
+
         } catch (e) {
-            container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
+
+            container.innerHTML = `<div style="padding:2rem;">Error: ${e.message}</div>`;
+
             return;
+
         }
+
     }
+
+
+
+    // 3. RENDERIZADO INTERFAZ
 
     const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
-    
-    // Crear un div para depuración
-    const debugHTML = `
-        <div class="debug-info">
-            <strong>Depuración:</strong><br>
-            Filas con nombres: ${window.filasConNombre.join(', ')}<br>
-            Nombres: ${window.listaFarmacos.join(', ')}<br>
-            Destinos en fila 13: ${window.destinos.join(', ')}<br>
-            Columnas destino: ${window.columnasDestino.join(', ')}
-        </div>
-    `;
-    
+
     container.innerHTML = `
+
         <div class="calc-ui">
-            <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
+
+            <h2><i class="fas fa-random"></i> APS Switch Manager</h2>
+
+            
+
             <label>Fármaco Origen</label>
+
             <select id="f_orig">${options}</select>
+
+            
+
             <label>Dosis Actual (mg/día)</label>
-            <input type="number" id="d_orig" placeholder="0.00">
+
+            <input type="number" id="d_orig" placeholder="0.00" step="any">
+
+            
+
             <label>Fármaco Destino</label>
+
             <select id="f_dest">${options}</select>
-            <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
-            <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
-                <div id="res-val"></div>
-                <div id="res-alert"></div>
-                <div id="res-tip"></div>
+
+            
+
+            <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
+
+            
+
+            <div id="res-box" class="res-container">
+
+                <div id="res-header" class="res-header"></div>
+
+                <div id="res-pauta" class="res-pauta"></div>
+
             </div>
-            ${debugHTML}
-            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
-                Basado en Taylor (Maudsley Prescribing Guidelines), Leucht et al. e INTEGRATE. Juicio clínico indispensable.
-            </p>
+
         </div>`;
+
 }
 
-// --- TRADUCCIÓN DE PASOS (igual) ---
+
+
+// --- 4. FUNCIÓN TRADUCTORA DE PASOS ---
+
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "") {
-        return "<span style='color: #999;'>No hay instrucciones de cambio para esta combinación.</span>";
+
+    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") {
+
+        return `<div style="color:var(--text-muted); font-style:italic;">No se han definido pasos específicos para este cruce. Se recomienda switch cruzado conservador.</div>`;
+
     }
-    const pasos = rawStr.split('|').map(p => p.trim()).filter(p => p.length > 0);
-    let html = '<ul style="list-style:none; padding:0; margin:0;">';
-    let objetivoAlcanzado = false;
-    let dosisActual = dOrig;
 
-    pasos.forEach(paso => {
-        if (objetivoAlcanzado) return;
-        let instruccion = paso;
-        let incluirPaso = true;
 
-        while (instruccion.startsWith('IF_ACTUAL_')) {
-            const match = instruccion.match(/IF_ACTUAL_([<>]=?)(\d+)mg?:(.*)/);
-            if (!match) { incluirPaso = false; break; }
-            const op = match[1], valorCorte = parseFloat(match[2]), resto = match[3];
-            let cumple = false;
-            if (op === '<') cumple = dOrig < valorCorte;
-            else if (op === '>') cumple = dOrig > valorCorte;
-            else if (op === '<=') cumple = dOrig <= valorCorte;
-            else if (op === '>=') cumple = dOrig >= valorCorte;
-            if (!cumple) { incluirPaso = false; break; }
-            else instruccion = resto;
+
+    const bloques = rawStr.split('|').map(b => b.trim()).filter(Boolean);
+
+    let html = '';
+
+
+
+    bloques.forEach(bloque => {
+
+        let texto = bloque;
+
+        
+
+        // Manejo de lógica condicional (IF_ACTUAL)
+
+        if (texto.startsWith("IF_ACTUAL_")) {
+
+            const m = texto.match(/IF_ACTUAL_([<>]=?)([\d.]+)(?:mg)?:(.*)/);
+
+            if (m) {
+
+                const op = m[1], corte = parseFloat(m[2]), resto = m[3];
+
+                const cumple = (op === '<' && dOrig < corte) || (op === '>' && dOrig > corte) || 
+
+                               (op === '<=' && dOrig <= corte) || (op === '>=' && dOrig >= corte);
+
+                if (!cumple) return; // Si no cumple la dosis actual, saltamos este paso
+
+                texto = resto.trim();
+
+            }
+
         }
-        if (!incluirPaso) return;
 
-        const partes = instruccion.split(':').map(s => s.trim());
-        if (partes.length < 3) return;
-        const dia = partes[0].replace('D', 'Día ');
-        const sujeto = partes[1];
-        const accion = partes[2];
-        const valor = partes.slice(3).join(':');
 
-        let texto = `<b>${dia}:</b> `;
+
+        const p = texto.split(':').map(s => s.trim());
+
+        if (p.length < 3) return;
+
+
+
+        const dia = p[0].replace('D', 'Día ');
+
+        const sujeto = p[1]; // ACTUAL o NUEVO
+
+        const accion = p[2]; // STOP, REDUCIR, INICIAR...
+
+        const valor = p[3] || "";
+
+
+
+        let desc = '';
 
         if (sujeto === 'ACTUAL') {
-            if (accion === 'STOP') texto += 'Suspender fármaco origen.';
-            else if (accion === 'REDUCIR') {
-                const pct = parseFloat(valor.replace('%', ''));
-                if (!isNaN(pct)) {
-                    const nueva = dosisActual * pct / 100;
-                    texto += `Reducir fármaco origen a ${nueva.toFixed(1)} mg.`;
-                    dosisActual = nueva;
-                } else texto += `Reducir fármaco origen (${valor}).`;
-            } else if (accion === 'MANTENER') texto += 'Mantener dosis actual del fármaco origen.';
-            else texto += `Acción desconocida sobre origen: ${accion}`;
-        } else if (sujeto === 'NUEVO') {
-            if (accion === 'INICIAR' || accion === 'SUBIR') {
-                if (valor === 'TARGET') {
-                    texto += `Alcanzar dosis objetivo de ${targetMg.toFixed(1)} mg.`;
-                    objetivoAlcanzado = true;
-                } else if (valor.includes('%_TARGET')) {
-                    const pct = parseFloat(valor.replace('%_TARGET', ''));
-                    texto += `Iniciar fármaco nuevo a ${(targetMg * pct / 100).toFixed(1)} mg.`;
-                } else if (valor.includes('%')) {
-                    const pct = parseFloat(valor.replace('%', ''));
-                    texto += `Iniciar fármaco nuevo a ${(targetMg * pct / 100).toFixed(1)} mg.`;
-                } else if (valor.includes('mg')) {
-                    const mg = parseFloat(valor.replace(/[^0-9.]/g, ''));
-                    if (!isNaN(mg)) {
-                        if (mg >= targetMg) {
-                            texto += `Alcanzar dosis objetivo de ${targetMg.toFixed(1)} mg.`;
-                            objetivoAlcanzado = true;
-                        } else texto += `Iniciar fármaco nuevo a ${mg.toFixed(1)} mg.`;
-                    } else texto += `Iniciar fármaco nuevo a ${valor}.`;
-                } else texto += `Iniciar fármaco nuevo a ${valor}.`;
-            } else if (accion === 'TITULAR_PROGRESIVO') {
-                texto += `Desde este día, titular progresivamente hasta alcanzar ${targetMg.toFixed(1)} mg.`;
-                objetivoAlcanzado = true;
-            } else texto += `Acción desconocida sobre nuevo: ${accion}`;
-        } else texto += `Sujeto desconocido: ${sujeto}`;
 
-        html += `<li style="margin-bottom:6px; line-height:1.4;">${texto}</li>`;
+            if (accion === 'STOP') desc = 'Suspender completamente el fármaco de origen.';
+
+            else if (accion === 'REDUCIR') desc = `Reducir fármaco de origen al ${valor} (<b>${(dOrig * parseFloat(valor) / 100).toFixed(1)} mg</b>).`;
+
+            else desc = `${accion} ${valor}`;
+
+        } else {
+
+            // Lógica para el fármaco NUEVO
+
+            if (accion === 'TITULAR_PROGRESIVO' || valor === 'TARGET' || (valor.includes('TARGET') && !valor.includes('%'))) {
+
+                desc = `Alcanzar dosis objetivo de <b>${targetMg.toFixed(1)} mg</b>.`;
+
+            } else if (valor.includes('%_TARGET')) {
+
+                const pct = parseFloat(valor);
+
+                desc = `Iniciar fármaco nuevo al ${pct}% de la dosis objetivo (<b>${(targetMg * pct / 100).toFixed(1)} mg</b>).`;
+
+            } else {
+
+                desc = `Iniciar/Ajustar fármaco nuevo a <b>${valor}</b>.`;
+
+            }
+
+        }
+
+
+
+        html += `
+
+            <div class="pauta-step">
+
+                <div class="step-idx">${dia.replace('Día ', '')}</div>
+
+                <div class="step-body">
+
+                    <span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto === 'ACTUAL' ? 'Origen' : 'Nuevo'}</span>
+
+                    <div class="step-txt">${desc}</div>
+
+                </div>
+
+            </div>`;
+
     });
-    return html + '</ul>';
+
+    return html;
+
 }
 
-// --- FUNCIÓN DE CÁLCULO (CON ÍNDICES DINÁMICOS) ---
+
+
+// --- 5. LÓGICA DE CÁLCULO Y MATRIZ ---
+
 window.ejecutarCalculo = function() {
-    const fOrigName = document.getElementById('f_orig').value.trim();
-    const fDestName = document.getElementById('f_dest').value.trim();
-    const dosisO = parseFloat(document.getElementById('d_orig').value);
+
+    const fOrig = document.getElementById('f_orig').value;
+
+    const fDest = document.getElementById('f_dest').value;
+
+    const dosis = parseFloat(document.getElementById('d_orig').value);
+
     
-    const o = window.dbCalc.find(f => f.farmaco === fOrigName);
-    const d = window.dbCalc.find(f => f.farmaco === fDestName);
+
+    const o = window.dbCalc.find(f => f.farmaco === fOrig);
+
+    const d = window.dbCalc.find(f => f.farmaco === fDest);
+
     
-    if (!dosisO || isNaN(dosisO) || !o || !d) {
+
+    if (!dosis || isNaN(dosis) || !o || !d) {
+
         alert("Por favor, introduce una dosis válida.");
+
         return;
+
     }
 
-    // Cálculo de dosis equivalente
-    let Maudsley = (dosisO / o.factor) * d.factor;
-    let porcentajeRango = (dosisO / o.max) * 100;
-    let dosisRango = (porcentajeRango / 100) * d.max;
+
+
+    // Cálculo Maudsley
+
+    const Maudsley = (dosis / o.factor) * d.factor;
+
     
-    let bgColor, textColor, alertText;
-    if (Maudsley > d.max) { bgColor = '#fee2e2'; textColor = "#b91c1c"; alertText = "⚠️ EXCEDE DOSIS MÁXIMA"; }
-    else if (Maudsley > d.ed95) { bgColor = '#fef3c7'; textColor = "#b45309"; alertText = "⚠️ SUPERIOR A ED95"; }
-    else if (Maudsley < d.min) { bgColor = '#f1f5f9'; textColor = "#475569"; alertText = "🔍 POR DEBAJO DE MÍNIMO"; }
-    else { bgColor = '#dcfce7'; textColor = "#15803d"; alertText = "✅ RANGO ESTÁNDAR"; }
 
     const resBox = document.getElementById('res-box');
+
+    const header = document.getElementById('res-header');
+
     resBox.style.display = 'block';
-    resBox.style.background = bgColor;
 
-    document.getElementById('res-val').innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.5px;">Dosis de prescripción (Maudsley)</div>
-                <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
-                <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor}; line-height: 1.2;">
-                    ${alertText}
-                </div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
-                <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
-            </div>
+
+
+    // Aplicar color pastel según categoría
+
+    const pastel = (cat) => {
+
+        let hash = 0;
+
+        for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+
+        return `hsl(${Math.abs(hash) % 360}, 80%, 94%)`;
+
+    };
+
+    header.style.background = pastel(d.categoria);
+
+
+
+    header.innerHTML = `
+
+        <div style="font-size:0.7rem; font-weight:800; color:rgba(0,0,0,0.4); text-transform:uppercase; margin-bottom:4px;">Dosis Objetivo Estimada</div>
+
+        <div style="font-size:2.8rem; font-weight:900; color:var(--text-main); line-height:1;">${Maudsley.toFixed(1)} <span style="font-size:1.2rem;">mg/día</span></div>
+
+        <div style="margin-top:12px; display:inline-block; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; background:white; border:1px solid ${Maudsley > d.max ? '#b91c1c' : '#15803d'}; color:${Maudsley > d.max ? '#b91c1c' : '#15803d'}">
+
+            ${Maudsley > d.max ? '⚠️ EXCEDE MÁXIMA' : '✅ RANGO TERAPÉUTICO'}
+
         </div>
+
     `;
 
-    // --- OBTENER ÍNDICES DINÁMICAMENTE ---
-    const indiceOrigen = window.listaFarmacos.indexOf(fOrigName);
-    const indiceDestino = window.listaFarmacos.indexOf(fDestName);
 
-    if (indiceOrigen === -1 || indiceDestino === -1) {
-        document.getElementById('res-tip').innerHTML = `<div style="color:#999;">Error: fármaco no encontrado en la lista.</div>`;
-        return;
-    }
 
-    // La fila en dbRaw es la que corresponde según window.filasConNombre
-    const filaOrigen = window.filasConNombre[indiceOrigen];
-    // La columna en dbRaw es la que corresponde según window.columnasDestino
-    const columnaDestino = window.columnasDestino[indiceDestino];
+    // --- CRUCE DE MATRIZ (G=6) ---
 
-    console.log(`Origen: ${fOrigName} (fila ${filaOrigen}), Destino: ${fDestName} (col ${columnaDestino})`);
+    const indexO = window.listaFarmacos.indexOf(fOrig);
 
-    let instruccionRaw = "";
-    if (filaOrigen !== undefined && columnaDestino !== undefined && 
-        filaOrigen < window.dbRaw.length && columnaDestino < window.dbRaw[filaOrigen].length) {
-        instruccionRaw = window.dbRaw[filaOrigen][columnaDestino];
-        console.log("Instrucción:", instruccionRaw);
-    } else {
-        console.error("Índices fuera de rango");
-    }
+    const indexD = window.listaFarmacos.indexOf(fDest);
 
-    let contenidoEstrategia = instruccionRaw && instruccionRaw.toString().trim() !== ""
-        ? window.traducirPasos(instruccionRaw, dosisO, Maudsley)
-        : `<span style="color: #999;">No hay instrucciones de cambio para ${fOrigName} → ${fDestName} (celda vacía).</span>`;
 
-    document.getElementById('res-tip').innerHTML = `
-        <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
-            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px;">Estrategia de Cambio</b>
-            ${contenidoEstrategia}
-        </div>
+
+    // Fila: Haloperidol está en Fila 2 (índice 1). indexO=0 -> Fila 1. Correcto.
+
+    const fila = window.idxRowStart + indexO;
+
+    // Columna: G es índice 6. indexD=0 -> Col 6. Correcto.
+
+    const col = window.idxColStart + indexD;
+
+
+
+    const rawInstr = (window.dbRaw[fila] && window.dbRaw[fila][col]) ? window.dbRaw[fila][col] : "";
+
+
+
+    document.getElementById('res-pauta').innerHTML = `
+
+        <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Estrategia Sugerida</h4>
+
+        ${window.traducirPasos(rawInstr, dosis, Maudsley)}
+
     `;
-}
+
+} 
