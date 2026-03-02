@@ -1,113 +1,84 @@
-// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
-window.iniciarInterfazCalculadora = async function() {
-    const container = document.getElementById('modalData');
+// --- NUEVO MOTOR DE TRADUCCIÓN DE INSTRUCCIONES ---
+window.traducirInstrucciones = function(rawString, dOrig, dTarget, targetMg) {
+    if (!rawString || rawString.trim() === "") return "No hay pauta específica definida.";
 
-    // A. INYECCIÓN DE ESTILOS (Para que el diseño sea autónomo)
-    if (!document.getElementById('calc-internal-styles')) {
-        const styleTag = document.createElement('style');
-        styleTag.id = 'calc-internal-styles';
-        styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
-            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
-            .calc-ui label { 
-                font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
-                color: var(--text-muted); margin-top: 0.8rem; display: block; 
-            }
-            .calc-ui select, .calc-ui input { 
-                width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
-                background: var(--bg); color: var(--text-main); font-size: 1rem; 
-                font-family: inherit; outline: none; box-sizing: border-box;
-            }
-            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
-            .res-container { 
-                padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; 
-                display: none; border: 1px solid rgba(0,0,0,0.05); 
-            }
-            .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
-        `;
-        document.head.appendChild(styleTag);
-    }
-    
-    // 1. CARGA AUTÓNOMA DE DATOS (Solo si no existen)
-   // 1. CARGA AUTÓNOMA DE DATOS (Vía Worker)
-if (!window.dbCalc) {
-    try {
-        const pestaña = "Data_APS"; 
-        // IMPORTANTE: window.WORKER_URL debe estar definida en tu index.html
-        const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
-        const data = await response.json();
+    let instruccion = rawString;
 
-        if (data.error) {
-            throw new Error(data.details || data.error);
+    // 1. Manejo de condicionales: IF_ACTUAL_<5mg:RESTO_DEL_CODIGO
+    if (instruccion.startsWith("IF_ACTUAL_")) {
+        const partes = instruccion.split(':');
+        const condicion = partes[0]; // Ej: IF_ACTUAL_<5mg
+        const valorCorte = parseFloat(condicion.match(/\d+/)[0]);
+        const operador = condicion.includes('<') ? '<' : '>';
+
+        const cumple = operador === '<' ? dOrig < valorCorte : dOrig > valorCorte;
+        
+        if (cumple) {
+            instruccion = partes.slice(1).join(':'); // Quitamos el IF
+        } else {
+            // Si no cumple, buscamos si hay un ELSE o simplemente decimos que use juicio clínico
+            return "Dosis fuera de rango de pauta automática. Ajustar según juicio clínico.";
         }
-
-        if (data.values) {
-            window.dbCalc = data.values.map(row => ({
-                farmaco: row[0],
-                factor: parseFloat(row[1]) || 1,
-                ed95: parseFloat(row[2]) || 0,
-                max: parseFloat(row[3]) || 0,
-                min: parseFloat(row[4]) || 0,
-                umbral: parseFloat(row[5]) || 0
-            }));
-        }
-    } catch (e) {
-        console.error("Error en la calculadora:", e);
-        container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
-        return;
     }
-}
 
-    // 2. TU CÓDIGO ORIGINAL DE RENDERIZADO
-    const options = window.dbCalc.map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`).join('');
-    
-    container.innerHTML = `
-        <div class="calc-ui">
-            <h2 style="margin-bottom:1.5rem;"><i class="fas fa-calculator"></i> Calculadora APS</h2>
-            
-            <label>Fármaco Origen</label>
-            <select id="f_orig">${options}</select>
-            
-            <label>Dosis Actual (mg/día)</label>
-            <input type="number" id="d_orig" placeholder="0.00">
-            
-            <label>Fármaco Destino</label>
-            <select id="f_dest">${options}</select>
-            
-            <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">CALCULAR</button>
-            
-            <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
-                <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
-                <div id="res-alert"></div>
-                <div id="res-tip"></div>
-            </div>
-            
-            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
-                Basado en Taylor (Maudsley Prescribing Guidelines), Leucht et al. e INTEGRATE. Juicio clínico indispensable.
-            </p>
-        </div>`;
-}
+    // 2. Procesar pasos (separados por |)
+    const pasos = instruccion.split('|').map(p => p.trim());
+    let htmlPasos = '<ul style="list-style:none; padding:0; margin:0;">';
+    let objetivoAlcanzado = false;
 
-// --- TU MATRIZ ORIGINAL ---
-const MATRIZ_INTEGRATE = {
-  "AMISULPRIDA-ARIPIPRAZOL": "Solapamiento 14d: Iniciar Aripiprazol Día 1. Mantener Amisulprida total 7 días. 50% el Día 8. Stop Día 14.",
-  "RISPERIDONA-PALIPERIDONA": "Cambio Directo: Stop origen e iniciar dosis equivalente el Día 1.",
-  "DESTINO-CARIPRAZINA": "Cambio Lento (4 sem): Iniciar 1.5 mg. Mantener origen total 21 días. Reducir origen al 50% día 22. Stop día 29.",
-  "DESTINO-BREXPIPRAZOL": "Solapamiento 12d: Día 1: 1 mg, Día 2: 2 mg. Reducir origen al 50% y suspender el Día 12.",
-  "ORIGEN-ARIPIPRAZOL": "Elección: A) Stop Día 1 o B) Reducir al 50% el Día 1 y Stop el Día 14.",
-  "ORIGEN-QUETIAPINA": "Si dosis > 300 mg: IR: Reducir 25% cada 4 días (Stop día 13). MR: Reducir 50% 1 semana (Stop día 8).",
-  "ORIGEN-AGONISTA_PARCIAL": "Stop & Start: Suspender origen el Día 1. Iniciar destino el Día 1 (titulando según fármaco)."
+    for (let p of pasos) {
+        if (objetivoAlcanzado) break;
+
+        // Formato esperado: D1:ACTUAL:STOP o D1:NUEVO:INICIAR:37mg
+        const partes = p.split(':');
+        const dia = partes[0].replace('D', 'Día ');
+        const sujeto = partes[1]; // ACTUAL o NUEVO
+        const accion = partes[2]; // STOP, INICIAR, REDUCIR, TITULAR...
+        const valor = partes[3];  // Cantidad (37mg, 50%, TARGET...)
+
+        let textoPaso = `<b>${dia}:</b> `;
+
+        if (sujeto === "ACTUAL") {
+            if (accion === "STOP") textoPaso += `Suspender fármaco de origen.`;
+            if (accion === "REDUCIR") textoPaso += `Reducir fármaco de origen al ${valor}.`;
+        } else {
+            // Lógica para el Fármaco NUEVO
+            if (accion === "INICIAR") {
+                const mgPaso = parseFloat(valor);
+                if (!isNaN(mgPaso) && mgPaso >= targetMg) {
+                    textoPaso += `Alcanzar dosis objetivo de ${targetMg.toFixed(1)} mg.`;
+                    objetivoAlcanzado = true;
+                } else {
+                    textoPaso += `Iniciar/subir fármaco nuevo a ${valor}.`;
+                }
+            }
+            if (accion === "TITULAR_PROGRESIVO") {
+                textoPaso += `Desde este día, iniciar titulación progresiva hasta la dosis objetivo (${targetMg.toFixed(1)} mg).`;
+                objetivoAlcanzado = true;
+            }
+        }
+        htmlPasos += `<li style="margin-bottom:8px; line-height:1.4;">${textoPaso}</li>`;
+    }
+
+    htmlPasos += '</ul>';
+    return htmlPasos;
 };
 
-// --- TU FUNCIÓN DE CÁLCULO ORIGINAL (Globalizada) ---
+// --- FUNCIÓN DE CÁLCULO ACTUALIZADA ---
 window.ejecutarCalculo = function() {
     const fOrigName = document.getElementById('f_orig').value;
     const fDestName = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
     
-    const o = window.dbCalc.find(f => f.farmaco === fOrigName);
+    // Necesitamos los datos mapeados y la fila original para las instrucciones
+    const oIndex = window.dbCalc.findIndex(f => f.farmaco === fOrigName);
+    const o = window.dbCalc[oIndex];
     const d = window.dbCalc.find(f => f.farmaco === fDestName);
     
+    // El índice de columna para el destino (Basado en tu fila 13)
+    // Asumimos que las columnas de instrucciones empiezan en la G (índice 6)
+    const dColIndex = 6 + window.dbCalc.findIndex(f => f.farmaco === fDestName);
+
     if (!dosisO || isNaN(dosisO) || !o || !d) {
         alert("Por favor, introduce una dosis válida.");
         return;
@@ -117,81 +88,36 @@ window.ejecutarCalculo = function() {
     let porcentajeRango = (dosisO / o.max) * 100;
     let dosisRango = (porcentajeRango / 100) * d.max;
     
-    let bgColor = ""; let textColor = ""; let alertText = "";
-
-    if (Maudsley > d.max) {
-        bgColor = '#fee2e2'; textColor = "#b91c1c"; 
-        alertText = "⚠️ EXCEDE DOSIS MÁXIMA en ficha técnica";
-    } else if (Maudsley > d.ed95) {
-        bgColor = '#fef3c7'; textColor = "#b45309"; 
-        alertText = "⚠️ SUPERIOR A ED95 (dosis para 95% respuesta)";
-    } else if (Maudsley < d.min) {
-        bgColor = '#f1f5f9'; textColor = "#475569"; 
-        alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO";
-    } else {
-        bgColor = '#dcfce7'; textColor = "#15803d"; 
-        alertText = "✅ RANGO ESTÁNDAR";
-    }
+    // ... (Aquí va tu lógica de colores y alertas que ya tenías) ...
+    let bgColor = Maudsley > d.max ? '#fee2e2' : (Maudsley > d.ed95 ? '#fef3c7' : '#dcfce7');
+    let textColor = Maudsley > d.max ? '#b91c1c' : (Maudsley > d.ed95 ? '#b45309' : '#15803d');
+    let alertText = Maudsley > d.max ? "⚠️ EXCEDE DOSIS MÁXIMA" : "✅ RANGO ESTÁNDAR";
 
     const resBox = document.getElementById('res-box');
     const resVal = document.getElementById('res-val');
-    const resAlert = document.getElementById('res-alert');
     const resTip = document.getElementById('res-tip');
 
     resBox.style.display = 'block';
     resBox.style.background = bgColor;
-    if(resAlert) resAlert.innerHTML = ""; 
 
     resVal.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 15px;">
             <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
                 <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; letter-spacing: 0.5px;">Dosis de prescripción (Maudsley)</div>
                 <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
-                
-                <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor}; line-height: 1.2;">
-                    ${alertText}
-                </div>
+                <div style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900; background: white; color: ${textColor}; border: 1px solid ${textColor};">${alertText}</div>
             </div>
+        </div>`;
 
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Equivalencia en su rango (${porcentajeRango.toFixed(0)}%)</div>
-                <div style="font-size: 1.1rem; font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} <span style="font-size: 0.8rem;">mg</span></div>
-            </div>
-        </div>
-    `;
+    // Obtener la instrucción desde la matriz original cargada por el Worker
+    // window.dbRaw contiene los valores sin procesar del fetch
+    const rawInstruction = window.dbRaw[oIndex + 1][dColIndex]; // +1 por la cabecera
+    
+    const tipTraducido = window.traducirInstrucciones(rawInstruction, dosisO, fDestName, Maudsley);
 
-    let tip = "";
-    const oName = o.farmaco.toUpperCase();
-    const dName = d.farmaco.toUpperCase();
-    const parClave = `${oName}-${dName}`;
-
-    if (MATRIZ_INTEGRATE[parClave]) {
-        tip = MATRIZ_INTEGRATE[parClave];
-    } else if (dName === "CARIPRAZINA") {
-        tip = MATRIZ_INTEGRATE["DESTINO-CARIPRAZINA"];
-    } else if (dName === "BREXPIPRAZOL") {
-        tip = MATRIZ_INTEGRATE["DESTINO-BREXPIPRAZOL"];
-    } else if (oName === "ARIPIPRAZOL") {
-        tip = MATRIZ_INTEGRATE["ORIGEN-ARIPIPRAZOL"];
-    } else if (oName === "CARIPRAZINA" || oName === "BREXPIPRAZOL") {
-        tip = MATRIZ_INTEGRATE["ORIGEN-AGONISTA_PARCIAL"];
-    } else if (oName === "QUETIAPINA") {
-        tip = MATRIZ_INTEGRATE["ORIGEN-QUETIAPINA"];
-    } else {
-        if (dosisO <= o.umbral) {
-            tip = "Dosis baja de origen: Se recomienda cambio directo (Stop/Start) el Día 1.";
-        } else {
-            tip = `Reducción gradual: Reducir ${o.farmaco} al 50% el Día 1 y suspender tras 7 días de solapamiento con el nuevo fármaco.`;
-        }
-    }
-
-    if (dName === "QUETIAPINA") {
-        tip += "<br><br>Iniciar Quetiapina de forma gradual (ej. 25-50mg) y subir hasta la dosis objetivo en 4-7 días.";
-    }
     resTip.innerHTML = `
         <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
-            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px;">Estrategia de Cambio</b>
-            ${tip}
-        </div>
-    `;
-}
+            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 10px;">Estrategia de Cambio Automática</b>
+            ${tipTraducido}
+        </div>`;
+};
