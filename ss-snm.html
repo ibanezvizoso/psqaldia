@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diferencial SS vs SNM | PSQALDÍA</title>
-    <meta name="description" content="Herramienta de diagnóstico diferencial entre Síndrome Serotoninérgico (Hunter) y Síndrome Neuroléptico Maligno (Levenson).">
+    <meta name="description" content="Herramienta clínica para diferenciar el Síndrome Serotoninérgico y el Síndrome Neuroléptico Maligno mediante criterios de Hunter y Levenson.">
     <link rel="canonical" href="https://psqaldia.com/ss-snm">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -26,22 +26,20 @@
         .nav-header { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
         
-        .hero { text-align: center; padding: 4rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; }
+        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
         
         .main-content { padding: 0 1.5rem 4rem 1.5rem; }
-        .card { background: var(--card-bg); border-radius: var(--radius); padding: 2rem; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02); margin-bottom: 2rem; }
         
-        /* Estilos específicos de la herramienta de diagnóstico */
-        .calc-ui { background: white; border-radius: 1rem; }
-        #check-list-container label { transition: all 0.2s; border: 1px solid var(--border); }
+        /* Contenedor de la herramienta */
+        #modal { display: none; flex-direction: column; min-height: 400px; }
+        .card-tool { background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02); }
+
+        /* Ajustes para los checkboxes de tu JS */
+        #check-list-container label { transition: all 0.2s; background: #fff; border: 1px solid var(--border); }
         #check-list-container label:hover { background: var(--primary-light) !important; border-color: var(--primary); }
         
-        .btn-main { padding: 1.25rem 3rem; border-radius: 100px; border: none; background: var(--text-main); color: white; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 12px; transition: 0.3s; }
-        .btn-main:hover { transform: scale(1.03); background: var(--primary); }
-
-        /* Escondemos el modal por defecto para usar la lógica de tu JS */
-        #modal { display: none; flex-direction: column; }
+        footer { margin-top: 3rem; padding: 2rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -51,42 +49,47 @@
     </nav>
 
     <header class="hero">
-        <h1>SS vs SNM</h1>
-        <p>Herramienta avanzada para el diagnóstico diferencial en urgencias psiquiátricas.</p>
+        <h1>Diferencial SS vs SNM</h1>
+        <p>Evaluación simultánea: Criterios de Hunter y Levenson para el Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno.</p>
     </header>
 
     <main class="main-content">
-        <div class="card" id="intro-card">
-            <h2 style="font-size: 1.4rem; margin-top: 0;"><i class="fas fa-microscope" style="color:var(--primary)"></i> Criterios Clínicos</h2>
-            <p>Esta herramienta procesa simultáneamente los <strong>Criterios de Hunter</strong> (específicos para toxicidad serotoninérgica) y los <strong>Criterios de Levenson</strong> (para Síndrome Neuroléptico Maligno).</p>
-            <div style="text-align: center; margin-top: 2rem;">
-                <button onclick="iniciarHerramienta()" class="btn-main">
-                    <i class="fas fa-stethoscope"></i> EMPEZAR EVALUACIÓN
-                </button>
+        <div id="modal">
+            <div id="modalData" class="card-tool">
+                <div style="padding:3rem; text-align:center;">
+                    <i class="fas fa-sync fa-spin fa-2x" style="color:var(--primary);"></i>
+                    <p style="margin-top:1rem; font-weight:700;">Conectando con la base de datos...</p>
+                </div>
             </div>
         </div>
 
-        <div id="modal">
-            <div id="modalData" class="card"></div>
-        </div>
-
-        <footer class="card" style="margin-top: 4rem;">
-            <h2 style="font-size: 1.1rem;"><i class="fas fa-book-medical"></i> Referencias</h2>
-            <ul style="font-size: 0.85rem; color: var(--text-muted); list-style: none; padding: 0;">
-                <li><strong>Hunter</strong></li>
-                <li><strong>Levenson</strong></li>
-            </ul>
+        <footer>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                <div>
+                    <h3 style="color: var(--text-main); font-size: 1rem;"><i class="fas fa-info-circle"></i> Sobre esta herramienta</h3>
+                    <p>Asistencia para el diagnóstico diferencial en caso de sospecha de toxicidad por psicofármacos</p>
+                </div>
+                <div>
+                    <h3 style="color: var(--text-main); font-size: 1rem;"><i class="fas fa-book"></i> Referencias</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>• Hunter</li>
+                        <li>• Levenson</li>
+                    </ul>
+                </div>
+            </div>
         </footer>
     </main>
 
+    <script src="/diagnostico.js"></script>
     <script>
         window.WORKER_URL = "https://psqaldia.com/"; 
-
-        function iniciarHerramienta() {
-            document.getElementById('intro-card').style.display = 'none';
-            openDiagUI(); // Llamamos a tu función del .js
-        }
+        
+        // Carga inmediata al estar listo el DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof openDiagUI === 'function') {
+                openDiagUI();
+            }
+        });
     </script>
-    <script src="/diagnostico.js"></script> 
 </body>
 </html>
