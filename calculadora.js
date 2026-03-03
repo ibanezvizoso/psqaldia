@@ -1,12 +1,29 @@
-// --- CARGA DE DATOS Y CONSTRUCCIÓN DE LA INTERFAZ ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // Estilos (los mismos de siempre)
+    // Estilos (los mismos)
     if (!document.getElementById('calc-internal-styles')) {
         const style = document.createElement('style');
         style.id = 'calc-internal-styles';
-        style.innerHTML = ` ... `; // (pon aquí los estilos que ya tenías)
+        style.innerHTML = `
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
+            .calc-ui label { 
+                font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
+                color: var(--text-muted); margin-top: 0.8rem; display: block; 
+            }
+            .calc-ui select, .calc-ui input { 
+                width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
+                background: var(--bg); color: var(--text-main); font-size: 1rem; 
+                font-family: inherit; outline: none; box-sizing: border-box;
+            }
+            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
+            .res-container { 
+                padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; 
+                display: none; border: 1px solid rgba(0,0,0,0.05); 
+            }
+            .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
+        `;
         document.head.appendChild(style);
     }
 
@@ -17,7 +34,7 @@ window.iniciarInterfazCalculadora = async function() {
             if (data.error) throw new Error(data.details);
             window.dbRaw = data.values;
 
-            // 1. Extraer lista de fármacos desde columna A (índice 0) a partir de fila 2 (índice 1)
+            // Lista de fármacos desde columna A, empezando en A2 (índice 1)
             window.listaFarmacos = [];
             for (let i = 1; i < window.dbRaw.length; i++) {
                 const nombre = window.dbRaw[i]?.[0];
@@ -27,7 +44,7 @@ window.iniciarInterfazCalculadora = async function() {
             }
             console.log('Fármacos:', window.listaFarmacos);
 
-            // 2. Crear dbCalc para factores (cálculo de dosis)
+            // Datos para cálculos (factores, etc.)
             window.dbCalc = window.dbRaw.map(row => ({
                 farmaco: row[0] ? row[0].toString().trim() : '',
                 factor: parseFloat(row[1]) || 1,
@@ -46,11 +63,11 @@ window.iniciarInterfazCalculadora = async function() {
     container.innerHTML = `
         <div class="calc-ui">
             <h2>Calculadora APS</h2>
-            <label>Origen</label>
+            <label>Fármaco Origen</label>
             <select id="f_orig">${options}</select>
-            <label>Dosis actual (mg/día)</label>
-            <input type="number" id="d_orig" step="0.1">
-            <label>Destino</label>
+            <label>Dosis Actual (mg/día)</label>
+            <input type="number" id="d_orig" step="0.1" value="10">
+            <label>Fármaco Destino</label>
             <select id="f_dest">${options}</select>
             <button class="btn btn-primary" onclick="ejecutarCalculo()">CALCULAR</button>
             <div id="res-box" class="res-container"></div>
@@ -58,7 +75,7 @@ window.iniciarInterfazCalculadora = async function() {
     `;
 }
 
-// --- TRADUCCIÓN DE LA INSTRUCCIÓN (sin porcentajes, solo mg) ---
+// --- TRADUCCIÓN DE PASOS (sin cambios) ---
 window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
     if (!raw || raw.trim() === '') return 'No hay instrucciones.';
     const pasos = raw.split('|').map(p => p.trim()).filter(p => p);
@@ -71,7 +88,6 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
         let inst = p;
         let incluir = true;
 
-        // Manejar condiciones IF_ACTUAL_
         while (inst.startsWith('IF_ACTUAL_')) {
             const match = inst.match(/IF_ACTUAL_([<>]=?)(\d+)mg?:(.*)/);
             if (!match) { incluir = false; break; }
@@ -103,7 +119,7 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
                     texto += `Reducir origen a ${nueva.toFixed(1)} mg.`;
                     dosisAct = nueva;
                 } else texto += `Reducir origen (${valor}).`;
-            } else texto += `Mantener origen.`;
+            } else texto += 'Mantener origen.';
         } else if (sujeto === 'NUEVO') {
             if (accion === 'INICIAR' || accion === 'SUBIR') {
                 if (valor === 'TARGET') {
@@ -134,7 +150,6 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
     return html + '</ul>';
 }
 
-// --- CÁLCULO Y OBTENCIÓN DE LA INSTRUCCIÓN ---
 window.ejecutarCalculo = function() {
     const orig = document.getElementById('f_orig').value.trim();
     const dest = document.getElementById('f_dest').value.trim();
@@ -145,10 +160,9 @@ window.ejecutarCalculo = function() {
     const d = window.dbCalc.find(f => f.farmaco === dest);
     if (!o || !d) { alert('Fármaco no encontrado'); return; }
 
-    // Dosis equivalente Maudsley
     const equivalente = (dosis / o.factor) * d.factor;
 
-    // Colores y alerta (igual que antes)
+    // Colores y alerta
     let bg, color, alerta;
     if (equivalente > d.max) { bg = '#fee2e2'; color = '#b91c1c'; alerta = '⚠️ EXCEDE MÁXIMO'; }
     else if (equivalente > d.ed95) { bg = '#fef3c7'; color = '#b45309'; alerta = '⚠️ SOBRE ED95'; }
@@ -166,19 +180,21 @@ window.ejecutarCalculo = function() {
         <div id="res-tip" style="margin-top:1rem; border-top:1px solid #ccc; padding-top:1rem;"></div>
     `;
 
-    // --- OBTENER INSTRUCCIÓN DE LA MATRIZ ---
+    // --- ÍNDICES PUROS ---
     const idxOrig = window.listaFarmacos.indexOf(orig);
     const idxDest = window.listaFarmacos.indexOf(dest);
+
     if (idxOrig === -1 || idxDest === -1) {
-        document.getElementById('res-tip').innerText = 'Error: fármaco no encontrado.';
+        document.getElementById('res-tip').innerText = 'Error: fármaco no está en la lista.';
         return;
     }
 
-    // Fila: 1 + idxOrig (porque la fila 1 es el primer fármaco)
-    // Columna: 6 + idxDest (porque col G es la 6 y ahí está el primer destino)
+    // Fila: A2 es índice 1 en dbRaw, más el índice del origen
     const fila = 1 + idxOrig;
+    // Columna: G es índice 6 en dbRaw, más el índice del destino
     const col = 6 + idxDest;
-    console.log(`Leyendo dbRaw[${fila}][${col}]`);
+
+    console.log(`Celda: dbRaw[${fila}][${col}]`);
 
     let instruccion = '';
     if (fila < window.dbRaw.length && col < window.dbRaw[fila].length) {
