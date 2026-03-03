@@ -95,7 +95,7 @@ window.copiarEstrategia = function() {
     });
 };
 
-// --- TRADUCTOR PULIDO (CON LÓGICA DE UMBRAL) ---
+// --- TRADUCTOR REFINADO ---
 window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nombreDest, umbralDest) {
     if (!raw || raw.trim() === '') return '<span style="color:var(--text-muted);">Sin pauta específica.</span>';
     const bloques = raw.split('|').map(b => b.trim()).filter(Boolean);
@@ -131,11 +131,13 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
         } else {
             let dosisPaso = 0;
             const numExtraido = parseFloat(valor.replace(/[^0-9.]/g, ''));
-
-            // Lógica para detectar si es dosis baja y debe iniciarse directamente
             const esDosisBaja = dosisObjetivo <= umbralDest;
 
-            if (valor === 'TARGET' || accion === 'TITULAR_PROGRESIVO') {
+            // --- Lógica de Target vs Titulación ---
+            if (valor === 'TARGET') {
+                desc = `Iniciar dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
+                objetivoAlcanzado = true;
+            } else if (accion === 'TITULAR_PROGRESIVO') {
                 desc = esDosisBaja 
                     ? `Iniciar directamente con la dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`
                     : `Desde este día, titular progresivamente hasta <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
@@ -144,9 +146,7 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
                 dosisPaso = valor.includes('%') ? (dosisObjetivo * numExtraido / 100) : numExtraido;
 
                 if (dosisPaso >= dosisObjetivo) {
-                    desc = esDosisBaja 
-                        ? `Iniciar directamente con la dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`
-                        : `Desde este día, titular progresivamente hasta <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
+                    desc = `Alcanzar dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
                     objetivoAlcanzado = true;
                 } else {
                     const verbo = nuevoIniciado ? 'Subir' : 'Iniciar';
@@ -212,7 +212,6 @@ window.ejecutarCalculo = function() {
     const idxDest = window.listaFarmacos.indexOf(dest);
     const rawInstr = (window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig] && window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig][CONFIG.COL_INICIO_DESTINOS + idxDest]) || "";
     
-    // Pasamos el d.umbral a la función de traducción
     document.getElementById('res-pauta').innerHTML = `
         <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>
         ${orig === dest ? 'Mismo fármaco.' : window.traducirPasos(rawInstr.toString(), dosis, equivalente, orig, dest, d.umbral)}`;
