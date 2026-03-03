@@ -1,149 +1,210 @@
-/**
- * CALCULADORA APS - VERSIÓN AUDITADA
- * Solución: Origen A2+ | Destino Fila 13
- */
-
+// --- CARGA DE DATOS, ESTILOS Y FUNCIÓN PRINCIPAL ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // 1. ESTILOS (Timeline + UI)
+    // A. INYECCIÓN DE ESTILOS
     if (!document.getElementById('calc-internal-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'calc-internal-styles';
         styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
-            .calc-ui h2 { margin: 0 0 1rem 0; font-weight: 800; display: flex; align-items: center; gap: 10px; }
-            .calc-ui label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.8rem; display: block; }
-            .calc-ui select, .calc-ui input { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; box-sizing: border-box; }
-            .btn-primary { margin-top: 1.2rem; padding: 1.1rem; background: var(--primary); color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
-            .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); overflow: hidden; }
-            .res-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
-            .res-pauta { padding: 1.5rem; background: var(--bg); }
-            .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
-            .pauta-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; width: 2px; background: var(--border); opacity: 0.5; }
-            .step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.8rem; z-index: 1; }
-            .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
-            .tag-orig { background: #fee2e2; color: #b91c1c; }
-            .tag-dest { background: #dcfce7; color: #15803d; }
-            .step-txt { font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+            .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
+            .calc-ui label { 
+                font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
+                color: var(--text-muted); margin-top: 0.8rem; display: block; 
+            }
+            .calc-ui select, .calc-ui input { 
+                width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
+                background: var(--bg); color: var(--text-main); font-size: 1rem; 
+                font-family: inherit; outline: none; box-sizing: border-box;
+            }
+            .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
+            .res-container { 
+                padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; 
+                display: none; border: 1px solid rgba(0,0,0,0.05); 
+            }
+            .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
         `;
         document.head.appendChild(styleTag);
     }
 
-    try {
-        const response = await fetch(`${window.WORKER_URL}?sheet=Data_APS`);
-        const data = await response.json();
+    // --- CARGA AUTÓNOMA DE DATOS ---
+    if (!window.dbCalc) {
+        try {
+            const pestaña = "Data_APS";
+            const response = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const data = await response.json();
 
-        if (data.values) {
-            window.dbRaw = data.values;
-            window.dbCalc = [];
-            window.mapSwitchCol = {};
-
-            // A. CARGA DE FÁRMACOS (COLUMNA A, DESDE A2)
-            // Haloperidol está en data.values[1][0]. Lo leemos sin filtros.
-            for (let i = 1; i < data.values.length; i++) {
-                const fila = data.values[i];
-                if (fila && fila[0] && fila[0].toString().trim() !== "") {
-                    window.dbCalc.push({
-                        nombre: fila[0].toString().trim(),
-                        filaIdx: i, // Guardamos la fila para el switch
-                        factor: parseFloat(fila[1]) || 1,
-                        max: parseFloat(fila[3]) || 0
-                    });
-                }
+            if (data.error) {
+                throw new Error(data.details || data.error);
             }
 
-            // B. MAPEAMOS LA FILA 13 (GPS DE COLUMNAS)
-            const fila13 = data.values[12]; // Índice 12 = Fila 13
-            if (fila13) {
-                fila13.forEach((val, idx) => {
-                    if (val) {
-                        window.mapSwitchCol[val.toString().trim().toUpperCase()] = idx;
-                    }
-                });
+            if (data.values) {
+
+                // Guardamos la hoja completa para leer switches
+                window.rawSheet = data.values;
+
+                // Construimos base farmacológica (columnas A-F)
+                window.dbCalc = data.values.map(row => ({
+                    farmaco: row[0],
+                    factor: parseFloat(row[1]) || 1,
+                    ed95: parseFloat(row[2]) || 0,
+                    max: parseFloat(row[3]) || 0,
+                    min: parseFloat(row[4]) || 0,
+                    umbral: parseFloat(row[5]) || 0
+                }));
             }
 
-            const options = window.dbCalc.map(f => `<option value="${f.nombre}">${f.nombre}</option>`).join('');
-            container.innerHTML = `
-                <div class="calc-ui">
-                    <h2><i class="fas fa-calculator"></i> APS Switch</h2>
-                    <label>Fármaco Origen</label>
-                    <select id="f_orig">${options}</select>
-                    <label>Dosis Actual (mg/día)</label>
-                    <input type="number" id="d_orig" placeholder="0.00">
-                    <label>Fármaco Destino</label>
-                    <select id="f_dest">${options}</select>
-                    <button class="btn-primary" onclick="ejecutarCalculo()">CALCULAR</button>
-                    <div id="res-box" class="res-container">
-                        <div id="res-header" class="res-header"></div>
-                        <div id="res-pauta" class="res-pauta"></div>
-                    </div>
-                </div>`;
+        } catch (e) {
+            console.error("Error en la calculadora:", e);
+            container.innerHTML = `<div style="padding:2.5rem;">Error cargando datos: ${e.message}</div>`;
+            return;
         }
-    } catch (e) {
-        container.innerHTML = "Error: " + e.message;
     }
-}
 
+    const options = window.dbCalc
+        .filter(f => f.farmaco)
+        .map(f => `<option value="${f.farmaco}">${f.farmaco}</option>`)
+        .join('');
+
+    container.innerHTML = `
+        <div class="calc-ui">
+            <h2 style="margin-bottom:1.5rem;">
+                <i class="fas fa-calculator"></i> Calculadora APS
+            </h2>
+            
+            <label>Fármaco Origen</label>
+            <select id="f_orig">${options}</select>
+            
+            <label>Dosis Actual (mg/día)</label>
+            <input type="number" id="d_orig" placeholder="0.00">
+            
+            <label>Fármaco Destino</label>
+            <select id="f_dest">${options}</select>
+            
+            <button class="btn btn-primary" style="width:100%;" onclick="ejecutarCalculo()">
+                CALCULAR
+            </button>
+            
+            <div id="res-box" class="res-container" style="background:var(--bg); margin-top: 1.5rem;">
+                <div id="res-val" style="font-size:2.2rem; font-weight:900;"></div>
+                <div id="res-alert"></div>
+                <div id="res-tip"></div>
+            </div>
+            
+            <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2rem; line-height: 1.3; font-style: italic;">
+                Basado en equivalencias APS. Juicio clínico indispensable.
+            </p>
+        </div>`;
+};
+
+// --- FUNCIÓN DE CÁLCULO ---
 window.ejecutarCalculo = function() {
-    const fOrigNom = document.getElementById('f_orig').value;
-    const fDestNom = document.getElementById('f_dest').value;
+
+    const fOrigName = document.getElementById('f_orig').value;
+    const fDestName = document.getElementById('f_dest').value;
     const dosisO = parseFloat(document.getElementById('d_orig').value);
-    
-    const o = window.dbCalc.find(f => f.nombre === fOrigNom);
-    const d = window.dbCalc.find(f => f.nombre === fDestNom);
-    
-    if (!o || !d || isNaN(dosisO)) return;
 
-    // Cálculo Maudsley
-    const Maudsley = (dosisO / o.factor) * d.factor;
-    
-    const resBox = document.getElementById('res-box');
-    resBox.style.display = 'block';
-    const header = document.getElementById('res-header');
-    header.style.background = `hsl(${(fDestNom.length * 50) % 360}, 85%, 94%)`;
-    header.innerHTML = `
-        <div style="font-size:0.7rem; font-weight:800; opacity:0.6; text-transform:uppercase;">Dosis Objetivo</div>
-        <div style="font-size:2.8rem; font-weight:900;">${Maudsley.toFixed(1)} <span style="font-size:1.2rem;">mg/día</span></div>
-    `;
+    const o = window.dbCalc.find(f => f.farmaco === fOrigName);
+    const d = window.dbCalc.find(f => f.farmaco === fDestName);
 
-    // INTERSECCIÓN: Fila (Origen en A) x Columna (Destino en Fila 13)
-    const fila = o.filaIdx;
-    const col = window.mapSwitchCol[fDestNom.trim().toUpperCase()];
-
-    let rawInstr = "";
-    if (col !== undefined && window.dbRaw[fila]) {
-        rawInstr = window.dbRaw[fila][col] ? window.dbRaw[fila][col].toString() : "";
+    if (!dosisO || isNaN(dosisO) || !o || !d) {
+        alert("Por favor, introduce una dosis válida.");
+        return;
     }
 
-    document.getElementById('res-pauta').innerHTML = `
-        <h4 style="margin:0 0 1rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia</h4>
-        ${fOrigNom === fDestNom ? 'Origen y destino iguales.' : window.traducirPasos(rawInstr, dosisO, Maudsley)}
-    `;
-}
+    // --- CÁLCULO ---
+    let Maudsley = (dosisO / o.factor) * d.factor;
+    let porcentajeRango = (dosisO / o.max) * 100;
+    let dosisRango = (porcentajeRango / 100) * d.max;
 
-window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") return "Pauta no definida.";
-    const bloques = rawStr.split('|').filter(Boolean);
-    let html = '';
-    bloques.forEach(bloque => {
-        let texto = bloque.trim();
-        if (texto.startsWith("IF_ACTUAL_")) {
-            const m = texto.match(/IF_ACTUAL_([<>]=?)([\d.]+)(?:mg)?:(.*)/);
-            if (m) {
-                const cumple = eval(`${dOrig} ${m[1] === '=' ? '==' : m[1]} ${m[2]}`);
-                if (!cumple) return;
-                texto = m[3].trim();
-            }
+    let bgColor = "";
+    let textColor = "";
+    let alertText = "";
+
+    if (Maudsley > d.max) {
+        bgColor = '#fee2e2'; 
+        textColor = "#b91c1c"; 
+        alertText = "⚠️ EXCEDE DOSIS MÁXIMA";
+    } else if (Maudsley > d.ed95) {
+        bgColor = '#fef3c7'; 
+        textColor = "#b45309"; 
+        alertText = "⚠️ SUPERIOR A ED95";
+    } else if (Maudsley < d.min) {
+        bgColor = '#f1f5f9'; 
+        textColor = "#475569"; 
+        alertText = "🔍 POR DEBAJO DE MÍNIMO EFECTIVO";
+    } else {
+        bgColor = '#dcfce7'; 
+        textColor = "#15803d"; 
+        alertText = "✅ RANGO ESTÁNDAR";
+    }
+
+    const resBox = document.getElementById('res-box');
+    const resVal = document.getElementById('res-val');
+    const resTip = document.getElementById('res-tip');
+
+    resBox.style.display = 'block';
+    resBox.style.background = bgColor;
+
+    resVal.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; text-align: center;">
+                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">
+                    Dosis de prescripción
+                </div>
+                <div style="font-size: 2.8rem; font-weight: 900;">
+                    ${Maudsley.toFixed(1)} mg/día
+                </div>
+                <div style="margin-top: 12px; font-weight: 800; color: ${textColor};">
+                    ${alertText}
+                </div>
+            </div>
+            <div style="font-size: 0.85rem;">
+                Equivalencia en su rango (${porcentajeRango.toFixed(0)}%): 
+                <b>${dosisRango.toFixed(1)} mg</b>
+            </div>
+        </div>
+    `;
+
+    // --- NUEVA LÓGICA DE SWITCH DESDE EXCEL ---
+    let tip = "";
+
+    if (window.rawSheet) {
+
+        const sheet = window.rawSheet;
+
+        // Buscar fila del fármaco origen (columna A)
+        const filaOrigen = sheet.findIndex(row =>
+            row[0] && row[0].toString().trim().toUpperCase() === fOrigName.toUpperCase()
+        );
+
+        // Fila 13 (índice 12) contiene cabecera de destinos desde G13
+        const filaCabecera = sheet[12];
+
+        let colDestino = -1;
+
+        if (filaCabecera) {
+            colDestino = filaCabecera.findIndex(cell =>
+                cell && cell.toString().trim().toUpperCase() === fDestName.toUpperCase()
+            );
         }
-        const p = texto.split(':').map(s => s.trim());
-        if (p.length < 3) return;
-        const dia = p[0].replace('D', 'Día '), sujeto = p[1], accion = p[2], valor = p[3] || "";
-        let desc = (sujeto === 'ACTUAL') 
-            ? (accion === 'REDUCIR' ? `Bajar origen al ${valor} (<b>${(dOrig * parseFloat(valor) / 100).toFixed(1)} mg</b>)` : `${accion} ${valor}`)
-            : (valor.includes('TARGET') ? `Nuevo al ${valor.includes('%') ? parseFloat(valor) : 100}% (<b>${(targetMg * (parseFloat(valor) || 100) / 100).toFixed(1)} mg</b>)` : `Iniciar a ${valor}`);
-        
-        html += `<div class="pauta-step"><div class="step-idx">${dia.replace('Día ', '')}</div><div class="step-body"><span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto}</span><div class="step-txt">${desc}</div></div></div>`;
-    });
-    return html;
+
+        if (filaOrigen !== -1 && colDestino !== -1) {
+            tip = sheet[filaOrigen][colDestino] || "";
+        }
+    }
+
+    if (!tip || tip.trim() === "") {
+        tip = "No hay instrucción específica definida para este cambio.";
+    }
+
+    resTip.innerHTML = `
+        <div style="margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; font-size: 0.9rem;">
+            <b style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px;">
+                Estrategia de Cambio
+            </b>
+            ${tip}
+        </div>
+    `;
 };
