@@ -1,7 +1,5 @@
 /**
- * CALCULADORA APS - SOLUCIÓN FINAL SWITCH
- * 1. Datos: Columna A (Haloperidol en A2)
- * 2. Mapa de Switch: Cruce entre Fila (Origen A) y Columna (Destino Fila 13)
+ * CALCULADORA APS - INTERSECCIÓN RECALIBRADA
  */
 
 window.iniciarInterfazCalculadora = async function() {
@@ -34,7 +32,7 @@ window.iniciarInterfazCalculadora = async function() {
         document.head.appendChild(styleTag);
     }
 
-    // 2. CARGA DE DATOS (Fila 13 para switch, Columna A para fármacos)
+    // 2. CARGA DE DATOS
     if (!window.dbCalc) {
         try {
             const pestaña = "Data_APS";
@@ -43,33 +41,38 @@ window.iniciarInterfazCalculadora = async function() {
 
             if (data.values) {
                 window.dbRaw = data.values;
-                
-                // Cargamos dbCalc desde Columna A (respetando tu mapeo original que lee A2)
-                window.dbCalc = data.values.map((row, index) => ({
-                    farmaco: row[0] ? row[0].toString().trim() : "",
-                    factor: parseFloat(row[1]) || 1,
-                    ed95: parseFloat(row[2]) || 0,
-                    max: parseFloat(row[3]) || 0,
-                    min: parseFloat(row[4]) || 0,
-                    umbral: parseFloat(row[5]) || 0,
-                    filaIdx: index 
-                })).filter(f => f.farmaco && f.farmaco.toLowerCase() !== "farmaco");
-
-                // MAPEAMOS LA FILA 13 (Índice 12) para encontrar las columnas de destino
+                window.dbCalc = [];
                 window.mapDestinoSwitch = {};
+
+                // A. MAPEAMOS LA FILA 13 (Índice 12) PARA LAS COLUMNAS
                 const fila13 = data.values[12];
                 if (fila13) {
                     fila13.forEach((val, idx) => {
-                        if (val) {
-                            // Guardamos el nombre en MAYÚSCULAS y sin espacios para que la búsqueda sea infalible
-                            const nombreLimpio = val.toString().trim().toUpperCase();
-                            window.mapDestinoSwitch[nombreLimpio] = idx;
+                        if (val && val.toString().trim() !== "") {
+                            // Guardamos el nombre tal cual para comparar luego
+                            window.mapDestinoSwitch[val.toString().trim().toUpperCase()] = idx;
                         }
                     });
                 }
+
+                // B. MAPEAMOS LA COLUMNA A (Desde A2 / Índice 1) PARA LAS FILAS
+                for (let i = 1; i < data.values.length; i++) {
+                    const row = data.values[i];
+                    if (row && row[0]) {
+                        const nombre = row[0].toString().trim();
+                        if (nombre !== "" && nombre.toLowerCase() !== "farmaco") {
+                            window.dbCalc.push({
+                                farmaco: nombre,
+                                filaIdx: i, // La fila exacta en dbRaw
+                                factor: parseFloat(row[1]) || 1,
+                                max: parseFloat(row[3]) || 0
+                            });
+                        }
+                    }
+                }
             }
         } catch (e) {
-            container.innerHTML = `<div style="padding:2.5rem;">Error: ${e.message}</div>`;
+            container.innerHTML = "Error cargando datos.";
             return;
         }
     }
@@ -92,7 +95,7 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 }
 
-// 4. CÁLCULO Y LOCALIZACIÓN DE PAUTA
+// 4. FUNCIÓN DE CÁLCULO E INTERSECCIÓN
 window.ejecutarCalculo = function() {
     const fOrigNom = document.getElementById('f_orig').value;
     const fDestNom = document.getElementById('f_dest').value;
@@ -103,39 +106,38 @@ window.ejecutarCalculo = function() {
     
     if (isNaN(dosisO) || !o || !d) return;
 
-    // Conversión Maudsley
+    // Conversión Maudsley (Usa Columna A para ambos factores)
     const Maudsley = (dosisO / o.factor) * d.factor;
     
     document.getElementById('res-box').style.display = 'block';
     const header = document.getElementById('res-header');
-    header.style.background = `hsl(${(fDestNom.length * 65) % 360}, 85%, 94%)`;
+    header.style.background = `hsl(${(fDestNom.length * 70) % 360}, 85%, 94%)`;
     header.innerHTML = `
-        <div style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Dosis Maudsley Estimada</div>
-        <div style="font-size: 2.8rem; font-weight: 900; color: var(--text-main);">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
+        <div style="font-size: 0.7rem; font-weight: 800; opacity: 0.6; text-transform: uppercase;">Dosis Objetivo Maudsley</div>
+        <div style="font-size: 2.8rem; font-weight: 900;">${Maudsley.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
     `;
 
-    // --- BÚSQUEDA EN LA MATRIZ ---
-    // Fila: La que guardamos de la Columna A
-    // Columna: La que buscamos en el mapa de la Fila 13
-    const filaIdx = o.filaIdx;
-    const colIdx = window.mapDestinoSwitch[fDestNom.trim().toUpperCase()];
+    // --- INTERSECCIÓN MAESTRA ---
+    // 1. Buscamos la fila basándonos en el origen (Columna A)
+    const fila = o.filaIdx; 
+    // 2. Buscamos la columna basándonos en el nombre del destino en la Fila 13
+    const columna = window.mapDestinoSwitch[fDestNom.toUpperCase()];
 
     let rawInstr = "";
-    if (colIdx !== undefined && window.dbRaw[filaIdx]) {
-        rawInstr = window.dbRaw[filaIdx][colIdx] ? window.dbRaw[filaIdx][colIdx].toString() : "";
+    if (columna !== undefined && window.dbRaw[fila]) {
+        // Obtenemos el contenido de la celda en esa intersección exacta
+        rawInstr = window.dbRaw[fila][columna] ? window.dbRaw[fila][columna].toString() : "";
     }
 
     document.getElementById('res-pauta').innerHTML = `
-        <h4 style="margin:0 0 1rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia de Cambio</h4>
-        ${fOrigNom === fDestNom ? 'Cambio no necesario.' : window.traducirPasos(rawInstr, dosisO, Maudsley)}
+        <h4 style="margin:0 0 1rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>
+        ${fOrigNom === fDestNom ? 'Cambio no requerido.' : window.traducirPasos(rawInstr, dosisO, Maudsley)}
     `;
 }
 
 // 5. TRADUCTOR DE PASOS
 window.traducirPasos = function(rawStr, dOrig, targetMg) {
-    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") {
-        return `<div style="color:var(--text-muted); font-style:italic;">No hay pauta específica para este cruce en la matriz. Revise la fila 13 y la columna A del Excel.</div>`;
-    }
+    if (!rawStr || rawStr.trim() === "" || rawStr === "NaN") return "Pauta de switch no definida en la matriz.";
     const bloques = rawStr.split('|').map(b => b.trim()).filter(Boolean);
     let html = '';
     bloques.forEach(bloque => {
@@ -150,17 +152,10 @@ window.traducirPasos = function(rawStr, dOrig, targetMg) {
         const p = texto.split(':').map(s => s.trim());
         if (p.length < 3) return;
         const dia = p[0].replace('D', 'Día '), sujeto = p[1], accion = p[2], valor = p[3] || "";
-        let desc = '';
-        if (sujeto === 'ACTUAL') {
-            if (accion === 'STOP') desc = 'Suspender origen.';
-            else if (accion === 'REDUCIR') desc = `Bajar origen al ${valor} (<b>${(dOrig * parseFloat(valor) / 100).toFixed(1)} mg</b>).`;
-            else desc = `${accion} ${valor}`;
-        } else {
-            if (valor.includes('TARGET')) {
-                const pct = valor.includes('%') ? parseFloat(valor) : 100;
-                desc = `Nuevo fármaco al ${pct}% de dosis objetivo (<b>${(targetMg * pct / 100).toFixed(1)} mg</b>).`;
-            } else desc = `Iniciar nuevo a ${valor}.`;
-        }
+        let desc = (sujeto === 'ACTUAL') 
+            ? (accion === 'REDUCIR' ? `Bajar origen al ${valor} (<b>${(dOrig * parseFloat(valor) / 100).toFixed(1)} mg</b>)` : `${accion} ${valor}`)
+            : (valor.includes('TARGET') ? `Nuevo al ${valor.includes('%') ? parseFloat(valor) : 100}% (<b>${(targetMg * (parseFloat(valor) || 100) / 100).toFixed(1)} mg</b>)` : `Iniciar nuevo a ${valor}`);
+        
         html += `<div class="pauta-step"><div class="step-idx">${dia.replace('Día ', '')}</div><div class="step-body"><span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto}</span><div class="step-txt">${desc}</div></div></div>`;
     });
     return html;
