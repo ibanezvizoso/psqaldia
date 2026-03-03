@@ -267,6 +267,7 @@ window.ejecutarCalculo = function() {
     resBox.style.display = 'block'; 
     resBox.style.background = bg;
     
+    // --- BUSCA ESTA PARTE EN window.ejecutarCalculo ---
     document.getElementById('res-header').innerHTML = `
         <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; margin-bottom: 10px;">
             <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">
@@ -274,6 +275,12 @@ window.ejecutarCalculo = function() {
             </div>
             <div style="font-size: 2.8rem; font-weight: 900; color: var(--text-main);">${equivalente.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
             <div style="display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 900; background: white; color: ${color}; border: 1px solid ${color};">${alerta}</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 0 10px; font-size: 0.8rem;">
+            <span style="color: var(--text-muted); font-weight: 600;">
+                ${isEn ? `Equivalence in range (${porcentajeRango.toFixed(0)}%)` : `Equivalencia en % dentro de rango (${porcentajeRango.toFixed(0)}%)`}
+            </span>
+            <span style="font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} mg</span>
         </div>`;
 
     const idxOrig = window.listaFarmacos.indexOf(orig);
