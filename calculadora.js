@@ -1,7 +1,7 @@
 // --- CONFIGURACIÓN: AJUSTA ESTOS VALORES HASTA QUE FUNCIONE ---
 const CONFIG = {
     FILA_INICIO_FARMACOS: 0,      // ¿En qué fila del array empieza Haloperidol? (1 = fila 2 de Excel)
-    COL_INICIO_DESTINOS: 7        // ¿En qué columna del array empiezan los destinos en fila 13? (6 = G)
+    COL_INICIO_DESTINOS: 6        // ¿En qué columna del array empiezan los destinos en fila 13? (6 = G)
 };
 // --------------------------------------------------------------
 
