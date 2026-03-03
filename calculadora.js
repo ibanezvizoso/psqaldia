@@ -26,6 +26,8 @@ window.iniciarInterfazCalculadora = async function() {
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
             .step-txt { font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
+            .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.5); border: 1px solid var(--border); border-radius: 1rem; cursor: pointer; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-main); transition: all 0.2s; }
+            .btn-copiar:hover { background: white; border-color: var(--primary); }
         `;
         document.head.appendChild(styleTag);
     }
@@ -63,9 +65,34 @@ window.iniciarInterfazCalculadora = async function() {
             <label>Fármaco Origen</label><select id="f_orig">${options}</select>
             <label>Dosis Actual (mg/día)</label><input type="number" id="d_orig" step="any" value="10">
             <label>Fármaco Destino</label><select id="f_dest">${options}</select>
-            <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR/ESTRATEGIA</button>
+            <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
             <div id="res-box" class="res-container"><div id="res-header" class="res-header"></div><div id="res-pauta" class="res-pauta"></div></div>
         </div>`;
+};
+
+// --- FUNCIÓN COPIAR ---
+window.copiarEstrategia = function() {
+    const steps = document.querySelectorAll('.pauta-step');
+    if (steps.length === 0) return;
+
+    let texto = "ESTRATEGIA DE CAMBIO SUGERIDA:\n\n";
+    steps.forEach(step => {
+        const dia = step.querySelector('.step-idx').innerText;
+        const farm = step.querySelector('.tag-farm').innerText;
+        const desc = step.querySelector('.step-txt').innerText;
+        texto += `Día ${dia}: [${farm}] ${desc}\n`;
+    });
+
+    navigator.clipboard.writeText(texto).then(() => {
+        const btn = document.querySelector('.btn-copiar');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> ¡COPIADO!';
+        btn.style.color = '#15803d';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.style.color = '';
+        }, 2000);
+    });
 };
 
 // --- TRADUCTOR PULIDO ---
@@ -98,12 +125,10 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
         if (sujeto === 'ACTUAL') {
             if (accion === 'STOP') desc = `Suspender ${nombreOrig}.`;
             else if (accion === 'REDUCIR') {
-                // Cálculo de dosis sin mostrar el porcentaje en el texto
                 const dosisCalc = (dosisActual * parseFloat(valor) / 100).toFixed(1);
                 desc = `Reducir ${nombreOrig} a <b>${dosisCalc} mg</b>.`;
             } else desc = `${accion} ${nombreOrig} ${valor}`;
         } else {
-            // Sujeto: NUEVO (Farmaco Destino)
             let dosisPaso = 0;
             const numExtraido = parseFloat(valor.replace(/[^0-9.]/g, ''));
 
@@ -124,7 +149,6 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
             }
         }
 
-        // Tag visual con el nombre del fármaco real
         const tagNombre = (sujeto === 'NUEVO' ? nombreDest : nombreOrig);
         const tagClase = (sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig');
 
@@ -137,6 +161,10 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
                 </div>
             </div>`;
     });
+
+    // Añadir botón de copiar al final de los pasos
+    html += `<button class="btn-copiar" onclick="copiarEstrategia()"><i class="far fa-copy"></i> COPIAR PAUTA</button>`;
+    
     return html;
 };
 
@@ -179,7 +207,6 @@ window.ejecutarCalculo = function() {
     const idxDest = window.listaFarmacos.indexOf(dest);
     const rawInstr = (window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig] && window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig][CONFIG.COL_INICIO_DESTINOS + idxDest]) || "";
     
-    // Llamada al traductor pasando los nombres de los fármacos explícitamente
     document.getElementById('res-pauta').innerHTML = `
         <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>
         ${orig === dest ? 'Mismo fármaco.' : window.traducirPasos(rawInstr.toString(), dosis, equivalente, orig, dest)}`;
