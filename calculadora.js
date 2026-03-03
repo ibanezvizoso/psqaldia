@@ -63,7 +63,7 @@ window.iniciarInterfazCalculadora = async function() {
             <label>Fármaco Origen</label><select id="f_orig">${options}</select>
             <label>Dosis Actual (mg/día)</label><input type="number" id="d_orig" step="any" value="10">
             <label>Fármaco Destino</label><select id="f_dest">${options}</select>
-            <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
+            <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR/ESTRATEGIA</button>
             <div id="res-box" class="res-container"><div id="res-header" class="res-header"></div><div id="res-pauta" class="res-pauta"></div></div>
         </div>`;
 };
