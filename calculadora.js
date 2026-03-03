@@ -129,21 +129,27 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
                 desc = `Reducir ${nombreOrig} a <b>${dosisCalc} mg</b>.`;
             } else desc = `${accion} ${nombreOrig} ${valor}`;
         } else {
-            let dosisPaso = 0;
-            const numExtraido = parseFloat(valor.replace(/[^0-9.]/g, ''));
+            // Lógica para fármaco NUEVO
             const esDosisBaja = dosisObjetivo <= umbralDest;
 
-            // --- Lógica de Target vs Titulación ---
-            if (valor === 'TARGET') {
+            // 1. Caso INICIAR TARGET (Directo)
+            if (valor === 'TARGET' && accion !== 'TITULAR_PROGRESIVO') {
                 desc = `Iniciar dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
                 objetivoAlcanzado = true;
-            } else if (accion === 'TITULAR_PROGRESIVO') {
-                desc = esDosisBaja 
-                    ? `Iniciar directamente con la dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`
-                    : `Desde este día, titular progresivamente hasta <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
+            } 
+            // 2. Caso TITULAR PROGRESIVAMENTE
+            else if (accion === 'TITULAR_PROGRESIVO') {
+                if (esDosisBaja) {
+                    desc = `Iniciar directamente con la dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
+                } else {
+                    desc = `Desde este día, titular progresivamente hasta alcanzar <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
+                }
                 objetivoAlcanzado = true;
-            } else {
-                dosisPaso = valor.includes('%') ? (dosisObjetivo * numExtraido / 100) : numExtraido;
+            } 
+            // 3. Pasos intermedios (Dosis fijas o porcentajes)
+            else {
+                const numExtraido = parseFloat(valor.replace(/[^0-9.]/g, ''));
+                let dosisPaso = valor.includes('%') ? (dosisObjetivo * numExtraido / 100) : numExtraido;
 
                 if (dosisPaso >= dosisObjetivo) {
                     desc = `Alcanzar dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
