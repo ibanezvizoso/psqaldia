@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diferencial SS vs SNM | PSQALDÍA</title>
-    <meta name="description" content="Herramienta clínica para diferenciar el Síndrome Serotoninérgico y el Síndrome Neuroléptico Maligno mediante criterios de Hunter y Levenson.">
+    <meta name="description" content="Herramienta clínica de diagnóstico diferencial entre Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno basada en evidencia.">
     <link rel="canonical" href="https://psqaldia.com/ss-snm">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,6 +14,7 @@
         :root {
             --primary: #2563eb;
             --primary-light: #eff6ff;
+            --secondary: #6366f1;
             --bg: #fcfdfe;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -22,74 +23,168 @@
             --radius: 1.25rem;
         }
 
-        body { font-family: 'Plus Jakarta Sans', sans-serif; max-width: 1000px; margin: auto; background: var(--bg); color: var(--text-main); line-height: 1.6; }
-        .nav-header { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        /* Reset y Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            /* Forzamos el scroll aunque el JS intente bloquearlo */
+            overflow: auto !important; 
+        }
+
+        /* Layout */
+        .nav-header { 
+            padding: 1.5rem 2rem; 
+            max-width: 1000px; 
+            margin: auto;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
         
-        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
-        
-        .main-content { padding: 0 1.5rem 4rem 1.5rem; }
-        
-        /* Contenedor de la herramienta */
-        #modal { display: none; flex-direction: column; min-height: 400px; }
-        .card-tool { background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02); }
+        .hero { 
+            text-align: center; 
+            padding: 4rem 1.5rem 2rem 1.5rem; 
+            background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
+        }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; color: var(--text-main); }
+        .hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: auto; }
 
-        /* Ajustes para los checkboxes de tu JS */
-        #check-list-container label { transition: all 0.2s; background: #fff; border: 1px solid var(--border); }
-        #check-list-container label:hover { background: var(--primary-light) !important; border-color: var(--primary); }
-        
-        footer { margin-top: 3rem; padding: 2rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted); }
+        .main-content { 
+            padding: 2rem 1.5rem 5rem 1.5rem; 
+            max-width: 900px; 
+            margin: auto; 
+        }
+
+        /* Ajustes para integrar el modal como contenido de página */
+        #modal { 
+            display: flex !important; /* Forzamos visualización */
+            position: relative !important; 
+            width: 100% !important;
+            height: auto !important;
+            background: transparent !important;
+            z-index: 1 !important;
+            padding: 0;
+            margin-bottom: 3rem;
+        }
+
+        #modalData { 
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        /* Estilos internos que inyecta tu JS */
+        .calc-ui { 
+            padding: 2rem !important; 
+            height: auto !important; /* Permite que crezca verticalmente */
+        }
+
+        #check-list-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px !important;
+            margin-top: 1.5rem !important;
+        }
+
+        #check-list-container label {
+            background: #fff !important;
+            padding: 1rem !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px !important;
+            font-weight: 600;
+            font-size: 0.85rem !important;
+            transition: 0.2s all ease;
+        }
+
+        #check-list-container label:hover {
+            border-color: var(--primary) !important;
+            background: var(--primary-light) !important;
+        }
+
+        /* Footer y Referencias */
+        .references-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        .references-section h2 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+        .ref-list { list-style: none; color: var(--text-muted); font-size: 0.9rem; }
+        .ref-list li { margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px; }
+        .ref-list li::before { content: "•"; color: var(--primary); font-weight: bold; }
+
+        .back-nav { text-align: center; margin-top: 3rem; }
+        .link-home { color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.95rem; }
+        .link-home:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .calc-ui { padding: 1rem !important; }
+            #check-list-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
     <nav class="nav-header">
-        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+        <a href="https://psqaldia.com" class="logo">
+            <i class="fas fa-brain"></i> PSQALDÍA
+        </a>
     </nav>
 
     <header class="hero">
-        <h1>Diferencial SS vs SNM</h1>
-        <p>Evaluación simultánea: Criterios de Hunter y Levenson para el Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno.</p>
+        <h1>SS vs SNM</h1>
+        <p>Herramienta avanzada de diagnóstico diferencial para la distinción clínica entre toxicidad serotoninérgica y neuroléptica.</p>
     </header>
 
     <main class="main-content">
         <div id="modal">
-            <div id="modalData" class="card-tool">
-                <div style="padding:3rem; text-align:center;">
-                    <i class="fas fa-sync fa-spin fa-2x" style="color:var(--primary);"></i>
-                    <p style="margin-top:1rem; font-weight:700;">Conectando con la base de datos...</p>
+            <div id="modalData">
+                <div style="padding:4rem; text-align:center;">
+                    <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
+                    <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Sincronizando criterios clínicos...</p>
                 </div>
             </div>
         </div>
 
-        <footer>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                <div>
-                    <h3 style="color: var(--text-main); font-size: 1rem;"><i class="fas fa-info-circle"></i> Sobre esta herramienta</h3>
-                    <p>Asistencia para el diagnóstico diferencial en caso de sospecha de toxicidad por psicofármacos</p>
-                </div>
-                <div>
-                    <h3 style="color: var(--text-main); font-size: 1rem;"><i class="fas fa-book"></i> Referencias</h3>
-                    <ul style="list-style: none; padding: 0;">
-                        <li>• Hunter</li>
-                        <li>• Levenson</li>
-                    </ul>
-                </div>
-            </div>
-        </footer>
+        <section class="references-section">
+            <h2><i class="fas fa-book-medical"></i> Referencias</h2>
+            <ul class="ref-list">
+                <li>Criterios de Hunter</li>
+                <li>Criterios de Levenson</li>
+            </ul>
+        </section>
+
+        <div class="back-nav">
+            <a href="https://psqaldia.com" class="link-home">
+                <i class="fas fa-arrow-left"></i> Volver a PSQALDÍA
+            </a>
+        </div>
     </main>
 
-    <script src="/diagnostico.js"></script>
     <script>
         window.WORKER_URL = "https://psqaldia.com/"; 
-        
-        // Carga inmediata al estar listo el DOM
+
+        // Forzar carga directa al iniciar
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof openDiagUI === 'function') {
                 openDiagUI();
+                
+                // Pequeño ajuste tras la carga para asegurar que el scroll esté habilitado
+                setTimeout(() => {
+                    document.body.style.overflow = 'auto';
+                }, 500);
             }
         });
     </script>
+    <script src="/diagnostico.js"></script>
 </body>
 </html>
