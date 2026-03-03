@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploración de la Catatonía | PSQALDÍA</title>
+    <meta name="description" content="Protocolo sistemático de exploración de catatonía. Evaluación por DSM-5, Taylor & Fink y Lohr & Wisniewski.">
+    <link rel="canonical" href="https://psqaldia.com/catatonia">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --bg-alt: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.25rem;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.5;
+            overflow: auto !important; 
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1200px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+
+        .main-content { padding: 0 1rem 5rem 1rem; max-width: 1100px; margin: auto; }
+
+        /* Contenedor principal de la herramienta */
+        #modalData { 
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+            min-height: 600px;
+            overflow: hidden;
+        }
+
+        /* Ajustes de scroll para la tabla en móviles */
+        .cat-scroll-container {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Guía de Colores (Leyenda) */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
+
+        footer { 
+            margin-top: 4rem; 
+            padding: 2rem; 
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            font-size: 0.85rem; 
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .legend { flex-direction: column; align-items: center; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Exploración Catatonía</h1>
+        <p>Protocolo de examen físico y algoritmos de cribado diagnóstico.</p>
+    </header>
+
+    <main class="main-content">
+        <div class="legend">
+            <div class="legend-item"><div class="dot" style="background: hsla(140, 70%, 92%, 1)"></div> Actividad Aumentada</div>
+            <div class="legend-item"><div class="dot" style="background: hsla(50, 85%, 90%, 1)"></div> Actividad anormal</div>
+            <div class="legend-item"><div class="dot" style="background: hsla(0, 80%, 92%, 1)"></div> Actividad Disminuida</div>
+        </div>
+
+        <div id="modalData">
+            <div style="padding:5rem; text-align:center;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i>
+                <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Cargando matriz de exploración...</p>
+            </div>
+        </div>
+
+        <footer>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div>
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-stethoscope"></i> Metodología</h3>
+                    <p style="color: var(--text-muted);">Exploración estructurada en tres fases (Observación, Entrevista y Examen Físico). La herramienta permite la consulta de definiciones y maniobras específicas para cada signo catatónico.</p>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-book-open"></i> Referencias</h3>
+                    <ul style="list-style: none; padding: 0; color: var(--text-muted); font-size: 0.8rem;">
+                        <li style="margin-bottom: 8px;">• <strong>DSM-5-TR</strong></li>
+                        <li style="margin-bottom: 8px;">• <strong>Taylor & Fink</strong></li>
+                        <li>• <strong>Lohr & Wisniewski</strong></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+                <a href="https://psqaldia.com" style="color: var(--primary); font-weight: 800; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> VOLVER A PSQALDÍA
+                </a>
+            </div>
+        </footer>
+    </main>
+
+    <script src="/catatonia.js"></script>
+    <script>
+        // Configuración necesaria para el script
+        window.WORKER_URL = "https://psqaldia.com/"; 
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof window.iniciarInterfazCatatonia === 'function') {
+                await window.iniciarInterfazCatatonia();
+                // Aseguramos que el scroll del body esté activo después de que el JS lo toque
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>
