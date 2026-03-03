@@ -108,7 +108,7 @@ function renderInterfaz() {
             <select id="f_dest">${options}</select>
             
             <button class="btn-ejecutar" onclick="ejecutarCalculo()">
-                ${isEs ? 'CALCULAR ESTRATEGIA' : 'CALCULATE STRATEGY'}
+                ${isEs ? 'CALCULAR&ESTRATEGIA' : 'CALCULATE&STRATEGY'}
             </button>
             
             <div id="res-box" class="res-container">
