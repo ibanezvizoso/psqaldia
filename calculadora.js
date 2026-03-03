@@ -136,9 +136,9 @@ window.ejecutarCalculo = function() {
     const dosisRango = (porcentajeRango / 100) * d.max;
 
     let bg, color, alerta;
-    if (equivalente > d.max) { bg = '#fee2e2'; color = '#b91c1c'; alerta = '⚠️ EXCEDE MÁXIMA'; }
+    if (equivalente > d.max) { bg = '#fee2e2'; color = '#b91c1c'; alerta = '⚠️ EXCEDE MÁXIMA en ficha técnica'; }
     else if (equivalente > d.ed95) { bg = '#fef3c7'; color = '#b45309'; alerta = '⚠️ SOBRE ED95'; }
-    else if (equivalente < d.min) { bg = '#f1f5f9'; color = '#475569'; alerta = '🔍 BAJO MÍNIMO'; }
+    else if (equivalente < d.min) { bg = '#f1f5f9'; color = '#475569'; alerta = '🔍 POR DEBAJO DE MÍNIMO EFECTIVO'; }
     else { bg = '#dcfce7'; color = '#15803d'; alerta = '✅ RANGO ESTÁNDAR'; }
 
     const resBox = document.getElementById('res-box'); resBox.style.display = 'block'; resBox.style.background = bg;
