@@ -278,7 +278,7 @@ window.ejecutarCalculo = function() {
         </div>
         <div style="display: flex; justify-content: space-between; padding: 0 10px; font-size: 0.8rem;">
             <span style="color: var(--text-muted); font-weight: 600;">
-                ${isEn ? `Equivalence in range (${porcentajeRango.toFixed(0)}%)` : `Equivalencia en % dentro de rango (${porcentajeRango.toFixed(0)}%)`}
+                ${isEn ? `Relative therapeutic position equivalence (${porcentajeRango.toFixed(0)}%)` : `Equivalencia por posición relativa dentro del rango terapéutico (${porcentajeRango.toFixed(0)}%)`}
             </span>
             <span style="font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} mg</span>
         </div>`;
