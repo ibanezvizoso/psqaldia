@@ -68,8 +68,8 @@ window.iniciarInterfazCalculadora = async function() {
         </div>`;
 };
 
-// --- TRADUCTOR CON LÓGICA DE VERBOS DINÁMICOS Y TOPE ---
-window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
+// --- TRADUCTOR PULIDO (Nombres reales y sin porcentajes) ---
+window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nombreDest) {
     if (!raw || raw.trim() === '') return '<span style="color:var(--text-muted);">Sin pauta específica.</span>';
     const bloques = raw.split('|').map(b => b.trim()).filter(Boolean);
     let html = '';
@@ -96,10 +96,11 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
         let desc = '';
 
         if (sujeto === 'ACTUAL') {
-            if (accion === 'STOP') desc = 'Suspender fármaco de origen.';
+            if (accion === 'STOP') desc = `Suspender ${nombreOrig}.`;
             else if (accion === 'REDUCIR') {
-                desc = `Reducir origen al ${valor} (<b>${(dosisActual * parseFloat(valor) / 100).toFixed(1)} mg</b>).`;
-            } else desc = `${accion} ${valor}`;
+                const dosisCalc = (dosisActual * parseFloat(valor) / 100).toFixed(1);
+                desc = `Reducir ${nombreOrig} a <b>${dosisCalc} mg</b>.`;
+            } else desc = `${accion} ${nombreOrig} ${valor}`;
         } else {
             let dosisPaso = 0;
             const numExtraido = parseFloat(valor.replace(/[^0-9.]/g, ''));
@@ -115,13 +116,13 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
                     objetivoAlcanzado = true;
                 } else {
                     const verbo = nuevoIniciado ? 'Subir' : 'Iniciar';
-                    desc = `${verbo} nuevo a <b>${dosisPaso.toFixed(1)} mg</b>.`;
+                    desc = `${verbo} ${nombreDest} a <b>${dosisPaso.toFixed(1)} mg</b>.`;
                     nuevoIniciado = true;
                 }
             }
         }
 
-        html += `<div class="pauta-step"><div class="step-idx">${dia.replace('Día ', '')}</div><div class="step-body"><span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto}</span><div class="step-txt">${desc}</div></div></div>`;
+        html += `<div class="pauta-step"><div class="step-idx">${dia.replace('Día ', '')}</div><div class="step-body"><span class="tag-farm ${sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig'}">${sujeto === 'NUEVO' ? nombreDest : nombreOrig}</span><div class="step-txt">${desc}</div></div></div>`;
     });
     return html;
 };
@@ -138,7 +139,7 @@ window.ejecutarCalculo = function() {
     let bg, color, alerta;
     if (equivalente > d.max) { bg = '#fee2e2'; color = '#b91c1c'; alerta = '⚠️ EXCEDE MÁXIMA en ficha técnica'; }
     else if (equivalente > d.ed95) { bg = '#fef3c7'; color = '#b45309'; alerta = '⚠️ SOBRE ED95'; }
-    else if (equivalente < d.min) { bg = '#f1f5f9'; color = '#475569'; alerta = '🔍 POR DEBAJO DE MÍNIMO EFECTIVO'; }
+    else if (equivalente < d.min) { bg = '#f1f5f9'; color = '#475569'; alerta = '🔍 POR DEBAJO DE MÍNIMO EFECTIVO en primer episodio psicótico'; }
     else { bg = '#dcfce7'; color = '#15803d'; alerta = '✅ RANGO ESTÁNDAR'; }
 
     const resBox = document.getElementById('res-box'); resBox.style.display = 'block'; resBox.style.background = bg;
@@ -156,5 +157,5 @@ window.ejecutarCalculo = function() {
     const idxOrig = window.listaFarmacos.indexOf(orig), idxDest = window.listaFarmacos.indexOf(dest);
     const rawInstr = (window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig] && window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig][CONFIG.COL_INICIO_DESTINOS + idxDest]) || "";
     
-    document.getElementById('res-pauta').innerHTML = `<h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>${orig === dest ? 'Mismo fármaco.' : window.traducirPasos(rawInstr.toString(), dosis, equivalente)}`;
+    document.getElementById('res-pauta').innerHTML = `<h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>${orig === dest ? 'Mismo fármaco.' : window.traducirPasos(rawInstr.toString(), dosis, equivalente, orig, dest)}`;
 };
