@@ -8,66 +8,52 @@ window.iniciarInterfazCalculadora = async function() {
         style.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
             .calc-ui h2 { margin: 0 0 1.5rem 0; font-weight: 800; }
-            .calc-ui label { 
-                font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
-                color: var(--text-muted); margin-top: 0.8rem; display: block; 
-            }
-            .calc-ui select, .calc-ui input { 
-                width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); 
-                background: var(--bg); color: var(--text-main); font-size: 1rem; 
-                font-family: inherit; outline: none; box-sizing: border-box;
-            }
+            .calc-ui label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.8rem; display: block; }
+            .calc-ui select, .calc-ui input { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; font-family: inherit; outline: none; box-sizing: border-box; }
             .calc-ui select:focus, .calc-ui input:focus { border-color: var(--primary); }
-            .res-container { 
-                padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; 
-                display: none; border: 1px solid rgba(0,0,0,0.05); 
-            }
+            .res-container { padding: 1.5rem; border-radius: 1.5rem; margin-top: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.05); }
             .calc-ui .btn-primary { margin-top: 1.2rem; cursor: pointer; }
         `;
         document.head.appendChild(style);
     }
 
-    if (!window.dbRaw) {
+    if (!window.dbCalc) {
         try {
             const response = await fetch(`${window.WORKER_URL}?sheet=Data_APS`);
             const data = await response.json();
             if (data.error) throw new Error(data.details);
             window.dbRaw = data.values;
 
-            // Lista de fármacos desde la fila 13 (índice 12), columna G (índice 6) en adelante
-            const headerRow = window.dbRaw[12];
+            // Lista de fármacos desde columna A, empezando en fila 1 (índice 1) porque la 0 es "Farmaco"
             window.listaFarmacos = [];
-            if (headerRow) {
-                for (let i = 6; i < headerRow.length; i++) {
-                    const nombre = headerRow[i];
-                    if (nombre && nombre.toString().trim() !== '') {
-                        window.listaFarmacos.push(nombre.toString().trim());
-                    }
-                }
-            }
-            console.log('Fármacos (desde fila 13):', window.listaFarmacos);
-
-            // Crear un mapa de filas para origen: nombre -> fila
-            window.filaOrigenMap = new Map();
-            for (let i = 0; i < window.dbRaw.length; i++) {
+            for (let i = 1; i < window.dbRaw.length; i++) {
                 const nombre = window.dbRaw[i]?.[0];
                 if (nombre && nombre.toString().trim() !== '') {
-                    window.filaOrigenMap.set(nombre.toString().trim(), i);
+                    window.listaFarmacos.push(nombre.toString().trim());
                 }
+                // Paramos cuando ya no haya más nombres? Mejor hasta que se acaben las filas, pero hay filas vacías? No, en tu captura son 11 fármacos.
             }
-            console.log('Mapa de filas de origen:', Array.from(window.filaOrigenMap.entries()));
+            console.log('Fármacos (desde columna A, fila 1):', window.listaFarmacos);
 
             // Datos para cálculos (factores, etc.)
-            window.dbCalc = window.dbRaw.map((row, idx) => ({
-                farmaco: row[0] ? row[0].toString().trim() : '',
-                factor: parseFloat(row[1]) || 1,
-                ed95: parseFloat(row[2]) || 0,
-                max: parseFloat(row[3]) || 0,
-                min: parseFloat(row[4]) || 0,
-                umbral: parseFloat(row[5]) || 0
-            })).filter(f => f.farmaco);
+            window.dbCalc = window.listaFarmacos.map(nombre => {
+                // Buscar la fila donde está este nombre en dbRaw para obtener sus factores
+                for (let i = 1; i < window.dbRaw.length; i++) {
+                    if (window.dbRaw[i]?.[0]?.toString().trim() === nombre) {
+                        return {
+                            farmaco: nombre,
+                            factor: parseFloat(window.dbRaw[i][1]) || 1,
+                            ed95: parseFloat(window.dbRaw[i][2]) || 0,
+                            max: parseFloat(window.dbRaw[i][3]) || 0,
+                            min: parseFloat(window.dbRaw[i][4]) || 0,
+                            umbral: parseFloat(window.dbRaw[i][5]) || 0
+                        };
+                    }
+                }
+                return null;
+            }).filter(f => f);
         } catch (e) {
-            container.innerHTML = `Error cargando datos: ${e.message}`;
+            container.innerHTML = `Error: ${e.message}`;
             return;
         }
     }
@@ -168,13 +154,9 @@ window.ejecutarCalculo = function() {
     const dosis = parseFloat(document.getElementById('d_orig').value);
     if (isNaN(dosis)) { alert('Dosis inválida'); return; }
 
-    // Buscar datos de factores (en dbCalc)
     const o = window.dbCalc.find(f => f.farmaco === orig);
     const d = window.dbCalc.find(f => f.farmaco === dest);
-    if (!o || !d) {
-        alert('Fármaco no encontrado en la base de datos de factores.');
-        return;
-    }
+    if (!o || !d) { alert('Fármaco no encontrado'); return; }
 
     const equivalente = (dosis / o.factor) * d.factor;
 
@@ -196,26 +178,25 @@ window.ejecutarCalculo = function() {
         <div id="res-tip" style="margin-top:1rem; border-top:1px solid #ccc; padding-top:1rem;"></div>
     `;
 
-    // Índice del destino (según la lista de la fila 13)
+    // --- ÍNDICES ---
+    const idxOrig = window.listaFarmacos.indexOf(orig);
     const idxDest = window.listaFarmacos.indexOf(dest);
-    if (idxDest === -1) {
-        document.getElementById('res-tip').innerText = 'Error: destino no encontrado en la lista de la fila 13.';
+
+    if (idxOrig === -1 || idxDest === -1) {
+        document.getElementById('res-tip').innerText = 'Error: fármaco no está en la lista.';
         return;
     }
 
-    // Buscar fila del origen en el mapa
-    const filaOrigen = window.filaOrigenMap.get(orig);
-    if (filaOrigen === undefined) {
-        document.getElementById('res-tip').innerText = 'Error: origen no encontrado en la columna A.';
-        return;
-    }
+    // Fila: 1 + idxOrig (porque la fila 1 es Haloperidol)
+    const fila = 1 + idxOrig;
+    // Columna: 6 + idxDest (porque G13 es columna 6)
+    const col = 6 + idxDest;
 
-    const colDestino = 6 + idxDest; // col G = 6
-    console.log(`Leyendo dbRaw[${filaOrigen}][${colDestino}]`);
+    console.log(`Leyendo dbRaw[${fila}][${col}]`);
 
     let instruccion = '';
-    if (filaOrigen < window.dbRaw.length && colDestino < window.dbRaw[filaOrigen].length) {
-        instruccion = window.dbRaw[filaOrigen][colDestino];
+    if (fila < window.dbRaw.length && col < window.dbRaw[fila].length) {
+        instruccion = window.dbRaw[fila][col];
     }
 
     const traducido = instruccion && instruccion.toString().trim() !== ''
