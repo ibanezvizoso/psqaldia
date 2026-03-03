@@ -1,8 +1,7 @@
-// --- CARGA DE DATOS Y CONSTRUCCIÓN DE INTERFAZ ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
-    // Estilos (los mismos)
+    // Estilos
     if (!document.getElementById('calc-internal-styles')) {
         const style = document.createElement('style');
         style.id = 'calc-internal-styles';
@@ -25,7 +24,7 @@ window.iniciarInterfazCalculadora = async function() {
             if (data.error) throw new Error(data.details);
             window.dbRaw = data.values;
 
-            // Lista de fármacos desde columna A, empezando en fila 1 (índice 1) porque la 0 es "Farmaco"
+            // Lista de fármacos desde A2 (índice 1) hasta el final
             window.listaFarmacos = [];
             for (let i = 1; i < window.dbRaw.length; i++) {
                 const nombre = window.dbRaw[i]?.[0];
@@ -33,24 +32,30 @@ window.iniciarInterfazCalculadora = async function() {
                     window.listaFarmacos.push(nombre.toString().trim());
                 }
             }
-            console.log('Fármacos (desde columna A, fila 1):', window.listaFarmacos);
+            console.log('Fármacos:', window.listaFarmacos);
 
-            // Datos para cálculos (factores)
-            window.dbCalc = window.listaFarmacos.map(nombre => {
-                for (let i = 1; i < window.dbRaw.length; i++) {
-                    if (window.dbRaw[i]?.[0]?.toString().trim() === nombre) {
-                        return {
-                            farmaco: nombre,
-                            factor: parseFloat(window.dbRaw[i][1]) || 1,
-                            ed95: parseFloat(window.dbRaw[i][2]) || 0,
-                            max: parseFloat(window.dbRaw[i][3]) || 0,
-                            min: parseFloat(window.dbRaw[i][4]) || 0,
-                            umbral: parseFloat(window.dbRaw[i][5]) || 0
-                        };
-                    }
+            // Datos para cálculos
+            window.dbCalc = window.listaFarmacos.map((nombre, idx) => {
+                const fila = 1 + idx; // A2 es fila 1 en dbRaw
+                return {
+                    farmaco: nombre,
+                    factor: parseFloat(window.dbRaw[fila]?.[1]) || 1,
+                    ed95: parseFloat(window.dbRaw[fila]?.[2]) || 0,
+                    max: parseFloat(window.dbRaw[fila]?.[3]) || 0,
+                    min: parseFloat(window.dbRaw[fila]?.[4]) || 0,
+                    umbral: parseFloat(window.dbRaw[fila]?.[5]) || 0
+                };
+            });
+
+            // Verificar destinos en fila 13 (índice 12) desde col G (índice 6)
+            const headerRow = window.dbRaw[12];
+            if (headerRow) {
+                let destinos = [];
+                for (let i = 6; i < headerRow.length; i++) {
+                    if (headerRow[i]) destinos.push(headerRow[i].toString().trim());
                 }
-                return null;
-            }).filter(f => f);
+                console.log('Destinos en fila 13:', destinos);
+            }
         } catch (e) {
             container.innerHTML = `Error: ${e.message}`;
             return;
@@ -73,7 +78,7 @@ window.iniciarInterfazCalculadora = async function() {
     `;
 }
 
-// --- TRADUCCIÓN DE PASOS (siempre en mg) ---
+// Traducción de pasos (siempre en mg)
 window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
     if (!raw || raw.trim() === '') return 'No hay instrucciones.';
     const pasos = raw.split('|').map(p => p.trim()).filter(p => p);
@@ -148,7 +153,7 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
     return html + '</ul>';
 }
 
-// --- CÁLCULO Y OBTENCIÓN DE LA INSTRUCCIÓN ---
+// Cálculo y obtención de la instrucción
 window.ejecutarCalculo = function() {
     const orig = document.getElementById('f_orig').value.trim();
     const dest = document.getElementById('f_dest').value.trim();
@@ -161,7 +166,6 @@ window.ejecutarCalculo = function() {
 
     const equivalente = (dosis / o.factor) * d.factor;
 
-    // Colores y alerta
     let bg, color, alerta;
     if (equivalente > d.max) { bg = '#fee2e2'; color = '#b91c1c'; alerta = '⚠️ EXCEDE MÁXIMO'; }
     else if (equivalente > d.ed95) { bg = '#fef3c7'; color = '#b45309'; alerta = '⚠️ SOBRE ED95'; }
@@ -179,18 +183,17 @@ window.ejecutarCalculo = function() {
         <div id="res-tip" style="margin-top:1rem; border-top:1px solid #ccc; padding-top:1rem;"></div>
     `;
 
-    // --- ÍNDICES ---
     const idxOrig = window.listaFarmacos.indexOf(orig);
     const idxDest = window.listaFarmacos.indexOf(dest);
 
     if (idxOrig === -1 || idxDest === -1) {
-        document.getElementById('res-tip').innerText = 'Error: fármaco no está en la lista.';
+        document.getElementById('res-tip').innerText = 'Error: fármaco no encontrado.';
         return;
     }
 
-    // Fila en dbRaw: 1 + idxOrig (porque la fila 1 es Haloperidol)
+    // Fila en dbRaw: 1 + idxOrig (A2 es fila 1)
     const fila = 1 + idxOrig;
-    // Columna en dbRaw: 6 + idxDest (porque G13 es columna 6)
+    // Columna en dbRaw: 6 + idxDest (G13 es columna 6)
     const col = 6 + idxDest;
 
     console.log(`Leyendo dbRaw[${fila}][${col}]`);
