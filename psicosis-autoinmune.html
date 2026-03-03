@@ -85,6 +85,41 @@
             .hero h1 { font-size: 2rem; }
             .calc-ui { padding: 1rem !important; }
         }
+        /* Arreglo para el Modal de Red Flags */
+#rf-modal {
+    backdrop-filter: blur(8px); /* Efecto de desenfoque moderno */
+}
+
+#rf-modal > div {
+    background-color: white !important; /* Forzamos el fondo blanco */
+    color: var(--text-main) !important;
+    max-height: 85vh; /* Evita que se salga de la pantalla en móviles */
+    overflow-y: auto; /* Permite scroll si la lista es muy larga */
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+#rf-modal h3 {
+    color: var(--primary) !important;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 10px;
+    margin-bottom: 15px !important;
+}
+
+#rf-modal ul li {
+    color: var(--text-main) !important;
+    margin-bottom: 8px !important;
+    list-style-type: none;
+    position: relative;
+    padding-left: 20px;
+}
+
+#rf-modal ul li::before {
+    content: "🚩";
+    position: absolute;
+    left: 0;
+    font-size: 0.8rem;
+}
     </style>
 </head>
 <body>
@@ -122,7 +157,8 @@
 
         <footer>
             <p><strong>Referencia bibliográfica:</strong></p>
-            <p>Pollak TA, et al. <em>The International Management of Autoimmune Psychosis</em>. The Lancet Psychiatry. 2020;7(1):93-108.</p>
+            <p>Pollak TA, et al. <em>Autoimmune psychosis: an international consensus on an to the diagnosis and management of psychosis of
+suspected autoimmune origin</em>. The Lancet Psychiatry. 2020;7(1):93-108.</p>
             <div style="margin-top: 2rem; text-align: center;">
                 <a href="https://psqaldia.com" style="color: var(--primary); font-weight: 700; text-decoration: none;">
                     <i class="fas fa-arrow-left"></i> Volver a PSQALDÍA
