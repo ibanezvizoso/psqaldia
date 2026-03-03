@@ -94,14 +94,27 @@ function actualizarDiagnostico() {
     const activos = dbDiag.filter(s => checks.includes(s.id));
 
     // --- LÓGICA HUNTER (SS) ---
-    const hasExp = activos.some(s => s.rutaHunter === 'EXPOSICION');
-    const r1 = activos.some(s => s.rutaHunter === 'RUTA_1'); // Clonus espontáneo
-    const r2 = activos.some(s => s.rutaHunter === 'RUTA_2') && checks.includes('agitacion') && checks.includes('diaforesis');
-    const r3 = activos.some(s => s.rutaHunter === 'RUTA_3') && checks.includes('agitacion') && checks.includes('diaforesis');
-    const r4 = checks.includes('temblor') && checks.includes('hiperreflexia');
-    const r5 = activos.some(s => s.rutaHunter === 'RUTA_5') && (checks.includes('clonus_ocu') || checks.includes('clonus_ind'));
+    // --- LÓGICA HUNTER (SS) ---
+// 0. Requisito indispensable: Exposición reciente
+const hasExp = checks.includes('exp_serot');
 
-    const cumpleHunter = hasExp && (r1 || r2 || r3 || r4 || r5);
+// 1. Clonus espontáneo
+const r1 = checks.includes('clonus_esp'); 
+
+// 2. Clonus inducible CON (agitación O diaforesis)
+const r2 = checks.includes('clonus_ind') && (checks.includes('agitacion') || checks.includes('diaforesis'));
+
+// 3. Clonus ocular CON (agitación Y diaforesis)
+const r3 = checks.includes('clonus_ocu') && (checks.includes('agitacion') && checks.includes('diaforesis'));
+
+// 4. Temblor E hiperreflexia
+const r4 = checks.includes('temblor') && checks.includes('hiperreflexia');
+
+// 5. Hipertonía Y Fiebre (>38°C) CON (clonus ocular O inducible)
+const r5 = (checks.includes('rigidez') && checks.includes('fiebre')) && (checks.includes('clonus_ocu') || checks.includes('clonus_ind'));
+
+// El diagnóstico final
+const cumpleHunter = hasExp && (r1 || r2 || r3 || r4 || r5);
     
     // Progreso SS
     let progresoSS = (hasExp ? 25 : 0) + (checks.length * 4); 
