@@ -59,6 +59,22 @@ window.iniciarInterfazCatatonia = async function() {
             .maneuver-header { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: #6d28d9; display: block; margin-bottom: 4px; }
             
             .counter-pill { background: var(--primary); color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; }
+            .criteria-container { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    margin-bottom: 15px; 
+    background: var(--bg-alt); 
+    padding: 10px; 
+    border-radius: 10px; 
+    border: 1px solid var(--border);
+}
+.crit-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.crit-label { font-size: 0.7rem; font-weight: 800; width: 90px; color: var(--text-muted); }
+.progress-bg { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; position: relative; }
+.progress-bar { height: 100%; width: 0%; background: var(--primary); transition: 0.3s; }
+.crit-status { font-size: 0.65rem; font-weight: 900; min-width: 100px; text-align: right; }
+.met { color: #10b981; } /* Verde para cuando cumple */
         `;
         document.head.appendChild(style);
     }
@@ -76,7 +92,10 @@ window.iniciarInterfazCatatonia = async function() {
                     actividad: row[1],
                     def: row[4] || "Sin definición.",
                     expl: row[3] || "Sin datos de maniobra.",
-                    color: getColorByActividad(row[1])
+                    color: getColorByActividad(row[1]),
+                    dsm: String(row[6]).toUpperCase() === 'TRUE',
+        fink: String(row[7]).trim().toUpperCase(), // Guardará 'PRIM', 'PRIMPLUS' o 'SEC'
+        lohr: String(row[8]).trim().toUpperCase()  // Guardará 'PRIM' o 'SEC'
                 };
             });
         } catch (e) { console.error("Error DB:", e); }
@@ -143,23 +162,43 @@ window.iniciarInterfazCatatonia = async function() {
             </div>
         </div>
 
-        <div id="cat-checklist" class="cat-ui-wrapper checklist-view">
-            <div class="cat-header">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="btn-narrow-hor" style="min-width:30px;" onclick="window.viewCat('exp')">←</button>
-                    <h3 style="margin:0; font-size:1rem;">Checklist</h3>
-                </div>
-                <div id="cat-count" class="counter-pill">0 / ${window.totalSintomas || 0}</div>
-            </div>
-            <div class="chk-grid">
-                ${Object.keys(window.dbCatatonia).map(s => `
-                    <label class="chk-card" style="background:${window.dbCatatonia[s].color}">
-                        <input type="checkbox" onchange="window.updateCatCount()">
-                        <span>${s}</span>
-                    </label>
-                `).join('')}
-            </div>
+        /* --- SUSTITUYE EL BLOQUE DEL CHECKLIST DENTRO DE container.innerHTML POR ESTE --- */
+<div id="cat-checklist" class="cat-ui-wrapper checklist-view">
+    <div class="cat-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="btn-narrow-hor" style="min-width:30px;" onclick="window.viewCat('exp')">←</button>
+            <h3 style="margin:0; font-size:1rem;">Checklist</h3>
         </div>
+        <div id="cat-count" class="counter-pill">0 / ${window.totalSintomas || 0}</div>
+    </div>
+
+    <div class="criteria-container">
+        <div class="crit-row">
+            <span class="crit-label">DSM-V</span>
+            <div class="progress-bg"><div class="progress-bar" id="bar-dsm"></div></div>
+            <span class="crit-status" id="status-dsm">0 / 3</span>
+        </div>
+        <div class="crit-row">
+            <span class="crit-label">TAYLOR & FINK</span>
+            <div class="progress-bg"><div class="progress-bar" id="bar-fink"></div></div>
+            <span class="crit-status" id="status-fink">Incompleto</span>
+        </div>
+        <div class="crit-row">
+            <span class="crit-label">LOHR & WISN.</span>
+            <div class="progress-bg"><div class="progress-bar" id="bar-lohr"></div></div>
+            <span class="crit-status" id="status-lohr">Incompleto</span>
+        </div>
+    </div>
+
+    <div class="chk-grid">
+        ${Object.keys(window.dbCatatonia).map(s => `
+            <label class="chk-card" style="background:${window.dbCatatonia[s].color}">
+                <input type="checkbox" data-sintoma="${s}" onchange="window.updateCatCount()">
+                <span>${s}</span>
+            </label>
+        `).join('')}
+    </div>
+</div>
     `;
 };
 
@@ -178,7 +217,44 @@ window.viewCat = function(mode) {
     document.getElementById('cat-checklist').style.display = mode === 'chk' ? 'block' : 'none';
 };
 
+/* --- SUSTITUYE TU FUNCIÓN updateCatCount ANTIGUA POR ESTA --- */
 window.updateCatCount = function() {
-    const n = document.querySelectorAll('#cat-checklist input:checked').length;
+    // 1. Contar totales
+    const checkedCheckboxes = document.querySelectorAll('#cat-checklist input:checked');
+    const n = checkedCheckboxes.length;
     document.getElementById('cat-count').innerText = `${n} / ${window.totalSintomas}`;
+
+    // 2. Obtener los datos de los síntomas que están marcados actualmente
+    const activos = Array.from(checkedCheckboxes).map(i => window.dbCatatonia[i.dataset.sintoma]);
+
+    // --- LÓGICA DSM (3 o más síntomas marcados como TRUE en columna G) ---
+    const dsmCount = activos.filter(s => s.dsm).length;
+    const dsmPct = Math.min((dsmCount / 3) * 100, 100);
+    document.getElementById('bar-dsm').style.width = dsmPct + '%';
+    const dsmMet = dsmCount >= 3;
+    document.getElementById('status-dsm').innerHTML = dsmMet ? '✅ CUMPLE DSM' : `${dsmCount} / 3`;
+    document.getElementById('status-dsm').className = `crit-status ${dsmMet ? 'met' : ''}`;
+
+    // --- LÓGICA TAYLOR & FINK (1 PRIM + 1 PRIMPLUS  Ó  2 de tipo PP/SEC) ---
+    const fP = activos.filter(s => s.fink === 'PRIM').length;
+    const fPP = activos.filter(s => s.fink === 'PRIMPLUS').length;
+    const fS = activos.filter(s => s.fink === 'SEC').length;
+    const finkMet = (fP >= 1 && fPP >= 1) || (fPP + fS >= 2);
+    
+    document.getElementById('bar-fink').style.width = finkMet ? '100%' : (fP+fPP+fS > 0 ? '50%' : '0%');
+    document.getElementById('status-fink').innerHTML = finkMet ? '✅ CUMPLE FINK' : 'Incompleto';
+    document.getElementById('status-fink').className = `crit-status ${finkMet ? 'met' : ''}`;
+
+    // --- LÓGICA LOHR & WISNIEWSKI (1 PRIM + 2 SEC) ---
+    const lP = activos.filter(s => s.lohr === 'PRIM').length;
+    const lS = activos.filter(s => s.lohr === 'SEC').length;
+    const lohrMet = (lP >= 1 && lS >= 2);
+    
+    let lohrPct = 0;
+    if (lP >= 1) lohrPct += 34;
+    lohrPct += Math.min(lS, 2) * 33;
+
+    document.getElementById('bar-lohr').style.width = lohrPct + '%';
+    document.getElementById('status-lohr').innerHTML = lohrMet ? '✅ CUMPLE LOHR' : 'Incompleto';
+    document.getElementById('status-lohr').className = `crit-status ${lohrMet ? 'met' : ''}`;
 };
