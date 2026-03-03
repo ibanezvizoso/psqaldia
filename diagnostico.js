@@ -98,7 +98,7 @@ function actualizarDiagnostico() {
     const r1 = activos.some(s => s.rutaHunter === 'RUTA_1'); // Clonus espontáneo
     const r2 = activos.some(s => s.rutaHunter === 'RUTA_2') && checks.includes('agitacion') && checks.includes('diaforesis');
     const r3 = activos.some(s => s.rutaHunter === 'RUTA_3') && checks.includes('agitacion') && checks.includes('diaforesis');
-    const r4 = activos.some(s => s.rutaHunter === 'RUTA_4'); // Temblor + Hiperreflexia (debe estar marcado en Excel)
+    const r4 = checks.includes('temblor') && checks.includes('hiperreflexia');
     const r5 = activos.some(s => s.rutaHunter === 'RUTA_5') && (checks.includes('clonus_ocu') || checks.includes('clonus_ind'));
 
     const cumpleHunter = hasExp && (r1 || r2 || r3 || r4 || r5);
