@@ -1,1 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criterios de Psicosis Autoinmune | PSQALDÍA</title>
+    <meta name="description" content="Herramienta clínica basada en los criterios de Pollak et al. para el diagnóstico de psicosis de etiología autoinmune y encefalitis.">
+    <link rel="canonical" href="https://psqaldia.com/psicosis-autoinmune">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.25rem;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            overflow: auto !important; /* Anula el 'hidden' del JS */
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+
+        .main-content { padding: 0 1.5rem 5rem 1.5rem; max-width: 900px; margin: auto; }
+
+        /* Integración del contenedor del JS */
+        #modal { 
+            display: flex !important; 
+            position: relative !important; 
+            width: 100% !important;
+            background: transparent !important;
+            z-index: 1 !important;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        #modalData { 
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Estilos internos de la herramienta */
+        .calc-ui { padding: 2rem !important; height: auto !important; }
+        
+        input[type="checkbox"] {
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Estilo para los grupos de checklists */
+        .pa-check-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        footer { 
+            margin-top: 4rem; 
+            padding-top: 2rem; 
+            border-top: 1px solid var(--border); 
+            font-size: 0.85rem; 
+            color: var(--text-muted); 
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .calc-ui { padding: 1rem !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Psicosis Autoinmune</h1>
+        <p>Algoritmo de sospecha clínica y criterios diagnósticos internacionales.</p>
+    </header>
+
+    <main class="main-content">
+        <div id="modal">
+            <div id="modalData">
+                <div style="padding:4rem; text-align:center;">
+                    <i class="fas fa-sync fa-spin fa-2x" style="color:var(--primary);"></i>
+                    <p style="margin-top:1rem; font-weight:700;">Cargando criterios diagnósticos...</p>
+                </div>
+            </div>
+        </div>
+
+        <section style="background: white; padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fas fa-info-circle" style="color: var(--primary);"></i> Guía de interpretación</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Este algoritmo permite clasificar la sospecha de psicosis autoinmune en tres niveles de certidumbre. El inicio agudo (menos de 3 meses) es el criterio base necesario para considerar la etiología autoinmune en ausencia de otras causas claras.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.8rem; font-weight: 700;">
+                <div style="color: #ca8a04; border-left: 4px solid #fef08a; padding-left: 10px;">POSIBLE: Inicio abrupto + 1 criterio clínico.</div>
+                <div style="color: #ea580c; border-left: 4px solid #fed7aa; padding-left: 10px;">PROBABLE: Posible + alteraciones en LCR, RM o EEG.</div>
+                <div style="color: #e11d48; border-left: 4px solid #fda4af; padding-left: 10px;">DEFINITIVA: Probable + Anticuerpos positivos en LCR.</div>
+            </div>
+        </section>
+
+        <footer>
+            <p><strong>Referencia bibliográfica:</strong></p>
+            <p>Pollak TA, et al. <em>The International Management of Autoimmune Psychosis</em>. The Lancet Psychiatry. 2020;7(1):93-108.</p>
+            <div style="margin-top: 2rem; text-align: center;">
+                <a href="https://psqaldia.com" style="color: var(--primary); font-weight: 700; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Volver a PSQALDÍA
+                </a>
+            </div>
+        </footer>
+    </main>
+
+    <script src="/autoinmune.js"></script>
+    <script>
+        window.WORKER_URL = "https://psqaldia.com/"; 
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof openAutoimmuneUI === 'function') {
+                openAutoimmuneUI();
+                // Forzamos el scroll habilitado
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>
