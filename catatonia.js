@@ -162,7 +162,7 @@ window.iniciarInterfazCatatonia = async function() {
             </div>
         </div>
 
-        /* --- SUSTITUYE EL BLOQUE DEL CHECKLIST DENTRO DE container.innerHTML POR ESTE --- */
+     
 <div id="cat-checklist" class="cat-ui-wrapper checklist-view">
     <div class="cat-header">
         <div style="display:flex; align-items:center; gap:10px;">
