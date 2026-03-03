@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Farmacocinético Start, Stop & Switch | PSQALDÍA</title>
+    <meta name="description" content="Simulador farmacocinético de inicio, cambio einterrupción de psicofármacos.">
+    <link rel="canonical" href="https://psqaldia.com/farmacocinetica">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.25rem;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            overflow: auto !important;
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; color: var(--text-main); }
+
+        .main-content { padding: 0 1.5rem 5rem 1.5rem; max-width: 800px; margin: auto; }
+
+        /* Estenedor del Simulador */
+        #modalData { 
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        /* Sobreescritura de estilos del JS para que luzcan mejor en página completa */
+        .sss-ui { padding: 1.5rem !important; }
+        .sss-card { background: var(--bg-alt) !important; border: 1px solid var(--border) !important; padding: 15px !important; }
+        .chart-box { padding: 15px !important; border-radius: 15px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+
+        .info-panel {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .sss-ui { padding: 1rem !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-wave-square"></i> PSQALDÍA</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Simulador farmacocinético dinámico</h1>
+        <p>Modelado de niveles plasmáticos relativos y simulación de escenarios clínicos al iniciar, cambiar e interrumpir psicofármacos.</p>
+    </header>
+
+    <main class="main-content">
+        <div id="modalData">
+            <div style="padding:4rem; text-align:center;">
+                <i class="fas fa-microchip fa-spin fa-2x" style="color:var(--primary);"></i>
+                <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Iniciando motor SSS v2.4...</p>
+            </div>
+        </div>
+
+        <section class="info-panel">
+            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fas fa-graduation-cap"></i> Nota Académica</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Este simulador utiliza modelos de compartimento único y la función de Bateman para estimar la curva de concentración:
+                <br><br>
+                $$C(t) = D \cdot \frac{k_a}{k_a - k_e} \cdot (e^{-k_e t} - e^{-k_a t})$$
+                <br>
+                Los valores representados son <strong>relativos (%)</strong>. El 100% se define como el pico máximo alcanzado en estado estacionario (Steady State) tras la administración repetida de la dosis de referencia.
+            </p>
+        </section>
+
+        
+
+        <footer>
+            <a href="https://psqaldia.com" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A PSQALDÍA
+            </a>
+        </footer>
+    </main>
+
+    <script src="/farmacocinetica.js"></script>
+    <script>
+        window.WORKER_URL = "https://psqaldia.com/"; 
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof window.iniciarInterfazSSS === 'function') {
+                window.iniciarInterfazSSS();
+                // Asegurar scroll habilitado
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>
