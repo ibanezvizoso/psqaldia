@@ -1,3 +1,4 @@
+// --- CARGA DE DATOS Y CONSTRUCCIÓN DE INTERFAZ ---
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
@@ -31,13 +32,11 @@ window.iniciarInterfazCalculadora = async function() {
                 if (nombre && nombre.toString().trim() !== '') {
                     window.listaFarmacos.push(nombre.toString().trim());
                 }
-                // Paramos cuando ya no haya más nombres? Mejor hasta que se acaben las filas, pero hay filas vacías? No, en tu captura son 11 fármacos.
             }
             console.log('Fármacos (desde columna A, fila 1):', window.listaFarmacos);
 
-            // Datos para cálculos (factores, etc.)
+            // Datos para cálculos (factores)
             window.dbCalc = window.listaFarmacos.map(nombre => {
-                // Buscar la fila donde está este nombre en dbRaw para obtener sus factores
                 for (let i = 1; i < window.dbRaw.length; i++) {
                     if (window.dbRaw[i]?.[0]?.toString().trim() === nombre) {
                         return {
@@ -74,6 +73,7 @@ window.iniciarInterfazCalculadora = async function() {
     `;
 }
 
+// --- TRADUCCIÓN DE PASOS (siempre en mg) ---
 window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
     if (!raw || raw.trim() === '') return 'No hay instrucciones.';
     const pasos = raw.split('|').map(p => p.trim()).filter(p => p);
@@ -148,6 +148,7 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
     return html + '</ul>';
 }
 
+// --- CÁLCULO Y OBTENCIÓN DE LA INSTRUCCIÓN ---
 window.ejecutarCalculo = function() {
     const orig = document.getElementById('f_orig').value.trim();
     const dest = document.getElementById('f_dest').value.trim();
@@ -187,9 +188,9 @@ window.ejecutarCalculo = function() {
         return;
     }
 
-    // Fila: 1 + idxOrig (porque la fila 1 es Haloperidol)
+    // Fila en dbRaw: 1 + idxOrig (porque la fila 1 es Haloperidol)
     const fila = 1 + idxOrig;
-    // Columna: 6 + idxDest (porque G13 es columna 6)
+    // Columna en dbRaw: 6 + idxDest (porque G13 es columna 6)
     const col = 6 + idxDest;
 
     console.log(`Leyendo dbRaw[${fila}][${col}]`);
