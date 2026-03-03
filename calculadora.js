@@ -27,25 +27,38 @@ window.iniciarInterfazCalculadora = async function() {
         document.head.appendChild(style);
     }
 
-    if (!window.dbCalc) {
+    if (!window.dbRaw) {
         try {
             const response = await fetch(`${window.WORKER_URL}?sheet=Data_APS`);
             const data = await response.json();
             if (data.error) throw new Error(data.details);
             window.dbRaw = data.values;
 
-            // Lista de fármacos desde columna A, empezando en A2 (índice 1)
+            // Lista de fármacos desde la fila 13 (índice 12), columna G (índice 6) en adelante
+            const headerRow = window.dbRaw[12];
             window.listaFarmacos = [];
-            for (let i = 1; i < window.dbRaw.length; i++) {
-                const nombre = window.dbRaw[i]?.[0];
-                if (nombre && nombre.toString().trim() !== '') {
-                    window.listaFarmacos.push(nombre.toString().trim());
+            if (headerRow) {
+                for (let i = 6; i < headerRow.length; i++) {
+                    const nombre = headerRow[i];
+                    if (nombre && nombre.toString().trim() !== '') {
+                        window.listaFarmacos.push(nombre.toString().trim());
+                    }
                 }
             }
-            console.log('Fármacos:', window.listaFarmacos);
+            console.log('Fármacos (desde fila 13):', window.listaFarmacos);
+
+            // Crear un mapa de filas para origen: nombre -> fila
+            window.filaOrigenMap = new Map();
+            for (let i = 0; i < window.dbRaw.length; i++) {
+                const nombre = window.dbRaw[i]?.[0];
+                if (nombre && nombre.toString().trim() !== '') {
+                    window.filaOrigenMap.set(nombre.toString().trim(), i);
+                }
+            }
+            console.log('Mapa de filas de origen:', Array.from(window.filaOrigenMap.entries()));
 
             // Datos para cálculos (factores, etc.)
-            window.dbCalc = window.dbRaw.map(row => ({
+            window.dbCalc = window.dbRaw.map((row, idx) => ({
                 farmaco: row[0] ? row[0].toString().trim() : '',
                 factor: parseFloat(row[1]) || 1,
                 ed95: parseFloat(row[2]) || 0,
@@ -54,7 +67,7 @@ window.iniciarInterfazCalculadora = async function() {
                 umbral: parseFloat(row[5]) || 0
             })).filter(f => f.farmaco);
         } catch (e) {
-            container.innerHTML = `Error: ${e.message}`;
+            container.innerHTML = `Error cargando datos: ${e.message}`;
             return;
         }
     }
@@ -75,7 +88,6 @@ window.iniciarInterfazCalculadora = async function() {
     `;
 }
 
-// --- TRADUCCIÓN DE PASOS (sin cambios) ---
 window.traducirPasos = function(raw, dosisActual, dosisObjetivo) {
     if (!raw || raw.trim() === '') return 'No hay instrucciones.';
     const pasos = raw.split('|').map(p => p.trim()).filter(p => p);
@@ -156,9 +168,13 @@ window.ejecutarCalculo = function() {
     const dosis = parseFloat(document.getElementById('d_orig').value);
     if (isNaN(dosis)) { alert('Dosis inválida'); return; }
 
+    // Buscar datos de factores (en dbCalc)
     const o = window.dbCalc.find(f => f.farmaco === orig);
     const d = window.dbCalc.find(f => f.farmaco === dest);
-    if (!o || !d) { alert('Fármaco no encontrado'); return; }
+    if (!o || !d) {
+        alert('Fármaco no encontrado en la base de datos de factores.');
+        return;
+    }
 
     const equivalente = (dosis / o.factor) * d.factor;
 
@@ -180,25 +196,26 @@ window.ejecutarCalculo = function() {
         <div id="res-tip" style="margin-top:1rem; border-top:1px solid #ccc; padding-top:1rem;"></div>
     `;
 
-    // --- ÍNDICES PUROS ---
-    const idxOrig = window.listaFarmacos.indexOf(orig);
+    // Índice del destino (según la lista de la fila 13)
     const idxDest = window.listaFarmacos.indexOf(dest);
-
-    if (idxOrig === -1 || idxDest === -1) {
-        document.getElementById('res-tip').innerText = 'Error: fármaco no está en la lista.';
+    if (idxDest === -1) {
+        document.getElementById('res-tip').innerText = 'Error: destino no encontrado en la lista de la fila 13.';
         return;
     }
 
-    // Fila: A2 es índice 1 en dbRaw, más el índice del origen
-    const fila = 1 + idxOrig;
-    // Columna: G es índice 6 en dbRaw, más el índice del destino
-    const col = 6 + idxDest;
+    // Buscar fila del origen en el mapa
+    const filaOrigen = window.filaOrigenMap.get(orig);
+    if (filaOrigen === undefined) {
+        document.getElementById('res-tip').innerText = 'Error: origen no encontrado en la columna A.';
+        return;
+    }
 
-    console.log(`Celda: dbRaw[${fila}][${col}]`);
+    const colDestino = 6 + idxDest; // col G = 6
+    console.log(`Leyendo dbRaw[${filaOrigen}][${colDestino}]`);
 
     let instruccion = '';
-    if (fila < window.dbRaw.length && col < window.dbRaw[fila].length) {
-        instruccion = window.dbRaw[fila][col];
+    if (filaOrigen < window.dbRaw.length && colDestino < window.dbRaw[filaOrigen].length) {
+        instruccion = window.dbRaw[filaOrigen][colDestino];
     }
 
     const traducido = instruccion && instruccion.toString().trim() !== ''
