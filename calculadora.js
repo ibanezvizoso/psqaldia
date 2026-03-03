@@ -1,3 +1,10 @@
+// --- CONFIGURACIÓN: AJUSTA ESTOS VALORES HASTA QUE FUNCIONE ---
+const CONFIG = {
+    FILA_INICIO_FARMACOS: 1,      // ¿En qué fila del array empieza Haloperidol? (1 = fila 2 de Excel)
+    COL_INICIO_DESTINOS: 6        // ¿En qué columna del array empiezan los destinos en fila 13? (6 = G)
+};
+// --------------------------------------------------------------
+
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
@@ -24,19 +31,29 @@ window.iniciarInterfazCalculadora = async function() {
             if (data.error) throw new Error(data.details);
             window.dbRaw = data.values;
 
-            // Lista de fármacos desde A2 (índice 1) hasta el final
+            // Construir lista de fármacos desde la fila indicada
             window.listaFarmacos = [];
-            for (let i = 1; i < window.dbRaw.length; i++) {
+            for (let i = CONFIG.FILA_INICIO_FARMACOS; i < window.dbRaw.length; i++) {
                 const nombre = window.dbRaw[i]?.[0];
                 if (nombre && nombre.toString().trim() !== '') {
                     window.listaFarmacos.push(nombre.toString().trim());
                 }
             }
-            console.log('Fármacos:', window.listaFarmacos);
+            console.log('Fármacos (desde fila', CONFIG.FILA_INICIO_FARMACOS, '):', window.listaFarmacos);
 
-            // Datos para cálculos
+            // Mostrar destinos en fila 13 para verificar
+            const headerRow = window.dbRaw[12];
+            if (headerRow) {
+                let destinos = [];
+                for (let i = CONFIG.COL_INICIO_DESTINOS; i < headerRow.length; i++) {
+                    if (headerRow[i]) destinos.push(headerRow[i].toString().trim());
+                }
+                console.log('Destinos (desde col', CONFIG.COL_INICIO_DESTINOS, '):', destinos);
+            }
+
+            // Datos para cálculos (factores)
             window.dbCalc = window.listaFarmacos.map((nombre, idx) => {
-                const fila = 1 + idx; // A2 es fila 1 en dbRaw
+                const fila = CONFIG.FILA_INICIO_FARMACOS + idx;
                 return {
                     farmaco: nombre,
                     factor: parseFloat(window.dbRaw[fila]?.[1]) || 1,
@@ -46,16 +63,6 @@ window.iniciarInterfazCalculadora = async function() {
                     umbral: parseFloat(window.dbRaw[fila]?.[5]) || 0
                 };
             });
-
-            // Verificar destinos en fila 13 (índice 12) desde col G (índice 6)
-            const headerRow = window.dbRaw[12];
-            if (headerRow) {
-                let destinos = [];
-                for (let i = 6; i < headerRow.length; i++) {
-                    if (headerRow[i]) destinos.push(headerRow[i].toString().trim());
-                }
-                console.log('Destinos en fila 13:', destinos);
-            }
         } catch (e) {
             container.innerHTML = `Error: ${e.message}`;
             return;
@@ -191,10 +198,8 @@ window.ejecutarCalculo = function() {
         return;
     }
 
-    // Fila en dbRaw: 1 + idxOrig (A2 es fila 1)
-    const fila = 1 + idxOrig;
-    // Columna en dbRaw: 6 + idxDest (G13 es columna 6)
-    const col = 6 + idxDest;
+    const fila = CONFIG.FILA_INICIO_FARMACOS + idxOrig;
+    const col = CONFIG.COL_INICIO_DESTINOS + idxDest;
 
     console.log(`Leyendo dbRaw[${fila}][${col}]`);
 
