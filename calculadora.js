@@ -4,6 +4,9 @@ const CONFIG = {
     COL_INICIO_DESTINOS: 6        
 };
 
+// Estado global de idioma
+window.currentLang = 'es';
+
 window.iniciarInterfazCalculadora = async function() {
     const container = document.getElementById('modalData');
 
@@ -12,16 +15,28 @@ window.iniciarInterfazCalculadora = async function() {
         styleTag.id = 'calc-internal-styles';
         styleTag.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-            .calc-ui h2 { margin: 0 0 1rem 0; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+            .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+            .calc-ui h2 { margin: 0; font-weight: 800; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; }
+            
+            /* Selector de Idioma */
+            .lang-toggle { display: flex; background: var(--border); border-radius: 0.8rem; padding: 2px; gap: 2px; }
+            .lang-btn { padding: 4px 10px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; background: transparent; color: var(--text-muted); transition: all 0.2s; }
+            .lang-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
             .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.6rem; display: block; }
             .calc-ui select, .calc-ui input { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; box-sizing: border-box; }
             .btn-ejecutar { margin-top: 1rem; padding: 1.1rem; background: var(--primary); color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
+            
             .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); overflow: hidden; }
             .res-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
             .res-pauta { padding: 1.5rem; background: var(--bg); }
+            
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
             .pauta-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; width: 2px; background: var(--border); opacity: 0.5; }
-            .step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.8rem; z-index: 1; }
+            
+            /* Formato D. 1 */
+            .step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.7rem; z-index: 1; }
+            
             .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
@@ -58,46 +73,89 @@ window.iniciarInterfazCalculadora = async function() {
         } catch (e) { console.error(e); }
     }
 
+    renderInterfaz();
+};
+
+window.setLanguage = function(lang) {
+    window.currentLang = lang;
+    renderInterfaz();
+    if (document.getElementById('res-box').style.display === 'block') {
+        ejecutarCalculo(); // Refrescar cálculo con el nuevo idioma
+    }
+};
+
+function renderInterfaz() {
+    const isEs = window.currentLang === 'es';
+    const container = document.getElementById('modalData');
     const options = window.listaFarmacos.map(f => `<option value="${f}">${f}</option>`).join('');
+    
     container.innerHTML = `
         <div class="calc-ui">
-            <h2><i class="fas fa-random"></i> APS Switch Manager</h2>
-            <label>Fármaco Origen</label><select id="f_orig">${options}</select>
-            <label>Dosis Actual (mg/día)</label><input type="number" id="d_orig" step="any" value="10">
-            <label>Fármaco Destino</label><select id="f_dest">${options}</select>
-            <button class="btn-ejecutar" onclick="ejecutarCalculo()">CALCULAR ESTRATEGIA</button>
-            <div id="res-box" class="res-container"><div id="res-header" class="res-header"></div><div id="res-pauta" class="res-pauta"></div></div>
+            <div class="calc-header">
+                <h2><i class="fas fa-random"></i> APS Switch</h2>
+                <div class="lang-toggle">
+                    <button class="lang-btn ${isEs ? 'active' : ''}" onclick="setLanguage('es')">ES</button>
+                    <button class="lang-btn ${!isEs ? 'active' : ''}" onclick="setLanguage('en')">EN</button>
+                </div>
+            </div>
+            <label>${isEs ? 'Fármaco Origen' : 'Origin Drug'}</label>
+            <select id="f_orig">${options}</select>
+            
+            <label>${isEs ? 'Dosis Actual (mg/día)' : 'Current Dose (mg/day)'}</label>
+            <input type="number" id="d_orig" step="any" value="10">
+            
+            <label>${isEs ? 'Fármaco Destino' : 'Target Drug'}</label>
+            <select id="f_dest">${options}</select>
+            
+            <button class="btn-ejecutar" onclick="ejecutarCalculo()">
+                ${isEs ? 'CALCULAR ESTRATEGIA' : 'CALCULATE STRATEGY'}
+            </button>
+            
+            <div id="res-box" class="res-container">
+                <div id="res-header" class="res-header"></div>
+                <div id="res-pauta" class="res-pauta"></div>
+            </div>
         </div>`;
-};
+}
 
-// --- FUNCIÓN COPIAR ---
-window.copiarEstrategia = function() {
-    const steps = document.querySelectorAll('.pauta-step');
-    if (steps.length === 0) return;
-
-    let texto = "ESTRATEGIA DE CAMBIO SUGERIDA:\n\n";
-    steps.forEach(step => {
-        const dia = step.querySelector('.step-idx').innerText;
-        const farm = step.querySelector('.tag-farm').innerText;
-        const desc = step.querySelector('.step-txt').innerText;
-        texto += `Día ${dia}: [${farm}] ${desc}\n`;
-    });
-
-    navigator.clipboard.writeText(texto).then(() => {
-        const btn = document.querySelector('.btn-copiar');
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> ¡COPIADO!';
-        btn.style.color = '#15803d';
-        setTimeout(() => {
-            btn.innerHTML = originalHtml;
-            btn.style.color = '';
-        }, 2000);
-    });
-};
-
-// --- TRADUCTOR REFINADO ---
+// --- TRADUCTOR MULTI-IDIOMA ---
 window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nombreDest, umbralDest) {
-    if (!raw || raw.trim() === '') return '<span style="color:var(--text-muted);">Sin pauta específica.</span>';
+    const isEn = window.currentLang === 'en';
+    
+    const i18n = {
+        es: {
+            noData: "Sin pauta específica.",
+            suspend: "Suspender",
+            reduce: "Reducir a",
+            startTarget: "Iniciar dosis objetivo de",
+            startDirect: "Iniciar directamente con la dosis objetivo de",
+            titrate: "Desde este día, titular progresivamente hasta alcanzar",
+            reachTarget: "Alcanzar dosis objetivo de",
+            start: "Iniciar",
+            increase: "Subir",
+            copy: "COPIAR PAUTA",
+            copied: "¡COPIADO!",
+            strategy: "Estrategia Sugerida"
+        },
+        en: {
+            noData: "No specific instructions.",
+            suspend: "Discontinue",
+            reduce: "Reduce",
+            startTarget: "Start target dose of",
+            startDirect: "Start directly with the target dose of",
+            titrate: "From this day, titrate progressively until reaching",
+            reachTarget: "Reach target dose of",
+            start: "Start",
+            increase: "Increase",
+            copy: "COPY STRATEGY",
+            copied: "COPIED!",
+            strategy: "Suggested Strategy"
+        }
+    };
+
+    const t = isEn ? i18n.en : i18n.es;
+    if (!raw || raw.trim() === '') return `<span style="color:var(--text-muted);">${t.noData}</span>`;
+    
     const bloques = raw.split('|').map(b => b.trim()).filter(Boolean);
     let html = '';
     let objetivoAlcanzado = false;
@@ -119,44 +177,37 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
         const p = texto.split(':').map(s => s.trim());
         if (p.length < 3) return;
         
-        const dia = p[0].replace('D', 'Día '), sujeto = p[1], accion = p[2], valor = p.slice(3).join(':');
+        const diaNum = p[0].replace('D', '');
+        const sujeto = p[1], accion = p[2], valor = p.slice(3).join(':');
         let desc = '';
 
         if (sujeto === 'ACTUAL') {
-            if (accion === 'STOP') desc = `Suspender ${nombreOrig}.`;
+            if (accion === 'STOP') desc = `${t.suspend} ${nombreOrig}.`;
             else if (accion === 'REDUCIR') {
                 const dosisCalc = (dosisActual * parseFloat(valor) / 100).toFixed(1);
-                desc = `Reducir ${nombreOrig} a <b>${dosisCalc} mg</b>.`;
+                desc = isEn ? `${t.reduce} ${nombreOrig} to <b>${dosisCalc} mg</b>.` : `${t.reduce} ${nombreOrig} a <b>${dosisCalc} mg</b>.`;
             } else desc = `${accion} ${nombreOrig} ${valor}`;
         } else {
-            // Lógica para fármaco NUEVO
             const esDosisBaja = dosisObjetivo <= umbralDest;
 
-            // 1. Caso INICIAR TARGET (Directo)
             if (valor === 'TARGET' && accion !== 'TITULAR_PROGRESIVO') {
-                desc = `Iniciar dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
+                desc = `${t.startTarget} <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
                 objetivoAlcanzado = true;
             } 
-            // 2. Caso TITULAR PROGRESIVAMENTE
             else if (accion === 'TITULAR_PROGRESIVO') {
-                if (esDosisBaja) {
-                    desc = `Iniciar directamente con la dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
-                } else {
-                    desc = `Desde este día, titular progresivamente hasta alcanzar <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
-                }
+                desc = esDosisBaja ? `${t.startDirect} <b>${dosisObjetivo.toFixed(1)} mg</b>.` : `${t.titrate} <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
                 objetivoAlcanzado = true;
             } 
-            // 3. Pasos intermedios (Dosis fijas o porcentajes)
             else {
                 const numExtraido = parseFloat(valor.replace(/[^0-9.]/g, ''));
                 let dosisPaso = valor.includes('%') ? (dosisObjetivo * numExtraido / 100) : numExtraido;
 
                 if (dosisPaso >= dosisObjetivo) {
-                    desc = `Alcanzar dosis objetivo de <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
+                    desc = `${t.reachTarget} <b>${dosisObjetivo.toFixed(1)} mg</b>.`;
                     objetivoAlcanzado = true;
                 } else {
-                    const verbo = nuevoIniciado ? 'Subir' : 'Iniciar';
-                    desc = `${verbo} ${nombreDest} a <b>${dosisPaso.toFixed(1)} mg</b>.`;
+                    const verbo = nuevoIniciado ? t.increase : t.start;
+                    desc = isEn ? `${verbo} ${nombreDest} to <b>${dosisPaso.toFixed(1)} mg</b>.` : `${verbo} ${nombreDest} a <b>${dosisPaso.toFixed(1)} mg</b>.`;
                     nuevoIniciado = true;
                 }
             }
@@ -167,7 +218,7 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
 
         html += `
             <div class="pauta-step">
-                <div class="step-idx">${dia.replace('Día ', '')}</div>
+                <div class="step-idx">D. ${diaNum}</div>
                 <div class="step-body">
                     <span class="tag-farm ${tagClase}">${tagNombre}</span>
                     <div class="step-txt">${desc}</div>
@@ -175,11 +226,12 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
             </div>`;
     });
 
-    html += `<button class="btn-copiar" onclick="copiarEstrategia()"><i class="far fa-copy"></i> COPIAR PAUTA</button>`;
+    html += `<button class="btn-copiar" onclick="copiarEstrategia()"><i class="far fa-copy"></i> ${t.copy}</button>`;
     return html;
 };
 
 window.ejecutarCalculo = function() {
+    const isEn = window.currentLang === 'en';
     const orig = document.getElementById('f_orig').value;
     const dest = document.getElementById('f_dest').value;
     const dosis = parseFloat(document.getElementById('d_orig').value);
@@ -194,10 +246,22 @@ window.ejecutarCalculo = function() {
     const dosisRango = (porcentajeRango / 100) * d.max;
 
     let bg, color, alerta;
-    if (equivalente > d.max) { bg = '#fee2e2'; color = '#b91c1c'; alerta = '⚠️ EXCEDE MÁXIMA en ficha técnica'; }
-    else if (equivalente > d.ed95) { bg = '#fef3c7'; color = '#b45309'; alerta = '⚠️ SOBRE ED95'; }
-    else if (equivalente < d.min) { bg = '#f1f5f9'; color = '#475569'; alerta = '🔍 POR DEBAJO DE MÍNIMO EFECTIVO en primer episodio psicótico'; }
-    else { bg = '#dcfce7'; color = '#15803d'; alerta = '✅ RANGO ESTÁNDAR'; }
+    if (equivalente > d.max) { 
+        bg = '#fee2e2'; color = '#b91c1c'; 
+        alerta = isEn ? '⚠️ EXCEEDS MAXIMUM Dose' : '⚠️ EXCEDE MÁXIMA en ficha técnica'; 
+    }
+    else if (equivalente > d.ed95) { 
+        bg = '#fef3c7'; color = '#b45309'; 
+        alerta = isEn ? '⚠️ ABOVE ED95' : '⚠️ SOBRE ED95'; 
+    }
+    else if (equivalente < d.min) { 
+        bg = '#f1f5f9'; color = '#475569'; 
+        alerta = isEn ? '🔍 BELOW MINIMUM effective dose' : '🔍 POR DEBAJO DE MÍNIMO EFECTIVO'; 
+    }
+    else { 
+        bg = '#dcfce7'; color = '#15803d'; 
+        alerta = isEn ? '✅ STANDARD RANGE' : '✅ RANGO ESTÁNDAR'; 
+    }
 
     const resBox = document.getElementById('res-box'); 
     resBox.style.display = 'block'; 
@@ -205,13 +269,11 @@ window.ejecutarCalculo = function() {
     
     document.getElementById('res-header').innerHTML = `
         <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; margin-bottom: 10px;">
-            <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">Dosis Objetivo (Maudsley)</div>
+            <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">
+                ${isEn ? 'Target Dose (Maudsley)' : 'Dosis Objetivo (Maudsley)'}
+            </div>
             <div style="font-size: 2.8rem; font-weight: 900; color: var(--text-main);">${equivalente.toFixed(1)} <span style="font-size: 1.2rem;">mg/día</span></div>
             <div style="display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 900; background: white; color: ${color}; border: 1px solid ${color};">${alerta}</div>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 0 10px; font-size: 0.8rem;">
-            <span style="color: var(--text-muted); font-weight: 600;">Equivalencia en rango (${porcentajeRango.toFixed(0)}%)</span>
-            <span style="font-weight: 800; opacity: 0.8;">${dosisRango.toFixed(1)} mg</span>
         </div>`;
 
     const idxOrig = window.listaFarmacos.indexOf(orig);
@@ -219,6 +281,33 @@ window.ejecutarCalculo = function() {
     const rawInstr = (window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig] && window.dbRaw[CONFIG.FILA_INICIO_FARMACOS + idxOrig][CONFIG.COL_INICIO_DESTINOS + idxDest]) || "";
     
     document.getElementById('res-pauta').innerHTML = `
-        <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Estrategia Sugerida</h4>
-        ${orig === dest ? 'Mismo fármaco.' : window.traducirPasos(rawInstr.toString(), dosis, equivalente, orig, dest, d.umbral)}`;
+        <h4 style="margin:0 0 1.2rem 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">
+            ${isEn ? 'Suggested Strategy' : 'Estrategia Sugerida'}
+        </h4>
+        ${orig === dest ? (isEn ? 'Same drug.' : 'Mismo fármaco.') : window.traducirPasos(rawInstr.toString(), dosis, equivalente, orig, dest, d.umbral)}`;
+};
+
+window.copiarEstrategia = function() {
+    const isEn = window.currentLang === 'en';
+    const steps = document.querySelectorAll('.pauta-step');
+    if (steps.length === 0) return;
+
+    let texto = isEn ? "SUGGESTED SWITCH STRATEGY:\n\n" : "ESTRATEGIA DE CAMBIO SUGERIDA:\n\n";
+    steps.forEach(step => {
+        const dia = step.querySelector('.step-idx').innerText;
+        const farm = step.querySelector('.tag-farm').innerText;
+        const desc = step.querySelector('.step-txt').innerText;
+        texto += `${dia}: [${farm}] ${desc}\n`;
+    });
+
+    navigator.clipboard.writeText(texto).then(() => {
+        const btn = document.querySelector('.btn-copiar');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = isEn ? '<i class="fas fa-check"></i> COPIED!' : '<i class="fas fa-check"></i> ¡COPIADO!';
+        btn.style.color = '#15803d';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.style.color = '';
+        }, 2000);
+    });
 };
