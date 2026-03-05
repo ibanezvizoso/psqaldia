@@ -1,52 +1,129 @@
 /**
- * Motor de Deprescripción Hiperbólica
- * PSQALDÍA © 2026
+ * Motor de Deprescripción Hiperbólica v1.8
+ * PSQALDÍA © 2026 - Edición Profesional Bilingüe
  */
 
 window.dbTaper = [];
 window.taperChart = null;
+window.depreLang = 'es'; // Idioma por defecto
 
-// Estilos específicos que se inyectarán
+// 1. DICCIONARIO DE TRADUCCIONES
+const i18n = {
+    es: {
+        drug: "Fármaco",
+        initDose: "Dosis Inicial (mg)",
+        speed: "Velocidad de reducción",
+        speedFast: "Cada 2 semanas (Rápida)",
+        speedStd: "Cada 4 semanas (Estándar)",
+        placeholder: "Seleccione un fármaco...",
+        thWeek: "SEMANA",
+        thDose: "DOSIS (MG)",
+        thPres: "PRESENTACIÓN",
+        alertMax: "Dosis superior al protocolo. Iniciando desde",
+        seeNote: "VER NOTA",
+        week: "Semana",
+        end: "Fin",
+        labelHiper: "Hiperbólica lenta",
+        labelLineal: "Lineal rápida (2 meses)",
+        copyBtn: "Copiar Pauta",
+        copySuccess: "¡Pauta copiada al portapapeles!",
+        headerPlan: "PLAN DE REDUCCIÓN"
+    },
+    en: {
+        drug: "Drug",
+        initDose: "Initial Dose (mg)",
+        speed: "Tapering Speed",
+        speedFast: "Every 2 weeks (Fast)",
+        speedStd: "Every 4 weeks (Standard)",
+        placeholder: "Select a drug...",
+        thWeek: "WEEK",
+        thDose: "DOSE (MG)",
+        thPres: "PRESENTATION",
+        alertMax: "Dose exceeds protocol. Starting from",
+        seeNote: "SEE NOTE",
+        week: "Week",
+        end: "End",
+        labelHiper: "Slow Hyperbolic",
+        labelLineal: "Fast Linear (2 months)",
+        copyBtn: "Copy Plan",
+        copySuccess: "Plan copied to clipboard!",
+        headerPlan: "REDUCTION PLAN"
+    }
+};
+
 const estilosDepre = `
 <style>
-    .depre-container { padding: 1.5rem; }
+    .depre-container { padding: 1.5rem; font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* Pestañas de Idioma */
+    .depre-lang-tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .depre-tab { padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: 0.2s; }
+    .depre-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
     .depre-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; display: block; }
     .depre-input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 0.9rem; margin-bottom: 15px; box-sizing: border-box; }
     .depre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .depre-alert { padding: 12px; border-radius: 12px; background: #fff7ed; border-left: 4px solid #f97316; font-size: 0.8rem; margin-bottom: 15px; display: none; }
-    .depre-note { padding: 12px; border-radius: 12px; background: var(--primary-light); color: var(--primary); font-size: 0.85rem; margin-bottom: 15px; display: none; }
+    .depre-note { padding: 12px; border-radius: 12px; background: var(--primary-light); color: var(--primary); font-size: 0.85rem; margin-bottom: 15px; display: none; border-left: 4px solid var(--primary); }
     .depre-chart-box { background: white; border-radius: 15px; border: 1px solid var(--border); padding: 10px; height: 250px; margin-bottom: 20px; }
+    
+    .depre-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .depre-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     .depre-table th { text-align: left; padding: 10px; background: #f8fafc; font-size: 0.7rem; color: var(--text-muted); border-bottom: 2px solid var(--border); }
     .depre-table td { padding: 10px; border-bottom: 1px solid var(--border); }
+    
+    /* Botón Copiar */
+    .btn-copy { padding: 8px 15px; border-radius: 10px; background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+    .btn-copy:hover { background: var(--primary); color: white; }
+
     .depre-biblio { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed var(--border); font-size: 0.75rem; color: var(--text-muted); font-style: italic; }
 </style>
 `;
 
+window.cambiarIdiomaDepre = function(nuevoIdioma) {
+    window.depreLang = nuevoIdioma;
+    // Guardamos valores actuales para no perderlos al refrescar la UI
+    const dose = document.getElementById('current-dose')?.value;
+    const drug = document.getElementById('drug-select')?.value;
+    const interval = document.getElementById('interval-select')?.value;
+    
+    window.iniciarDeprescripcion().then(() => {
+        if(drug) document.getElementById('drug-select').value = drug;
+        if(dose) document.getElementById('current-dose').value = dose;
+        if(interval) document.getElementById('interval-select').value = interval;
+        window.updatePlan();
+    });
+};
+
 window.iniciarDeprescripcion = async function() {
     const container = document.getElementById('modalData');
     if (!container) return;
+    const t = i18n[window.depreLang];
 
-    // Inyectar Estructura Inicial
     container.innerHTML = estilosDepre + `
         <div class="depre-container">
+            <div class="depre-lang-tabs">
+                <div class="depre-tab ${window.depreLang === 'es' ? 'active' : ''}" onclick="window.cambiarIdiomaDepre('es')">ESP</div>
+                <div class="depre-tab ${window.depreLang === 'en' ? 'active' : ''}" onclick="window.cambiarIdiomaDepre('en')">ENG</div>
+            </div>
+
             <div id="depre-alert" class="depre-alert"></div>
             
             <div class="depre-grid">
                 <div>
-                    <label class="depre-label">Fármaco</label>
+                    <label class="depre-label">${t.drug}</label>
                     <select id="drug-select" class="depre-input" onchange="window.updatePlan()"></select>
                 </div>
                 <div>
-                    <label class="depre-label">Dosis Inicial (mg)</label>
+                    <label class="depre-label">${t.initDose}</label>
                     <input type="number" id="current-dose" class="depre-input" value="20" oninput="window.updatePlan()">
                 </div>
             </div>
 
-            <label class="depre-label">Velocidad de reducción</label>
+            <label class="depre-label">${t.speed}</label>
             <select id="interval-select" class="depre-input" onchange="window.updatePlan()">
-                <option value="2">Cada 2 semanas (Rápida)</option>
-                <option value="4" selected>Cada 4 semanas (Estándar)</option>
+                <option value="2">${t.speedFast}</option>
+                <option value="4" selected>${t.speedStd}</option>
             </select>
 
             <div id="solution-info" class="depre-note"></div>
@@ -55,9 +132,14 @@ window.iniciarDeprescripcion = async function() {
                 <canvas id="taperChart"></canvas>
             </div>
 
+            <div class="depre-table-header">
+                <span class="depre-label" style="margin:0">${t.headerPlan}</span>
+                <button class="btn-copy" onclick="window.copiarPauta()"><i class="far fa-copy"></i> ${t.copyBtn}</button>
+            </div>
+
             <table class="depre-table">
                 <thead>
-                    <tr><th>SEMANA</th><th>DOSIS (MG)</th><th>PRESENTACIÓN</th></tr>
+                    <tr><th>${t.thWeek}</th><th>${t.thDose}</th><th>${t.thPres}</th></tr>
                 </thead>
                 <tbody id="plan-body"></tbody>
             </table>
@@ -68,31 +150,33 @@ window.iniciarDeprescripcion = async function() {
         </div>
     `;
 
-    // Cargar Datos
-    try {
-        const res = await fetch(`/?sheet=Data_Farmacocinetica`);
-        const data = await res.json();
-        if (data.values) {
-            window.dbTaper = data.values.filter(row => {
-                const fam = (row[5] || '').toLowerCase();
-                const nom = (row[0] || '').toLowerCase();
-                return (fam.includes('antidepresivo') || fam.includes('benzo')) && 
-                       !fam.includes('antipsicótico') && !nom.includes('ketazolam') && row[6];
-            }).map(row => ({
-                nombre: row[0],
-                steps: row[6].split(',').map(s => parseFloat(s.trim())).sort((a,b) => b-a),
-                solucion: (row[7] || '').trim()
-            }));
+    if (window.dbTaper.length === 0) {
+        try {
+            const res = await fetch(`/?sheet=Data_Farmacocinetica`);
+            const data = await res.json();
+            if (data.values) {
+                window.dbTaper = data.values.filter(row => {
+                    const fam = (row[5] || '').toLowerCase();
+                    const nom = (row[0] || '').toLowerCase();
+                    return (fam.includes('antidepresivo') || fam.includes('benzo')) && 
+                           !fam.includes('antipsicótico') && !nom.includes('ketazolam') && row[6];
+                }).map(row => ({
+                    nombre: row[0],
+                    steps: row[6].split(',').map(s => parseFloat(s.trim())).sort((a,b) => b-a),
+                    solucion: (row[7] || '').trim()
+                }));
+            }
+        } catch (e) { console.error(e); }
+    }
 
-            const sel = document.getElementById('drug-select');
-            sel.innerHTML = '<option value="" selected disabled>Seleccione un fármaco...</option>' + 
-                            window.dbTaper.sort((a,b)=>a.nombre.localeCompare(b.nombre))
-                            .map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-        }
-    } catch (e) { console.error(e); }
+    const sel = document.getElementById('drug-select');
+    sel.innerHTML = `<option value="" selected disabled>${t.placeholder}</option>` + 
+                    window.dbTaper.sort((a,b)=>a.nombre.localeCompare(b.nombre))
+                    .map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
 };
 
 window.updatePlan = function() {
+    const t = i18n[window.depreLang];
     const drugName = document.getElementById('drug-select').value;
     if (!drugName) return;
 
@@ -104,10 +188,9 @@ window.updatePlan = function() {
     const noteBox = document.getElementById('solution-info');
     const tableBody = document.getElementById('plan-body');
 
-    // 1. Lógica de pasos
     let steps = [];
     if (dose > drug.steps[0]) {
-        alertBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Dosis superior al protocolo. Iniciando desde ${drug.steps[0]} mg.`;
+        alertBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${t.alertMax} ${drug.steps[0]} mg.`;
         alertBox.style.display = 'block';
         steps = [...drug.steps];
     } else {
@@ -116,7 +199,6 @@ window.updatePlan = function() {
         steps.unshift(dose);
     }
 
-    // 2. Mensaje de solución
     let ratio = parseFloat(drug.solucion.replace(',', '.'));
     let esTexto = isNaN(ratio) && drug.solucion !== "" && drug.solucion !== "PROTECTED";
     if (esTexto) {
@@ -124,7 +206,6 @@ window.updatePlan = function() {
         noteBox.style.display = 'block';
     } else { noteBox.style.display = 'none'; }
 
-    // 3. Tabla y Datos Gráfica
     tableBody.innerHTML = '';
     let hData = []; let labels = []; let curW = 0; let msgPut = false;
 
@@ -132,19 +213,18 @@ window.updatePlan = function() {
         labels.push(`S${curW}`);
         hData.push(mg);
         let extra = "-";
-        if (!isNaN(ratio) && ratio > 0) extra = `<b>${(mg/ratio).toFixed(2)} mL</b>`;
-        else if (esTexto && !msgPut) { extra = "VER NOTA"; msgPut = true; }
+        if (!isNaN(ratio) && ratio > 0) extra = `${(mg/ratio).toFixed(2)} mL`;
+        else if (esTexto && !msgPut) { extra = t.seeNote; msgPut = true; }
 
-        tableBody.innerHTML += `<tr><td>Semana ${curW}</td><td><b>${mg} mg</b></td><td>${extra}</td></tr>`;
+        tableBody.innerHTML += `<tr><td>${t.week} ${curW}</td><td><b>${mg} mg</b></td><td>${extra}</td></tr>`;
         curW += weeks;
     });
 
     if (hData[hData.length-1] !== 0) {
         labels.push(`S${curW}`); hData.push(0);
-        tableBody.innerHTML += `<tr><td>Semana ${curW}</td><td><b>0 mg</b></td><td>Fin</td></tr>`;
+        tableBody.innerHTML += `<tr><td>${t.week} ${curW}</td><td><b>0 mg</b></td><td>${t.end}</td></tr>`;
     }
 
-    // 4. Lineal (2 meses = 8 semanas)
     const startMg = hData[0];
     let lData = labels.map((_, i) => {
         const w = i * weeks;
@@ -154,7 +234,31 @@ window.updatePlan = function() {
     window.renderChart(labels, hData, lData);
 };
 
+window.copiarPauta = function() {
+    const t = i18n[window.depreLang];
+    const drugName = document.getElementById('drug-select').value;
+    if (!drugName) return;
+
+    let texto = `${t.headerPlan}: ${drugName}\n--------------------------\n`;
+    const rows = document.querySelectorAll('#plan-body tr');
+    
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        texto += `${cols[0].innerText}: ${cols[1].innerText} (${cols[2].innerText})\n`;
+    });
+
+    const note = document.getElementById('solution-info');
+    if (note.style.display === 'block') {
+        texto += `\nNota: ${note.innerText}`;
+    }
+
+    navigator.clipboard.writeText(texto).then(() => {
+        alert(t.copySuccess);
+    });
+};
+
 window.renderChart = function(labels, hData, lData) {
+    const t = i18n[window.depreLang];
     const ctx = document.getElementById('taperChart').getContext('2d');
     if (window.taperChart) window.taperChart.destroy();
     window.taperChart = new Chart(ctx, {
@@ -162,8 +266,8 @@ window.renderChart = function(labels, hData, lData) {
         data: {
             labels: labels,
             datasets: [
-                { label: 'Hiperbólica lenta', data: hData, borderColor: '#4338ca', backgroundColor: 'rgba(67, 56, 202, 0.05)', fill: true, tension: 0.4 },
-                { label: 'Lineal rápida (2m)', data: lData, borderColor: '#ec4899', borderDash: [5, 5], pointRadius: 0, tension: 0 }
+                { label: t.labelHiper, data: hData, borderColor: '#4338ca', backgroundColor: 'rgba(67, 56, 202, 0.05)', fill: true, tension: 0.4 },
+                { label: t.labelLineal, data: lData, borderColor: '#ec4899', borderDash: [5, 5], pointRadius: 0, tension: 0 }
             ]
         },
         options: { 
