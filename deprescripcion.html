@@ -27,12 +27,12 @@
 
         .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
 
-        /* CARDS DE FUNCIONES */
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; margin-top: -2rem; }
-        .info-card { background: var(--card-bg); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-start; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .info-card i { color: var(--primary); font-size: 1.25rem; margin-top: 3px; }
-        .info-card h3 { font-size: 0.95rem; font-weight: 800; margin: 0 0 0.4rem; }
-        .info-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+        /* CARDS DE FUNCIONES - Ajustadas para soportar 4 columnas */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.2rem; margin-bottom: 3rem; margin-top: -2.5rem; }
+        .info-card { background: var(--card-bg); padding: 1.2rem; border-radius: 1.25rem; border: 1px solid var(--border); display: flex; gap: 0.8rem; align-items: flex-start; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .info-card i { color: var(--primary); font-size: 1.1rem; margin-top: 3px; }
+        .info-card h3 { font-size: 0.9rem; font-weight: 800; margin: 0 0 0.3rem; }
+        .info-card p { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
 
         /* HUECO PARA LA HERRAMIENTA */
         #modalData { 
@@ -59,9 +59,25 @@
 
 <div class="container">
     <div class="info-grid">
-        <div class="info-card"><i class="fas fa-microscope"></i><div><h3>Base Neurobiológica</h3><p>Cálculo basado en la ocupación de receptores cerebrales.</p></div></div>
-        <div class="info-card"><i class="fas fa-tint"></i><div><h3>Ajuste de Presentación</h3><p>Cálculo automático de mL para soluciones líquidas.</p></div></div>
-        <div class="info-card"><i class="fas fa-chart-area"></i><div><h3>Comparativa Visual</h3><p>Contraste entre reducción lineal e hiperbólica.</p></div></div>
+        <div class="info-card">
+            <i class="fas fa-microscope"></i>
+            <div><h3>Base Neurobiológica</h3><p>Cálculo basado en la ocupación de receptores cerebrales.</p></div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-tint"></i>
+            <div><h3>Ajuste de Presentación</h3><p>Cálculo automático de mL para soluciones líquidas.</p></div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-chart-area"></i>
+            <div><h3>Comparativa Visual</h3><p>Contraste entre reducción lineal e hiperbólica.</p></div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-user-clock"></i>
+            <div>
+                <h3>¿Cuándo usar?</h3>
+                <p>Tratamientos largos, vida media corta o historia de síntomas de retirada.</p>
+            </div>
+        </div>
     </div>
 
     <main id="modalData">
