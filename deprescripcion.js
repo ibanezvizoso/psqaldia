@@ -1,6 +1,5 @@
 /**
- * Herramienta de Deprescripción Hiperbólica - Versión Actualizada
- * PSQALDÍA © 2026
+ * Herramienta de Deprescripción Hiperbólica - v1.1
  */
 
 let dbTaper = [];
@@ -15,17 +14,18 @@ async function initTool() {
         const data = await res.json();
 
         if (data.values) {
-            // Filtrado de fármacos (Antidepresivos y Benzos, excluyendo Ketazolam y Antipsicóticos)
             dbTaper = data.values.filter((row) => {
                 const nombre = (row[0] || '').toLowerCase();
                 const familia = (row[5] || '').toLowerCase();
                 const tieneTaper = row[6] && row[6].length > 1;
 
-                const esValido = (familia.includes('antidepresivo') || familia.includes('benzodiacepina')) && 
-                                 !familia.includes('antipsicótico') && 
-                                 nombre !== 'ketazolam';
-                
-                return esValido && tieneTaper;
+                // Filtro mejorado para capturar AD y BZ (independientemente de tildes o plurales)
+                const esAD = familia.includes('antidepresivo');
+                const esBZ = familia.includes('benzo'); // Captura benzodiacepina, benzodiazepina, etc.
+                const esKetazolam = nombre.includes('ketazolam');
+                const esAntipsicotico = familia.includes('antipsicótico');
+
+                return (esAD || esBZ) && !esAntipsicotico && !esKetazolam && tieneTaper;
             }).map(row => ({
                 nombre: row[0],
                 steps: row[6].split(',').map(s => parseFloat(s.trim())).sort((a,b) => b-a),
@@ -42,7 +42,7 @@ async function initTool() {
 
 function renderDrugSelect() {
     const sel = document.getElementById('drug-select');
-    sel.innerHTML = dbTaper.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
+    sel.innerHTML = dbTaper.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).sort().join('');
 }
 
 function updatePlan() {
@@ -58,12 +58,11 @@ function updatePlan() {
     alertBox.style.display = 'none';
     solutionInfo.innerHTML = '';
 
-    // 1. Lógica de dosis inicial
     let planSteps = [];
     const maxTaperDose = drug.steps[0];
 
     if (currentDose > maxTaperDose) {
-        alertBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> La dosis actual es superior a la recomendada. Se muestra el plan desde <b>${maxTaperDose} mg</b>.`;
+        alertBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Dosis superior al protocolo. Iniciando desde <b>${maxTaperDose} mg</b>.`;
         alertBox.style.display = 'block';
         planSteps = [...drug.steps];
     } else {
@@ -71,13 +70,16 @@ function updatePlan() {
         planSteps.unshift(currentDose);
     }
 
-    // 2. Manejo de Solución
-    let ratioML = parseFloat(drug.solucion);
-    if (isNaN(ratioML) && drug.solucion.length > 5) {
-        solutionInfo.innerHTML = `<i class="fas fa-info-circle"></i> <b>Instrucciones:</b> ${drug.solucion}`;
+    // Manejo de la frase o el cálculo
+    let ratioML = parseFloat(drug.solucion.replace(',', '.'));
+    let esFrase = isNaN(ratioML) && drug.solucion.trim() !== "" && drug.solucion !== "PROTECTED";
+
+    if (esFrase) {
+        solutionInfo.innerHTML = `<i class="fas fa-info-circle"></i> <b>Nota:</b> ${drug.solucion}`;
+    } else if (drug.solucion === "PROTECTED") {
+        solutionInfo.innerHTML = `<i class="fas fa-lock"></i> <b>Error:</b> Debes actualizar el Worker para permitir ver la columna H.`;
     }
 
-    // 3. Generar Datos para Tabla y Gráfica Hiperbólica
     const tableBody = document.getElementById('plan-body');
     tableBody.innerHTML = '';
     
@@ -89,42 +91,38 @@ function updatePlan() {
         chartLabels.push(`Sem ${currentWeek}`);
         chartDataHiper.push(mg);
 
-        let extraVal = (!isNaN(ratioML) && ratioML > 0) ? `${(mg / ratioML).toFixed(2)} mL` : "Ver nota";
-        
+        // Lógica de la tercera columna de la tabla
+        let infoExtra = "";
+        if (!isNaN(ratioML) && ratioML > 0) {
+            infoExtra = `<b>${(mg / ratioML).toFixed(2)} mL</b>`;
+        } else if (esFrase) {
+            infoExtra = "Ver nota arriba";
+        } else {
+            infoExtra = "-";
+        }
+
         tableBody.innerHTML += `
             <tr>
                 <td>Semana ${currentWeek}</td>
                 <td><b>${mg} mg</b></td>
-                <td>${extraVal}</td>
+                <td>${infoExtra}</td>
             </tr>
         `;
         currentWeek += weeksInterval;
     });
 
-    // Añadir punto final 0
+    // Punto final 0
     if (planSteps[planSteps.length-1] !== 0) {
         chartLabels.push(`Sem ${currentWeek}`);
         chartDataHiper.push(0);
         tableBody.innerHTML += `<tr><td>Semana ${currentWeek}</td><td><b>0 mg</b></td><td>Fin</td></tr>`;
     }
 
-    // 4. Lógica Lineal Rápida (8 semanas / 2 meses)
-    // Calculamos los puntos lineales sobre la misma escala de tiempo de la hiperbólica
+    // Lineal rápida (8 semanas fija)
     const startDose = chartDataHiper[0];
-    const WEEKS_LINEAL = 8;
-    let chartDataLineal = [];
-
-    chartLabels.forEach((label, index) => {
-        const week = index * weeksInterval;
-        let doseLineal;
-        
-        if (week >= WEEKS_LINEAL) {
-            doseLineal = 0;
-        } else {
-            // Ecuación de recta: Dosis = Inicial - (Pendiente * semana)
-            doseLineal = startDose - (startDose * (week / WEEKS_LINEAL));
-        }
-        chartDataLineal.push(doseLineal);
+    let chartDataLineal = chartLabels.map((_, i) => {
+        const week = i * weeksInterval;
+        return week >= 8 ? 0 : startDose - (startDose * (week / 8));
     });
 
     renderChart(chartLabels, chartDataHiper, chartDataLineal);
@@ -145,11 +143,10 @@ function renderChart(labels, dataHiper, dataLineal) {
                     borderColor: '#4338ca',
                     backgroundColor: 'rgba(67, 56, 202, 0.05)',
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 4
+                    tension: 0.4
                 },
                 {
-                    label: 'Deprescripción lineal rápida',
+                    label: 'Deprescripción lineal rápida (2 meses)',
                     data: dataLineal,
                     borderColor: '#ec4899',
                     borderDash: [5, 5],
@@ -163,14 +160,22 @@ function renderChart(labels, dataHiper, dataLineal) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { boxWidth: 15, font: { size: 11, weight: 'bold' } }
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        // AQUÍ LA CORRECCIÓN: Solo muestra los mg, no el nombre del dataset
+                        label: function(context) {
+                            return ` ${context.raw.toFixed(1)} mg`;
+                        },
+                        title: function(context) {
+                            return context[0].label;
+                        }
+                    }
                 }
             },
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'mg' } },
-                x: { title: { display: true, text: 'Tiempo' } }
+                y: { beginAtZero: true },
+                x: { ticks: { maxRotation: 0 } }
             }
         }
     });
