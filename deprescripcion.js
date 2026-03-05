@@ -1,11 +1,11 @@
 /**
- * Motor de Deprescripción Hiperbólica v1.8
- * PSQALDÍA © 2026 - Edición Profesional Bilingüe
+ * Motor de Deprescripción Hiperbólica v1.9
+ * PSQALDÍA © 2026 - Edición Profesional Bilingüe con Traducción de Notas
  */
 
 window.dbTaper = [];
 window.taperChart = null;
-window.depreLang = 'es'; // Idioma por defecto
+window.depreLang = 'es'; 
 
 // 1. DICCIONARIO DE TRADUCCIONES
 const i18n = {
@@ -27,7 +27,10 @@ const i18n = {
         labelLineal: "Lineal rápida (2 meses)",
         copyBtn: "Copiar Pauta",
         copySuccess: "¡Pauta copiada al portapapeles!",
-        headerPlan: "PLAN DE REDUCCIÓN"
+        headerPlan: "PLAN DE REDUCCIÓN",
+        noteLabel: "Nota",
+        // Traducción de frases típicas del Excel
+        excelNotes: {} 
     },
     en: {
         drug: "Drug",
@@ -47,42 +50,40 @@ const i18n = {
         labelLineal: "Fast Linear (2 months)",
         copyBtn: "Copy Plan",
         copySuccess: "Plan copied to clipboard!",
-        headerPlan: "REDUCTION PLAN"
+        headerPlan: "REDUCTION PLAN",
+        noteLabel: "Note",
+        // MAPEADOR DE TRADUCCIONES DEL EXCEL
+        excelNotes: {
+            "Partir comprimidos, romperlos y disolverlos, abrir cápsulas, etc.": "Split tablets, break and dissolve them, open capsules, etc.",
+            "PROTECTED": "PROTECTED"
+        }
     }
 };
 
 const estilosDepre = `
 <style>
     .depre-container { padding: 1.5rem; font-family: 'Plus Jakarta Sans', sans-serif; }
-    
-    /* Pestañas de Idioma */
     .depre-lang-tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
     .depre-tab { padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: 0.2s; }
     .depre-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-
     .depre-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; display: block; }
     .depre-input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 0.9rem; margin-bottom: 15px; box-sizing: border-box; }
     .depre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .depre-alert { padding: 12px; border-radius: 12px; background: #fff7ed; border-left: 4px solid #f97316; font-size: 0.8rem; margin-bottom: 15px; display: none; }
     .depre-note { padding: 12px; border-radius: 12px; background: var(--primary-light); color: var(--primary); font-size: 0.85rem; margin-bottom: 15px; display: none; border-left: 4px solid var(--primary); }
     .depre-chart-box { background: white; border-radius: 15px; border: 1px solid var(--border); padding: 10px; height: 250px; margin-bottom: 20px; }
-    
     .depre-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .depre-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     .depre-table th { text-align: left; padding: 10px; background: #f8fafc; font-size: 0.7rem; color: var(--text-muted); border-bottom: 2px solid var(--border); }
     .depre-table td { padding: 10px; border-bottom: 1px solid var(--border); }
-    
-    /* Botón Copiar */
     .btn-copy { padding: 8px 15px; border-radius: 10px; background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
     .btn-copy:hover { background: var(--primary); color: white; }
-
     .depre-biblio { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed var(--border); font-size: 0.75rem; color: var(--text-muted); font-style: italic; }
 </style>
 `;
 
 window.cambiarIdiomaDepre = function(nuevoIdioma) {
     window.depreLang = nuevoIdioma;
-    // Guardamos valores actuales para no perderlos al refrescar la UI
     const dose = document.getElementById('current-dose')?.value;
     const drug = document.getElementById('drug-select')?.value;
     const interval = document.getElementById('interval-select')?.value;
@@ -106,9 +107,7 @@ window.iniciarDeprescripcion = async function() {
                 <div class="depre-tab ${window.depreLang === 'es' ? 'active' : ''}" onclick="window.cambiarIdiomaDepre('es')">ESP</div>
                 <div class="depre-tab ${window.depreLang === 'en' ? 'active' : ''}" onclick="window.cambiarIdiomaDepre('en')">ENG</div>
             </div>
-
             <div id="depre-alert" class="depre-alert"></div>
-            
             <div class="depre-grid">
                 <div>
                     <label class="depre-label">${t.drug}</label>
@@ -119,31 +118,25 @@ window.iniciarDeprescripcion = async function() {
                     <input type="number" id="current-dose" class="depre-input" value="20" oninput="window.updatePlan()">
                 </div>
             </div>
-
             <label class="depre-label">${t.speed}</label>
             <select id="interval-select" class="depre-input" onchange="window.updatePlan()">
                 <option value="2">${t.speedFast}</option>
                 <option value="4" selected>${t.speedStd}</option>
             </select>
-
             <div id="solution-info" class="depre-note"></div>
-
             <div class="depre-chart-box">
                 <canvas id="taperChart"></canvas>
             </div>
-
             <div class="depre-table-header">
                 <span class="depre-label" style="margin:0">${t.headerPlan}</span>
                 <button class="btn-copy" onclick="window.copiarPauta()"><i class="far fa-copy"></i> ${t.copyBtn}</button>
             </div>
-
             <table class="depre-table">
                 <thead>
                     <tr><th>${t.thWeek}</th><th>${t.thDose}</th><th>${t.thPres}</th></tr>
                 </thead>
                 <tbody id="plan-body"></tbody>
             </table>
-
             <div class="depre-biblio">
                 <i class="fas fa-book-medical"></i> Bibliografía: The Maudsley Deprescribing Guidelines. Mark Horowitz y David Taylor, 2024.
             </div>
@@ -201,8 +194,14 @@ window.updatePlan = function() {
 
     let ratio = parseFloat(drug.solucion.replace(',', '.'));
     let esTexto = isNaN(ratio) && drug.solucion !== "" && drug.solucion !== "PROTECTED";
+    
     if (esTexto) {
-        noteBox.innerHTML = `<i class="fas fa-info-circle"></i> ${drug.solucion}`;
+        // --- LÓGICA DE TRADUCCIÓN DE LA NOTA DEL EXCEL ---
+        let notaMostrada = drug.solucion;
+        if (window.depreLang === 'en' && t.excelNotes[drug.solucion]) {
+            notaMostrada = t.excelNotes[drug.solucion];
+        }
+        noteBox.innerHTML = `<i class="fas fa-info-circle"></i> ${notaMostrada}`;
         noteBox.style.display = 'block';
     } else { noteBox.style.display = 'none'; }
 
@@ -249,7 +248,7 @@ window.copiarPauta = function() {
 
     const note = document.getElementById('solution-info');
     if (note.style.display === 'block') {
-        texto += `\nNota: ${note.innerText}`;
+        texto += `\n${t.noteLabel}: ${note.innerText}`;
     }
 
     navigator.clipboard.writeText(texto).then(() => {
