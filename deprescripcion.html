@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herramienta de Deprescripción Hiperbólica | PSQALDÍA</title>
-    <meta name="description" content="Planificador de reducción gradual y segura de psicofármacos basado en modelos de deprescripción hiperbólica.">
+    <title>Deprescripción Hiperbólica | PSQALDÍA</title>
+    <meta name="description" content="Planificador de reducción gradual de psicofármacos basado en modelos de ocupación de receptores.">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
@@ -14,123 +14,194 @@
         :root {
             --primary: #4338ca;
             --primary-light: #eef2ff;
-            --bg: #fcfdfe;
+            --secondary: #ec4899;
+            --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border: #f1f5f9;
-            --radius: 1.25rem;
-            --secondary: #ec4899; /* Para la línea lineal */
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 1.5rem;
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background: var(--bg); 
             color: var(--text-main); 
+            margin: 0;
             line-height: 1.6;
         }
 
-        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        
-        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .hero h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+        /* Header Estilo Premium */
+        .header { 
+            padding: 3rem 1.5rem; 
+            text-align: center; 
+            background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
+        }
+        .logo-text { font-weight: 900; color: var(--primary); letter-spacing: 1px; text-decoration: none; font-size: 0.9rem; }
+        .header h1 { font-size: 2.5rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -1px; }
+        .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: auto; }
 
-        .main-content { padding: 0 1.5rem 5rem 1.5rem; max-width: 900px; margin: auto; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
 
-        #tool-container {
+        /* Sección de Funciones (Cards de Info) */
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 3rem;
+        }
+        .info-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .info-card i { color: var(--primary); font-size: 1.25rem; margin-top: 3px; }
+        .info-card h3 { font-size: 0.95rem; font-weight: 800; margin: 0 0 0.4rem; }
+        .info-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+        /* Contenedor de la Herramienta */
+        #tool-box {
             background: var(--card-bg);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
-            padding: 1.5rem;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+            padding: 2.5rem;
         }
 
-        .input-group { margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        @media (max-width: 600px) { .input-group { grid-template-columns: 1fr; } }
+        .alert-box { 
+            padding: 1rem; border-radius: 1rem; background: #fff7ed; 
+            border-left: 4px solid #f97316; font-size: 0.85rem; margin-bottom: 2rem; display: none; 
+        }
 
-        label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem; }
-        select, input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); font-family: inherit; font-size: 0.9rem; box-sizing: border-box; }
+        .inputs-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        @media (max-width: 768px) { .inputs-row { grid-template-columns: 1fr; } }
 
-        .chart-box { margin-top: 2rem; background: white; border-radius: 15px; padding: 15px; border: 1px solid var(--border); }
+        label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.6rem; }
+        select, input { 
+            width: 100%; padding: 0.8rem 1rem; border-radius: 0.75rem; border: 1px solid var(--border); 
+            background: #fdfdfd; font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+        }
+        select:focus, input:focus { border-color: var(--primary); }
+
+        .note-area { font-size: 0.85rem; color: var(--primary); background: var(--primary-light); padding: 1rem; border-radius: 0.75rem; margin-bottom: 2rem; display: none; }
+
+        /* Gráfica y Tabla */
+        .visual-area { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem; margin-top: 2rem; }
+        @media (max-width: 900px) { .visual-area { grid-template-columns: 1fr; } }
+
+        .chart-container { background: white; padding: 1rem; border-radius: 1rem; border: 1px solid var(--border); height: 350px; }
         
-        .table-container { margin-top: 2rem; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: var(--primary-light); color: var(--primary); text-align: left; padding: 12px; font-weight: 800; }
-        td { padding: 12px; border-bottom: 1px solid var(--border); }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 1rem; background: #f8fafc; color: var(--text-muted); font-weight: 800; font-size: 0.7rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); }
 
-        .alert-box { padding: 12px; border-radius: 10px; background: #fff7ed; border-left: 4px solid #f97316; font-size: 0.8rem; margin-bottom: 1rem; display: none; }
-        .solution-note { font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-top: 1rem; }
+        /* Bibliografía */
+        .biblio-section { 
+            margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); 
+        }
+        .biblio-section h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+        .biblio-section p { font-size: 0.85rem; font-style: italic; }
 
-        footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
-        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        footer { text-align: center; margin-top: 3rem; }
+        .btn-home { color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.9rem; }
+        .btn-home:hover { color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <nav class="nav-header">
-        <a href="/" class="logo"><i class="fas fa-wave-square"></i> PSQALDÍA</a>
-    </nav>
+<header class="header">
+    <a href="/" class="logo-text">PSQALDÍA</a>
+    <h1>Deprescripción Hiperbólica</h1>
+    <p>Algoritmos de reducción gradual para minimizar el riesgo de síntomas de retirada.</p>
+</header>
 
-    <header class="hero">
-        <h1>Deprescripción Hiperbólica</h1>
-        <p>Generador de pautas de reducción progresiva basadas en ocupación de receptores.</p>
-    </header>
-
-    <main class="main-content">
-        <div id="tool-container">
-            <div id="alert-msg" class="alert-box"></div>
-
-            <div class="input-group">
-                <div>
-                    <label>Fármaco</label>
-                    <select id="drug-select" onchange="updatePlan()"></select>
-                </div>
-                <div>
-                    <label>Dosis Actual (mg)</label>
-                    <input type="number" id="current-dose" value="20" oninput="updatePlan()">
-                </div>
+<div class="container">
+    
+    <div class="info-grid">
+        <div class="info-card">
+            <i class="fas fa-microscope"></i>
+            <div>
+                <h3>Base Neurobiológica</h3>
+                <p>Cálculo basado en la ocupación de receptores cerebrales, evitando caídas bruscas en el tramo final.</p>
             </div>
-
-            <div class="input-group">
-                <div>
-                    <label>Frecuencia de reducción</label>
-                    <select id="interval-select" onchange="updatePlan()">
-                        <option value="2">Cada 2 semanas</option>
-                        <option value="4" selected>Cada 4 semanas</option>
-                    </select>
-                </div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-tint"></i>
+            <div>
+                <h3>Ajuste de Presentación</h3>
+                <p>Cálculo automático de mililitros (mL) para fármacos disponibles en solución líquida.</p>
             </div>
-
-            <div id="solution-info" class="solution-note"></div>
-
-            <div class="chart-box">
-                <canvas id="taperChart" style="max-height: 300px;"></canvas>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-chart-area"></i>
+            <div>
+                <h3>Comparativa Visual</h3>
+                <p>Contraste visual entre la reducción lineal convencional y la pauta hiperbólica recomendada.</p>
             </div>
+        </div>
+    </div>
 
-            <div class="table-container">
-                <table id="plan-table">
+    <main id="tool-box">
+        <div id="alert-msg" class="alert-box"></div>
+
+        <div class="inputs-row">
+            <div>
+                <label>Fármaco</label>
+                <select id="drug-select" onchange="updatePlan()"></select>
+            </div>
+            <div>
+                <label>Dosis Actual (mg)</label>
+                <input type="number" id="current-dose" value="20" oninput="updatePlan()">
+            </div>
+            <div>
+                <label>Intervalo</label>
+                <select id="interval-select" onchange="updatePlan()">
+                    <option value="2">Cada 2 semanas</option>
+                    <option value="4" selected>Cada 4 semanas</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="solution-info" class="note-area"></div>
+
+        <div class="visual-area">
+            <div class="chart-container">
+                <canvas id="taperChart"></canvas>
+            </div>
+            <div class="table-wrap">
+                <table>
                     <thead>
                         <tr>
                             <th>Semana</th>
                             <th>Dosis (mg)</th>
-                            <th id="th-extra">Presentación/ML</th>
+                            <th>Presentación</th>
                         </tr>
                     </thead>
                     <tbody id="plan-body"></tbody>
                 </table>
             </div>
         </div>
-
-        <footer>
-            <a href="/" class="link-back"><i class="fas fa-arrow-left"></i> VOLVER A PSQALDÍA</a>
-        </footer>
     </main>
 
-    <script src="/deprescripcion.js"></script>
-    <script>
-        window.WORKER_URL = "https://psqaldia.com/"; 
-        document.addEventListener('DOMContentLoaded', () => initTool());
-    </script>
+    <section class="biblio-section">
+        <h4>Referencias Bibliográficas</h4>
+        <p><i class="fas fa-book-medical"></i> The Maudsley Deprescribing Guidelines: Antidepressants, Benzodiazepines, Gabapentinoids and Z-drugs. Mark Horowitz y David Taylor, 2024.</p>
+    </section>
+
+    <footer>
+        <a href="/herramientas" class="btn-home"><i class="fas fa-arrow-left"></i> Volver a Herramientas</a>
+    </footer>
+</div>
+
+<script src="/deprescripcion.js"></script>
+<script>
+    // Inicialización al cargar
+    document.addEventListener('DOMContentLoaded', initTool);
+</script>
 </body>
 </html>
