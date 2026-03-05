@@ -1,5 +1,5 @@
 /**
- * Herramienta de Deprescripción Hiperbólica
+ * Herramienta de Deprescripción Hiperbólica - Versión Actualizada
  * PSQALDÍA © 2026
  */
 
@@ -15,9 +15,8 @@ async function initTool() {
         const data = await res.json();
 
         if (data.values) {
-            // Filtrar: Antidepresivos y Benzos (Exc. Ketazolam en A32 y Antipsicóticos)
-            // Asumimos: row[0]=Nombre, row[5]=Familia, row[6]=Taper(G), row[7]=Solución(H)
-            dbTaper = data.values.filter((row, index) => {
+            // Filtrado de fármacos (Antidepresivos y Benzos, excluyendo Ketazolam y Antipsicóticos)
+            dbTaper = data.values.filter((row) => {
                 const nombre = (row[0] || '').toLowerCase();
                 const familia = (row[5] || '').toLowerCase();
                 const tieneTaper = row[6] && row[6].length > 1;
@@ -59,30 +58,26 @@ function updatePlan() {
     alertBox.style.display = 'none';
     solutionInfo.innerHTML = '';
 
-    // 1. Lógica de inicio de Taper
+    // 1. Lógica de dosis inicial
     let planSteps = [];
     const maxTaperDose = drug.steps[0];
 
     if (currentDose > maxTaperDose) {
-        alertBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> La dosis actual es superior a la recomendada para inicio de taper. Se muestra el plan desde <b>${maxTaperDose} mg</b>.`;
+        alertBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> La dosis actual es superior a la recomendada. Se muestra el plan desde <b>${maxTaperDose} mg</b>.`;
         alertBox.style.display = 'block';
         planSteps = [...drug.steps];
     } else {
-        // Buscamos el primer escalón inferior a la dosis actual
         planSteps = drug.steps.filter(s => s < currentDose);
-        // Añadimos la dosis actual como punto de partida si no está
         planSteps.unshift(currentDose);
     }
 
-    // 2. Manejo de Solución (Columna H)
+    // 2. Manejo de Solución
     let ratioML = parseFloat(drug.solucion);
-    let instructionText = "";
     if (isNaN(ratioML) && drug.solucion.length > 5) {
-        instructionText = drug.solucion;
-        solutionInfo.innerHTML = `<i class="fas fa-info-circle"></i> <b>Nota de preparación:</b> ${instructionText}`;
+        solutionInfo.innerHTML = `<i class="fas fa-info-circle"></i> <b>Instrucciones:</b> ${drug.solucion}`;
     }
 
-    // 3. Generar Datos para Tabla y Gráfica
+    // 3. Generar Datos para Tabla y Gráfica Hiperbólica
     const tableBody = document.getElementById('plan-body');
     tableBody.innerHTML = '';
     
@@ -90,17 +85,12 @@ function updatePlan() {
     let chartLabels = [];
     let currentWeek = 0;
 
-    planSteps.forEach((mg, index) => {
+    planSteps.forEach((mg) => {
         chartLabels.push(`Sem ${currentWeek}`);
         chartDataHiper.push(mg);
 
-        let extraVal = "";
-        if (!isNaN(ratioML) && ratioML > 0) {
-            extraVal = `${(mg / ratioML).toFixed(2)} mL`;
-        } else {
-            extraVal = mg === currentDose ? "Dosis Inicial" : "Ver nota";
-        }
-
+        let extraVal = (!isNaN(ratioML) && ratioML > 0) ? `${(mg / ratioML).toFixed(2)} mL` : "Ver nota";
+        
         tableBody.innerHTML += `
             <tr>
                 <td>Semana ${currentWeek}</td>
@@ -111,22 +101,30 @@ function updatePlan() {
         currentWeek += weeksInterval;
     });
 
-    // Añadir el punto 0 al final
+    // Añadir punto final 0
     if (planSteps[planSteps.length-1] !== 0) {
         chartLabels.push(`Sem ${currentWeek}`);
         chartDataHiper.push(0);
         tableBody.innerHTML += `<tr><td>Semana ${currentWeek}</td><td><b>0 mg</b></td><td>Fin</td></tr>`;
     }
 
-    // 4. Generar Curva Lineal para comparativa
-    const totalWeeks = (chartLabels.length - 1) * weeksInterval;
-    let chartDataLineal = [];
+    // 4. Lógica Lineal Rápida (8 semanas / 2 meses)
+    // Calculamos los puntos lineales sobre la misma escala de tiempo de la hiperbólica
     const startDose = chartDataHiper[0];
-    
-    chartDataHiper.forEach((_, i) => {
-        const week = i * weeksInterval;
-        const valLineal = Math.max(0, startDose - (startDose * (week / (chartDataHiper.length * weeksInterval - weeksInterval))));
-        chartDataLineal.push(valLineal);
+    const WEEKS_LINEAL = 8;
+    let chartDataLineal = [];
+
+    chartLabels.forEach((label, index) => {
+        const week = index * weeksInterval;
+        let doseLineal;
+        
+        if (week >= WEEKS_LINEAL) {
+            doseLineal = 0;
+        } else {
+            // Ecuación de recta: Dosis = Inicial - (Pendiente * semana)
+            doseLineal = startDose - (startDose * (week / WEEKS_LINEAL));
+        }
+        chartDataLineal.push(doseLineal);
     });
 
     renderChart(chartLabels, chartDataHiper, chartDataLineal);
@@ -134,7 +132,6 @@ function updatePlan() {
 
 function renderChart(labels, dataHiper, dataLineal) {
     const ctx = document.getElementById('taperChart').getContext('2d');
-    
     if (taperChart) taperChart.destroy();
 
     taperChart = new Chart(ctx, {
@@ -143,24 +140,22 @@ function renderChart(labels, dataHiper, dataLineal) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Reducción Hiperbólica (Sugerida)',
+                    label: 'Deprescripción hiperbólica lenta',
                     data: dataHiper,
                     borderColor: '#4338ca',
                     backgroundColor: 'rgba(67, 56, 202, 0.05)',
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 4,
-                    zIndex: 2
+                    pointRadius: 4
                 },
                 {
-                    label: 'Reducción Lineal (Teórica)',
+                    label: 'Deprescripción lineal rápida',
                     data: dataLineal,
                     borderColor: '#ec4899',
                     borderDash: [5, 5],
                     fill: false,
                     tension: 0,
-                    pointRadius: 0,
-                    zIndex: 1
+                    pointRadius: 0
                 }
             ]
         },
@@ -169,24 +164,13 @@ function renderChart(labels, dataHiper, dataLineal) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: true,
                     position: 'top',
-                    labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (context) => `Dosis: ${context.raw.toFixed(1)} mg`
-                    }
+                    labels: { boxWidth: 15, font: { size: 11, weight: 'bold' } }
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Miligramos (mg)', font: { size: 10 } }
-                },
-                x: {
-                    title: { display: true, text: 'Tiempo (Semanas)', font: { size: 10 } }
-                }
+                y: { beginAtZero: true, title: { display: true, text: 'mg' } },
+                x: { title: { display: true, text: 'Tiempo' } }
             }
         }
     });
