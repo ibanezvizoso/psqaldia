@@ -236,14 +236,27 @@
         let iconoLock = (item.password && item.password.trim() !== "") ? '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>' : ""; 
 
 
-        card.onclick = () => {
-            if (item.password && item.password.trim() !== "") {
-                const userPass = prompt("Contenido protegido. Introduce la contraseña:");
-                if (userPass !== item.password) { alert("Acceso denegado."); return; }
-            }
-            window.history.pushState({}, '', `/${item.id}`); 
-            openModal(item.id); 
-        };
+        card.onclick = async () => {
+    // Si el Worker nos dice que está protegido
+    if (item.password === "PROTECTED") {
+        const userPass = prompt("Contenido protegido. Introduce la contraseña:");
+        if (!userPass) return; // El usuario canceló
+
+        // Validamos contra el Worker (v2.6)
+        // Usamos item.fecha porque es row[0] en tu Sheet, que es lo que el Worker usa para buscar
+        const res = await fetch(`/?sheet=Hoja 1&checkPass=${encodeURIComponent(userPass)}&id=${encodeURIComponent(item.fecha)}`);
+        const val = await res.json();
+
+        if (!val.success) {
+            alert("Contraseña incorrecta.");
+            return;
+        }
+    }
+    
+    // Si no tiene contraseña o la validación fue exitosa:
+    window.history.pushState({}, '', `/${item.id}`); 
+    openModal(item.id); 
+};
 
         const shareUrl = window.location.origin + '/' + item.id;
         const shareText = item.accion !== '' ? `🛠️ *Herramienta*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}*: ${shareUrl}`;
