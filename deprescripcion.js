@@ -1,12 +1,10 @@
 /**
- * Herramienta de Deprescripción Hiperbólica - v1.2
- * PSQALDÍA - Programado para el proyecto de deprescripción segura.
+ * Herramienta de Deprescripción Hiperbólica - v1.3
+ * PSQALDÍA - Mostrando mensajes reales del Excel
  */
 
 let dbTaper = [];
 let taperChart = null;
-
-// URL base del Worker (se asume que el JS corre en el mismo dominio o usa la ruta absoluta)
 const API_URL = window.location.origin;
 
 async function initTool() {
@@ -14,48 +12,40 @@ async function initTool() {
     drugSelect.innerHTML = '<option>Cargando fármacos...</option>';
 
     try {
-        // Consultamos la hoja de Farmacocinética a través del Worker
         const res = await fetch(`${API_URL}?sheet=Data_Farmacocinetica`);
         const data = await res.json();
 
         if (data.values) {
-            // Filtrado: Antidepresivos y Benzos. Excluimos Antipsicóticos y Ketazolam.
             dbTaper = data.values.filter((row) => {
                 const nombre = (row[0] || '').toLowerCase();
                 const familia = (row[5] || '').toLowerCase();
                 const tieneTaper = row[6] && row[6].length > 1;
 
                 const esAD = familia.includes('antidepresivo');
-                const esBZ = familia.includes('benzo'); // Captura cualquier variante de benzodiacepina
+                const esBZ = familia.includes('benzo');
                 const esAntipsicotico = familia.includes('antipsicótico');
                 const esKetazolam = nombre.includes('ketazolam');
 
                 return (esAD || esBZ) && !esAntipsicotico && !esKetazolam && tieneTaper;
             }).map(row => ({
                 nombre: row[0],
-                // Columna G (índice 6): Pasos de mg
                 steps: row[6].split(',').map(s => parseFloat(s.trim())).sort((a,b) => b-a),
-                // Columna H (índice 7): Solución o instrucciones
-                solucion: row[7] || ''
+                solucion: (row[7] || '').trim() // Aquí está tu mensaje del Excel
             }));
 
             renderDrugSelect();
         }
     } catch (e) {
-        console.error("Error cargando base de datos:", e);
-        drugSelect.innerHTML = '<option>Error al cargar datos</option>';
+        console.error("Error:", e);
+        drugSelect.innerHTML = '<option>Error al cargar</option>';
     }
 }
 
 function renderDrugSelect() {
     const sel = document.getElementById('drug-select');
-    // Ordenamos alfabéticamente los nombres
     const sortedDrugs = dbTaper.sort((a, b) => a.nombre.localeCompare(b.nombre));
-    
-    // Placeholder inicial deshabilitado
     let html = '<option value="" selected disabled>Seleccione un fármaco...</option>';
     html += sortedDrugs.map(d => `<option value="${d.nombre}">${d.nombre}</option>`).join('');
-    
     sel.innerHTML = html;
 }
 
@@ -65,15 +55,11 @@ function updatePlan() {
     const solutionInfo = document.getElementById('solution-info');
     const alertBox = document.getElementById('alert-msg');
 
-    // 1. Si no hay nada seleccionado, limpiamos todo y salimos
     if (!drugName) {
         tableBody.innerHTML = '';
-        solutionInfo.innerHTML = '';
+        solutionInfo.style.display = 'none';
         alertBox.style.display = 'none';
-        if (taperChart) {
-            taperChart.destroy();
-            taperChart = null;
-        }
+        if (taperChart) { taperChart.destroy(); taperChart = null; }
         return;
     }
 
@@ -81,46 +67,57 @@ function updatePlan() {
     const currentDose = parseFloat(document.getElementById('current-dose').value) || 0;
     const weeksInterval = parseInt(document.getElementById('interval-select').value);
 
-    alertBox.style.display = 'none';
-    solutionInfo.innerHTML = '';
+    // 1. Mostrar/Ocultar el mensaje del Excel
+    let ratioML = parseFloat(drug.solucion.replace(',', '.'));
+    let esMensajeTexto = isNaN(ratioML) && drug.solucion !== "" && drug.solucion !== "PROTECTED";
 
-    // 2. Determinar pasos de mg
+    if (esMensajeTexto) {
+        // AQUÍ SE LEE EL MENSAJE REAL DEL EXCEL
+        solutionInfo.innerHTML = `
+            <div style="display:flex; gap:10px; align-items:center;">
+                <i class="fas fa-info-circle" style="font-size:1.5rem;"></i>
+                <div>
+                    <strong style="display:block; margin-bottom:2px; text-transform:uppercase; font-size:0.7rem;">Instrucciones específicas:</strong>
+                    ${drug.solucion}
+                </div>
+            </div>`;
+        solutionInfo.style.display = 'block';
+    } else {
+        solutionInfo.style.display = 'none';
+    }
+
+    // 2. Calcular pasos
     let planSteps = [];
     const maxTaperDose = drug.steps[0];
-
     if (currentDose > maxTaperDose) {
-        alertBox.innerHTML = `<i class="fas fa-exclamation-triangle"></i> La dosis actual es superior al protocolo estándar. Iniciando pauta desde <b>${maxTaperDose} mg</b>.`;
+        alertBox.innerHTML = `Iniciando pauta desde el máximo recomendado: <b>${maxTaperDose} mg</b>.`;
         alertBox.style.display = 'block';
         planSteps = [...drug.steps];
     } else {
-        // Filtramos pasos menores a la dosis actual y añadimos la dosis actual al inicio
+        alertBox.style.display = 'none';
         planSteps = drug.steps.filter(s => s < currentDose);
         planSteps.unshift(currentDose);
     }
 
-    // 3. Procesar Columna H (Solución)
-    let ratioML = parseFloat(drug.solucion.toString().replace(',', '.'));
-    let esInstruccionTexto = isNaN(ratioML) && drug.solucion.trim() !== "" && drug.solucion !== "PROTECTED";
-
-    if (esInstruccionTexto) {
-        solutionInfo.innerHTML = `<i class="fas fa-info-circle"></i> <b>Nota de preparación:</b> ${drug.solucion}`;
-    }
-
-    // 4. Generar Tabla y Datos de Gráfica
+    // 3. Rellenar Tabla
     tableBody.innerHTML = '';
     let chartDataHiper = [];
     let chartLabels = [];
     let currentWeek = 0;
+    let mensajeMostradoEnTabla = false;
 
-    planSteps.forEach((mg) => {
+    planSteps.forEach((mg, index) => {
         chartLabels.push(`Sem ${currentWeek}`);
         chartDataHiper.push(mg);
 
         let colExtra = "-";
         if (!isNaN(ratioML) && ratioML > 0) {
+            // Si es número (mg/mL), calculamos mL
             colExtra = `<b>${(mg / ratioML).toFixed(2)} mL</b>`;
-        } else if (esInstruccionTexto) {
-            colExtra = "Ver nota";
+        } else if (esMensajeTexto && !mensajeMostradoEnTabla) {
+            // Si es texto, ponemos un aviso solo en la primera fila
+            colExtra = `<span style="color:var(--primary); font-size:0.75rem; font-weight:800;">INSTRUCCIONES ARRIBA</span>`;
+            mensajeMostradoEnTabla = true;
         }
 
         tableBody.innerHTML += `
@@ -133,22 +130,18 @@ function updatePlan() {
         currentWeek += weeksInterval;
     });
 
-    // Añadir punto final a 0
+    // Punto final
     if (planSteps[planSteps.length - 1] !== 0) {
         chartLabels.push(`Sem ${currentWeek}`);
         chartDataHiper.push(0);
         tableBody.innerHTML += `<tr><td>Semana ${currentWeek}</td><td><b>0 mg</b></td><td>Fin</td></tr>`;
     }
 
-    // 5. Cálculo Lineal Rápido (Siempre a 8 semanas / 2 meses)
+    // 4. Gráfica
     const startDose = chartDataHiper[0];
-    const WEEKS_LINEAL = 8;
-    
     let chartDataLineal = chartLabels.map((_, i) => {
         const week = i * weeksInterval;
-        if (week >= WEEKS_LINEAL) return 0;
-        // Recta: Dosis = Inicial - (Inicial * (semana / total_semanas))
-        return startDose - (startDose * (week / WEEKS_LINEAL));
+        return week >= 8 ? 0 : startDose - (startDose * (week / 8));
     });
 
     renderChart(chartLabels, chartDataHiper, chartDataLineal);
@@ -157,7 +150,6 @@ function updatePlan() {
 function renderChart(labels, dataHiper, dataLineal) {
     const ctx = document.getElementById('taperChart').getContext('2d');
     if (taperChart) taperChart.destroy();
-
     taperChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -169,9 +161,7 @@ function renderChart(labels, dataHiper, dataLineal) {
                     borderColor: '#4338ca',
                     backgroundColor: 'rgba(67, 56, 202, 0.05)',
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
+                    tension: 0.4
                 },
                 {
                     label: 'Deprescripción lineal rápida (2 meses)',
@@ -188,30 +178,10 @@ function renderChart(labels, dataHiper, dataLineal) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { font: { size: 11, weight: '600' }, boxWidth: 15 }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    padding: 10,
-                    callbacks: {
-                        // Limpieza: Solo muestra "X mg" al pasar el ratón
-                        label: function(context) {
-                            return ` ${context.raw.toFixed(1)} mg`;
-                        }
-                    }
-                }
+                legend: { position: 'top', labels: { font: { size: 11, weight: '600' } } },
+                tooltip: { callbacks: { label: (c) => ` ${c.raw.toFixed(1)} mg` } }
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Dosis (mg)', font: { size: 11 } }
-                },
-                x: {
-                    title: { display: true, text: 'Tiempo', font: { size: 11 } }
-                }
-            }
+            scales: { y: { beginAtZero: true }, x: { title: { display: true, text: 'Tiempo' } } }
         }
     });
 }
