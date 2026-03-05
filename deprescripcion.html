@@ -4,24 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deprescripción Hiperbólica | PSQALDÍA</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="description" content="Planificador de reducción gradual de psicofármacos basado en modelos de ocupación de receptores.">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        :root { --primary: #4338ca; --primary-light: #eef2ff; --bg: #f8fafc; --border: #e2e8f0; --text-main: #1e293b; --text-muted: #64748b; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; }
-        .nav { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; }
-        .logo { font-weight: 800; color: var(--primary); text-decoration: none; }
-        .main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-        #modalData { background: white; border-radius: 2rem; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        :root {
+            --primary: #4338ca; --primary-light: #eef2ff; --bg: #f8fafc;
+            --card-bg: #ffffff; --text-main: #1e293b; --text-muted: #64748b;
+            --border: #e2e8f0; --radius: 1.5rem;
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; line-height: 1.6; }
+
+        /* HEADER PREMIUM */
+        .header { padding: 3rem 1.5rem; text-align: center; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .logo-text { font-weight: 900; color: var(--primary); letter-spacing: 1px; text-decoration: none; font-size: 0.9rem; }
+        .header h1 { font-size: 2.5rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -1px; }
+        .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: auto; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+        /* CARDS DE FUNCIONES */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; margin-top: -2rem; }
+        .info-card { background: var(--card-bg); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-start; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .info-card i { color: var(--primary); font-size: 1.25rem; margin-top: 3px; }
+        .info-card h3 { font-size: 0.95rem; font-weight: 800; margin: 0 0 0.4rem; }
+        .info-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+        /* HUECO PARA LA HERRAMIENTA */
+        #modalData { 
+            background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); padding: 2rem; min-height: 400px;
+        }
+
+        /* BIBLIOGRAFÍA */
+        .biblio-section { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
+        .biblio-section h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+        .biblio-section p { font-size: 0.85rem; font-style: italic; }
+
+        footer { text-align: center; margin-top: 3rem; }
+        .btn-home { color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <nav class="nav"><a href="/" class="logo">PSQALDÍA</a></nav>
-    <main class="main">
-        <div id="modalData"><div style="padding:5rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x"></i></div></div>
+
+<header class="header">
+    <a href="/" class="logo-text">PSQALDÍA</a>
+    <h1>Deprescripción Hiperbólica</h1>
+    <p>Algoritmos de reducción gradual para minimizar el riesgo de síntomas de retirada.</p>
+</header>
+
+<div class="container">
+    <div class="info-grid">
+        <div class="info-card"><i class="fas fa-microscope"></i><div><h3>Base Neurobiológica</h3><p>Cálculo basado en la ocupación de receptores cerebrales.</p></div></div>
+        <div class="info-card"><i class="fas fa-tint"></i><div><h3>Ajuste de Presentación</h3><p>Cálculo automático de mL para soluciones líquidas.</p></div></div>
+        <div class="info-card"><i class="fas fa-chart-area"></i><div><h3>Comparativa Visual</h3><p>Contraste entre reducción lineal e hiperbólica.</p></div></div>
+    </div>
+
+    <main id="modalData">
+        <div style="padding:4rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x" style="color:var(--primary);"></i></div>
     </main>
-    <script src="/deprescripcion.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', () => window.iniciarDeprescripcion());</script>
+
+    <section class="biblio-section">
+        <h4>Referencias Bibliográficas</h4>
+        <p><i class="fas fa-book-medical"></i> The Maudsley Deprescribing Guidelines: Antidepressants, Benzodiazepines, Gabapentinoids and Z-drugs. Mark Horowitz y David Taylor, 2024.</p>
+    </section>
+
+    <footer><a href="/herramientas" class="btn-home"><i class="fas fa-arrow-left"></i> Volver a Herramientas</a></footer>
+</div>
+
+<script src="/deprescripcion.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => window.iniciarDeprescripcion());</script>
 </body>
 </html>
