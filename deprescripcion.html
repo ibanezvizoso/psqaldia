@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramienta de Deprescripción Hiperbólica | PSQALDÍA</title>
+    <meta name="description" content="Planificador de reducción gradual y segura de psicofármacos basado en modelos de deprescripción hiperbólica.">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.25rem;
+            --secondary: #ec4899; /* Para la línea lineal */
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+
+        .main-content { padding: 0 1.5rem 5rem 1.5rem; max-width: 900px; margin: auto; }
+
+        #tool-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+            padding: 1.5rem;
+        }
+
+        .input-group { margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) { .input-group { grid-template-columns: 1fr; } }
+
+        label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem; }
+        select, input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); font-family: inherit; font-size: 0.9rem; box-sizing: border-box; }
+
+        .chart-box { margin-top: 2rem; background: white; border-radius: 15px; padding: 15px; border: 1px solid var(--border); }
+        
+        .table-container { margin-top: 2rem; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: var(--primary-light); color: var(--primary); text-align: left; padding: 12px; font-weight: 800; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); }
+
+        .alert-box { padding: 12px; border-radius: 10px; background: #fff7ed; border-left: 4px solid #f97316; font-size: 0.8rem; margin-bottom: 1rem; display: none; }
+        .solution-note { font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-top: 1rem; }
+
+        footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="/" class="logo"><i class="fas fa-wave-square"></i> PSQALDÍA</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Deprescripción Hiperbólica</h1>
+        <p>Generador de pautas de reducción progresiva basadas en ocupación de receptores.</p>
+    </header>
+
+    <main class="main-content">
+        <div id="tool-container">
+            <div id="alert-msg" class="alert-box"></div>
+
+            <div class="input-group">
+                <div>
+                    <label>Fármaco</label>
+                    <select id="drug-select" onchange="updatePlan()"></select>
+                </div>
+                <div>
+                    <label>Dosis Actual (mg)</label>
+                    <input type="number" id="current-dose" value="20" oninput="updatePlan()">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div>
+                    <label>Frecuencia de reducción</label>
+                    <select id="interval-select" onchange="updatePlan()">
+                        <option value="2">Cada 2 semanas</option>
+                        <option value="4" selected>Cada 4 semanas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="solution-info" class="solution-note"></div>
+
+            <div class="chart-box">
+                <canvas id="taperChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <div class="table-container">
+                <table id="plan-table">
+                    <thead>
+                        <tr>
+                            <th>Semana</th>
+                            <th>Dosis (mg)</th>
+                            <th id="th-extra">Presentación/ML</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plan-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <a href="/" class="link-back"><i class="fas fa-arrow-left"></i> VOLVER A PSQALDÍA</a>
+        </footer>
+    </main>
+
+    <script src="/deprescripcion.js"></script>
+    <script>
+        window.WORKER_URL = "https://psqaldia.com/"; 
+        document.addEventListener('DOMContentLoaded', () => initTool());
+    </script>
+</body>
+</html>
