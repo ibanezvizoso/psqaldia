@@ -53,9 +53,8 @@ async function iniciarExamen(año) {
     
     const pestaña = `Ope_PSQ${año}`;
     
-    // 1. Limpieza de URL para evitar el "Fail to fetch"
+    // Limpieza de URL para evitar el "Fail to fetch"
     let baseUrl = window.WORKER_URL || "https://psqaldia-worker.psqaldia.workers.dev";
-    // Quitamos barras finales si existen y añadimos una sola
     baseUrl = baseUrl.replace(/\/+$/, ""); 
     const finalUrl = `${baseUrl}/?sheet=${encodeURIComponent(pestaña)}`;
 
@@ -67,29 +66,27 @@ async function iniciarExamen(año) {
         </div>`;
 
     try {
-        console.log("Intentando conectar a:", finalUrl); // Para depurar en la consola (F12)
+        console.log("Intentando conectar a:", finalUrl);
 
         const response = await fetch(finalUrl, {
             method: 'GET',
-            mode: 'cors', // Forzamos modo CORS
+            mode: 'cors',
         });
 
         if (!response.ok) {
-            // Si el worker responde pero con error (404, 500, etc)
-            throw new Error(`Servidor respondió con código ${response.status}. Revisa que la pestaña '${pestaña}' exista en el Excel.`);
+            throw new Error(`Servidor respondió con código ${response.status}.`);
         }
         
         const data = await response.json();
 
         if (data.error) {
-            throw new Error(`Error de Google Sheets: ${data.error.message || "No se pudo acceder a la pestaña"}`);
+            throw new Error(`Error de Google Sheets: ${data.error.message || "No se pudo acceder"}`);
         }
 
         if (!data.values || data.values.length === 0) {
-            throw new Error(`La pestaña '${pestaña}' está vacía.`);
+            throw new Error(`El examen no tiene preguntas.`);
         }
 
-        // ... resto del código (mapeo de preguntas) ...
         preguntasExamen = data.values
             .filter(row => row[0] && row[0].trim() !== "")
             .map(row => ({
