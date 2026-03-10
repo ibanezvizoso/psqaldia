@@ -1,28 +1,55 @@
-// ope22_anest.js
+// ope22_anest.js - Gestión de OPE Anestesia con Persistencia y Repaso de Fallos
 let preguntasExamenAnest = [];
 let respuestasUsuarioAnest = {};
 let preguntasVisiblesAnest = 20;
 
+/**
+ * Persistencia: Guardar estado actual
+ */
+function guardarEstadoAnest() {
+    const estado = {
+        preguntas: preguntasExamenAnest,
+        respuestas: respuestasUsuarioAnest,
+        visibles: preguntasVisiblesAnest
+    };
+    localStorage.setItem('psq_save_anest', JSON.stringify(estado));
+}
+
+/**
+ * Inicio de la herramienta: con detección de progreso guardado
+ */
 async function openExamenAnestUI() {
+    // 1. Comprobar si hay algo guardado
+    const save = localStorage.getItem('psq_save_anest');
+    if (save) {
+        if (confirm("Tienes un examen de Anestesia a medias. ¿Quieres continuarlo?")) {
+            const data = JSON.parse(save);
+            preguntasExamenAnest = data.preguntas;
+            respuestasUsuarioAnest = data.respuestas;
+            preguntasVisiblesAnest = data.visibles;
+            renderizarExamenAnest();
+            document.getElementById('modal').style.display = 'flex';
+            return;
+        }
+    }
+
+    // 2. Si no hay guardado o elige nuevo: Reset y Carga
     preguntasVisiblesAnest = 20; 
-    // Solo necesitamos el nombre de la pestaña, el Worker ya pide el rango A2:Z500
-const pestaña = 'Ope_Anest22'; 
-const url = `${window.WORKER_URL}?sheet=${pestaña}`;
+    respuestasUsuarioAnest = {};
+    const pestaña = 'Ope_Anest22'; 
+    const url = `${window.WORKER_URL}?sheet=${pestaña}`;
 
-const modalData = document.getElementById('modalData');
-modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando Examen de Anestesia...</b></div>`;
-document.getElementById('modal').style.display = 'flex';
+    const modalData = document.getElementById('modalData');
+    modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando Examen de Anestesia...</b></div>`;
+    document.getElementById('modal').style.display = 'flex';
 
-try {
-    const response = await fetch(url);
-    const data = await response.json();
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-    // Verificamos si el Worker nos devuelve un error
-    if (data.error) throw new Error(data.details || data.error);
-    if (!data.values) throw new Error("No hay datos en Ope_Anest22");
-    
-    // ... resto del mapeo (se mantiene igual)
-
+        if (data.error) throw new Error(data.details || data.error);
+        if (!data.values) throw new Error("No hay datos en Ope_Anest22");
+        
         preguntasExamenAnest = data.values
             .filter(row => row[0] && row[0].trim() !== "")
             .map(row => ({
@@ -38,11 +65,12 @@ try {
             }));
 
         renderizarExamenAnest();
+        guardarEstadoAnest();
     } catch (error) {
         console.error("Error Guardián Anest:", error);
         modalData.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--text-main);">
             <i class="fas fa-exclamation-triangle fa-2x" style="color:#ef4444; margin-bottom:1rem;"></i><br>
-            No se pudo cargar el examen de anestesia.<br><small style="color:var(--text-muted);">Verifica la pestaña <b>Ope_Anest22</b></small>
+            No se pudo cargar el examen de anestesia.<br><small style="color:var(--text-muted);">${error.message}</small>
         </div>`;
     }
 }
@@ -57,7 +85,7 @@ function renderizarExamenAnest() {
                     <span style="background:#ec4899; color:white; padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:900; text-transform:uppercase;">Específico</span>
                 </div>
                 <p style="margin:0; font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Servicio Gallego de Salud (SERGAS)</p>
-                <p style="margin:5px 0 0; font-size:0.75rem; color:var(--text-muted);">Cargadas <span id="cont-anest">${preguntasVisiblesAnest}</span> de ${preguntasExamenAnest.length} preguntas</p>
+                <p style="margin:5px 0 0; font-size:0.75rem; color:var(--text-muted);">Cargadas <span id="cont-anest">${Math.min(preguntasVisiblesAnest, preguntasExamenAnestAnest = preguntasExamenAnest.length)}</span> de ${preguntasExamenAnest.length} preguntas</p>
             </div>
             <div id="contenedor-preguntas-anest">
                 ${generarBloqueAnest(0, preguntasVisiblesAnest)}
@@ -68,9 +96,11 @@ function renderizarExamenAnest() {
     }
 
     html += `
-            <button onclick="corregirExamenAnest()" class="btn btn-primary" style="width:100%; height:50px; border-radius:15px; font-size:1rem; margin-top:1rem; position:sticky; bottom:10px; z-index:100; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-                FINALIZAR Y CORREGIR TODO
-            </button>
+            <div id="footer-anest" style="position:sticky; bottom:10px; z-index:100;">
+                <button onclick="corregirExamenAnest()" class="btn btn-primary" style="width:100%; height:55px; border-radius:15px; font-size:1rem; font-weight:900; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                    FINALIZAR Y CORREGIR TODO
+                </button>
+            </div>
         </div>`;
     
     container.innerHTML = html;
@@ -82,13 +112,17 @@ function generarBloqueAnest(inicio, fin) {
 
     listaSlice.forEach((p, i) => {
         const realIndex = inicio + i;
+        const resPrevia = respuestasUsuarioAnest[realIndex] || "";
+
         bloqueHtml += `
             <div id="bloque-anest-${realIndex}" style="margin-bottom:2.5rem; padding:1.5rem; background:var(--bg); border-radius:1.5rem; border:1px solid var(--border);">
                 <p style="font-weight:700; font-size:1.05rem; line-height:1.4; margin-bottom:1.5rem; color:var(--text-main);">${p.pregunta}</p>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     ${['A', 'B', 'C', 'D'].map((letra, idx) => `
                         <label style="display:flex; align-items:center; gap:12px; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text-main);">
-                            <input type="radio" name="preg-anest-${realIndex}" value="${letra}" style="accent-color:var(--primary); width:18px; height:18px;" onclick="respuestasUsuarioAnest[${realIndex}] = '${letra}'">
+                            <input type="radio" name="preg-anest-${realIndex}" value="${letra}" ${resPrevia === letra ? 'checked' : ''} 
+                                style="accent-color:var(--primary); width:18px; height:18px;" 
+                                onclick="respuestasUsuarioAnest[${realIndex}] = '${letra}'; guardarEstadoAnest();">
                             <span style="font-size:0.95rem;">${p.opciones[idx]}</span>
                         </label>
                     `).join('')}
@@ -112,6 +146,7 @@ function cargarMasAnest() {
     document.getElementById('contenedor-preguntas-anest').insertAdjacentHTML('beforeend', nuevoBloque);
     document.getElementById('cont-anest').innerText = preguntasVisiblesAnest;
     if (preguntasVisiblesAnest >= preguntasExamenAnest.length) document.getElementById('btn-mas-anest').style.display = 'none';
+    guardarEstadoAnest();
 }
 
 function revelarIndividualAnest(idx) {
@@ -121,6 +156,8 @@ function revelarIndividualAnest(idx) {
 
 function corregirExamenAnest() {
     let aciertos = 0;
+    let fallosIndices = [];
+
     preguntasExamenAnest.forEach((p, idx) => {
         const bloque = document.getElementById(`bloque-anest-${idx}`);
         const feedback = document.getElementById(`feedback-anest-${idx}`);
@@ -131,11 +168,41 @@ function corregirExamenAnest() {
                 bloque.style.borderColor = '#22c55e';
                 bloque.style.background = 'rgba(34, 197, 94, 0.05)';
             } else {
+                fallosIndices.push(idx);
                 bloque.style.borderColor = '#ef4444';
                 bloque.style.background = 'rgba(239, 68, 68, 0.05)';
             }
         }
     });
+
+    // Limpiar persistencia al terminar corregir
+    localStorage.removeItem('psq_save_anest');
+
+    // Si hay fallos, mostrar botón de repaso
+    if (fallosIndices.length > 0) {
+        const footer = document.getElementById('footer-anest');
+        footer.innerHTML = `
+            <div style="display:flex; gap:10px;">
+                <button onclick="repasarFallosAnest([${fallosIndices}])" class="btn" style="flex:1; background:#ef4444; color:white; height:55px; border-radius:15px; font-weight:900;">
+                    REPASAR ${fallosIndices.length} FALLOS
+                </button>
+                <button onclick="document.getElementById('modal').style.display='none'" class="btn" style="flex:1; background:var(--border); color:var(--text-main); height:55px; border-radius:15px; font-weight:900;">
+                    SALIR
+                </button>
+            </div>`;
+    }
+
     alert(`Examen de Anestesia finalizado.\n\nAciertos: ${aciertos} de ${preguntasExamenAnest.length}`);
     document.querySelector('.modal-content').scrollTo({top: 0, behavior: 'smooth'});
+}
+
+/**
+ * Función para repasar solo los errores
+ */
+function repasarFallosAnest(indices) {
+    const nuevasPreguntas = indices.map(idx => preguntasExamenAnest[idx]);
+    preguntasExamenAnest = nuevasPreguntas;
+    respuestasUsuarioAnest = {};
+    preguntasVisiblesAnest = nuevasPreguntas.length;
+    renderizarExamenAnest();
 }
