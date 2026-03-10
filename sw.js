@@ -1,14 +1,22 @@
-const CACHE_NAME = 'psq-v4'; // Subimos a v4 para limpiar el error anterior de los navegadores
+const CACHE_NAME = 'psq-v4'; // Nueva versión
 const ASSETS = [
   '/',
-  '/Logo.png'
+  '/index.html',
+  '/Logo.png',
+  '/herramientas.html',
+  '/equivalencias.html',
+  '/farmacocinetica.html',
+  '/farmacocinetica.js',
+  '/catatonia.html',
+  '/catatonia.js',
+  '/calculadora.js'
 ];
 
-// Instalación: Cacheamos lo básico
+// Instalación: Guardamos las herramientas principales
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS).catch(err => console.log("Fallo preventivo de caché:", err));
+      return cache.addAll(ASSETS);
     })
   );
   self.skipWaiting();
@@ -23,30 +31,19 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Gestión de peticiones (Aquí estaba el error)
+// Estrategia: Network First con Cache Fallback
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+  if (event.request.method !== 'GET') return;
 
-  // 1. FILTRO DE SEGURIDAD: 
-  // Si la petición es para el Worker (lleva "?sheet=") o no es GET,
-  // NO usamos event.respondWith. Al no ponerlo, el navegador la gestiona
-  // directamente por internet, saltándose el Service Worker.
-  if (event.request.method !== 'GET' || url.search.includes('sheet=')) {
-    return; 
-  }
-
-  // 2. Para el resto de archivos (HTML, Logo, etc.)
   event.respondWith(
     fetch(event.request)
+      .then(response => {
+        // Si la red funciona, devolvemos la respuesta actualizada
+        return response;
+      })
       .catch(() => {
-        // Si falla internet, buscamos en caché
-        return caches.match(event.request).then(response => {
-          // Si tampoco está en caché, devolvemos un error offline real
-          return response || new Response('Sin conexión', { 
-            status: 503, 
-            statusText: 'Service Unavailable' 
-          });
-        });
+        // Si falla la red (offline), buscamos en caché
+        return caches.match(event.request);
       })
   );
 });
