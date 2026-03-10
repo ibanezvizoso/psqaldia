@@ -1,10 +1,10 @@
-const CACHE_NAME = 'psq-v3'; // Cambiamos a v3 para forzar la actualización
+const CACHE_NAME = 'psq-v4'; // Subimos a v4 para limpiar el error anterior de los navegadores
 const ASSETS = [
   '/',
   '/Logo.png'
 ];
 
-// Instalación: No bloqueamos si falla un archivo
+// Instalación: Cacheamos lo básico
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
@@ -14,6 +14,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
+// Activación: Limpieza de versiones antiguas
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
@@ -22,15 +23,30 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Gestión de peticiones (Aquí estaba el error)
 self.addEventListener('fetch', event => {
-  // Ignoramos peticiones que no sean GET (como las de analíticas o POST)
-  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
 
+  // 1. FILTRO DE SEGURIDAD: 
+  // Si la petición es para el Worker (lleva "?sheet=") o no es GET,
+  // NO usamos event.respondWith. Al no ponerlo, el navegador la gestiona
+  // directamente por internet, saltándose el Service Worker.
+  if (event.request.method !== 'GET' || url.search.includes('sheet=')) {
+    return; 
+  }
+
+  // 2. Para el resto de archivos (HTML, Logo, etc.)
   event.respondWith(
     fetch(event.request)
       .catch(() => {
-        // Solo si falla INTERNET por completo, buscamos en la caché
-        return caches.match(event.request);
+        // Si falla internet, buscamos en caché
+        return caches.match(event.request).then(response => {
+          // Si tampoco está en caché, devolvemos un error offline real
+          return response || new Response('Sin conexión', { 
+            status: 503, 
+            statusText: 'Service Unavailable' 
+          });
+        });
       })
   );
 });
