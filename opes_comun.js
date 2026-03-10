@@ -1,7 +1,8 @@
 // opes_comun.js - Gestión de OPE Común con Selector, Persistencia y Modo Snack
-let preguntasExamen = [];
-let respuestasUsuario = {};
-let añoActual = "";
+// Variables renombradas para evitar conflictos con otros scripts (PSQ)
+let preguntasComun = []; 
+let respuestasComun = {}; 
+let añoComunActual = ""; 
 
 /**
  * Pantalla inicial: Selector de año y Modo Snack
@@ -48,9 +49,9 @@ function openExamenComunSelector() {
  */
 function guardarEstadoComun() {
     const estado = {
-        año: añoActual,
-        preguntas: preguntasExamen,
-        respuestas: respuestasUsuario
+        año: añoComunActual,
+        preguntas: preguntasComun,
+        respuestas: respuestasComun
     };
     localStorage.setItem('psq_save_comun', JSON.stringify(estado));
 }
@@ -65,16 +66,16 @@ async function iniciarExamenComun(año, esContinuacion = false) {
         const nombreModo = data.año === 'snack' ? 'Snack' : `Común ${data.año}`;
         if (confirm(`Tienes un examen (${nombreModo}) a medias. ¿Quieres continuarlo?`)) {
             const save = JSON.parse(localStorage.getItem('psq_save_comun'));
-            añoActual = save.año;
-            preguntasExamen = save.preguntas;
-            respuestasUsuario = save.respuestas;
+            añoComunActual = save.año;
+            preguntasComun = save.preguntas;
+            respuestasComun = save.respuestas;
             renderizarExamenComun();
             return;
         }
     }
 
-    añoActual = año;
-    respuestasUsuario = {};
+    añoComunActual = año;
+    respuestasComun = {};
     const modalData = document.getElementById('modalData');
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando OPE Común...</b></div>`;
 
@@ -98,13 +99,13 @@ async function iniciarExamenComun(año, esContinuacion = false) {
 
         if (año === 'snack') {
             // Modo Snack: 5 aleatorias de toda la hoja
-            preguntasExamen = todasLasPreguntas.sort(() => Math.random() - 0.5).slice(0, 5);
+            preguntasComun = todasLasPreguntas.sort(() => Math.random() - 0.5).slice(0, 5);
         } else {
             // Modo Convocatoria: Filtrar por año exacto
-            preguntasExamen = todasLasPreguntas.filter(p => p.añoRow === año);
+            preguntasComun = todasLasPreguntas.filter(p => p.añoRow === año);
         }
 
-        if (preguntasExamen.length === 0) throw new Error(`No se encontraron preguntas para: ${año}`);
+        if (preguntasComun.length === 0) throw new Error(`No se encontraron preguntas para: ${año}`);
 
         renderizarExamenComun();
         guardarEstadoComun();
@@ -118,7 +119,7 @@ async function iniciarExamenComun(año, esContinuacion = false) {
 
 function renderizarExamenComun() {
     const container = document.getElementById('modalData');
-    const titulo = añoActual === 'snack' ? 'Modo Snack Común' : `OPE COMÚN ${añoActual}`;
+    const titulo = añoComunActual === 'snack' ? 'Modo Snack Común' : `OPE COMÚN ${añoComunActual}`;
 
     let html = `
         <div style="padding:1.5rem; max-width:800px; margin:auto;">
@@ -128,18 +129,18 @@ function renderizarExamenComun() {
                     <i class="fas fa-times"></i> SALIR
                 </button>
             </div>
-            <div id="contenedor-preguntas">`;
+            <div id="contenedor-preguntas-comun">`;
 
-    preguntasExamen.forEach((p, index) => {
-        const resPrevia = respuestasUsuario[index] || "";
+    preguntasComun.forEach((p, index) => {
+        const resPrevia = respuestasComun[index] || "";
         html += `
-            <div id="bloque-${index}" style="margin-bottom:2rem; padding:1.5rem; background:var(--bg); border-radius:1.5rem; border:1px solid var(--border); transition: 0.3s;">
+            <div id="bloque-comun-${index}" style="margin-bottom:2rem; padding:1.5rem; background:var(--bg); border-radius:1.5rem; border:1px solid var(--border); transition: 0.3s;">
                 <p style="font-weight:700; font-size:1.05rem; line-height:1.4; margin-bottom:1.5rem; color:var(--text-main);">${p.pregunta}</p>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     ${['A', 'B', 'C', 'D'].map((letra, i) => `
                         <label style="display:flex; align-items:center; gap:12px; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text-main);">
-                            <input type="radio" name="preg-${index}" value="${letra}" ${resPrevia === letra ? 'checked' : ''} 
-                                onclick="respuestasUsuario[${index}] = '${letra}'; guardarEstadoComun();">
+                            <input type="radio" name="preg-comun-${index}" value="${letra}" ${resPrevia === letra ? 'checked' : ''} 
+                                onclick="respuestasComun[${index}] = '${letra}'; guardarEstadoComun();">
                             <span style="font-size:0.95rem;">${p.opciones[i]}</span>
                         </label>
                     `).join('')}
@@ -147,7 +148,7 @@ function renderizarExamenComun() {
                 <button onclick="revelarIndividualComun(${index})" style="margin-top:1.5rem; background:none; border:none; color:var(--text-muted); font-weight:800; font-size:0.7rem; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <i class="fas fa-lightbulb"></i> Ver explicación
                 </button>
-                <div id="feedback-${index}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid var(--primary); border-radius:12px; font-size:0.9rem; color:var(--text-main);">
+                <div id="feedback-comun-${index}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid var(--primary); border-radius:12px; font-size:0.9rem; color:var(--text-main);">
                     <strong style="color:var(--primary); display:block; margin-bottom:8px; font-weight:900;">CORRECTA: ${p.correcta}</strong>
                     <div style="opacity:0.9;">${p.explicacion}</div>
                 </div>
@@ -166,7 +167,7 @@ function renderizarExamenComun() {
 }
 
 function revelarIndividualComun(idx) {
-    const fb = document.getElementById(`feedback-${idx}`);
+    const fb = document.getElementById(`feedback-comun-${idx}`);
     fb.style.display = (fb.style.display === 'none') ? 'block' : 'none';
 }
 
@@ -174,12 +175,12 @@ function corregirExamenComun() {
     let aciertos = 0;
     let fallosIndices = [];
 
-    preguntasExamen.forEach((p, idx) => {
-        const bloque = document.getElementById(`bloque-${idx}`);
-        const feedback = document.getElementById(`feedback-${idx}`);
+    preguntasComun.forEach((p, idx) => {
+        const bloque = document.getElementById(`bloque-comun-${idx}`);
+        const feedback = document.getElementById(`feedback-comun-${idx}`);
         feedback.style.display = 'block';
 
-        if (respuestasUsuario[idx] === p.correcta) {
+        if (respuestasComun[idx] === p.correcta) {
             aciertos++;
             bloque.style.borderColor = '#22c55e';
             bloque.style.background = 'rgba(34, 197, 94, 0.05)';
@@ -204,14 +205,14 @@ function corregirExamenComun() {
             </button>`;
     }
     
-    alert(`Has completado el examen común.\n\nAciertos: ${aciertos} de ${preguntasExamen.length}`);
+    alert(`Has completado el examen común.\n\nAciertos: ${aciertos} de ${preguntasComun.length}`);
     document.querySelector('.modal-content').scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function repasarFallosComun(indices) {
-    const nuevasPreguntas = indices.map(idx => preguntasExamen[idx]);
-    preguntasExamen = nuevasPreguntas;
-    respuestasUsuario = {};
-    añoActual = `${añoActual} (Fallos)`;
+    const nuevasPreguntas = indices.map(idx => preguntasComun[idx]);
+    preguntasComun = nuevasPreguntas;
+    respuestasComun = {};
+    añoComunActual = `${añoComunActual} (Fallos)`;
     renderizarExamenComun();
 }
