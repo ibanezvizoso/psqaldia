@@ -52,26 +52,44 @@ async function iniciarExamen(año) {
     respuestasUsuario = {};
     
     const pestaña = `Ope_PSQ${año}`;
-    const baseUrl = getWorkerUrl();
-    // Limpieza de URL para evitar errores de "Fail to fetch" por dobles barras o falta de ellas
-    const finalUrl = baseUrl.endsWith('/') ? `${baseUrl}?sheet=${pestaña}` : `${baseUrl}/?sheet=${pestaña}`;
+    
+    // 1. Limpieza de URL para evitar el "Fail to fetch"
+    let baseUrl = window.WORKER_URL || "https://psqaldia-worker.psqaldia.workers.dev";
+    // Quitamos barras finales si existen y añadimos una sola
+    baseUrl = baseUrl.replace(/\/+$/, ""); 
+    const finalUrl = `${baseUrl}/?sheet=${encodeURIComponent(pestaña)}`;
 
     const modalData = document.getElementById('modalData');
     modalData.innerHTML = `
         <div style="padding:5rem; text-align:center;">
             <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
-            <br><br><b style="color:var(--text-main);">Cargando OPE 20${año}...</b>
+            <br><br><b style="color:var(--text-main);">Conectando con el servidor...</b>
         </div>`;
 
     try {
-        const response = await fetch(finalUrl);
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        console.log("Intentando conectar a:", finalUrl); // Para depurar en la consola (F12)
+
+        const response = await fetch(finalUrl, {
+            method: 'GET',
+            mode: 'cors', // Forzamos modo CORS
+        });
+
+        if (!response.ok) {
+            // Si el worker responde pero con error (404, 500, etc)
+            throw new Error(`Servidor respondió con código ${response.status}. Revisa que la pestaña '${pestaña}' exista en el Excel.`);
+        }
         
         const data = await response.json();
 
-        if (data.error) throw new Error(data.details || data.error);
-        if (!data.values) throw new Error(`No se encontraron preguntas.`);
+        if (data.error) {
+            throw new Error(`Error de Google Sheets: ${data.error.message || "No se pudo acceder a la pestaña"}`);
+        }
 
+        if (!data.values || data.values.length === 0) {
+            throw new Error(`La pestaña '${pestaña}' está vacía.`);
+        }
+
+        // ... resto del código (mapeo de preguntas) ...
         preguntasExamen = data.values
             .filter(row => row[0] && row[0].trim() !== "")
             .map(row => ({
@@ -82,14 +100,19 @@ async function iniciarExamen(año) {
             }));
 
         renderizarExamen();
+
     } catch (error) {
-        console.error("Error al cargar:", error);
+        console.error("Error detallado:", error);
         modalData.innerHTML = `
             <div style="padding:3rem; text-align:center;">
-                <i class="fas fa-exclamation-triangle fa-2x" style="color:#ef4444; margin-bottom:1rem;"></i>
-                <p style="color:var(--text-main); font-weight:700;">Error al conectar con el servidor</p>
-                <small style="color:var(--text-muted); display:block; margin-bottom:1.5rem;">${error.message}</small>
-                <button onclick="openExamenSelector()" class="btn" style="background:var(--border); color:var(--text-main); padding: 10px 20px; border-radius: 10px; border:none; cursor:pointer; font-weight:bold;">Reintentar</button>
+                <i class="fas fa-wifi fa-2x" style="color:#ef4444; margin-bottom:1rem;"></i>
+                <p style="color:var(--text-main); font-weight:700;">No se pudo cargar el examen</p>
+                <div style="background:var(--card); padding:10px; border-radius:10px; margin:15px 0; font-size:0.8rem; color:var(--text-muted); border:1px solid var(--border);">
+                    ${error.message}
+                </div>
+                <button onclick="openExamenSelector()" class="btn" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">
+                    Intentar de nuevo
+                </button>
             </div>`;
     }
 }
