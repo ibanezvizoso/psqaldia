@@ -4,33 +4,40 @@ let respuestasUsuario = {};
 let preguntasVisibles = 20;
 let añoActual = "";
 
+// Intentamos obtener la URL del worker desde el index, si no, usamos la de producción
+const BASE_WORKER_URL = window.WORKER_URL || "https://psqaldia-worker.psqaldia.workers.dev/";
+
 /**
  * Pantalla inicial: Selector de año
+ * Se ejecuta al pulsar la tarjeta en el index
  */
 function openExamenSelector() {
     const modalData = document.getElementById('modalData');
-    document.getElementById('modal').style.display = 'flex';
+    const modal = document.getElementById('modal');
+    
+    // Forzamos que el modal se vea por si acaso
+    if (modal) modal.style.display = 'flex';
 
     modalData.innerHTML = `
         <div style="padding: 2.5rem 1.5rem; text-align: center; max-width: 500px; margin: auto;">
             <div style="margin-bottom: 2.5rem;">
                 <i class="fas fa-file-alt fa-3x" style="color: var(--primary); margin-bottom: 1rem; opacity: 0.8;"></i>
-                <h2 style="color: var(--text-main); font-weight: 900; margin: 0; font-size: 1.8rem;">Exámenes OPE</h2>
-                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Selecciona la convocatoria para comenzar</p>
+                <h2 style="color: var(--text-main); font-weight: 900; margin: 0; font-size: 1.8rem;">OPE Psiquiatría</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Selecciona el año del examen</p>
             </div>
             
             <div style="display: grid; gap: 15px;">
-                <button onclick="iniciarExamen('22')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left;">
+                <button onclick="iniciarExamen('22')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
-                        <b style="display: block; color: var(--text-main); font-size: 1.1rem;">Convocatoria 2022</b>
+                        <b style="display: block; color: var(--text-main); font-size: 1.1rem;">Examen 2022</b>
                         <small style="color: var(--text-muted);">Pestaña: Ope_PSQ22</small>
                     </div>
                     <i class="fas fa-chevron-right" style="color: var(--primary);"></i>
                 </button>
 
-                <button onclick="iniciarExamen('20')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left;">
+                <button onclick="iniciarExamen('20')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
-                        <b style="display: block; color: var(--text-main); font-size: 1.1rem;">Convocatoria 2020</b>
+                        <b style="display: block; color: var(--text-main); font-size: 1.1rem;">Examen 2020</b>
                         <small style="color: var(--text-muted);">Pestaña: Ope_PSQ20</small>
                     </div>
                     <i class="fas fa-chevron-right" style="color: var(--primary);"></i>
@@ -51,13 +58,13 @@ async function iniciarExamen(año) {
     respuestasUsuario = {};
     
     const pestaña = `Ope_PSQ${año}`;
-    const url = `${window.WORKER_URL}?sheet=${pestaña}`;
+    const url = `${BASE_WORKER_URL}?sheet=${pestaña}`;
 
     const modalData = document.getElementById('modalData');
     modalData.innerHTML = `
         <div style="padding:5rem; text-align:center;">
             <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
-            <br><br><b style="color:var(--text-main);">Cargando OPE 20${año}...</b>
+            <br><br><b style="color:var(--text-main);">Cargando Examen 20${año}...</b>
         </div>`;
 
     try {
@@ -67,6 +74,7 @@ async function iniciarExamen(año) {
         if (data.error) throw new Error(data.details || data.error);
         if (!data.values) throw new Error(`No se encontraron preguntas en ${pestaña}`);
 
+        // Limpiamos y procesamos filas (suponiendo: 0:Preg, 1-4:Opciones, 5:Correcta, 6:Expl)
         preguntasExamen = data.values
             .filter(row => row[0] && row[0].trim() !== "")
             .map(row => ({
@@ -101,7 +109,7 @@ function renderizarExamen() {
                 <div>
                     <h2 style="margin:0; font-weight:900; color:var(--primary); font-size:1.6rem;">OPE 20${añoActual}</h2>
                     <p style="margin:5px 0 0; font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
-                        Preguntas: <span id="contador-preg">${preguntasVisibles}</span> de ${preguntasExamen.length}
+                        Preguntas cargadas: <span id="contador-preg">${Math.min(preguntasVisibles, preguntasExamen.length)}</span> de ${preguntasExamen.length}
                     </p>
                 </div>
                 <button onclick="openExamenSelector()" style="background:var(--card); border:1px solid var(--border); color:var(--text-muted); padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.75rem; font-weight:800;">
@@ -145,7 +153,7 @@ function generarBloquePreguntas(inicio, fin) {
                 </div>
                 
                 <button onclick="revelarIndividual(${idx})" style="margin-top:1.5rem; background:none; border:none; color:var(--text-muted); font-weight:800; font-size:0.7rem; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:5px;">
-                    <i class="fas fa-lightbulb"></i> Ver explicación
+                    <i class="fas fa-lightbulb"></i> Ver respuesta y explicación
                 </button>
 
                 <div id="feedback-${idx}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid var(--primary); border-radius:12px; font-size:0.9rem; color:var(--text-main);">
@@ -177,6 +185,8 @@ function revelarIndividual(idx) {
 
 function corregirExamen() {
     let aciertos = 0;
+    let contestadas = Object.keys(respuestasUsuario).length;
+
     preguntasExamen.forEach((p, idx) => {
         const bloque = document.getElementById(`bloque-${idx}`);
         const feedback = document.getElementById(`feedback-${idx}`);
@@ -187,12 +197,12 @@ function corregirExamen() {
                 aciertos++;
                 bloque.style.borderColor = '#22c55e';
                 bloque.style.background = 'rgba(34, 197, 94, 0.05)';
-            } else {
+            } else if (respuestasUsuario[idx]) {
                 bloque.style.borderColor = '#ef4444';
                 bloque.style.background = 'rgba(239, 68, 68, 0.05)';
             }
         }
     });
-    alert(`Examen 20${añoActual} finalizado.\n\nAciertos: ${aciertos} de ${preguntasExamen.length}`);
+    alert(`Resultado OPE 20${añoActual}:\n\nHas acertado ${aciertos} de ${preguntasExamen.length} preguntas.\nContestadas: ${contestadas}`);
     document.querySelector('.modal-content').scrollTo({top: 0, behavior: 'smooth'});
 }
