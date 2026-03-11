@@ -15,7 +15,8 @@ window.iniciarInterfazCalculadora = async function() {
         styleTag.id = 'calc-internal-styles';
         styleTag.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-            .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+            /* AJUSTE: justify-content flex-start y gap para alejarlo de la X de cierre */
+            .calc-header { display: flex; justify-content: flex-start; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
             .calc-ui h2 { margin: 0; font-weight: 800; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; }
             
             /* Selector de Idioma */
@@ -267,7 +268,6 @@ window.ejecutarCalculo = function() {
     resBox.style.display = 'block'; 
     resBox.style.background = bg;
     
-    // --- BUSCA ESTA PARTE EN window.ejecutarCalculo ---
     document.getElementById('res-header').innerHTML = `
         <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1.2rem; margin-bottom: 10px;">
             <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">
