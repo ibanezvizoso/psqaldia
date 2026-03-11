@@ -29,7 +29,8 @@ const i18n = {
         copySuccess: "¡Pauta copiada al portapapeles!",
         headerPlan: "PLAN DE REDUCCIÓN",
         noteLabel: "Nota",
-        // Traducción de frases típicas del Excel
+        infoBtn: "¿Qué es la deprescripción hiperbólica?",
+        infoTitle: "Deprescripción Hiperbólica",
         excelNotes: {} 
     },
     en: {
@@ -52,7 +53,8 @@ const i18n = {
         copySuccess: "Plan copied to clipboard!",
         headerPlan: "REDUCTION PLAN",
         noteLabel: "Note",
-        // MAPEADOR DE TRADUCCIONES DEL EXCEL
+        infoBtn: "What is hyperbolic deprescribing?",
+        infoTitle: "Hyperbolic Deprescribing",
         excelNotes: {
             "Partir comprimidos, romperlos y disolverlos, abrir cápsulas, etc.": "Split tablets, break and dissolve them, open capsules, etc.",
             "PROTECTED": "PROTECTED"
@@ -62,10 +64,21 @@ const i18n = {
 
 const estilosDepre = `
 <style>
-    .depre-container { padding: 1.5rem; font-family: 'Plus Jakarta Sans', sans-serif; }
-    .depre-lang-tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .depre-container { padding: 1.5rem; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
+    .depre-lang-tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; align-items: center; }
     .depre-tab { padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: 0.2s; }
     .depre-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    .depre-info-trigger { margin-left: auto; font-size: 0.7rem; font-weight: 800; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 5px; background: var(--primary-light); padding: 5px 12px; border-radius: 20px; transition: 0.2s; }
+    .depre-info-trigger:hover { filter: brightness(0.95); }
+
+    .depre-modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+    .depre-modal-content { background: white; padding: 2rem; border-radius: 1.5rem; max-width: 600px; width: 100%; position: relative; font-size: 0.85rem; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .depre-modal-content h3 { color: var(--primary); margin-top: 0; font-weight: 800; }
+    .depre-modal-content ul { padding-left: 1.2rem; margin: 15px 0; }
+    .depre-modal-content li { margin-bottom: 10px; }
+    .depre-modal-close { position: absolute; top: 1rem; right: 1rem; cursor: pointer; color: var(--text-muted); font-size: 1.2rem; }
+
     .depre-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; display: block; }
     .depre-input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 0.9rem; margin-bottom: 15px; box-sizing: border-box; }
     .depre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -81,6 +94,11 @@ const estilosDepre = `
     .depre-biblio { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed var(--border); font-size: 0.75rem; color: var(--text-muted); font-style: italic; }
 </style>
 `;
+
+window.toggleDepreInfo = function(show) {
+    const modal = document.getElementById('depre-info-modal');
+    if (modal) modal.style.display = show ? 'flex' : 'none';
+};
 
 window.cambiarIdiomaDepre = function(nuevoIdioma) {
     window.depreLang = nuevoIdioma;
@@ -106,7 +124,28 @@ window.iniciarDeprescripcion = async function() {
             <div class="depre-lang-tabs">
                 <div class="depre-tab ${window.depreLang === 'es' ? 'active' : ''}" onclick="window.cambiarIdiomaDepre('es')">ESP</div>
                 <div class="depre-tab ${window.depreLang === 'en' ? 'active' : ''}" onclick="window.cambiarIdiomaDepre('en')">ENG</div>
+                
+                <div class="depre-info-trigger" onclick="window.toggleDepreInfo(true)">
+                    <i class="fas fa-info-circle"></i> ${t.infoBtn}
+                </div>
             </div>
+            
+            <div id="depre-info-modal" class="depre-modal-overlay" onclick="if(event.target === this) window.toggleDepreInfo(false)">
+                <div class="depre-modal-content">
+                    <span class="depre-modal-close" onclick="window.toggleDepreInfo(false)">&times;</span>
+                    <h3>${t.infoTitle}</h3>
+                    <p>Es un método de retirada gradual basado en la farmacodinámica de saturación de receptores, diseñado para minimizar el riesgo de síndrome de discontinuación.</p>
+                    <ul>
+                        <li><strong>Relación Dosis-Ocupación:</strong> La unión del fármaco a sus receptores no es lineal, sino hiperbólica. A dosis altas, los receptores están saturados; a dosis bajas, la pendiente es máxima: reducciones mínimas de dosis provocan caídas drásticas en la ocupación de receptores.</li>
+                        <li><strong>El riesgo de la reducción lineal:</strong> Las pautas clásicas (ej. bajar siempre 5 mg) son desproporcionadas. El salto final (de una dosis mínima a cero) genera una caída de la ocupación de receptores masiva comparada con los primeros pasos, desestabilizando la homeostasis neuroquímica.</li>
+                        <li><strong>Objetivo de la desocupación:</strong> Para que la retirada sea tolerable, se debe intentar reducir la ocupación de receptores en pasos constantes y similares, en lugar de reducir cantidades fijas de miligramos. Esto se puede lograr de forma aproximada reduciendo un porcentaje de la dosis actual (ej. 10-25%), lo que genera pasos de miligramos cada vez más pequeños a medida que nos acercamos a cero.</li>
+                    </ul>
+                    <p style="background:var(--primary-light); padding:10px; border-radius:10px; border-left:4px solid var(--primary); font-size:0.8rem;">
+                        <strong>Regla de oro:</strong> A menor dosis, mayor es la sensibilidad del sistema y más pequeños deben ser los pasos de reducción para mantener una desocupación de receptores estable.
+                    </p>
+                </div>
+            </div>
+
             <div id="depre-alert" class="depre-alert"></div>
             <div class="depre-grid">
                 <div>
