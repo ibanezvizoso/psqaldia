@@ -1,6 +1,6 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v3.5
- * Soporte Bilingüe + Lógica de Matriz K14:V25
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v4.0
+ * Lógica: Búsqueda cruzada de propiedades (Med/Desescalada) en filas A14:A25
  */
 
 const CONFIG_SW = {
@@ -18,7 +18,6 @@ const ORDEN_MATRIZ = [
     "Clomipramina", "Mirtazapina", "Trazodona"
 ];
 
-// Estado global de idioma
 window.currentLang = 'es';
 
 const i18n = {
@@ -29,16 +28,16 @@ const i18n = {
         to: "Fármaco de Destino",
         targetDose: "Dosis Objetivo",
         btn: "GENERAR PAUTA",
-        copy: "COPIAR ESTRATEGIA",
+        copy: "COPIAR",
         copied: "¡Copiado!",
         stop: "Suspender",
         start: "Iniciar con",
         reduce: "Reducir a",
         increase: "Subir a",
-        reach: "Alcanzar dosis objetivo:",
+        reach: "Alcanzar objetivo:",
         same: "Mismo fármaco o pauta no definida.",
         day: "Día",
-        disclaimer: "Inspirado en Maudsley 15 edición, características de fármacos y experiencia clínica. En general, se propone un cambio para ámbito ambulatorio en el que se prioriza la tolerabilidad."
+        disclaimer: "Inspirado en Maudsley 15 edición. Se prioriza la tolerabilidad en ámbito ambulatorio."
     },
     en: {
         title: "AD Switch",
@@ -47,16 +46,16 @@ const i18n = {
         to: "Target Drug",
         targetDose: "Target Dose",
         btn: "GENERATE STRATEGY",
-        copy: "COPY STRATEGY",
+        copy: "COPY",
         copied: "Copied!",
         stop: "Discontinue",
         start: "Start with",
         reduce: "Reduce to",
         increase: "Increase to",
-        reach: "Reach target dose:",
+        reach: "Reach target:",
         same: "Same drug or strategy not defined.",
         day: "Day",
-        disclaimer: "Inspired by Maudsley 15th ed, drug characteristics, and clinical experience. Generally, a switch for outpatient settings prioritizing tolerability is proposed."
+        disclaimer: "Inspired by Maudsley 15th ed. Outpatient safety and tolerability prioritized."
     }
 };
 
@@ -67,24 +66,23 @@ window.iniciarADSwitch = async function() {
         styleTag.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
             .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-            .calc-ui h2 { margin: 0; font-weight: 800; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; color: #2563eb; }
+            .calc-ui h2 { margin: 0; font-weight: 800; font-size: 1.2rem; color: #2563eb; }
             .lang-toggle { display: flex; background: #f1f5f9; border-radius: 0.8rem; padding: 2px; }
-            .lang-btn { padding: 4px 10px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; background: transparent; color: #64748b; }
+            .lang-btn { padding: 4px 10px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-            .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; display: block; }
-            .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; background: #fff; color: #1e293b; font-size: 1rem; outline: none; appearance: none; }
+            .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; }
+            .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; background: #fff; }
             .btn-ejecutar { margin-top: 1.5rem; padding: 1.1rem; background: #2563eb; color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
             .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid #e2e8f0; background: white; overflow: hidden; }
             .res-pauta { padding: 1.5rem; }
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
             .pauta-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; width: 2px; background: #e2e8f0; }
             .step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.7rem; color: #2563eb; z-index: 1; }
-            .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
+            .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px; }
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
-            .step-txt { font-size: 0.95rem; line-height: 1.4; color: #1e293b; }
-            .disclaimer { font-size: 0.7rem; color: #64748b; padding: 1.2rem; border-top: 1px solid #e2e8f0; background: #f8fafc; font-style: italic; }
-            .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 1rem; cursor: pointer; font-weight: 700; }
+            .disclaimer { font-size: 0.65rem; color: #64748b; padding: 1rem; border-top: 1px solid #e2e8f0; background: #f8fafc; font-style: italic; }
+            .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: #f1f5f9; border-radius: 1rem; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 700; }
         `;
         document.head.appendChild(styleTag);
     }
@@ -93,20 +91,23 @@ window.iniciarADSwitch = async function() {
         const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
         const data = await response.json();
         const rows = data.values;
+
+        // Mapeo Filas 14 a 25 (Sertralina a Trazodona)
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
         
+        // Aquí cargamos toda la base de datos de antidepresivos en memoria
         window.dbSwitch = indicesAD.map(idx => {
             const r = rows[idx];
             return r ? {
                 nombre: r[CONFIG_SW.COL_NOMBRE]?.toString().trim(),
                 desescalada: r[CONFIG_SW.COL_DESESCALADA] ? r[CONFIG_SW.COL_DESESCALADA].split(',').map(v => v.trim()) : [],
                 med: r[CONFIG_SW.COL_MED],
-                filaCompleta: r 
+                filaCompleta: r // Guardamos la fila para leer la matriz (Col K en adelante)
             } : null;
-        }).filter(item => item !== null);
+        }).filter(f => f !== null);
 
         renderInterfazSW();
-    } catch (e) { console.error("Error loading ADSwitch:", e); }
+    } catch (e) { console.error("Error loading data:", e); }
 };
 
 window.setLanguageSW = function(lang) {
@@ -146,7 +147,6 @@ function renderInterfazSW() {
                 <div class="disclaimer">${t.disclaimer}</div>
             </div>
         </div>`;
-
     actualizarDosisSW('orig');
     actualizarDosisSW('dest');
 }
@@ -167,13 +167,12 @@ window.ejecutarSwitch = function() {
     const dActual = parseFloat(document.getElementById('sw_d_orig').value);
     const dTarget = parseFloat(document.getElementById('sw_d_target').value);
 
-    if (nameOrig === nameDest) return alert(t.same);
-
-    const farmOrig = window.dbSwitch.find(f => f.nombre === nameOrig);
-    const farmDest = window.dbSwitch.find(f => f.nombre === nameDest);
+    const fOrig = window.dbSwitch.find(f => f.nombre === nameOrig);
+    const fDest = window.dbSwitch.find(f => f.nombre === nameDest);
     
+    // IMPORTANTE: Buscamos en la fila del ORIGEN, la columna del DESTINO
     const colIndex = ORDEN_MATRIZ.indexOf(nameDest);
-    const rawCode = farmOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIndex];
+    const rawCode = fOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIndex];
 
     if (!rawCode || rawCode === 'x') {
         document.getElementById('sw-res-box').style.display = 'block';
@@ -181,16 +180,19 @@ window.ejecutarSwitch = function() {
         return;
     }
 
-    procesarGramaticaSW(rawCode, farmOrig, farmDest, dActual, dTarget);
+    procesarGramaticaSW(rawCode, fOrig, fDest, dActual, dTarget);
 };
 
 function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
     const t = i18n[window.currentLang];
     let workingCode = code;
+
+    // 1. Evaluar condicionales [O<150]
     const condRegex = /\[O([<>]=?)(\d+)\]\{(.*?)\}/g;
     let m;
     while ((m = condRegex.exec(code)) !== null) {
-        if (eval(`${dAct} ${m[1].replace('=','==')} ${m[2]}`)) workingCode = m[3];
+        const condition = `${dAct} ${m[1].replace('=','==')} ${m[2]}`;
+        if (eval(condition)) workingCode = m[3];
     }
 
     const bloques = workingCode.split('|').map(b => b.trim());
@@ -202,8 +204,12 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         if (p.length < 3) return;
 
         let diaLabel = p[0], sujeto = p[1], accion = p[2], extra = p[3] || "";
-        let f = (sujeto === 'O') ? fOrig : fDest;
-        let clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
+        
+        // Seleccionamos el objeto de fármaco correcto:
+        // Si el código dice 'O', usamos las reglas de la fila del Origen.
+        // Si el código dice 'D', usamos las reglas de la fila del Destino.
+        const f = (sujeto === 'O') ? fOrig : fDest;
+        const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
         
         let diaInicio;
         if (diaLabel.startsWith('d+')) diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
@@ -217,6 +223,7 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
             let lista = [...f.desescalada].map(Number);
             
             if (accion.includes('up')) {
+                // ESCALADA (Destino): Buscar su desescalada en su propia fila
                 const hUlt = [...hitos].reverse().find(h => h.nombre === f.nombre);
                 let part = hUlt ? Number(hUlt.dose) : 0;
                 let pasos = lista.filter(v => v > part && v <= dTar).reverse();
@@ -226,6 +233,7 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
                     ultimoDia = Math.max(ultimoDia, d);
                 });
             } else {
+                // DESESCALADA (Origen): Buscar su desescalada en su propia fila
                 let idx = lista.indexOf(dAct);
                 let pasos = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
                 pasos.forEach((dose, i) => {
@@ -253,24 +261,22 @@ function renderPautaSW(hitos) {
     const t = i18n[window.currentLang];
     let html = '';
     hitos.forEach(h => {
-        let txt = "";
+        let accionTxt = "";
         switch(h.tipo) {
-            case 'STOP': txt = `<b>${t.stop}</b>`; break;
-            case 'START': txt = `${t.start} <b>${h.dose} mg</b>`; break;
-            case 'UP': txt = `${t.increase} <b>${h.dose} mg</b>`; break;
-            case 'DOWN': txt = `${t.reduce} <b>${h.dose} mg</b>`; break;
-            case 'FIX': txt = `Tomar <b>${h.dose} mg</b>`; break;
-            default: txt = `${t.reach} <b>${h.dose} mg</b>`;
+            case 'STOP': accionTxt = `<b>${t.stop}</b>`; break;
+            case 'START': accionTxt = `${t.start} <b>${h.dose} mg</b>`; break;
+            case 'UP': accionTxt = `${t.increase} <b>${h.dose} mg</b>`; break;
+            case 'DOWN': accionTxt = `${t.reduce} <b>${h.dose} mg</b>`; break;
+            case 'FIX': accionTxt = `Tomar <b>${h.dose} mg</b>`; break;
+            default: accionTxt = `${t.reach} <b>${h.dose} mg</b>`;
         }
-
-        html += `
-            <div class="pauta-step">
-                <div class="step-idx">${t.day} ${h.dia}</div>
-                <div class="step-body">
-                    <span class="tag-farm ${h.clase}">${h.nombre}</span>
-                    <div class="step-txt">${txt}</div>
-                </div>
-            </div>`;
+        html += `<div class="pauta-step">
+            <div class="step-idx">${t.day} ${h.dia}</div>
+            <div class="step-body">
+                <span class="tag-farm ${h.clase}">${h.nombre}</span>
+                <div class="step-txt">${accionTxt}</div>
+            </div>
+        </div>`;
     });
     document.getElementById('sw-res-box').style.display = 'block';
     document.getElementById('sw-res-pauta').innerHTML = html + `<button class="btn-copiar" onclick="copiarEstrategiaSW()">${t.copy}</button>`;
@@ -278,7 +284,7 @@ function renderPautaSW(hitos) {
 
 window.copiarEstrategiaSW = function() {
     const t = i18n[window.currentLang];
-    let txt = `${t.title} PSQALDÍA:\n`;
+    let txt = `AD SWITCH PSQALDÍA:\n`;
     document.querySelectorAll('.pauta-step').forEach(s => {
         txt += `${s.querySelector('.step-idx').innerText}: [${s.querySelector('.tag-farm').innerText}] ${s.querySelector('.step-txt').innerText}\n`;
     });
