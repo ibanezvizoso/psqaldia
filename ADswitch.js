@@ -1,106 +1,88 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA
- * Basado en lógica de matrices de Sheets y gramática de hitos temporales.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v3.0
  */
 
 const CONFIG_SW = {
     SHEET_NAME: 'Data_Farmacocinetica',
     COL_NOMBRE: 0,        // A
     COL_CATEGORIA: 5,     // F
-    COL_DESESCALADA: 7,   // H
-    COL_MED: 8,           // I
-    COL_MATRIZ_INICIO: 10 // K (La matriz empieza en la columna 11 del array, índice 10)
+    COL_MED: 8,           // I (Ajustado)
+    COL_DESESCALADA: 9,   // J (Ajustado)
+    COL_MATRIZ_INICIO: 10 // K
 };
+
+// Orden exacto de las columnas de la matriz (K a V)
+const ORDEN_MATRIZ = [
+    "Sertralina", "Fluoxetina", "Paroxetina", "Escitalopram", "Citalopram", 
+    "Fluvoxamina", "Duloxetina", "Venlafaxina IR", "Vortioxetina", 
+    "Clomipramina", "Mirtazapina", "Trazodona"
+];
 
 window.currentLang = 'es';
 
 window.iniciarADSwitch = async function() {
-    const container = document.getElementById('modalData');
-
-    // Estilos heredados y adaptados de calculadora.js
     if (!document.getElementById('switch-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'switch-styles';
         styleTag.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
             .calc-header { display: flex; justify-content: flex-start; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
-            .calc-ui h2 { margin: 0; font-weight: 800; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; color: var(--primary); }
-            .lang-toggle { display: flex; background: var(--border); border-radius: 0.8rem; padding: 2px; gap: 2px; }
-            .lang-btn { padding: 4px 10px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; background: transparent; color: var(--text-muted); transition: all 0.2s; }
-            .lang-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.6rem; display: block; }
-            .calc-ui select, .calc-ui input { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; box-sizing: border-box; }
-            .btn-ejecutar { margin-top: 1rem; padding: 1.1rem; background: var(--primary); color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; transition: opacity 0.2s; }
-            .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); overflow: hidden; background: white; }
+            .calc-ui h2 { margin: 0; font-weight: 800; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; color: #2563eb; }
+            .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-top: 0.8rem; display: block; }
+            .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 1rem; outline: none; appearance: none; }
+            .btn-ejecutar { margin-top: 1.5rem; padding: 1.1rem; background: #2563eb; color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
+            .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid rgba(0,0,0,0.08); background: white; overflow: hidden; }
             .res-pauta { padding: 1.5rem; }
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
             .pauta-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; width: 2px; background: var(--border); opacity: 0.5; }
-            .step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.7rem; z-index: 1; color: var(--primary); }
+            .step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.7rem; color: #2563eb; z-index: 1; }
             .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
             .step-txt { font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
-            .disclaimer { margin-top: 1.5rem; font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; font-style: italic; padding: 10px; border-top: 1px solid var(--border); }
-            .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.03); border: 1px solid var(--border); border-radius: 1rem; cursor: pointer; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-main); }
+            .disclaimer { font-size: 0.7rem; color: var(--text-muted); padding: 1.2rem; border-top: 1px solid var(--border); background: #f8fafc; font-style: italic; }
+            .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: #f1f5f9; border: 1px solid var(--border); border-radius: 1rem; cursor: pointer; font-weight: 700; color: var(--text-main); }
         `;
         document.head.appendChild(styleTag);
     }
 
-    // Carga de datos
-    if (!window.dbSwitch) {
-        try {
-            const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
-            const data = await response.json();
-            const rows = data.values;
-
-            // Filtrar solo antidepresivos
-            window.dbSwitch = rows.filter(r => r[CONFIG_SW.COL_CATEGORIA] === "Antidepresivos").map(r => ({
+    try {
+        const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
+        const data = await response.json();
+        
+        window.dbSwitch = data.values
+            .filter(r => r[CONFIG_SW.COL_CATEGORIA] === "Antidepresivos")
+            .map(r => ({
                 nombre: r[CONFIG_SW.COL_NOMBRE],
                 desescalada: r[CONFIG_SW.COL_DESESCALADA] ? r[CONFIG_SW.COL_DESESCALADA].split(',').map(v => v.trim()) : [],
                 med: r[CONFIG_SW.COL_MED],
-                instruccionesRaw: r.slice(CONFIG_SW.COL_MATRIZ_INICIO) // Todas las celdas de la matriz desde K
+                filaCompleta: r 
             }));
-            
-            window.listaNombresSW = window.dbSwitch.map(d => d.nombre);
-        } catch (e) { console.error("Error cargando matriz:", e); }
-    }
-
-    renderInterfazSW();
-};
-
-window.setLanguageSW = function(lang) {
-    window.currentLang = lang;
-    renderInterfazSW();
+        
+        renderInterfazSW();
+    } catch (e) { console.error("Error cargando ADSwitch:", e); }
 };
 
 function renderInterfazSW() {
     const isEs = window.currentLang === 'es';
     const container = document.getElementById('modalData');
-    if (!window.listaNombresSW) return;
-
-    const options = window.listaNombresSW.map(n => `<option value="${n}">${n}</option>`).join('');
+    const farmOptions = window.dbSwitch.map(f => `<option value="${f.nombre}">${f.nombre}</option>`).join('');
 
     container.innerHTML = `
         <div class="calc-ui">
-            <div class="calc-header">
-                <h2><i class="fas fa-exchange-alt"></i> AD Switch</h2>
-                <div class="lang-toggle">
-                    <button class="lang-btn ${isEs ? 'active' : ''}" onclick="setLanguageSW('es')">ES</button>
-                    <button class="lang-btn ${!isEs ? 'active' : ''}" onclick="setLanguageSW('en')">EN</button>
-                </div>
-            </div>
+            <h2><i class="fas fa-exchange-alt"></i> AD Switch</h2>
 
-            <label>${isEs ? 'De (Fármaco Origen)' : 'From (Origin Drug)'}</label>
-            <select id="sw_orig">${options}</select>
+            <label>${isEs ? 'Fármaco de Origen' : 'Origin Drug'}</label>
+            <select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
 
-            <label>${isEs ? 'Dosis Actual (mg/día)' : 'Current Dose (mg/day)'}</label>
-            <input type="number" id="sw_d_orig" value="50">
+            <label>${isEs ? 'Dosis Actual' : 'Current Dose'}</label>
+            <select id="sw_d_orig"></select>
 
-            <label>${isEs ? 'A (Fármaco Destino)' : 'To (Target Drug)'}</label>
-            <select id="sw_dest">${options}</select>
+            <label>${isEs ? 'Fármaco de Destino' : 'Target Drug'}</label>
+            <select id="sw_dest" onchange="actualizarDosisSW('dest')">${farmOptions}</select>
 
-            <label>${isEs ? 'Dosis Objetivo (mg/día)' : 'Target Dose (mg/day)'}</label>
-            <input type="number" id="sw_d_target" value="20">
+            <label>${isEs ? 'Dosis Objetivo' : 'Target Dose'}</label>
+            <select id="sw_d_target"></select>
 
             <button class="btn-ejecutar" onclick="ejecutarSwitch()">
                 ${isEs ? 'GENERAR PAUTA' : 'GENERATE STRATEGY'}
@@ -109,178 +91,129 @@ function renderInterfazSW() {
             <div id="sw-res-box" class="res-container">
                 <div id="sw-res-pauta" class="res-pauta"></div>
                 <div class="disclaimer">
-                    ${isEs ? 'Inspirado en Maudsley 15 edición, características de fármacos y experiencia clínica. En general, se propone un cambio para ámbito ambulatorio en el que se prioriza la tolerabilidad.' 
-                           : 'Inspired by Maudsley 15th ed, drug characteristics, and clinical experience. Generally, a switch for outpatient settings prioritizing tolerability is proposed.'}
+                    Inspirado en Maudsley 15 edición, características de fármacos y experiencia clínica. En general, se propone un cambio para ámbito ambulatorio en el que se prioriza la tolerabilidad.
                 </div>
             </div>
         </div>`;
+
+    actualizarDosisSW('orig');
+    actualizarDosisSW('dest');
 }
 
+window.actualizarDosisSW = function(tipo) {
+    const farmNombre = document.getElementById(tipo === 'orig' ? 'sw_orig' : 'sw_dest').value;
+    const farm = window.dbSwitch.find(f => f.nombre === farmNombre);
+    const selector = document.getElementById(tipo === 'orig' ? 'sw_d_orig' : 'sw_d_target');
+    
+    if (farm && farm.desescalada.length > 0) {
+        selector.innerHTML = farm.desescalada.map(d => `<option value="${d}">${d} mg</option>`).join('');
+    } else {
+        selector.innerHTML = `<option value="${farm.med}">${farm.med} mg (med)</option>`;
+    }
+};
+
 window.ejecutarSwitch = function() {
-    const isEn = window.currentLang === 'en';
     const nameOrig = document.getElementById('sw_orig').value;
     const nameDest = document.getElementById('sw_dest').value;
     const dActual = parseFloat(document.getElementById('sw_d_orig').value);
     const dTarget = parseFloat(document.getElementById('sw_d_target').value);
 
-    if (nameOrig === nameDest) {
+    if (nameOrig === nameDest) return alert("Selecciona fármacos distintos.");
+
+    const farmOrig = window.dbSwitch.find(f => f.nombre === nameOrig);
+    const farmDest = window.dbSwitch.find(f => f.nombre === nameDest);
+    
+    const colMatriz = ORDEN_MATRIZ.indexOf(nameDest);
+    const rawCode = farmOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colMatriz];
+
+    if (!rawCode || rawCode === 'x') {
         document.getElementById('sw-res-box').style.display = 'block';
-        document.getElementById('sw-res-pauta').innerHTML = isEn ? "Same drug selected." : "Se ha seleccionado el mismo fármaco.";
+        document.getElementById('sw-res-pauta').innerHTML = "No hay datos específicos para este cambio.";
         return;
     }
 
-    const objOrig = window.dbSwitch.find(f => f.nombre === nameOrig);
-    const idxDest = window.listaNombresSW.indexOf(nameDest);
-    
-    // Obtener la celda de la matriz
-    let rawCode = objOrig.instruccionesRaw[idxDest] || "";
-
-    if (rawCode === "x" || !rawCode) {
-        document.getElementById('sw-res-box').style.display = 'block';
-        document.getElementById('sw-res-pauta').innerHTML = isEn ? "No specific data for this switch." : "No hay datos específicos para este cambio.";
-        return;
-    }
-
-    const pautaHtml = decodificarGramatica(rawCode, objOrig, window.dbSwitch.find(f => f.nombre === nameDest), dActual, dTarget);
-    
-    document.getElementById('sw-res-box').style.display = 'block';
-    document.getElementById('sw-res-pauta').innerHTML = pautaHtml;
+    generarCronograma(rawCode, farmOrig, farmDest, dActual, dTarget);
 };
 
-/**
- * EL MOTOR DE DECODIFICACIÓN
- */
-function decodificarGramatica(code, farmOrig, farmDest, dActual, dTarget) {
-    const isEn = window.currentLang === 'en';
-    const t = {
-        es: { stop: "Suspender", start: "Iniciar", reduce: "Bajar a", increase: "Subir a", obj: "Dosis objetivo", med: "Dosis mín. efectiva", day: "D." },
-        en: { stop: "Discontinue", start: "Start", reduce: "Reduce to", increase: "Increase to", obj: "Target dose", med: "Min. effective dose", day: "D." }
-    }[window.currentLang];
-
-    // 1. Manejo de condicionales [O<150]{...}
+function generarCronograma(code, fOrig, fDest, dAct, dTar) {
     let workingCode = code;
+    // Manejo de condicionales [O<150]{...}
     const condRegex = /\[O([<>]=?)(\d+)\]\{(.*?)\}/g;
-    let match;
-    while ((match = condRegex.exec(code)) !== null) {
-        const [full, op, val, content] = match;
-        const condition = `${dActual} ${op.replace('=', '==')} ${val}`;
-        if (eval(condition)) {
-            workingCode = workingCode.replace(full, content);
-        } else {
-            workingCode = workingCode.replace(full, "");
-        }
+    let m;
+    while ((m = condRegex.exec(code)) !== null) {
+        if (eval(`${dAct} ${m[1].replace('=','==')} ${m[2]}`)) workingCode = m[3];
     }
-    // Limpiar posibles dobles pipes ||
-    workingCode = workingCode.replace(/\|\|+/g, '|').replace(/^\||\|$/g, '');
 
     const bloques = workingCode.split('|').map(b => b.trim());
     let hitos = [];
-    let diaMaxOrigin = 0;
+    let diaSincronizacion = 1;
 
-    // Procesar bloques para construir cronograma
     bloques.forEach(bloque => {
-        const parts = bloque.split(':');
-        if (parts.length < 3) return;
+        const p = bloque.split(':');
+        if (p.length < 3) return;
 
-        let diaLabel = parts[0]; 
-        let sujeto = parts[1]; // O o D
-        let accion = parts[2];
-        let param = parts[3] || "";
+        let diaLabel = p[0], sujeto = p[1], accion = p[2], extra = p[3] || "";
+        let diaBase = diaLabel.startsWith('d+') ? "REL_" + diaLabel.substring(2) : (diaLabel === "@O0" ? "SYNC" : parseInt(diaLabel.substring(1)));
+        
+        const f = (sujeto === 'O') ? fOrig : fDest;
+        const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
 
-        let diaInicio = 1;
-        if (diaLabel.startsWith('d+')) diaInicio = "RELATIVE_" + diaLabel.replace('d+', '');
-        else if (diaLabel.startsWith('d')) diaInicio = parseInt(diaLabel.substring(1));
-        else if (diaLabel.startsWith('@O0')) diaInicio = "SYNC_O0";
-
-        const dataFarm = (sujeto === 'O') ? farmOrig : farmDest;
-        const nombreFarm = dataFarm.nombre;
-        const tagClase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
-
-        // Lógica de acciones complejas
-        if (accion === 'desc_all' || accion === 'desc_up_all') {
-            const intervalo = parseInt(param) || 7;
-            const lista = [...dataFarm.desescalada];
-            if (accion === 'desc_up_all') lista.reverse();
-
-            // Encontrar punto de inicio en la lista
-            let subLista = [];
-            if (accion === 'desc_all') {
-                const idx = lista.findIndex(v => parseFloat(v) < dActual);
-                subLista = idx === -1 ? [] : lista.slice(idx);
-                subLista.push("0");
+        if (accion.includes('desc_all') || accion.includes('desc_up_all')) {
+            const intv = parseInt(extra) || 7;
+            let lista = [...f.desescalada].map(Number);
+            if (accion.includes('up')) {
+                lista = lista.filter(v => v <= dTar).reverse();
             } else {
-                // Para subida, filtramos las que son menores a la objetivo
-                subLista = lista.filter(v => parseFloat(v) <= dTarget);
+                let idx = lista.indexOf(dAct);
+                lista = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
+                lista.push(0);
             }
 
-            subLista.forEach((dose, i) => {
-                let d = (typeof diaInicio === 'number') ? diaInicio + (i * intervalo) : diaInicio; 
-                hitos.push({ dia: d, farmaco: nombreFarm, tag: tagClase, txt: generarTextoAccion(dose, accion, t), valNum: parseFloat(dose) });
+            lista.forEach((dose, i) => {
+                let d = (typeof diaBase === 'number') ? diaBase + (i * intv) : { tipo: diaBase, offset: i * intv };
+                hitos.push({ dia: d, nombre: f.nombre, clase, dose });
+                if (sujeto === 'O' && dose === 0 && typeof d === 'number') diaSincronizacion = d;
             });
         } else {
-            // Acciones simples: med, 0, obj, desc_last, desc_up
-            let doseFinal = "";
-            if (accion === 'med') doseFinal = dataFarm.med;
-            else if (accion === '0') doseFinal = "0";
-            else if (accion === 'obj') doseFinal = dTarget.toString();
-            else if (accion === 'desc_last') doseFinal = dataFarm.desescalada[dataFarm.desescalada.length - 1];
-            else if (accion === 'desc_up') {
-                // Lógica de subir un peldaño (simplificada para matriz)
-                doseFinal = dTarget.toString(); 
-            }
-
-            hitos.push({ dia: diaInicio, farmaco: nombreFarm, tag: tagClase, txt: generarTextoAccion(doseFinal, accion, t), valNum: parseFloat(doseFinal) });
+            let dose = (accion === 'med') ? f.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : dAct));
+            hitos.push({ dia: diaBase, nombre: f.nombre, clase, dose });
+            if (sujeto === 'O' && dose === 0 && typeof diaBase === 'number') diaSincronizacion = diaBase;
         }
     });
 
-    // Resolución de SYNC y RELATIVE
-    // 1. Encontrar cuándo llega el origen a 0
-    let diaO0 = 1;
-    hitos.forEach(h => { if(h.tag === 'tag-orig' && h.valNum === 0 && typeof h.dia === 'number') diaO0 = h.dia; });
-    
-    // 2. Aplicar sincronización
+    // Resolver sincronización y relativos
     hitos = hitos.map(h => {
-        if (h.dia === "SYNC_O0") h.dia = diaO0;
-        if (typeof h.dia === 'string' && h.dia.startsWith("RELATIVE_")) {
-            // Esto es una simplificación, en un motor real necesitaría trackear el último día por sujeto
-            h.dia = diaO0 + parseInt(h.dia.split('_')[1]); 
-        }
+        if (h.dia === "SYNC") h.dia = diaSincronizacion;
+        if (h.dia.tipo === "REL") h.dia = diaSincronizacion + h.dia.offset;
         return h;
-    });
+    }).sort((a,b) => a.dia - b.dia);
 
-    // Ordenar por día
-    hitos.sort((a, b) => a.dia - b.dia);
+    renderPauta(hitos);
+}
 
-    // Renderizar HTML
+function renderPauta(hitos) {
+    const isEn = window.currentLang === 'en';
     let html = '';
     hitos.forEach(h => {
+        const textoAccion = h.dose == 0 ? (isEn ? "Stop" : "Suspender") : `<b>${h.dose} mg</b>`;
         html += `
             <div class="pauta-step">
-                <div class="step-idx">${t.day} ${h.dia}</div>
+                <div class="step-idx">D. ${h.dia}</div>
                 <div class="step-body">
-                    <span class="tag-farm ${h.tag}">${h.farmaco}</span>
-                    <div class="step-txt">${h.txt}</div>
+                    <span class="tag-farm ${h.clase}">${h.nombre}</span>
+                    <div class="step-txt">${textoAccion}</div>
                 </div>
             </div>`;
     });
-
-    html += `<button class="btn-copiar" onclick="copiarEstrategiaSW()"><i class="far fa-copy"></i> ${isEn ? 'COPY' : 'COPIAR'}</button>`;
-    return html;
-}
-
-function generarTextoAccion(dose, type, t) {
-    if (dose === "0") return `<b>${t.stop}</b>`;
-    if (type === 'obj') return `${t.obj}: <b>${dose} mg</b>`;
-    return `${parseFloat(dose) > 0 ? t.reduce : t.start} <b>${dose} mg</b>`;
+    document.getElementById('sw-res-box').style.display = 'block';
+    document.getElementById('sw-res-pauta').innerHTML = html + `<button class="btn-copiar" onclick="copiarEstrategiaSW()">COPIAR</button>`;
 }
 
 window.copiarEstrategiaSW = function() {
-    const isEn = window.currentLang === 'en';
-    const steps = document.querySelectorAll('.pauta-step');
-    let texto = (isEn ? "SWITCH STRATEGY:\n" : "ESTRATEGIA DE CAMBIO:\n") + "------------------\n";
-    steps.forEach(s => {
-        texto += `${s.querySelector('.step-idx').innerText}: [${s.querySelector('.tag-farm').innerText}] ${s.querySelector('.step-txt').innerText}\n`;
+    let txt = "ESTRATEGIA DE CAMBIO PSQALDÍA:\n";
+    document.querySelectorAll('.pauta-step').forEach(s => {
+        txt += `${s.querySelector('.step-idx').innerText}: [${s.querySelector('.tag-farm').innerText}] ${s.querySelector('.step-txt').innerText}\n`;
     });
-    navigator.clipboard.writeText(texto);
-    alert(isEn ? "Copied to clipboard" : "Copiado al portapapeles");
+    navigator.clipboard.writeText(txt);
+    alert("Copiado!");
 };
