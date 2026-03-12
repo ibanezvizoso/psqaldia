@@ -1,6 +1,6 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v4.0
- * Lógica: Búsqueda cruzada de propiedades (Med/Desescalada) en filas A14:A25
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v4.5
+ * CORRECCIÓN: Búsqueda de desescalada de destino y lógica de verbos.
  */
 
 const CONFIG_SW = {
@@ -29,13 +29,12 @@ const i18n = {
         targetDose: "Dosis Objetivo",
         btn: "GENERAR PAUTA",
         copy: "COPIAR",
-        copied: "¡Copiado!",
         stop: "Suspender",
         start: "Iniciar con",
         reduce: "Reducir a",
         increase: "Subir a",
-        reach: "Alcanzar objetivo:",
-        same: "Mismo fármaco o pauta no definida.",
+        keep: "Tomar",
+        target: "Dosis objetivo:",
         day: "Día",
         disclaimer: "Inspirado en Maudsley 15 edición. Se prioriza la tolerabilidad en ámbito ambulatorio."
     },
@@ -47,13 +46,12 @@ const i18n = {
         targetDose: "Target Dose",
         btn: "GENERATE STRATEGY",
         copy: "COPY",
-        copied: "Copied!",
         stop: "Discontinue",
         start: "Start with",
         reduce: "Reduce to",
         increase: "Increase to",
-        reach: "Reach target:",
-        same: "Same drug or strategy not defined.",
+        keep: "Take",
+        target: "Target dose:",
         day: "Day",
         disclaimer: "Inspired by Maudsley 15th ed. Outpatient safety and tolerability prioritized."
     }
@@ -81,6 +79,7 @@ window.iniciarADSwitch = async function() {
             .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px; }
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
+            .step-txt { font-size: 0.95rem; line-height: 1.4; color: #1e293b; }
             .disclaimer { font-size: 0.65rem; color: #64748b; padding: 1rem; border-top: 1px solid #e2e8f0; background: #f8fafc; font-style: italic; }
             .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: #f1f5f9; border-radius: 1rem; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 700; }
         `;
@@ -92,17 +91,16 @@ window.iniciarADSwitch = async function() {
         const data = await response.json();
         const rows = data.values;
 
-        // Mapeo Filas 14 a 25 (Sertralina a Trazodona)
+        // Mapeo Filas 14 a 25
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
         
-        // Aquí cargamos toda la base de datos de antidepresivos en memoria
         window.dbSwitch = indicesAD.map(idx => {
             const r = rows[idx];
             return r ? {
                 nombre: r[CONFIG_SW.COL_NOMBRE]?.toString().trim(),
                 desescalada: r[CONFIG_SW.COL_DESESCALADA] ? r[CONFIG_SW.COL_DESESCALADA].split(',').map(v => v.trim()) : [],
                 med: r[CONFIG_SW.COL_MED],
-                filaCompleta: r // Guardamos la fila para leer la matriz (Col K en adelante)
+                filaCompleta: r 
             } : null;
         }).filter(f => f !== null);
 
@@ -129,19 +127,15 @@ function renderInterfazSW() {
                     <button class="lang-btn ${window.currentLang === 'en' ? 'active' : ''}" onclick="setLanguageSW('en')">EN</button>
                 </div>
             </div>
-
             <label>${t.from}</label>
             <select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
             <label>${t.currentDose}</label>
             <select id="sw_d_orig"></select>
-
             <label>${t.to}</label>
             <select id="sw_dest" onchange="actualizarDosisSW('dest')">${farmOptions}</select>
             <label>${t.targetDose}</label>
             <select id="sw_d_target"></select>
-
             <button class="btn-ejecutar" onclick="ejecutarSwitch()">${t.btn}</button>
-
             <div id="sw-res-box" class="res-container">
                 <div id="sw-res-pauta" class="res-pauta"></div>
                 <div class="disclaimer">${t.disclaimer}</div>
@@ -162,17 +156,16 @@ window.actualizarDosisSW = function(tipo) {
 
 window.ejecutarSwitch = function() {
     const t = i18n[window.currentLang];
-    const nameOrig = document.getElementById('sw_orig').value;
-    const nameDest = document.getElementById('sw_dest').value;
-    const dActual = parseFloat(document.getElementById('sw_d_orig').value);
-    const dTarget = parseFloat(document.getElementById('sw_d_target').value);
+    const nOrig = document.getElementById('sw_orig').value;
+    const nDest = document.getElementById('sw_dest').value;
+    const dAct = parseFloat(document.getElementById('sw_d_orig').value);
+    const dTar = parseFloat(document.getElementById('sw_d_target').value);
 
-    const fOrig = window.dbSwitch.find(f => f.nombre === nameOrig);
-    const fDest = window.dbSwitch.find(f => f.nombre === nameDest);
+    const fOrig = window.dbSwitch.find(f => f.nombre === nOrig);
+    const fDest = window.dbSwitch.find(f => f.nombre === nDest);
     
-    // IMPORTANTE: Buscamos en la fila del ORIGEN, la columna del DESTINO
-    const colIndex = ORDEN_MATRIZ.indexOf(nameDest);
-    const rawCode = fOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIndex];
+    const colIdx = ORDEN_MATRIZ.indexOf(nDest);
+    const rawCode = fOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIdx];
 
     if (!rawCode || rawCode === 'x') {
         document.getElementById('sw-res-box').style.display = 'block';
@@ -180,19 +173,15 @@ window.ejecutarSwitch = function() {
         return;
     }
 
-    procesarGramaticaSW(rawCode, fOrig, fDest, dActual, dTarget);
+    procesarGramaticaSW(rawCode, fOrig, fDest, dAct, dTar);
 };
 
 function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
-    const t = i18n[window.currentLang];
     let workingCode = code;
-
-    // 1. Evaluar condicionales [O<150]
     const condRegex = /\[O([<>]=?)(\d+)\]\{(.*?)\}/g;
     let m;
     while ((m = condRegex.exec(code)) !== null) {
-        const condition = `${dAct} ${m[1].replace('=','==')} ${m[2]}`;
-        if (eval(condition)) workingCode = m[3];
+        if (eval(`${dAct} ${m[1].replace('=','==')} ${m[2]}`)) workingCode = m[3];
     }
 
     const bloques = workingCode.split('|').map(b => b.trim());
@@ -204,76 +193,86 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         if (p.length < 3) return;
 
         let diaLabel = p[0], sujeto = p[1], accion = p[2], extra = p[3] || "";
-        
-        // Seleccionamos el objeto de fármaco correcto:
-        // Si el código dice 'O', usamos las reglas de la fila del Origen.
-        // Si el código dice 'D', usamos las reglas de la fila del Destino.
-        const f = (sujeto === 'O') ? fOrig : fDest;
+        const farmObj = (sujeto === 'O') ? fOrig : fDest;
         const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
         
         let diaInicio;
         if (diaLabel.startsWith('d+')) diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
         else if (diaLabel === "@O0") {
-            const hO0 = hitos.find(h => h.clase === 'tag-orig' && h.dose === 0);
+            const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
             diaInicio = hO0 ? hO0.dia : ultimoDia;
         } else diaInicio = parseInt(diaLabel.substring(1));
 
         if (accion.includes('all') || accion === 'desc_up') {
             const intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
-            let lista = [...f.desescalada].map(Number);
+            let lista = [...farmObj.desescalada].map(Number);
             
             if (accion.includes('up')) {
-                // ESCALADA (Destino): Buscar su desescalada en su propia fila
-                const hUlt = [...hitos].reverse().find(h => h.nombre === f.nombre);
-                let part = hUlt ? Number(hUlt.dose) : 0;
-                let pasos = lista.filter(v => v > part && v <= dTar).reverse();
+                // ESCALADA (Destino): Busca en su propia lista (fDest)
+                const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
+                let actualEnCuerpo = hUlt ? Number(hUlt.dose) : 0;
+                // De menor a mayor para subir
+                let pasos = lista.filter(v => v > actualEnCuerpo && v <= dTar).sort((a,b) => a-b);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
-                    hitos.push({ dia: d, nombre: f.nombre, clase, dose, tipo: 'UP' });
+                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
                     ultimoDia = Math.max(ultimoDia, d);
                 });
             } else {
-                // DESESCALADA (Origen): Buscar su desescalada en su propia fila
+                // DESESCALADA (Origen): Busca en su propia lista (fOrig)
                 let idx = lista.indexOf(dAct);
                 let pasos = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
-                    hitos.push({ dia: d, nombre: f.nombre, clase, dose, tipo: 'DOWN' });
+                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
                     ultimoDia = Math.max(ultimoDia, d);
                 });
                 let dFin = diaInicio + (pasos.length * intv);
-                hitos.push({ dia: dFin, nombre: f.nombre, clase, dose: 0, tipo: 'STOP' });
+                hitos.push({ dia: dFin, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
                 ultimoDia = Math.max(ultimoDia, dFin);
             }
         } else {
-            let dose = (accion === 'med') ? f.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : dAct));
-            let tipo = (accion === '0') ? 'STOP' : (accion === 'med' || accion === 'desc_last' ? 'START' : 'FIX');
-            hitos.push({ dia: diaInicio, nombre: f.nombre, clase, dose, tipo });
+            let dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (accion === 'desc_last' ? farmObj.desescalada[farmObj.desescalada.length-1] : dAct)));
+            let tipo = (dose == 0) ? 'STOP' : (accion === 'obj' ? 'OBJ' : 'VAL');
+            hitos.push({ dia: diaInicio, nombre: farmObj.nombre, tag: clase, dose, tipo });
             ultimoDia = Math.max(ultimoDia, diaInicio);
         }
     });
 
     hitos.sort((a, b) => a.dia - b.dia);
-    renderPautaSW(hitos);
+    renderPautaSW(hitos, dTar);
 }
 
-function renderPautaSW(hitos) {
+function renderPautaSW(hitos, dTar) {
     const t = i18n[window.currentLang];
     let html = '';
+    let started = {}; // Para controlar si ya hemos "iniciado" un fármaco
+
     hitos.forEach(h => {
         let accionTxt = "";
-        switch(h.tipo) {
-            case 'STOP': accionTxt = `<b>${t.stop}</b>`; break;
-            case 'START': accionTxt = `${t.start} <b>${h.dose} mg</b>`; break;
-            case 'UP': accionTxt = `${t.increase} <b>${h.dose} mg</b>`; break;
-            case 'DOWN': accionTxt = `${t.reduce} <b>${h.dose} mg</b>`; break;
-            case 'FIX': accionTxt = `Tomar <b>${h.dose} mg</b>`; break;
-            default: accionTxt = `${t.reach} <b>${h.dose} mg</b>`;
+        let doseNum = Number(h.dose);
+
+        if (h.tipo === 'STOP') {
+            accionTxt = `<b>${t.stop}</b>`;
+        } else if (h.tipo === 'OBJ' || doseNum === dTar) {
+            accionTxt = `${t.target} <b>${doseNum} mg</b>`;
+        } else {
+            if (!started[h.nombre] && doseNum > 0) {
+                accionTxt = `${t.start} <b>${doseNum} mg</b>`;
+                started[h.nombre] = doseNum;
+            } else {
+                let prevDose = started[h.nombre];
+                if (doseNum > prevDose) accionTxt = `${t.increase} <b>${doseNum} mg</b>`;
+                else if (doseNum < prevDose) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
+                else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
+                started[h.nombre] = doseNum;
+            }
         }
+
         html += `<div class="pauta-step">
             <div class="step-idx">${t.day} ${h.dia}</div>
             <div class="step-body">
-                <span class="tag-farm ${h.clase}">${h.nombre}</span>
+                <span class="tag-farm ${h.tag}">${h.nombre}</span>
                 <div class="step-txt">${accionTxt}</div>
             </div>
         </div>`;
@@ -283,11 +282,10 @@ function renderPautaSW(hitos) {
 }
 
 window.copiarEstrategiaSW = function() {
-    const t = i18n[window.currentLang];
     let txt = `AD SWITCH PSQALDÍA:\n`;
     document.querySelectorAll('.pauta-step').forEach(s => {
         txt += `${s.querySelector('.step-idx').innerText}: [${s.querySelector('.tag-farm').innerText}] ${s.querySelector('.step-txt').innerText}\n`;
     });
     navigator.clipboard.writeText(txt);
-    alert(t.copied);
+    alert(i18n[window.currentLang].copied);
 };
