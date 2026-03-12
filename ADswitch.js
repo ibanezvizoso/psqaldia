@@ -1,6 +1,5 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v3.1
- * Mapeo forzado Filas 14-25 (Índices 12-23 del fetch A2:Z500)
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v3.2
  */
 
 const CONFIG_SW = {
@@ -9,7 +8,7 @@ const CONFIG_SW = {
     COL_CATEGORIA: 5,     // F
     COL_MED: 8,           // I
     COL_DESESCALADA: 9,   // J
-    COL_MATRIZ_INICIO: 10 // K
+    COL_MATRIZ_INICIO: 10 // K (Índice 10)
 };
 
 const ORDEN_MATRIZ = [
@@ -19,6 +18,7 @@ const ORDEN_MATRIZ = [
 ];
 
 window.iniciarADSwitch = async function() {
+    // Estilos (Se mantienen igual que en tu versión anterior)
     if (!document.getElementById('switch-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'switch-styles';
@@ -46,9 +46,9 @@ window.iniciarADSwitch = async function() {
     try {
         const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
         const data = await response.json();
-        const rows = data.values; // Array que empieza en Fila 2 (índice 0)
+        const rows = data.values;
 
-        // MAPEADO DIRECTO: Fila 14 es índice 12. Fila 25 es índice 23.
+        // Mapeo Filas 14 a 25 (Sertralina a Trazodona)
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
         
         window.dbSwitch = indicesAD.map(idx => {
@@ -62,9 +62,8 @@ window.iniciarADSwitch = async function() {
             };
         }).filter(item => item !== null);
 
-        console.log("Datos cargados para ADSwitch:", window.dbSwitch);
         renderInterfazSW();
-    } catch (e) { console.error("Error en ADSwitch:", e); }
+    } catch (e) { console.error("Error cargando datos:", e); }
 };
 
 function renderInterfazSW() {
@@ -90,7 +89,6 @@ function renderInterfazSW() {
                 </div>
             </div>
         </div>`;
-
     actualizarDosisSW('orig');
     actualizarDosisSW('dest');
 }
@@ -99,11 +97,8 @@ window.actualizarDosisSW = function(tipo) {
     const farmNombre = document.getElementById(tipo === 'orig' ? 'sw_orig' : 'sw_dest').value;
     const farm = window.dbSwitch.find(f => f.nombre === farmNombre);
     const selector = document.getElementById(tipo === 'orig' ? 'sw_d_orig' : 'sw_d_target');
-    
-    if (farm && farm.desescalada.length > 0) {
+    if (farm) {
         selector.innerHTML = farm.desescalada.map(d => `<option value="${d}">${d} mg</option>`).join('');
-    } else {
-        selector.innerHTML = `<option value="${farm.med}">${farm.med} mg (med)</option>`;
     }
 };
 
@@ -113,8 +108,6 @@ window.ejecutarSwitch = function() {
     const dActual = parseFloat(document.getElementById('sw_d_orig').value);
     const dTarget = parseFloat(document.getElementById('sw_d_target').value);
 
-    if (nameOrig === nameDest) return alert("Selecciona fármacos distintos.");
-
     const farmOrig = window.dbSwitch.find(f => f.nombre === nameOrig);
     const farmDest = window.dbSwitch.find(f => f.nombre === nameDest);
     
@@ -123,16 +116,19 @@ window.ejecutarSwitch = function() {
 
     if (!rawCode || rawCode === 'x') {
         document.getElementById('sw-res-box').style.display = 'block';
-        document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center; color:var(--text-muted);">No hay pauta registrada para este cruce.</p>`;
+        document.getElementById('sw-res-pauta').innerHTML = "<p style='text-align:center; padding:1rem;'>Mismo fármaco o pauta no definida.</p>";
         return;
     }
 
     procesarGramatica(rawCode, farmOrig, farmDest, dActual, dTarget);
 };
 
+/**
+ * MOTOR DE PROCESAMIENTO
+ */
 function procesarGramatica(code, fOrig, fDest, dAct, dTar) {
     let workingCode = code;
-    // Condicionales [O<150]{...}
+    // 1. Condicionales [O<150]{...}
     const condRegex = /\[O([<>]=?)(\d+)\]\{(.*?)\}/g;
     let m;
     while ((m = condRegex.exec(code)) !== null) {
@@ -149,7 +145,11 @@ function procesarGramatica(code, fOrig, fDest, dAct, dTar) {
         if (p.length < 3) return;
 
         let diaLabel = p[0], sujeto = p[1], accion = p[2], extra = p[3] || "";
-        let diaBase = diaLabel.startsWith('d+') ? "REL_" + diaLabel.substring(2) : (diaLabel === "@O0" ? "SYNC" : parseInt(diaLabel.substring(1)));
+        // Definir objeto de día
+        let diaObj;
+        if (diaLabel.startsWith('d+')) diaObj = { tipo: 'REL', offset: parseInt(diaLabel.substring(2)) };
+        else if (diaLabel === "@O0") diaObj = { tipo: 'SYNC', offset: 0 };
+        else diaObj = { tipo: 'FIX', val: parseInt(diaLabel.substring(1)) };
         
         const f = (sujeto === 'O') ? fOrig : fDest;
         const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
@@ -157,32 +157,42 @@ function procesarGramatica(code, fOrig, fDest, dAct, dTar) {
         if (accion.includes('all')) {
             const intv = parseInt(extra) || 7;
             let lista = [...f.desescalada].map(Number);
+            
             if (accion.includes('up')) {
+                // Escalada: desde el final de desescalada hasta alcanzar el objetivo
                 lista = lista.filter(v => v <= dTar).reverse();
             } else {
+                // Desescalada: desde el siguiente a la dosis actual hasta 0
                 let idx = lista.indexOf(dAct);
                 lista = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
                 lista.push(0);
             }
+
             lista.forEach((dose, i) => {
-                let d = (typeof diaBase === 'number') ? diaBase + (i * intv) : { tipo: diaBase, offset: i * intv };
+                let d;
+                if (diaObj.tipo === 'FIX') d = diaObj.val + (i * intv);
+                else d = { tipo: diaObj.tipo, offset: diaObj.offset + (i * intv) };
+                
                 hitos.push({ dia: d, nombre: f.nombre, clase, dose });
                 if (sujeto === 'O' && dose === 0 && typeof d === 'number') diaSincro = d;
             });
         } else {
             let dose = (accion === 'med') ? f.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : dAct));
-            hitos.push({ dia: diaBase, nombre: f.nombre, clase, dose });
-            if (sujeto === 'O' && dose === 0 && typeof diaBase === 'number') diaSincro = diaBase;
+            hitos.push({ dia: diaObj.tipo === 'FIX' ? diaObj.val : diaObj, nombre: f.nombre, clase, dose });
+            if (sujeto === 'O' && dose === 0 && diaObj.tipo === 'FIX') diaSincro = diaObj.val;
         }
     });
 
-    // Resolución de días especiales
+    // 2. Segunda pasada: Resolver SYNC y REL
     hitos = hitos.map(h => {
-        if (h.dia === "SYNC") h.dia = diaSincro;
-        if (h.dia.tipo === "REL") h.dia = diaSincro + h.dia.offset;
+        if (typeof h.dia === 'object') {
+            if (h.dia.tipo === 'SYNC') h.dia = diaSincro + h.dia.offset;
+            else if (h.dia.tipo === 'REL') h.dia = diaSincro + h.dia.offset;
+        }
         return h;
     }).sort((a,b) => a.dia - b.dia);
 
+    // 3. Renderizado
     let html = '';
     hitos.forEach(h => {
         const accionTxt = h.dose == 0 ? "<b>Suspender</b>" : `Tomar <b>${h.dose} mg</b>`;
@@ -195,6 +205,7 @@ function procesarGramatica(code, fOrig, fDest, dAct, dTar) {
         </div>`;
     });
     
+    document.getElementById('sw-res-box').style.display = 'block';
     document.getElementById('sw-res-pauta').innerHTML = html + `<button class="btn-copiar" onclick="copiarEstrategiaSW()">COPIAR ESTRATEGIA</button>`;
 }
 
@@ -204,5 +215,5 @@ window.copiarEstrategiaSW = function() {
         txt += `${s.querySelector('.step-idx').innerText}: [${s.querySelector('.tag-farm').innerText}] ${s.querySelector('.step-txt').innerText}\n`;
     });
     navigator.clipboard.writeText(txt);
-    alert("¡Copiado al portapapeles!");
+    alert("¡Copiado!");
 };
