@@ -1,7 +1,8 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v10.0
- * FIX: Recuperada escalada/desescalada progresiva (paso a paso cada X días).
- * FIX: Soporte para bloques de 2 partes (D:obj) para Mirtazapina/Trazodona.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v11.0
+ * FIX: Escalada progresiva garantizada (todos los pasos) si se indica intervalo (:X).
+ * FIX: Sincronización de días d+X corregida.
+ * FIX: Soporte para bloques cortos (D:obj) sin pérdida de día.
  */
 
 const CONFIG_SW = {
@@ -158,7 +159,6 @@ window.actualizarDosisSW = function(tipo) {
 };
 
 window.ejecutarSwitch = function() {
-    const t = i18n[window.currentLang];
     const nOrig = document.getElementById('sw_orig').value;
     const nDest = document.getElementById('sw_dest').value;
     const dAct = parseFloat(document.getElementById('sw_d_orig').value);
@@ -190,18 +190,16 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
 
     const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
     let hitos = [];
-    let ultimoDia = 1;
-
-    // TRACKER DE DOSIS (Para saber desde dónde subir o bajar)
-    let estadoActual = { [fOrig.nombre]: dAct, [fDest.nombre]: 0 };
+    let ultimoDiaGlobal = 1;
+    let estadoDosis = { [fOrig.nombre]: dAct, [fDest.nombre]: 0 };
 
     bloques.forEach(bloque => {
         const p = bloque.split(':');
         let diaLabel, sujeto, accion, extra = "";
 
-        // SOPORTE 2 PARTES (Mirtazapina Fix)
+        // SOPORTE BLOQUES 2 PARTES (D:obj)
         if (p.length === 2) {
-            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
+            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDiaGlobal;
         } else if (p.length >= 3) {
             diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
         } else return;
@@ -211,71 +209,71 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         const lista = farmObj.desescalada.map(Number);
         
         let diaInicio;
-        if (diaLabel.startsWith('d+')) diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
+        if (diaLabel.startsWith('d+')) diaInicio = ultimoDiaGlobal + parseInt(diaLabel.substring(2));
         else if (diaLabel === "@O0") {
             const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
-            diaInicio = hO0 ? hO0.dia : ultimoDia;
-        } else diaInicio = parseInt(diaLabel.substring(1)) || ultimoDia;
+            diaInicio = hO0 ? hO0.dia : ultimoDiaGlobal;
+        } else diaInicio = parseInt(diaLabel.substring(1)) || ultimoDiaGlobal;
 
         if (accion.includes('desc_up') || accion.includes('desc_auto') || accion.includes('all')) {
-            const intv = parseInt(extra) || 7;
-            let currentDose = estadoActual[farmObj.nombre];
+            const intv = parseInt(extra) || (accion.includes(':') ? parseInt(accion.split(':')[1]) : 7);
+            let current = estadoDosis[farmObj.nombre];
             
             if (accion.includes('up')) {
-                // ESCALADA (Clomipramina Fix)
-                let pasos = lista.filter(v => v > currentDose && v <= dTar).sort((a,b) => a-b);
+                // ESCALADA COMPLETA (Clomipramina Fix)
+                let pasos = lista.filter(v => v > current && v <= dTar).sort((a,b) => a-b);
                 if (pasos.length > 0) {
-                    // Si NO dice 'all', solo hacemos el primer escalón. Si dice 'all' o 'desc_up:X', hacemos todos.
-                    const soloUno = !accion.includes('all') && !extra; 
-                    if (soloUno) pasos = [pasos[0]];
+                    // Si hay intervalo (:X) o dice 'all', se hacen todos. Si no, solo uno.
+                    const hacerTodos = extra !== "" || accion.includes('all') || accion.includes(':');
+                    if (!hacerTodos) pasos = [pasos[0]];
                     
                     pasos.forEach((dose, i) => {
                         let d = diaInicio + (i * intv);
                         hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose === dTar ? 'OBJ' : 'VAL') });
-                        ultimoDia = Math.max(ultimoDia, d);
-                        estadoActual[farmObj.nombre] = dose;
+                        ultimoDiaGlobal = Math.max(ultimoDiaGlobal, d);
+                        estadoDosis[farmObj.nombre] = dose;
                     });
                 }
             } else {
-                // DESESCALADA
-                let idx = lista.indexOf(currentDose);
-                let pasos = (idx === -1) ? lista.filter(v => v < currentDose).sort((a,b) => b-a) : lista.slice(idx + 1);
+                // DESESCALADA COMPLETA
+                let idx = lista.indexOf(current);
+                let pasos = (idx === -1) ? lista.filter(v => v < current).sort((a,b) => b-a) : lista.slice(idx + 1);
                 if (pasos.length > 0) {
-                    const soloUno = !accion.includes('all') && !extra;
-                    if (soloUno) {
+                    const hacerTodos = extra !== "" || accion.includes('all') || accion.includes(':');
+                    if (!hacerTodos) {
                         hitos.push({ dia: diaInicio, nombre: farmObj.nombre, tag: clase, dose: pasos[0], tipo: 'VAL' });
-                        ultimoDia = Math.max(ultimoDia, diaInicio);
-                        estadoActual[farmObj.nombre] = pasos[0];
+                        ultimoDiaGlobal = Math.max(ultimoDiaGlobal, diaInicio);
+                        estadoDosis[farmObj.nombre] = pasos[0];
                     } else {
                         pasos.forEach((dose, i) => {
                             let d = diaInicio + (i * intv);
                             hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
-                            ultimoDia = Math.max(ultimoDia, d);
-                            estadoActual[farmObj.nombre] = dose;
+                            ultimoDiaGlobal = Math.max(ultimoDiaGlobal, d);
+                            estadoDosis[farmObj.nombre] = dose;
                         });
-                        // Asegurar el Stop al final si es desescalada automática
-                        if (estadoActual[farmObj.nombre] > 0) {
-                            let dFin = ultimoDia + intv;
+                        // Asegurar el Suspender (0)
+                        if (estadoDosis[farmObj.nombre] > 0) {
+                            let dFin = ultimoDiaGlobal + intv;
                             hitos.push({ dia: dFin, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
-                            ultimoDia = dFin;
-                            estadoActual[farmObj.nombre] = 0;
+                            ultimoDiaGlobal = dFin;
+                            estadoDosis[farmObj.nombre] = 0;
                         }
                     }
                 }
             }
         } else {
-            // DOSIS FIJAS (100, 40, med, 0, obj...)
+            // DOSIS FIJAS
             let dose;
             if (!isNaN(accion) && accion.trim() !== "") dose = parseFloat(accion);
             else if (accion === 'med') dose = farmObj.med;
             else if (accion === '0') dose = 0;
             else if (accion === 'obj') dose = dTar;
             else if (accion === 'desc_last') dose = parseFloat(farmObj.desescalada[farmObj.desescalada.length-1]);
-            else dose = estadoActual[farmObj.nombre];
+            else dose = estadoDosis[farmObj.nombre];
 
             hitos.push({ dia: diaInicio, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose === 0 ? 'STOP' : (dose === dTar ? 'OBJ' : 'VAL')) });
-            ultimoDia = Math.max(ultimoDia, diaInicio);
-            estadoActual[farmObj.nombre] = dose;
+            ultimoDiaGlobal = Math.max(ultimoDiaGlobal, diaInicio);
+            estadoDosis[farmObj.nombre] = dose;
         }
     });
 
@@ -286,7 +284,7 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
 function renderPautaSW(hitos, dTar, dActOrigen) {
     const t = i18n[window.currentLang];
     let html = '';
-    let memory = {}; // Para saber si es la primera vez que aparece el fármaco
+    let memory = {}; 
 
     hitos.forEach(h => {
         let accionTxt = "";
@@ -298,7 +296,7 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
             else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
         } else {
             if (h.dose === 0) accionTxt = `<b>${t.stop}</b>`;
-            else if (doseNum === dTar) accionTxt = `${t.target} <b>${doseNum} mg</b>`;
+            else if (h.tipo === 'OBJ' || doseNum === dTar) accionTxt = `${t.target} <b>${doseNum} mg</b>`;
             else {
                 if (memory[h.nombre] === undefined) {
                     accionTxt = `${t.start} <b>${doseNum} mg</b>`;
