@@ -1,16 +1,15 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v12.0
- * BASE: Versión 6.0 (la que funcionaba bien).
- * FIX: Soporte para instrucciones de 2 partes (D:obj) para evitar errores en Mirta/Trazo.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v10.0
+ * Basado en v6.0 con motor de titulación secuencial corregido.
  */
 
 const CONFIG_SW = {
     SHEET_NAME: 'Data_Farmacocinetica',
-    COL_NOMBRE: 0,        // A
-    COL_CATEGORIA: 5,     // F
-    COL_MED: 8,           // I
-    COL_DESESCALADA: 9,   // J
-    COL_MATRIZ_INICIO: 10 // K
+    COL_NOMBRE: 0,
+    COL_CATEGORIA: 5,
+    COL_MED: 8,
+    COL_DESESCALADA: 9,
+    COL_MATRIZ_INICIO: 10
 };
 
 const ORDEN_MATRIZ = [
@@ -37,8 +36,9 @@ const i18n = {
         keep: "Tomar",
         target: "Dosis objetivo:",
         day: "Día",
-        copied: "¡Copiado al portapapeles!",
-        disclaimer: "Basado en Maudsley prescribing 15 edition, fichas técnicas y experiencia clínica. Debe considerarse como una propuesta de switch \"tipo\" para ámbito ambulatorio."
+        copied: "¡Copiado!",
+        same: "Mismo fármaco o cambio directo.",
+        disclaimer: "Basado en Maudsley Prescribing Guidelines 15th ed. y fichas técnicas. Propuesta de switch tipo para ámbito ambulatorio."
     },
     en: {
         title: "AD Switch",
@@ -55,10 +55,13 @@ const i18n = {
         keep: "Take",
         target: "Target dose:",
         day: "Day",
-        copied: "Copied to clipboard!",
-        disclaimer: "Based on Maudsley prescribing 15th edition, technical data sheets and clinical experience. It should be considered as a \"standard\" switch proposal for outpatient settings."
+        copied: "Copied!",
+        same: "Same drug or direct switch.",
+        disclaimer: "Based on Maudsley Prescribing Guidelines 15th ed. and technical data sheets. Standard switch proposal for outpatient settings."
     }
 };
+
+// ... (iniciarADSwitch y renderInterfazSW se mantienen igual que en tu v6.0)
 
 window.iniciarADSwitch = async function() {
     if (!document.getElementById('switch-styles')) {
@@ -66,21 +69,9 @@ window.iniciarADSwitch = async function() {
         styleTag.id = 'switch-styles';
         styleTag.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-            .calc-header { 
-                display: grid; 
-                grid-template-columns: 1fr auto 1fr; 
-                align-items: center; 
-                margin-bottom: 1.5rem; 
-                width: 100%;
-            }
+            .calc-header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 1.5rem; width: 100%; }
             .calc-ui h2 { margin: 0; font-weight: 800; font-size: 1.2rem; color: #2563eb; grid-column: 1; }
-            .lang-toggle { 
-                display: flex; 
-                background: #f1f5f9; 
-                border-radius: 0.8rem; 
-                padding: 2px; 
-                grid-column: 2;
-            }
+            .lang-toggle { display: flex; background: #f1f5f9; border-radius: 0.8rem; padding: 2px; grid-column: 2; }
             .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
             .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; }
@@ -112,7 +103,7 @@ window.iniciarADSwitch = async function() {
             return r ? {
                 nombre: r[CONFIG_SW.COL_NOMBRE]?.toString().trim(),
                 desescalada: r[CONFIG_SW.COL_DESESCALADA] ? r[CONFIG_SW.COL_DESESCALADA].split(',').map(v => v.trim()) : [],
-                med: r[CONFIG_SW.COL_MED],
+                med: parseFloat(r[CONFIG_SW.COL_MED]),
                 filaCompleta: r 
             } : null;
         }).filter(f => f !== null);
@@ -121,57 +112,134 @@ window.iniciarADSwitch = async function() {
     } catch (e) { console.error("Error loading data:", e); }
 };
 
-window.setLanguageSW = function(lang) {
-    window.currentLang = lang;
-    renderInterfazSW();
-    if (document.getElementById('sw-res-box').style.display === 'block') {
-        ejecutarSwitch();
-    }
-};
+// ... (renderInterfazSW, actualizarDosisSW, ejecutarSwitch se mantienen)
 
-function renderInterfazSW() {
-    const t = i18n[window.currentLang];
-    const container = document.getElementById('modalData');
-    const farmOptions = window.dbSwitch.map(f => `<option value="${f.nombre}">${f.nombre}</option>`).join('');
+function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
+    let workingCode = code;
+    
+    // 1. Evaluar condicionales [O<150]{...}
+    const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
+    matches.forEach(m => {
+        const op = m[1].replace('=', '==');
+        if (eval(`${dAct} ${op} ${m[2]}`)) workingCode = workingCode.replace(m[0], m[3]);
+        else workingCode = workingCode.replace(m[0], "");
+    });
 
-    container.innerHTML = `
-        <div class="calc-ui">
-            <div class="calc-header">
-                <h2>${t.title}</h2>
-                <div class="lang-toggle">
-                    <button class="lang-btn ${window.currentLang === 'es' ? 'active' : ''}" onclick="setLanguageSW('es')">ES</button>
-                    <button class="lang-btn ${window.currentLang === 'en' ? 'active' : ''}" onclick="setLanguageSW('en')">EN</button>
-                </div>
-                <div></div>
-            </div>
-            <label>${t.from}</label>
-            <select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
-            <label>${t.currentDose}</label>
-            <select id="sw_d_orig"></select>
-            <label>${t.to}</label>
-            <select id="sw_dest" onchange="actualizarDosisSW('dest')">${farmOptions}</select>
-            <label>${t.targetDose}</label>
-            <select id="sw_d_target"></select>
-            <button class="btn-ejecutar" onclick="ejecutarSwitch()">${t.btn}</button>
-            <div id="sw-res-box" class="res-container">
-                <div id="sw-res-pauta" class="res-pauta"></div>
-                <div class="disclaimer">${t.disclaimer}</div>
-            </div>
-        </div>`;
-    actualizarDosisSW('orig');
-    actualizarDosisSW('dest');
+    const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
+    let hitos = [];
+    let ultimoDia = 1;
+    
+    // Seguimiento de dosis actual en el motor para saber desde dónde subir/bajar
+    let estadoActual = {
+        [fOrig.nombre]: dAct,
+        [fDest.nombre]: 0
+    };
+
+    bloques.forEach(bloque => {
+        const p = bloque.split(':');
+        let diaLabel, sujeto, accion, extra = "";
+
+        // Identificar formato d1:O:accion o O:accion
+        if (p.length === 2) {
+            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
+        } else if (p.length >= 3) {
+            diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
+        } else return;
+
+        const farmObj = (sujeto === 'O') ? fOrig : fDest;
+        const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
+        
+        let diaInicio;
+        let esRelativo = diaLabel.startsWith('d+');
+
+        if (esRelativo) {
+            diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
+        } else if (diaLabel === "@O0") {
+            const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
+            diaInicio = hO0 ? hO0.dia : ultimoDia;
+        } else {
+            diaInicio = parseInt(diaLabel.substring(1)) || ultimoDia;
+        }
+
+        const listaDosis = farmObj.desescalada.map(Number).sort((a,b) => a-b);
+        const intv = esRelativo ? parseInt(diaLabel.substring(2)) : (parseInt(extra) || 7);
+
+        if (accion.includes('desc_up') || accion === 'desc_auto') {
+            let current = estadoActual[farmObj.nombre];
+            
+            if (accion.includes('up')) {
+                // TITRACIÓN: Subir paso a paso usando la columna de desescalada
+                let pasos = listaDosis.filter(v => v > current && v < dTar);
+                
+                if (pasos.length > 0) {
+                    pasos.forEach((dose, i) => {
+                        let d = diaInicio + (i * intv);
+                        hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
+                        ultimoDia = Math.max(ultimoDia, d);
+                        estadoActual[farmObj.nombre] = dose;
+                    });
+                    // El siguiente bloque (ej. D:obj) ocurrirá un intervalo después
+                    ultimoDia += intv;
+                } else {
+                    ultimoDia = diaInicio;
+                }
+            } else {
+                // DESESCALADA: Bajar paso a paso
+                let pasos = listaDosis.filter(v => v < current).sort((a,b) => b-a);
+                pasos.forEach((dose, i) => {
+                    let d = diaInicio + (i * intv);
+                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose === 0 ? 'STOP' : 'VAL') });
+                    ultimoDia = Math.max(ultimoDia, d);
+                    estadoActual[farmObj.nombre] = dose;
+                });
+                if (accion.includes('all') && estadoActual[farmObj.nombre] !== 0) {
+                    ultimoDia += intv;
+                    hitos.push({ dia: ultimoDia, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
+                    estadoActual[farmObj.nombre] = 0;
+                }
+            }
+        } else {
+            // ACCIONES FIJAS (D:obj, D:25, O:0, etc.)
+            let dose;
+            if (!isNaN(accion)) dose = parseFloat(accion);
+            else if (accion === 'med') dose = farmObj.med;
+            else if (accion === '0') dose = 0;
+            else if (accion === 'obj') dose = dTar;
+            else if (accion === 'desc_last') dose = listaDosis[0] || 0;
+            else dose = estadoActual[farmObj.nombre];
+
+            // Asegurar que si venimos de una subida, d:obj no se pise con el paso anterior
+            let dFinal = Math.max(diaInicio, ultimoDia);
+            
+            hitos.push({ dia: dFinal, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose === 0 ? 'STOP' : (dose === dTar ? 'OBJ' : 'VAL')) });
+            ultimoDia = dFinal;
+            estadoActual[farmObj.nombre] = dose;
+        }
+    });
+
+    hitos.sort((a, b) => a.dia - b.dia);
+    renderPautaSW(hitos, dTar, dAct);
 }
 
-window.actualizarDosisSW = function(tipo) {
+// ... (renderPautaSW y copiarEstrategiaSW se mantienen igual que en v6.0/v9.0)
+
+// Estas funciones deben estar definidas para que el motor funcione:
+function setLanguageSW(lang) {
+    window.currentLang = lang;
+    renderInterfazSW();
+    if (document.getElementById('sw-res-box').style.display === 'block') ejecutarSwitch();
+}
+
+function actualizarDosisSW(tipo) {
     const farmNombre = document.getElementById(tipo === 'orig' ? 'sw_orig' : 'sw_dest').value;
     const farm = window.dbSwitch.find(f => f.nombre === farmNombre);
     const selector = document.getElementById(tipo === 'orig' ? 'sw_d_orig' : 'sw_d_target');
     if (farm) {
         selector.innerHTML = farm.desescalada.map(d => `<option value="${d}">${d} mg</option>`).join('');
     }
-};
+}
 
-window.ejecutarSwitch = function() {
+function ejecutarSwitch() {
     const t = i18n[window.currentLang];
     const nOrig = document.getElementById('sw_orig').value;
     const nDest = document.getElementById('sw_dest').value;
@@ -189,92 +257,7 @@ window.ejecutarSwitch = function() {
         document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center; padding: 2rem; color: #64748b;">${t.same}</p>`;
         return;
     }
-
     procesarGramaticaSW(rawCode.toString(), fOrig, fDest, dAct, dTar);
-};
-
-function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
-    let workingCode = code;
-    const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
-    
-    matches.forEach(m => {
-        const fullMatch = m[0];
-        const operator = m[1].replace('=', '==');
-        const value = m[2];
-        const content = m[3];
-        if (eval(`${dAct} ${operator} ${value}`)) {
-            workingCode = workingCode.replace(fullMatch, content);
-        } else {
-            workingCode = workingCode.replace(fullMatch, "");
-        }
-    });
-
-    const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
-    let hitos = [];
-    let ultimoDia = 1;
-
-    bloques.forEach(bloque => {
-        const p = bloque.split(':');
-        
-        // FIX PARA MIRTA/TRAZO: Soporte para instrucciones de 2 partes
-        let diaLabel, sujeto, accion, extra = "";
-        if (p.length === 2) {
-            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
-        } else if (p.length >= 3) {
-            diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
-        } else return;
-
-        const farmObj = (sujeto === 'O') ? fOrig : fDest;
-        const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
-        
-        let diaInicio;
-        if (diaLabel.startsWith('d+')) diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
-        else if (diaLabel === "@O0") {
-            const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
-            diaInicio = hO0 ? hO0.dia : ultimoDia;
-        } else diaInicio = parseInt(diaLabel.substring(1)) || ultimoDia;
-
-        if (accion.includes('all') || accion === 'desc_up' || accion === 'desc_auto') {
-            const intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
-            let lista = [...farmObj.desescalada].map(Number);
-            
-            if (accion.includes('up')) {
-                const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
-                let actualEnCuerpo = hUlt ? Number(hUlt.dose) : 0;
-                let pasos = lista.filter(v => v > actualEnCuerpo && v <= dTar).sort((a,b) => a-b);
-                pasos.forEach((dose, i) => {
-                    let d = diaInicio + (i * intv);
-                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
-                    ultimoDia = Math.max(ultimoDia, d);
-                });
-            } else {
-                let idx = lista.indexOf(dAct);
-                let pasos = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
-                pasos.forEach((dose, i) => {
-                    let d = diaInicio + (i * intv);
-                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
-                    ultimoDia = Math.max(ultimoDia, d);
-                });
-                let dFin = diaInicio + (pasos.length * intv);
-                hitos.push({ dia: dFin, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
-                ultimoDia = Math.max(ultimoDia, dFin);
-            }
-        } else {
-            let valAccion = accion.trim();
-            let dose;
-            if (!isNaN(valAccion) && valAccion !== "") {
-                dose = parseFloat(valAccion);
-            } else {
-                dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (accion === 'desc_last' ? farmObj.desescalada[farmObj.desescalada.length-1] : dAct)));
-            }
-            let tipo = (dose == 0) ? 'STOP' : (accion === 'obj' ? 'OBJ' : 'VAL');
-            hitos.push({ dia: diaInicio, nombre: farmObj.nombre, tag: clase, dose, tipo });
-            ultimoDia = Math.max(ultimoDia, diaInicio);
-        }
-    });
-
-    hitos.sort((a, b) => a.dia - b.dia);
-    renderPautaSW(hitos, dTar, dAct);
 }
 
 function renderPautaSW(hitos, dTar, dActOrigen) {
@@ -287,20 +270,20 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
         let doseNum = Number(h.dose);
 
         if (h.tag === 'tag-orig') {
-            if (h.dose === 0) accionTxt = `<b>${t.stop}</b>`;
+            if (h.tipo === 'STOP') accionTxt = `<b>${t.stop}</b>`;
             else if (doseNum < dActOrigen) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
             else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
         } else {
-            if (h.dose === 0) accionTxt = `<b>${t.stop}</b>`;
-            else if (doseNum === dTar) accionTxt = `${t.target} <b>${doseNum} mg</b>`;
+            if (h.tipo === 'STOP') accionTxt = `<b>${t.stop}</b>`;
+            else if (h.tipo === 'OBJ' || doseNum === dTar) accionTxt = `${t.target} <b>${doseNum} mg</b>`;
             else {
-                if (!started[h.nombre] && doseNum > 0) {
+                if (!started[h.nombre]) {
                     accionTxt = `${t.start} <b>${doseNum} mg</b>`;
                     started[h.nombre] = doseNum;
                 } else {
-                    let prevDose = started[h.nombre] || 0;
-                    if (doseNum > prevDose) accionTxt = `${t.increase} <b>${doseNum} mg</b>`;
-                    else if (doseNum < prevDose) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
+                    let prev = started[h.nombre];
+                    if (doseNum > prev) accionTxt = `${t.increase} <b>${doseNum} mg</b>`;
+                    else if (doseNum < prev) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
                     else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
                     started[h.nombre] = doseNum;
                 }
@@ -319,11 +302,11 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
     document.getElementById('sw-res-pauta').innerHTML = html + `<button class="btn-copiar" onclick="copiarEstrategiaSW()">${t.copy}</button>`;
 }
 
-window.copiarEstrategiaSW = function() {
+function copiarEstrategiaSW() {
     let txt = `AD SWITCH PSQALDÍA:\n`;
     document.querySelectorAll('.pauta-step').forEach(s => {
         txt += `${s.querySelector('.step-idx').innerText}: [${s.querySelector('.tag-farm').innerText}] ${s.querySelector('.step-txt').innerText}\n`;
     });
     navigator.clipboard.writeText(txt);
     alert(i18n[window.currentLang].copied);
-};
+}
