@@ -1,6 +1,6 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v4.5
- * CORRECCIÓN: Búsqueda de desescalada de destino y lógica de verbos.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v5.0
+ * AJUSTES: Centrado de UI, Lógica de verbos Origen/Destino, Fix Mirtazapina/Trazodona.
  */
 
 const CONFIG_SW = {
@@ -36,7 +36,7 @@ const i18n = {
         keep: "Tomar",
         target: "Dosis objetivo:",
         day: "Día",
-        disclaimer: "Inspirado en Maudsley 15 edición. Se prioriza la tolerabilidad en ámbito ambulatorio."
+        disclaimer: "Basado en Maudsley prescribing 15 edition, fichas técnicas y experiencia clínica. Debe considerarse como una propuesta de switch \"tipo\" para ámbito ambulatorio."
     },
     en: {
         title: "AD Switch",
@@ -53,7 +53,7 @@ const i18n = {
         keep: "Take",
         target: "Target dose:",
         day: "Day",
-        disclaimer: "Inspired by Maudsley 15th ed. Outpatient safety and tolerability prioritized."
+        disclaimer: "Based on Maudsley prescribing 15th edition, technical data sheets and clinical experience. It should be considered as a \"standard\" switch proposal for outpatient settings."
     }
 };
 
@@ -62,15 +62,18 @@ window.iniciarADSwitch = async function() {
         const styleTag = document.createElement('style');
         styleTag.id = 'switch-styles';
         styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-            .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; position: relative; }
+            /* Cabecera centrada para evitar la X de cierre del modal */
+            .calc-header { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; margin-bottom: 1rem; width: 100%; }
             .calc-ui h2 { margin: 0; font-weight: 800; font-size: 1.2rem; color: #2563eb; }
-            .lang-toggle { display: flex; background: #f1f5f9; border-radius: 0.8rem; padding: 2px; }
-            .lang-btn { padding: 4px 10px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
+            .lang-toggle { display: flex; background: #f1f5f9; border-radius: 0.8rem; padding: 2px; align-self: center; }
+            .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            
             .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; }
-            .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; background: #fff; }
+            .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; background: #fff; appearance: none; }
             .btn-ejecutar { margin-top: 1.5rem; padding: 1.1rem; background: #2563eb; color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
+            
             .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid #e2e8f0; background: white; overflow: hidden; }
             .res-pauta { padding: 1.5rem; }
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
@@ -80,7 +83,7 @@ window.iniciarADSwitch = async function() {
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
             .step-txt { font-size: 0.95rem; line-height: 1.4; color: #1e293b; }
-            .disclaimer { font-size: 0.65rem; color: #64748b; padding: 1rem; border-top: 1px solid #e2e8f0; background: #f8fafc; font-style: italic; }
+            .disclaimer { font-size: 0.65rem; color: #64748b; padding: 1rem; border-top: 1px solid #e2e8f0; background: #f8fafc; font-style: italic; line-height: 1.4; }
             .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: #f1f5f9; border-radius: 1rem; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 700; }
         `;
         document.head.appendChild(styleTag);
@@ -111,6 +114,10 @@ window.iniciarADSwitch = async function() {
 window.setLanguageSW = function(lang) {
     window.currentLang = lang;
     renderInterfazSW();
+    // Si ya hay una pauta generada, se refresca
+    if (document.getElementById('sw-res-box').style.display === 'block') {
+        ejecutarSwitch();
+    }
 };
 
 function renderInterfazSW() {
@@ -164,27 +171,32 @@ window.ejecutarSwitch = function() {
     const fOrig = window.dbSwitch.find(f => f.nombre === nOrig);
     const fDest = window.dbSwitch.find(f => f.nombre === nDest);
     
-    const colIdx = ORDEN_MATRIZ.indexOf(nDest);
+    // Fix para búsqueda de columna (limpiando posibles espacios en nombres de la matriz)
+    const colIdx = ORDEN_MATRIZ.map(s => s.toLowerCase()).indexOf(nDest.toLowerCase());
     const rawCode = fOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIdx];
 
     if (!rawCode || rawCode === 'x') {
         document.getElementById('sw-res-box').style.display = 'block';
-        document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center;">${t.same}</p>`;
+        document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center; padding: 2rem; color: #64748b;">${t.same}</p>`;
         return;
     }
 
-    procesarGramaticaSW(rawCode, fOrig, fDest, dAct, dTar);
+    procesarGramaticaSW(rawCode.toString(), fOrig, fDest, dAct, dTar);
 };
 
 function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
     let workingCode = code;
+    // Condicionales [O<150]{...}
     const condRegex = /\[O([<>]=?)(\d+)\]\{(.*?)\}/g;
     let m;
     while ((m = condRegex.exec(code)) !== null) {
-        if (eval(`${dAct} ${m[1].replace('=','==')} ${m[2]}`)) workingCode = m[3];
+        const op = m[1].replace('=', '==');
+        if (eval(`${dAct} ${op} ${m[2]}`)) {
+            workingCode = m[3];
+        }
     }
 
-    const bloques = workingCode.split('|').map(b => b.trim());
+    const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
     let hitos = [];
     let ultimoDia = 1;
 
@@ -203,15 +215,13 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
             diaInicio = hO0 ? hO0.dia : ultimoDia;
         } else diaInicio = parseInt(diaLabel.substring(1));
 
-        if (accion.includes('all') || accion === 'desc_up') {
+        if (accion.includes('all') || accion === 'desc_up' || accion === 'desc_auto') {
             const intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
             let lista = [...farmObj.desescalada].map(Number);
             
             if (accion.includes('up')) {
-                // ESCALADA (Destino): Busca en su propia lista (fDest)
                 const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
                 let actualEnCuerpo = hUlt ? Number(hUlt.dose) : 0;
-                // De menor a mayor para subir
                 let pasos = lista.filter(v => v > actualEnCuerpo && v <= dTar).sort((a,b) => a-b);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
@@ -219,7 +229,6 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
                     ultimoDia = Math.max(ultimoDia, d);
                 });
             } else {
-                // DESESCALADA (Origen): Busca en su propia lista (fOrig)
                 let idx = lista.indexOf(dAct);
                 let pasos = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
                 pasos.forEach((dose, i) => {
@@ -240,32 +249,44 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
     });
 
     hitos.sort((a, b) => a.dia - b.dia);
-    renderPautaSW(hitos, dTar);
+    renderPautaSW(hitos, dTar, dAct);
 }
 
-function renderPautaSW(hitos, dTar) {
+function renderPautaSW(hitos, dTar, dActOrigen) {
     const t = i18n[window.currentLang];
     let html = '';
-    let started = {}; // Para controlar si ya hemos "iniciado" un fármaco
+    let started = {}; // Control de inicio para Destino solamente
 
     hitos.forEach(h => {
         let accionTxt = "";
         let doseNum = Number(h.dose);
 
-        if (h.tipo === 'STOP') {
-            accionTxt = `<b>${t.stop}</b>`;
-        } else if (h.tipo === 'OBJ' || doseNum === dTar) {
-            accionTxt = `${t.target} <b>${doseNum} mg</b>`;
-        } else {
-            if (!started[h.nombre] && doseNum > 0) {
-                accionTxt = `${t.start} <b>${doseNum} mg</b>`;
-                started[h.nombre] = doseNum;
+        if (h.tag === 'tag-orig') {
+            // Lógica para ORIGEN: Nunca usa "Iniciar". Solo Reducir, Tomar o Suspender.
+            if (h.tipo === 'STOP') {
+                accionTxt = `<b>${t.stop}</b>`;
+            } else if (doseNum < dActOrigen) {
+                accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
             } else {
-                let prevDose = started[h.nombre];
-                if (doseNum > prevDose) accionTxt = `${t.increase} <b>${doseNum} mg</b>`;
-                else if (doseNum < prevDose) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
-                else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
-                started[h.nombre] = doseNum;
+                accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
+            }
+        } else {
+            // Lógica para DESTINO: Iniciar, Subir, Reducir o Objetivo.
+            if (h.tipo === 'STOP') {
+                accionTxt = `<b>${t.stop}</b>`;
+            } else if (h.tipo === 'OBJ' || doseNum === dTar) {
+                accionTxt = `${t.target} <b>${doseNum} mg</b>`;
+            } else {
+                if (!started[h.nombre] && doseNum > 0) {
+                    accionTxt = `${t.start} <b>${doseNum} mg</b>`;
+                    started[h.nombre] = doseNum;
+                } else {
+                    let prevDose = started[h.nombre] || 0;
+                    if (doseNum > prevDose) accionTxt = `${t.increase} <b>${doseNum} mg</b>`;
+                    else if (doseNum < prevDose) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
+                    else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
+                    started[h.nombre] = doseNum;
+                }
             }
         }
 
