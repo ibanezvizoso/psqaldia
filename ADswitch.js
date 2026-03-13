@@ -1,8 +1,7 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v15.0
- * FIX: Eliminación de colisiones de días (evita duplicados en el mismo día para el mismo fármaco).
- * FIX: Avance inteligente del cronograma en secuencias desc_up/desc_all.
- * FIX: Priorización de la última instrucción procesada sobre hitos previos.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v16.0
+ * FINAL: UI Polished + Motor de deduplicación de hitos.
+ * FIX: Estilo de disclaimer y botón de copiado extendido.
  */
 
 const CONFIG_SW = {
@@ -26,18 +25,18 @@ const i18n = {
     es: {
         title: "AD Switch", from: "Fármaco de Origen", currentDose: "Dosis Actual", 
         to: "Fármaco de Destino", targetDose: "Dosis Objetivo", btn: "GENERAR PAUTA", 
-        copy: "COPIAR", stop: "Suspender", start: "Iniciar con", reduce: "Reducir a", 
+        copy: "COPIAR ESTRATEGIA", stop: "Suspender", start: "Iniciar con", reduce: "Reducir a", 
         increase: "Subir a", keep: "Tomar", target: "Dosis objetivo:", day: "Día", 
         copied: "¡Copiado!", same: "Mismo fármaco o cambio directo.",
-        disclaimer: "Basado en Maudsley prescribing 15 edition, fichas técnicas y experiencia clínica. Propuesta de switch tipo para ámbito ambulatorio."
+        disclaimer: "Basado en Maudsley prescribing 15 edition, fichas técnicas y experiencia clínica. Esta propuesta debe validarse según el perfil clínico del paciente."
     },
     en: {
         title: "AD Switch", from: "Origin Drug", currentDose: "Current Dose", 
         to: "Target Drug", targetDose: "Target Dose", btn: "GENERATE STRATEGY", 
-        copy: "COPY", stop: "Discontinue", start: "Start with", reduce: "Reduce to", 
+        copy: "COPY STRATEGY", stop: "Discontinue", start: "Start with", reduce: "Reduce to", 
         increase: "Increase to", keep: "Take", target: "Target dose:", day: "Day", 
         copied: "Copied!", same: "Same drug or direct switch.",
-        disclaimer: "Based on Maudsley prescribing 15th edition, technical data sheets and clinical experience."
+        disclaimer: "Based on Maudsley prescribing 15th edition, technical data and clinical experience. This proposal must be validated according to the patient's clinical profile."
     }
 };
 
@@ -55,18 +54,47 @@ window.iniciarADSwitch = async function() {
             .lang-toggle { display: flex; background: #f1f5f9; border-radius: 0.8rem; padding: 2px; }
             .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            
             .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; }
             .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; background: #fff; appearance: none; }
             .btn-ejecutar { margin-top: 1.5rem; padding: 1.1rem; background: #2563eb; color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
-            .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid #e2e8f0; background: white; overflow: hidden; }
+            
+            .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid #e2e8f0; background: #fff; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
             .res-pauta { padding: 1.5rem; }
+            
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
-            .pauta-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; width: 2px; background: #e2e8f0; }
+            .pauta-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 35px; bottom: -15px; width: 2px; background: #f1f5f9; }
             .step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.7rem; color: #2563eb; z-index: 1; }
+            
             .tag-farm { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px; }
             .tag-orig { background: #fee2e2; color: #b91c1c; }
             .tag-dest { background: #dcfce7; color: #15803d; }
-            .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: #f1f5f9; border-radius: 1rem; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 700; }
+            .step-txt { font-size: 0.95rem; line-height: 1.4; color: #1e293b; }
+            
+            .disclaimer { 
+                font-size: 0.7rem; 
+                color: #64748b; 
+                padding: 1.2rem 1.5rem; 
+                border-top: 1px solid #f1f5f9; 
+                background: #f8fafc; 
+                font-style: italic; 
+                line-height: 1.5;
+                text-align: justify;
+            }
+            .btn-copiar { 
+                margin-top: 0.5rem; 
+                width: 100%; 
+                padding: 1rem; 
+                background: #f1f5f9; 
+                border-radius: 1rem; 
+                border: 1px solid #e2e8f0; 
+                cursor: pointer; 
+                font-weight: 800; 
+                font-size: 0.8rem;
+                color: #475569;
+                transition: all 0.2s;
+            }
+            .btn-copiar:hover { background: #e2e8f0; color: #1e293b; }
         `;
         document.head.appendChild(styleTag);
     }
@@ -170,7 +198,6 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
 
         if (p.length === 2) { 
             sujeto = p[0]; accion = p[1]; 
-            // Si no hay día, se asume que es la continuación inmediata del último día registrado
             diaLabel = "d" + (accion === 'obj' ? (ultimoDiaTimeline + ultimoIntervaloUsado) : ultimoDiaTimeline);
         } else {
             diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
@@ -233,16 +260,13 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         }
     });
 
-    // --- LIMPIEZA DE COLISIONES ---
-    // Agrupamos hitos por día y fármaco, manteniendo solo el último definido (el que manda)
-    const hitosLimpios = [];
     const mapaHitos = new Map();
-
     hitos.forEach(h => {
         const key = `${h.dia}-${h.nombre}`;
-        mapaHitos.set(key, h); // El set sobreescribe si la clave ya existe
+        mapaHitos.set(key, h);
     });
 
+    const hitosLimpios = [];
     mapaHitos.forEach(h => hitosLimpios.push(h));
     hitosLimpios.sort((a, b) => a.dia - b.dia);
 
