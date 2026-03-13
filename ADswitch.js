@@ -36,7 +36,7 @@ const i18n = {
         keep: "Tomar",
         target: "Dosis objetivo:",
         day: "Día",
-        disclaimer: "Basado en Maudsley prescribing 15 edition, fichas técnicas y experiencia clínica. Debe considerarse como una propuesta de switch \"tipo\" para ámbito ambulatorio."
+        disclaimer: "Basado en The Maudsley's Prescribing Guidelines 15th edition, fichas técnicas y experiencia clínica. Debe considerarse como una propuesta de switch \"tipo\" para ámbito ambulatorio que deberá ser individualizada según el contexto clínico."
     },
     en: {
         title: "AD Switch",
@@ -53,7 +53,7 @@ const i18n = {
         keep: "Take",
         target: "Target dose:",
         day: "Day",
-        disclaimer: "Based on Maudsley prescribing 15th edition, technical data sheets and clinical experience. It should be considered as a \"standard\" switch proposal for outpatient settings."
+        disclaimer: "Based on The Maudsley's Prescribing Guidelines 15th edition, technical data sheets and clinical experience. It should be considered as a \"standard\" switch proposal for outpatient settings which should be individualized according to the clinical context."
     }
 };
 
