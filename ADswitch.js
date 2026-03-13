@@ -1,7 +1,7 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v10.6
- * RESTAURADO: Basado en v6.0 (la versión que funcionaba).
- * FIX: Error de carga en fetch y puntero de calendario.
+ * ADswitch.js - Motor de Conmutación v11.0 (Final)
+ * FIX: 'med' como punto de anclaje real. 
+ * FIX: La desescalada/titulación ahora nace de la última dosis programada.
  */
 
 const CONFIG_SW = {
@@ -63,9 +63,8 @@ const i18n = {
 };
 
 window.iniciarADSwitch = async function() {
-    // 1. Asegurar que encontramos el contenedor
     const container = document.getElementById('modalData');
-    if (!container) return console.error("No se encontró el contenedor #modalData");
+    if (!container) return;
 
     if (!document.getElementById('switch-styles')) {
         const styleTag = document.createElement('style');
@@ -98,9 +97,7 @@ window.iniciarADSwitch = async function() {
     try {
         const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
         const data = await response.json();
-        
-        // Error tonto solucionado: Comprobación de que existan valores antes de mapear
-        if (!data || !data.values) throw new Error("Datos no encontrados en el Sheet");
+        if (!data || !data.values) throw new Error("No data");
 
         const rows = data.values;
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
@@ -116,9 +113,8 @@ window.iniciarADSwitch = async function() {
         }).filter(f => f !== null);
 
         renderInterfazSW();
-    } catch (e) { 
-        console.error("Error cargando ADSwitch:", e);
-        container.innerHTML = `<p style="text-align:center; padding:2rem; color:#ef4444;">Error al cargar datos. Compruebe la conexión.</p>`;
+    } catch (e) {
+        container.innerHTML = `<p style="text-align:center; padding:2rem; color:#ef4444;">Error de carga.</p>`;
     }
 };
 
@@ -137,14 +133,10 @@ function renderInterfazSW() {
                 </div>
                 <div></div>
             </div>
-            <label>${t.from}</label>
-            <select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
-            <label>${t.currentDose}</label>
-            <select id="sw_d_orig"></select>
-            <label>${t.to}</label>
-            <select id="sw_dest" onchange="actualizarDosisSW('dest')">${farmOptions}</select>
-            <label>${t.targetDose}</label>
-            <select id="sw_d_target"></select>
+            <label>${t.from}</label><select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
+            <label>${t.currentDose}</label><select id="sw_d_orig"></select>
+            <label>${t.to}</label><select id="sw_dest" onchange="actualizarDosisSW('dest')">${farmOptions}</select>
+            <label>${t.targetDose}</label><select id="sw_d_target"></select>
             <button class="btn-ejecutar" onclick="ejecutarSwitch()">${t.btn}</button>
             <div id="sw-res-box" class="res-container">
                 <div id="sw-res-pauta" class="res-pauta"></div>
@@ -165,13 +157,10 @@ window.actualizarDosisSW = function(tipo) {
     const farmNombre = document.getElementById(tipo === 'orig' ? 'sw_orig' : 'sw_dest').value;
     const farm = window.dbSwitch.find(f => f.nombre === farmNombre);
     const selector = document.getElementById(tipo === 'orig' ? 'sw_d_orig' : 'sw_d_target');
-    if (farm) {
-        selector.innerHTML = farm.desescalada.map(d => `<option value="${d}">${d} mg</option>`).join('');
-    }
+    if (farm) selector.innerHTML = farm.desescalada.map(d => `<option value="${d}">${d} mg</option>`).join('');
 };
 
 window.ejecutarSwitch = function() {
-    const t = i18n[window.currentLang];
     const nOrig = document.getElementById('sw_orig').value;
     const nDest = document.getElementById('sw_dest').value;
     const dAct = parseFloat(document.getElementById('sw_d_orig').value);
@@ -179,13 +168,12 @@ window.ejecutarSwitch = function() {
 
     const fOrig = window.dbSwitch.find(f => f.nombre === nOrig);
     const fDest = window.dbSwitch.find(f => f.nombre === nDest);
-    
     const colIdx = ORDEN_MATRIZ.map(s => s.toLowerCase()).indexOf(nDest.toLowerCase());
     const rawCode = fOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIdx];
 
     if (!rawCode || rawCode === 'x') {
         document.getElementById('sw-res-box').style.display = 'block';
-        document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center; padding: 2rem; color: #64748b;">${t.same}</p>`;
+        document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center; padding: 2rem; color: #64748b;">${i18n[window.currentLang].same}</p>`;
         return;
     }
     procesarGramaticaSW(rawCode.toString(), fOrig, fDest, dAct, dTar);
@@ -193,7 +181,6 @@ window.ejecutarSwitch = function() {
 
 function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
     let workingCode = code;
-    // Evaluar condicionales [O<150]{...}
     const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
     matches.forEach(m => {
         const op = m[1].replace('=', '==');
@@ -210,51 +197,48 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         if (p.length < 2) return;
 
         let diaLabel, sujeto, accion, extra = "";
-        if (p.length === 2) {
-            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
-        } else {
-            diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
-        }
+        if (p.length === 2) { sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia; }
+        else { diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || ""; }
 
         const farmObj = (sujeto === 'O') ? fOrig : fDest;
         const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
         
-        let diaInicio;
-        if (diaLabel.startsWith('d+')) diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
-        else if (diaLabel === "@O0") {
-            const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
-            diaInicio = hO0 ? hO0.dia : ultimoDia;
-        } else diaInicio = parseInt(diaLabel.substring(1)) || ultimoDia;
+        let diaInicio = diaLabel.startsWith('d+') ? ultimoDia + parseInt(diaLabel.substring(2)) : (parseInt(diaLabel.substring(1)) || ultimoDia);
+        let lista = [...farmObj.desescalada].map(Number).sort((a,b) => a-b);
+        let intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
 
-        // Lógica de titulación paso a paso (fiel a v6.0)
-        if (accion.includes('all') || accion === 'desc_up' || accion === 'desc_auto') {
-            const intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
-            let lista = [...farmObj.desescalada].map(Number).sort((a,b) => a-b);
-            
+        // --- MEMORIA DE ESTADO ---
+        // Buscamos la dosis más reciente programada para este fármaco
+        const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
+        let doseReferencia = hUlt ? Number(hUlt.dose) : (sujeto === 'O' ? dAct : 0);
+
+        if (accion.includes('desc_up') || accion.includes('desc_auto')) {
+            let pasos = [];
             if (accion.includes('up')) {
-                const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
-                let actual = hUlt ? Number(hUlt.dose) : 0;
-                let pasos = lista.filter(v => v > actual && v < dTar);
-                pasos.forEach((dose, i) => {
-                    let d = diaInicio + (i * intv);
-                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
-                    ultimoDia = Math.max(ultimoDia, d);
-                });
-                if (pasos.length > 0) ultimoDia += intv;
+                // Subir desde la última dosis programada hasta el objetivo
+                pasos = lista.filter(v => v > doseReferencia && v < dTar);
+                if (!accion.includes('all')) pasos = pasos.slice(0, 1);
             } else {
-                let pasos = lista.filter(v => v < dAct).sort((a,b) => b-a);
-                pasos.forEach((dose, i) => {
-                    let d = diaInicio + (i * intv);
-                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
-                    ultimoDia = Math.max(ultimoDia, d);
-                });
-                let dFin = diaInicio + (pasos.length * intv);
-                hitos.push({ dia: dFin, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
-                ultimoDia = Math.max(ultimoDia, dFin);
+                // Bajar desde la última dosis programada (ej. desde el 'med') hacia abajo
+                pasos = lista.filter(v => v < doseReferencia).sort((a,b) => b-a);
+                if (!accion.includes('all')) pasos = pasos.slice(0, 1);
+            }
+
+            pasos.forEach((dose, i) => {
+                let d = diaInicio + (i * intv);
+                hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
+                ultimoDia = Math.max(ultimoDia, d);
+            });
+            
+            if (accion.includes('all') && !accion.includes('up')) {
+                ultimoDia += intv;
+                hitos.push({ dia: ultimoDia, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
+            } else if (pasos.length > 0) {
+                ultimoDia = diaInicio + ((pasos.length - 1) * intv);
             }
         } else {
-            // Dosis fija
-            let dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (accion === 'desc_last' ? farmObj.desescalada[farmObj.desescalada.length-1] : dAct)));
+            // DOSIS FIJA (med, 0, obj...)
+            let dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (accion === 'desc_last' ? lista[0] : parseFloat(accion) || dAct)));
             let dFinal = Math.max(diaInicio, ultimoDia);
             hitos.push({ dia: dFinal, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose == 0 ? 'STOP' : (accion === 'obj' ? 'OBJ' : 'VAL')) });
             ultimoDia = dFinal;
@@ -271,9 +255,7 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
     let started = {};
 
     hitos.forEach(h => {
-        let accionTxt = "";
-        let doseNum = Number(h.dose);
-
+        let accionTxt = "", doseNum = Number(h.dose);
         if (h.tag === 'tag-orig') {
             if (h.tipo === 'STOP') accionTxt = `<b>${t.stop}</b>`;
             else if (doseNum < dActOrigen) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
@@ -282,10 +264,8 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
             if (h.tipo === 'STOP') accionTxt = `<b>${t.stop}</b>`;
             else if (h.tipo === 'OBJ' || doseNum === dTar) accionTxt = `${t.target} <b>${doseNum} mg</b>`;
             else {
-                if (!started[h.nombre]) {
-                    accionTxt = `${t.start} <b>${doseNum} mg</b>`;
-                    started[h.nombre] = doseNum;
-                } else {
+                if (!started[h.nombre]) { accionTxt = `${t.start} <b>${doseNum} mg</b>`; started[h.nombre] = doseNum; }
+                else {
                     let prev = started[h.nombre];
                     if (doseNum > prev) accionTxt = `${t.increase} <b>${doseNum} mg</b>`;
                     else if (doseNum < prev) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
