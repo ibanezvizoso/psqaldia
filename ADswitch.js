@@ -1,8 +1,8 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v12.5
- * FIX: Bloqueo al inicio mediante guardas en selectores.
- * FIX: Persistencia de etiquetas (evita repetir "Iniciar con").
- * FIX: Memoria de dosis para destino (no hereda dAct del origen).
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v13.0
+ * FIX: Soporte para instrucciones cortas (ej: D:obj).
+ * FIX: Titulación progresiva (desc_up) sin duplicar el hito final.
+ * FIX: Cálculo dinámico de d+2 basado en el último hito real.
  */
 
 const CONFIG_SW = {
@@ -29,7 +29,7 @@ const i18n = {
         copy: "COPIAR", stop: "Suspender", start: "Iniciar con", reduce: "Reducir a", 
         increase: "Subir a", keep: "Tomar", target: "Dosis objetivo:", day: "Día", 
         copied: "¡Copiado!", same: "Mismo fármaco o cambio directo.",
-        disclaimer: "Basado en Maudsley prescribing 15 edition. Propuesta de switch tipo para ámbito ambulatorio."
+        disclaimer: "Basado en Maudsley prescribing 15 edition, fichas técnicas y experiencia clínica. Propuesta de switch tipo para ámbito ambulatorio."
     },
     en: {
         title: "AD Switch", from: "Origin Drug", currentDose: "Current Dose", 
@@ -37,7 +37,7 @@ const i18n = {
         copy: "COPY", stop: "Discontinue", start: "Start with", reduce: "Reduce to", 
         increase: "Increase to", keep: "Take", target: "Target dose:", day: "Day", 
         copied: "Copied!", same: "Same drug or direct switch.",
-        disclaimer: "Based on Maudsley prescribing 15th edition."
+        disclaimer: "Based on Maudsley prescribing 15th edition, technical data sheets and clinical experience."
     }
 };
 
@@ -74,8 +74,6 @@ window.iniciarADSwitch = async function() {
     try {
         const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
         const data = await response.json();
-        if (!data || !data.values) throw new Error("Excel vacío");
-
         const rows = data.values;
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
         
@@ -90,17 +88,12 @@ window.iniciarADSwitch = async function() {
         }).filter(f => f !== null);
 
         renderInterfazSW();
-    } catch (e) {
-        console.error("Error cargando ADSwitch:", e);
-        container.innerHTML = `<p style="text-align:center; padding:2rem; color:#ef4444;">Error de conexión con la base de datos.</p>`;
-    }
+    } catch (e) { console.error("Error loading data:", e); }
 };
 
 function renderInterfazSW() {
     const t = i18n[window.currentLang];
     const container = document.getElementById('modalData');
-    if (!window.dbSwitch || window.dbSwitch.length === 0) return;
-
     const farmOptions = window.dbSwitch.map(f => `<option value="${f.nombre}">${f.nombre}</option>`).join('');
 
     container.innerHTML = `
@@ -128,15 +121,10 @@ function renderInterfazSW() {
 }
 
 window.actualizarDosisSW = function(tipo) {
-    const idSelect = tipo === 'orig' ? 'sw_orig' : 'sw_dest';
-    const el = document.getElementById(idSelect);
-    if (!el) return;
-
-    const farmNombre = el.value;
+    const farmNombre = document.getElementById(tipo === 'orig' ? 'sw_orig' : 'sw_dest').value;
     const farm = window.dbSwitch.find(f => f.nombre === farmNombre);
     const selector = document.getElementById(tipo === 'orig' ? 'sw_d_orig' : 'sw_d_target');
-    
-    if (farm && selector) {
+    if (farm) {
         selector.innerHTML = farm.desescalada.map(d => `<option value="${d}">${d} mg</option>`).join('');
     }
 };
@@ -149,7 +137,6 @@ window.ejecutarSwitch = function() {
 
     const fOrig = window.dbSwitch.find(f => f.nombre === nOrig);
     const fDest = window.dbSwitch.find(f => f.nombre === nDest);
-    
     const colIdx = ORDEN_MATRIZ.map(s => s.toLowerCase()).indexOf(nDest.toLowerCase());
     const rawCode = fOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIdx];
 
@@ -158,7 +145,6 @@ window.ejecutarSwitch = function() {
         document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center; padding: 2rem; color: #64748b;">${i18n[window.currentLang].same}</p>`;
         return;
     }
-
     procesarGramaticaSW(rawCode.toString(), fOrig, fDest, dAct, dTar);
 };
 
@@ -174,16 +160,21 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
     const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
     let hitos = [];
     let ultimoDia = 1;
-
     let dosisActuales = {};
     dosisActuales[fOrig.nombre] = dAct;
     dosisActuales[fDest.nombre] = 0;
 
     bloques.forEach(bloque => {
         const p = bloque.split(':');
-        if (p.length < 3) return;
+        let diaLabel, sujeto, accion, extra = "";
+        
+        // SOPORTE PARA D:obj (2 partes) O d8:D:obj (3+ partes)
+        if (p.length === 2) {
+            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
+        } else if (p.length >= 3) {
+            diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
+        } else return;
 
-        let diaLabel = p[0], sujeto = p[1], accion = p[2], extra = p[3] || "";
         const farmObj = (sujeto === 'O') ? fOrig : fDest;
         const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
         
@@ -191,11 +182,12 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         let dRef = dosisActuales[farmObj.nombre];
 
         if (accion.includes('all') || accion === 'desc_up' || accion === 'desc_auto') {
-            const intv = Math.max(1, parseInt(extra) || 7);
+            const intv = Math.max(1, parseInt(extra) || (accion.includes('up') ? 2 : 7));
             let lista = [...farmObj.desescalada].map(Number).sort((a,b) => a-b);
             
             if (accion.includes('up')) {
-                let pasos = lista.filter(v => v > dRef && v <= dTar);
+                // Filtramos pasos intermedios (excluyendo el objetivo final si hay un bloque 'obj' después)
+                let pasos = lista.filter(v => v > dRef && v < dTar);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
                     hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
@@ -210,13 +202,15 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
                     ultimoDia = Math.max(ultimoDia, d);
                     dosisActuales[farmObj.nombre] = dose;
                 });
-                let dFin = diaInicio + (pasos.length * intv);
-                hitos.push({ dia: dFin, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
-                ultimoDia = Math.max(ultimoDia, dFin);
-                dosisActuales[farmObj.nombre] = 0;
+                if (accion.includes('all')) {
+                    let dFin = diaInicio + (pasos.length * intv);
+                    hitos.push({ dia: dFin, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
+                    ultimoDia = Math.max(ultimoDia, dFin);
+                    dosisActuales[farmObj.nombre] = 0;
+                }
             }
         } else {
-            let dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (parseFloat(accion) || dRef)));
+            let dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (accion === 'desc_last' ? farmObj.desescalada[0] : (parseFloat(accion) || dRef))));
             hitos.push({ dia: diaInicio, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose == 0 ? 'STOP' : (accion === 'obj' ? 'OBJ' : 'VAL')) });
             ultimoDia = Math.max(ultimoDia, diaInicio);
             dosisActuales[farmObj.nombre] = dose;
@@ -230,7 +224,7 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
 function renderPautaSW(hitos, dTar, dActOrigen) {
     const t = i18n[window.currentLang];
     let html = '';
-    let started = {}; // Memoria para saber qué fármacos ya se han iniciado
+    let started = {};
 
     hitos.forEach(h => {
         let accionTxt = "";
@@ -241,12 +235,9 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
             else if (doseNum < dActOrigen) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
             else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
         } else {
-            // FARMACO DE DESTINO
-            if (h.tipo === 'STOP') {
-                accionTxt = `<b>${t.stop}</b>`;
-            } else if (h.tipo === 'OBJ' || doseNum === dTar) {
+            if (h.tipo === 'STOP') accionTxt = `<b>${t.stop}</b>`;
+            else if (h.tipo === 'OBJ' || doseNum === dTar) {
                 accionTxt = `${t.target} <b>${doseNum} mg</b>`;
-                // IMPORTANTE: Incluso si es el objetivo directo, marcamos como iniciado
                 started[h.nombre] = doseNum;
             } else {
                 if (started[h.nombre] === undefined && doseNum > 0) {
