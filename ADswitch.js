@@ -1,6 +1,6 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v6.5
- * FIX: Soporte para instrucciones de 2 partes (D:obj) y Layout UI centrado.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v8.0
+ * FIX: Desescalada desde dosis fija y soporte numérico completo.
  */
 
 const CONFIG_SW = {
@@ -63,7 +63,6 @@ window.iniciarADSwitch = async function() {
         styleTag.id = 'switch-styles';
         styleTag.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-            /* Header: Título arriba-izquierda, Selector centrado */
             .calc-header { 
                 display: grid; 
                 grid-template-columns: 1fr auto 1fr; 
@@ -77,15 +76,13 @@ window.iniciarADSwitch = async function() {
                 background: #f1f5f9; 
                 border-radius: 0.8rem; 
                 padding: 2px; 
-                grid-column: 2; /* Selector más centrado */
+                grid-column: 2;
             }
             .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-            
             .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; }
             .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; background: #fff; appearance: none; }
             .btn-ejecutar { margin-top: 1.5rem; padding: 1.1rem; background: #2563eb; color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
-            
             .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid #e2e8f0; background: white; overflow: hidden; }
             .res-pauta { padding: 1.5rem; }
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
@@ -124,9 +121,7 @@ window.iniciarADSwitch = async function() {
 window.setLanguageSW = function(lang) {
     window.currentLang = lang;
     renderInterfazSW();
-    if (document.getElementById('sw-res-box').style.display === 'block') {
-        ejecutarSwitch();
-    }
+    if (document.getElementById('sw-res-box').style.display === 'block') { ejecutarSwitch(); }
 };
 
 function renderInterfazSW() {
@@ -189,13 +184,11 @@ window.ejecutarSwitch = function() {
         document.getElementById('sw-res-pauta').innerHTML = `<p style="text-align:center; padding: 2rem; color: #64748b;">${t.same}</p>`;
         return;
     }
-
     procesarGramaticaSW(rawCode.toString(), fOrig, fDest, dAct, dTar);
 };
 
 function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
     let workingCode = code;
-    // Procesar condicionales sin romper el resto de la cadena
     const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
     matches.forEach(m => {
         const op = m[1].replace('=', '==');
@@ -211,16 +204,10 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         const p = bloque.split(':');
         let diaLabel, sujeto, accion, extra = "";
 
-        // SOPORTE PARA INSTRUCCIONES DE 2 PARTES (ej: D:obj)
         if (p.length === 2) {
-            sujeto = p[0];
-            accion = p[1];
-            diaLabel = "d" + ultimoDia; // Asumir último día si no se especifica
+            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
         } else if (p.length >= 3) {
-            diaLabel = p[0];
-            sujeto = p[1];
-            accion = p[2];
-            extra = p[3] || "";
+            diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
         } else return;
 
         const farmObj = (sujeto === 'O') ? fOrig : fDest;
@@ -237,18 +224,20 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
             const intv = parseInt(extra) || 7;
             let lista = [...farmObj.desescalada].map(Number);
             
+            // BUSCAR DOSIS PREVIA EN LA ESTRATEGIA (No en el selector UI)
+            const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
+            let doseRef = hUlt ? Number(hUlt.dose) : dAct;
+            
             if (accion.includes('up')) {
-                const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
-                let actualEnCuerpo = hUlt ? Number(hUlt.dose) : 0;
-                let pasos = lista.filter(v => v > actualEnCuerpo && v <= dTar).sort((a,b) => a-b);
+                let pasos = lista.filter(v => v > doseRef && v <= dTar).sort((a,b) => a-b);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
                     hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
                     ultimoDia = Math.max(ultimoDia, d);
                 });
             } else {
-                let idx = lista.indexOf(dAct);
-                let pasos = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
+                let idx = lista.indexOf(doseRef);
+                let pasos = (idx === -1) ? lista.filter(v => v < doseRef) : lista.slice(idx + 1);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
                     hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
@@ -259,7 +248,13 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
                 ultimoDia = Math.max(ultimoDia, dFin);
             }
         } else {
-            let dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (accion === 'desc_last' ? farmObj.desescalada[farmObj.desescalada.length-1] : dAct)));
+            // SOPORTE PARA DOSIS NUMÉRICAS DIRECTAS (100, 40...)
+            let dose;
+            if (!isNaN(accion) && accion.trim() !== "") {
+                dose = parseFloat(accion);
+            } else {
+                dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : dAct));
+            }
             let tipo = (dose == 0) ? 'STOP' : (accion === 'obj' ? 'OBJ' : 'VAL');
             hitos.push({ dia: diaInicio, nombre: farmObj.nombre, tag: clase, dose, tipo });
             ultimoDia = Math.max(ultimoDia, diaInicio);
