@@ -1,6 +1,6 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v6.0
- * FIX: Procesamiento de bloques condicionales múltiples y Layout UI.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v6.5
+ * FIX: Soporte para instrucciones de 2 partes (D:obj) y Layout UI centrado.
  */
 
 const CONFIG_SW = {
@@ -63,7 +63,7 @@ window.iniciarADSwitch = async function() {
         styleTag.id = 'switch-styles';
         styleTag.innerHTML = `
             .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-            /* Layout: Título a la izquierda, Selector centrado, Espacio a la derecha para la X */
+            /* Header: Título arriba-izquierda, Selector centrado */
             .calc-header { 
                 display: grid; 
                 grid-template-columns: 1fr auto 1fr; 
@@ -77,7 +77,7 @@ window.iniciarADSwitch = async function() {
                 background: #f1f5f9; 
                 border-radius: 0.8rem; 
                 padding: 2px; 
-                grid-column: 2; /* Centrado */
+                grid-column: 2; /* Selector más centrado */
             }
             .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -142,7 +142,8 @@ function renderInterfazSW() {
                     <button class="lang-btn ${window.currentLang === 'es' ? 'active' : ''}" onclick="setLanguageSW('es')">ES</button>
                     <button class="lang-btn ${window.currentLang === 'en' ? 'active' : ''}" onclick="setLanguageSW('en')">EN</button>
                 </div>
-                <div></div> </div>
+                <div></div>
+            </div>
             <label>${t.from}</label>
             <select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
             <label>${t.currentDose}</label>
@@ -193,33 +194,35 @@ window.ejecutarSwitch = function() {
 };
 
 function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
-    // FIX DE LA GRAMÁTICA: Ahora procesa condicionales sin borrar el resto del código
     let workingCode = code;
+    // Procesar condicionales sin romper el resto de la cadena
     const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
-    
     matches.forEach(m => {
-        const fullMatch = m[0];
-        const operator = m[1].replace('=', '==');
-        const value = m[2];
-        const content = m[3];
-        
-        if (eval(`${dAct} ${operator} ${value}`)) {
-            workingCode = workingCode.replace(fullMatch, content);
-        } else {
-            workingCode = workingCode.replace(fullMatch, "");
-        }
+        const op = m[1].replace('=', '==');
+        if (eval(`${dAct} ${op} ${m[2]}`)) workingCode = workingCode.replace(m[0], m[3]);
+        else workingCode = workingCode.replace(m[0], "");
     });
 
-    // Limpiar pipes sobrantes tras la eliminación de condiciones
     const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
     let hitos = [];
     let ultimoDia = 1;
 
     bloques.forEach(bloque => {
         const p = bloque.split(':');
-        if (p.length < 3) return;
+        let diaLabel, sujeto, accion, extra = "";
 
-        let diaLabel = p[0], sujeto = p[1], accion = p[2], extra = p[3] || "";
+        // SOPORTE PARA INSTRUCCIONES DE 2 PARTES (ej: D:obj)
+        if (p.length === 2) {
+            sujeto = p[0];
+            accion = p[1];
+            diaLabel = "d" + ultimoDia; // Asumir último día si no se especifica
+        } else if (p.length >= 3) {
+            diaLabel = p[0];
+            sujeto = p[1];
+            accion = p[2];
+            extra = p[3] || "";
+        } else return;
+
         const farmObj = (sujeto === 'O') ? fOrig : fDest;
         const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
         
@@ -228,10 +231,10 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
         else if (diaLabel === "@O0") {
             const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
             diaInicio = hO0 ? hO0.dia : ultimoDia;
-        } else diaInicio = parseInt(diaLabel.substring(1));
+        } else diaInicio = parseInt(diaLabel.substring(1)) || ultimoDia;
 
         if (accion.includes('all') || accion === 'desc_up' || accion === 'desc_auto') {
-            const intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
+            const intv = parseInt(extra) || 7;
             let lista = [...farmObj.desescalada].map(Number);
             
             if (accion.includes('up')) {
@@ -277,19 +280,13 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
         let doseNum = Number(h.dose);
 
         if (h.tag === 'tag-orig') {
-            if (h.tipo === 'STOP') {
-                accionTxt = `<b>${t.stop}</b>`;
-            } else if (doseNum < dActOrigen) {
-                accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
-            } else {
-                accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
-            }
+            if (h.tipo === 'STOP') accionTxt = `<b>${t.stop}</b>`;
+            else if (doseNum < dActOrigen) accionTxt = `${t.reduce} <b>${doseNum} mg</b>`;
+            else accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
         } else {
-            if (h.tipo === 'STOP') {
-                accionTxt = `<b>${t.stop}</b>`;
-            } else if (h.tipo === 'OBJ' || doseNum === dTar) {
-                accionTxt = `${t.target} <b>${doseNum} mg</b>`;
-            } else {
+            if (h.tipo === 'STOP') accionTxt = `<b>${t.stop}</b>`;
+            else if (h.tipo === 'OBJ' || doseNum === dTar) accionTxt = `${t.target} <b>${doseNum} mg</b>`;
+            else {
                 if (!started[h.nombre] && doseNum > 0) {
                     accionTxt = `${t.start} <b>${doseNum} mg</b>`;
                     started[h.nombre] = doseNum;
