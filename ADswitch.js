@@ -1,6 +1,7 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v6.0
- * FIX: Procesamiento de bloques condicionales múltiples y Layout UI.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v11.0
+ * FIX: Memoria de estado para 'med' y secuencias de desescalada/titulación.
+ * CONSERVADO: Layout UI, Multilingüe, Copiado y Gramática de bloques.
  */
 
 const CONFIG_SW = {
@@ -36,6 +37,8 @@ const i18n = {
         keep: "Tomar",
         target: "Dosis objetivo:",
         day: "Día",
+        copied: "¡Copiado!",
+        same: "Mismo fármaco o cambio directo.",
         disclaimer: "Basado en Maudsley prescribing 15 edition, fichas técnicas y experiencia clínica. Debe considerarse como una propuesta de switch \"tipo\" para ámbito ambulatorio."
     },
     en: {
@@ -53,6 +56,8 @@ const i18n = {
         keep: "Take",
         target: "Target dose:",
         day: "Day",
+        copied: "Copied!",
+        same: "Same drug or direct switch.",
         disclaimer: "Based on Maudsley prescribing 15th edition, technical data sheets and clinical experience. It should be considered as a \"standard\" switch proposal for outpatient settings."
     }
 };
@@ -80,11 +85,9 @@ window.iniciarADSwitch = async function() {
             }
             .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-            
             .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; }
             .calc-ui select { width: 100%; padding: 0.9rem; border-radius: 1rem; border: 2px solid #e2e8f0; font-size: 1rem; outline: none; background: #fff; appearance: none; }
             .btn-ejecutar { margin-top: 1.5rem; padding: 1.1rem; background: #2563eb; color: white; border: none; border-radius: 1.2rem; cursor: pointer; font-weight: 900; font-size: 1.1rem; }
-            
             .res-container { margin-top: 1.5rem; border-radius: 1.5rem; display: none; border: 1px solid #e2e8f0; background: white; overflow: hidden; }
             .res-pauta { padding: 1.5rem; }
             .pauta-step { display: flex; gap: 1rem; margin-bottom: 1.2rem; position: relative; }
@@ -111,7 +114,7 @@ window.iniciarADSwitch = async function() {
             return r ? {
                 nombre: r[CONFIG_SW.COL_NOMBRE]?.toString().trim(),
                 desescalada: r[CONFIG_SW.COL_DESESCALADA] ? r[CONFIG_SW.COL_DESESCALADA].split(',').map(v => v.trim()) : [],
-                med: r[CONFIG_SW.COL_MED],
+                med: parseFloat(r[CONFIG_SW.COL_MED]) || 0,
                 filaCompleta: r 
             } : null;
         }).filter(f => f !== null);
@@ -227,22 +230,25 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
             diaInicio = hO0 ? hO0.dia : ultimoDia;
         } else diaInicio = parseInt(diaLabel.substring(1));
 
+        // --- MEMORIA DE DOSIS ---
+        const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
+        let dosisDeReferencia = hUlt ? Number(hUlt.dose) : (sujeto === 'O' ? dAct : 0);
+
         if (accion.includes('all') || accion === 'desc_up' || accion === 'desc_auto') {
             const intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
-            let lista = [...farmObj.desescalada].map(Number);
+            let lista = [...farmObj.desescalada].map(Number).sort((a,b) => a-b);
             
             if (accion.includes('up')) {
-                const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
-                let actualEnCuerpo = hUlt ? Number(hUlt.dose) : 0;
-                let pasos = lista.filter(v => v > actualEnCuerpo && v <= dTar).sort((a,b) => a-b);
+                // Escalar desde la dosis actual en el timeline (ej. desde med)
+                let pasos = lista.filter(v => v > dosisDeReferencia && v <= dTar);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
                     hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
                     ultimoDia = Math.max(ultimoDia, d);
                 });
             } else {
-                let idx = lista.indexOf(dAct);
-                let pasos = (idx === -1) ? lista.filter(v => v < dAct) : lista.slice(idx + 1);
+                // Desescalar desde la dosis actual en el timeline (ej. desde med)
+                let pasos = lista.filter(v => v < dosisDeReferencia).sort((a,b) => b-a);
                 pasos.forEach((dose, i) => {
                     let d = diaInicio + (i * intv);
                     hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
