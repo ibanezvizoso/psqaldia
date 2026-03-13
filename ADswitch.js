@@ -1,6 +1,7 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v10.0
- * Basado en v6.0 con motor de titulación secuencial corregido.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v10.6
+ * RESTAURADO: Basado en v6.0 (la versión que funcionaba).
+ * FIX: Error de carga en fetch y puntero de calendario.
  */
 
 const CONFIG_SW = {
@@ -61,9 +62,11 @@ const i18n = {
     }
 };
 
-// ... (iniciarADSwitch y renderInterfazSW se mantienen igual que en tu v6.0)
-
 window.iniciarADSwitch = async function() {
+    // 1. Asegurar que encontramos el contenedor
+    const container = document.getElementById('modalData');
+    if (!container) return console.error("No se encontró el contenedor #modalData");
+
     if (!document.getElementById('switch-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'switch-styles';
@@ -95,6 +98,10 @@ window.iniciarADSwitch = async function() {
     try {
         const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
         const data = await response.json();
+        
+        // Error tonto solucionado: Comprobación de que existan valores antes de mapear
+        if (!data || !data.values) throw new Error("Datos no encontrados en el Sheet");
+
         const rows = data.values;
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
         
@@ -103,143 +110,67 @@ window.iniciarADSwitch = async function() {
             return r ? {
                 nombre: r[CONFIG_SW.COL_NOMBRE]?.toString().trim(),
                 desescalada: r[CONFIG_SW.COL_DESESCALADA] ? r[CONFIG_SW.COL_DESESCALADA].split(',').map(v => v.trim()) : [],
-                med: parseFloat(r[CONFIG_SW.COL_MED]),
+                med: parseFloat(r[CONFIG_SW.COL_MED]) || 0,
                 filaCompleta: r 
             } : null;
         }).filter(f => f !== null);
 
         renderInterfazSW();
-    } catch (e) { console.error("Error loading data:", e); }
+    } catch (e) { 
+        console.error("Error cargando ADSwitch:", e);
+        container.innerHTML = `<p style="text-align:center; padding:2rem; color:#ef4444;">Error al cargar datos. Compruebe la conexión.</p>`;
+    }
 };
 
-// ... (renderInterfazSW, actualizarDosisSW, ejecutarSwitch se mantienen)
+function renderInterfazSW() {
+    const t = i18n[window.currentLang];
+    const container = document.getElementById('modalData');
+    const farmOptions = window.dbSwitch.map(f => `<option value="${f.nombre}">${f.nombre}</option>`).join('');
 
-function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
-    let workingCode = code;
-    
-    // 1. Evaluar condicionales [O<150]{...}
-    const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
-    matches.forEach(m => {
-        const op = m[1].replace('=', '==');
-        if (eval(`${dAct} ${op} ${m[2]}`)) workingCode = workingCode.replace(m[0], m[3]);
-        else workingCode = workingCode.replace(m[0], "");
-    });
-
-    const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
-    let hitos = [];
-    let ultimoDia = 1;
-    
-    // Seguimiento de dosis actual en el motor para saber desde dónde subir/bajar
-    let estadoActual = {
-        [fOrig.nombre]: dAct,
-        [fDest.nombre]: 0
-    };
-
-    bloques.forEach(bloque => {
-        const p = bloque.split(':');
-        let diaLabel, sujeto, accion, extra = "";
-
-        // Identificar formato d1:O:accion o O:accion
-        if (p.length === 2) {
-            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
-        } else if (p.length >= 3) {
-            diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
-        } else return;
-
-        const farmObj = (sujeto === 'O') ? fOrig : fDest;
-        const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
-        
-        let diaInicio;
-        let esRelativo = diaLabel.startsWith('d+');
-
-        if (esRelativo) {
-            diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
-        } else if (diaLabel === "@O0") {
-            const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
-            diaInicio = hO0 ? hO0.dia : ultimoDia;
-        } else {
-            diaInicio = parseInt(diaLabel.substring(1)) || ultimoDia;
-        }
-
-        const listaDosis = farmObj.desescalada.map(Number).sort((a,b) => a-b);
-        const intv = esRelativo ? parseInt(diaLabel.substring(2)) : (parseInt(extra) || 7);
-
-        if (accion.includes('desc_up') || accion === 'desc_auto') {
-            let current = estadoActual[farmObj.nombre];
-            
-            if (accion.includes('up')) {
-                // TITRACIÓN: Subir paso a paso usando la columna de desescalada
-                let pasos = listaDosis.filter(v => v > current && v < dTar);
-                
-                if (pasos.length > 0) {
-                    pasos.forEach((dose, i) => {
-                        let d = diaInicio + (i * intv);
-                        hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
-                        ultimoDia = Math.max(ultimoDia, d);
-                        estadoActual[farmObj.nombre] = dose;
-                    });
-                    // El siguiente bloque (ej. D:obj) ocurrirá un intervalo después
-                    ultimoDia += intv;
-                } else {
-                    ultimoDia = diaInicio;
-                }
-            } else {
-                // DESESCALADA: Bajar paso a paso
-                let pasos = listaDosis.filter(v => v < current).sort((a,b) => b-a);
-                pasos.forEach((dose, i) => {
-                    let d = diaInicio + (i * intv);
-                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose === 0 ? 'STOP' : 'VAL') });
-                    ultimoDia = Math.max(ultimoDia, d);
-                    estadoActual[farmObj.nombre] = dose;
-                });
-                if (accion.includes('all') && estadoActual[farmObj.nombre] !== 0) {
-                    ultimoDia += intv;
-                    hitos.push({ dia: ultimoDia, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
-                    estadoActual[farmObj.nombre] = 0;
-                }
-            }
-        } else {
-            // ACCIONES FIJAS (D:obj, D:25, O:0, etc.)
-            let dose;
-            if (!isNaN(accion)) dose = parseFloat(accion);
-            else if (accion === 'med') dose = farmObj.med;
-            else if (accion === '0') dose = 0;
-            else if (accion === 'obj') dose = dTar;
-            else if (accion === 'desc_last') dose = listaDosis[0] || 0;
-            else dose = estadoActual[farmObj.nombre];
-
-            // Asegurar que si venimos de una subida, d:obj no se pise con el paso anterior
-            let dFinal = Math.max(diaInicio, ultimoDia);
-            
-            hitos.push({ dia: dFinal, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose === 0 ? 'STOP' : (dose === dTar ? 'OBJ' : 'VAL')) });
-            ultimoDia = dFinal;
-            estadoActual[farmObj.nombre] = dose;
-        }
-    });
-
-    hitos.sort((a, b) => a.dia - b.dia);
-    renderPautaSW(hitos, dTar, dAct);
+    container.innerHTML = `
+        <div class="calc-ui">
+            <div class="calc-header">
+                <h2>${t.title}</h2>
+                <div class="lang-toggle">
+                    <button class="lang-btn ${window.currentLang === 'es' ? 'active' : ''}" onclick="setLanguageSW('es')">ES</button>
+                    <button class="lang-btn ${window.currentLang === 'en' ? 'active' : ''}" onclick="setLanguageSW('en')">EN</button>
+                </div>
+                <div></div>
+            </div>
+            <label>${t.from}</label>
+            <select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
+            <label>${t.currentDose}</label>
+            <select id="sw_d_orig"></select>
+            <label>${t.to}</label>
+            <select id="sw_dest" onchange="actualizarDosisSW('dest')">${farmOptions}</select>
+            <label>${t.targetDose}</label>
+            <select id="sw_d_target"></select>
+            <button class="btn-ejecutar" onclick="ejecutarSwitch()">${t.btn}</button>
+            <div id="sw-res-box" class="res-container">
+                <div id="sw-res-pauta" class="res-pauta"></div>
+                <div class="disclaimer">${t.disclaimer}</div>
+            </div>
+        </div>`;
+    actualizarDosisSW('orig');
+    actualizarDosisSW('dest');
 }
 
-// ... (renderPautaSW y copiarEstrategiaSW se mantienen igual que en v6.0/v9.0)
-
-// Estas funciones deben estar definidas para que el motor funcione:
-function setLanguageSW(lang) {
+window.setLanguageSW = function(lang) {
     window.currentLang = lang;
     renderInterfazSW();
     if (document.getElementById('sw-res-box').style.display === 'block') ejecutarSwitch();
-}
+};
 
-function actualizarDosisSW(tipo) {
+window.actualizarDosisSW = function(tipo) {
     const farmNombre = document.getElementById(tipo === 'orig' ? 'sw_orig' : 'sw_dest').value;
     const farm = window.dbSwitch.find(f => f.nombre === farmNombre);
     const selector = document.getElementById(tipo === 'orig' ? 'sw_d_orig' : 'sw_d_target');
     if (farm) {
         selector.innerHTML = farm.desescalada.map(d => `<option value="${d}">${d} mg</option>`).join('');
     }
-}
+};
 
-function ejecutarSwitch() {
+window.ejecutarSwitch = function() {
     const t = i18n[window.currentLang];
     const nOrig = document.getElementById('sw_orig').value;
     const nDest = document.getElementById('sw_dest').value;
@@ -258,6 +189,80 @@ function ejecutarSwitch() {
         return;
     }
     procesarGramaticaSW(rawCode.toString(), fOrig, fDest, dAct, dTar);
+};
+
+function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
+    let workingCode = code;
+    // Evaluar condicionales [O<150]{...}
+    const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
+    matches.forEach(m => {
+        const op = m[1].replace('=', '==');
+        if (eval(`${dAct} ${op} ${m[2]}`)) workingCode = workingCode.replace(m[0], m[3]);
+        else workingCode = workingCode.replace(m[0], "");
+    });
+
+    const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
+    let hitos = [];
+    let ultimoDia = 1;
+
+    bloques.forEach(bloque => {
+        const p = bloque.split(':');
+        if (p.length < 2) return;
+
+        let diaLabel, sujeto, accion, extra = "";
+        if (p.length === 2) {
+            sujeto = p[0]; accion = p[1]; diaLabel = "d" + ultimoDia;
+        } else {
+            diaLabel = p[0]; sujeto = p[1]; accion = p[2]; extra = p[3] || "";
+        }
+
+        const farmObj = (sujeto === 'O') ? fOrig : fDest;
+        const clase = (sujeto === 'O') ? 'tag-orig' : 'tag-dest';
+        
+        let diaInicio;
+        if (diaLabel.startsWith('d+')) diaInicio = ultimoDia + parseInt(diaLabel.substring(2));
+        else if (diaLabel === "@O0") {
+            const hO0 = hitos.find(h => h.tag === 'tag-orig' && h.dose === 0);
+            diaInicio = hO0 ? hO0.dia : ultimoDia;
+        } else diaInicio = parseInt(diaLabel.substring(1)) || ultimoDia;
+
+        // Lógica de titulación paso a paso (fiel a v6.0)
+        if (accion.includes('all') || accion === 'desc_up' || accion === 'desc_auto') {
+            const intv = parseInt(extra) || (accion.includes('up') ? 2 : 7);
+            let lista = [...farmObj.desescalada].map(Number).sort((a,b) => a-b);
+            
+            if (accion.includes('up')) {
+                const hUlt = [...hitos].reverse().find(h => h.nombre === farmObj.nombre);
+                let actual = hUlt ? Number(hUlt.dose) : 0;
+                let pasos = lista.filter(v => v > actual && v < dTar);
+                pasos.forEach((dose, i) => {
+                    let d = diaInicio + (i * intv);
+                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
+                    ultimoDia = Math.max(ultimoDia, d);
+                });
+                if (pasos.length > 0) ultimoDia += intv;
+            } else {
+                let pasos = lista.filter(v => v < dAct).sort((a,b) => b-a);
+                pasos.forEach((dose, i) => {
+                    let d = diaInicio + (i * intv);
+                    hitos.push({ dia: d, nombre: farmObj.nombre, tag: clase, dose, tipo: 'VAL' });
+                    ultimoDia = Math.max(ultimoDia, d);
+                });
+                let dFin = diaInicio + (pasos.length * intv);
+                hitos.push({ dia: dFin, nombre: farmObj.nombre, tag: clase, dose: 0, tipo: 'STOP' });
+                ultimoDia = Math.max(ultimoDia, dFin);
+            }
+        } else {
+            // Dosis fija
+            let dose = (accion === 'med') ? farmObj.med : (accion === '0' ? 0 : (accion === 'obj' ? dTar : (accion === 'desc_last' ? farmObj.desescalada[farmObj.desescalada.length-1] : dAct)));
+            let dFinal = Math.max(diaInicio, ultimoDia);
+            hitos.push({ dia: dFinal, nombre: farmObj.nombre, tag: clase, dose, tipo: (dose == 0 ? 'STOP' : (accion === 'obj' ? 'OBJ' : 'VAL')) });
+            ultimoDia = dFinal;
+        }
+    });
+
+    hitos.sort((a, b) => a.dia - b.dia);
+    renderPautaSW(hitos, dTar, dAct);
 }
 
 function renderPautaSW(hitos, dTar, dActOrigen) {
@@ -289,14 +294,7 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
                 }
             }
         }
-
-        html += `<div class="pauta-step">
-            <div class="step-idx">${t.day} ${h.dia}</div>
-            <div class="step-body">
-                <span class="tag-farm ${h.tag}">${h.nombre}</span>
-                <div class="step-txt">${accionTxt}</div>
-            </div>
-        </div>`;
+        html += `<div class="pauta-step"><div class="step-idx">${t.day} ${h.dia}</div><div class="step-body"><span class="tag-farm ${h.tag}">${h.nombre}</span><div class="step-txt">${accionTxt}</div></div></div>`;
     });
     document.getElementById('sw-res-box').style.display = 'block';
     document.getElementById('sw-res-pauta').innerHTML = html + `<button class="btn-copiar" onclick="copiarEstrategiaSW()">${t.copy}</button>`;
