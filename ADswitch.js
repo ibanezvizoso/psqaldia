@@ -1,6 +1,6 @@
 /**
- * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v5.0
- * AJUSTES: Centrado de UI, Lógica de verbos Origen/Destino, Fix Mirtazapina/Trazodona.
+ * ADswitch.js - Motor de Conmutación de Antidepresivos PSQALDÍA v6.0
+ * FIX: Procesamiento de bloques condicionales múltiples y Layout UI.
  */
 
 const CONFIG_SW = {
@@ -62,12 +62,24 @@ window.iniciarADSwitch = async function() {
         const styleTag = document.createElement('style');
         styleTag.id = 'switch-styles';
         styleTag.innerHTML = `
-            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; position: relative; }
-            /* Cabecera centrada para evitar la X de cierre del modal */
-            .calc-header { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; margin-bottom: 1rem; width: 100%; }
-            .calc-ui h2 { margin: 0; font-weight: 800; font-size: 1.2rem; color: #2563eb; }
-            .lang-toggle { display: flex; background: #f1f5f9; border-radius: 0.8rem; padding: 2px; align-self: center; }
-            .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; }
+            .calc-ui { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+            /* Layout: Título a la izquierda, Selector centrado, Espacio a la derecha para la X */
+            .calc-header { 
+                display: grid; 
+                grid-template-columns: 1fr auto 1fr; 
+                align-items: center; 
+                margin-bottom: 1.5rem; 
+                width: 100%;
+            }
+            .calc-ui h2 { margin: 0; font-weight: 800; font-size: 1.2rem; color: #2563eb; grid-column: 1; }
+            .lang-toggle { 
+                display: flex; 
+                background: #f1f5f9; 
+                border-radius: 0.8rem; 
+                padding: 2px; 
+                grid-column: 2; /* Centrado */
+            }
+            .lang-btn { padding: 4px 12px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; }
             .lang-btn.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
             
             .calc-ui label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-top: 0.8rem; }
@@ -93,8 +105,6 @@ window.iniciarADSwitch = async function() {
         const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
         const data = await response.json();
         const rows = data.values;
-
-        // Mapeo Filas 14 a 25
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
         
         window.dbSwitch = indicesAD.map(idx => {
@@ -114,7 +124,6 @@ window.iniciarADSwitch = async function() {
 window.setLanguageSW = function(lang) {
     window.currentLang = lang;
     renderInterfazSW();
-    // Si ya hay una pauta generada, se refresca
     if (document.getElementById('sw-res-box').style.display === 'block') {
         ejecutarSwitch();
     }
@@ -128,12 +137,12 @@ function renderInterfazSW() {
     container.innerHTML = `
         <div class="calc-ui">
             <div class="calc-header">
-                <h2><i class="fas fa-exchange-alt"></i> ${t.title}</h2>
+                <h2>${t.title}</h2>
                 <div class="lang-toggle">
                     <button class="lang-btn ${window.currentLang === 'es' ? 'active' : ''}" onclick="setLanguageSW('es')">ES</button>
                     <button class="lang-btn ${window.currentLang === 'en' ? 'active' : ''}" onclick="setLanguageSW('en')">EN</button>
                 </div>
-            </div>
+                <div></div> </div>
             <label>${t.from}</label>
             <select id="sw_orig" onchange="actualizarDosisSW('orig')">${farmOptions}</select>
             <label>${t.currentDose}</label>
@@ -171,7 +180,6 @@ window.ejecutarSwitch = function() {
     const fOrig = window.dbSwitch.find(f => f.nombre === nOrig);
     const fDest = window.dbSwitch.find(f => f.nombre === nDest);
     
-    // Fix para búsqueda de columna (limpiando posibles espacios en nombres de la matriz)
     const colIdx = ORDEN_MATRIZ.map(s => s.toLowerCase()).indexOf(nDest.toLowerCase());
     const rawCode = fOrig.filaCompleta[CONFIG_SW.COL_MATRIZ_INICIO + colIdx];
 
@@ -185,17 +193,24 @@ window.ejecutarSwitch = function() {
 };
 
 function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
+    // FIX DE LA GRAMÁTICA: Ahora procesa condicionales sin borrar el resto del código
     let workingCode = code;
-    // Condicionales [O<150]{...}
-    const condRegex = /\[O([<>]=?)(\d+)\]\{(.*?)\}/g;
-    let m;
-    while ((m = condRegex.exec(code)) !== null) {
-        const op = m[1].replace('=', '==');
-        if (eval(`${dAct} ${op} ${m[2]}`)) {
-            workingCode = m[3];
+    const matches = [...code.matchAll(/\[O([<>]=?)(\d+)\]\{(.*?)\}/g)];
+    
+    matches.forEach(m => {
+        const fullMatch = m[0];
+        const operator = m[1].replace('=', '==');
+        const value = m[2];
+        const content = m[3];
+        
+        if (eval(`${dAct} ${operator} ${value}`)) {
+            workingCode = workingCode.replace(fullMatch, content);
+        } else {
+            workingCode = workingCode.replace(fullMatch, "");
         }
-    }
+    });
 
+    // Limpiar pipes sobrantes tras la eliminación de condiciones
     const bloques = workingCode.split('|').map(b => b.trim()).filter(Boolean);
     let hitos = [];
     let ultimoDia = 1;
@@ -255,14 +270,13 @@ function procesarGramaticaSW(code, fOrig, fDest, dAct, dTar) {
 function renderPautaSW(hitos, dTar, dActOrigen) {
     const t = i18n[window.currentLang];
     let html = '';
-    let started = {}; // Control de inicio para Destino solamente
+    let started = {};
 
     hitos.forEach(h => {
         let accionTxt = "";
         let doseNum = Number(h.dose);
 
         if (h.tag === 'tag-orig') {
-            // Lógica para ORIGEN: Nunca usa "Iniciar". Solo Reducir, Tomar o Suspender.
             if (h.tipo === 'STOP') {
                 accionTxt = `<b>${t.stop}</b>`;
             } else if (doseNum < dActOrigen) {
@@ -271,7 +285,6 @@ function renderPautaSW(hitos, dTar, dActOrigen) {
                 accionTxt = `${t.keep} <b>${doseNum} mg</b>`;
             }
         } else {
-            // Lógica para DESTINO: Iniciar, Subir, Reducir o Objetivo.
             if (h.tipo === 'STOP') {
                 accionTxt = `<b>${t.stop}</b>`;
             } else if (h.tipo === 'OBJ' || doseNum === dTar) {
