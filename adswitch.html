@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AD Switch: Cambio de Antidepresivos | PSQALDÍA</title>
+    <meta name="description" content="Guía interactiva de conmutación y rotación de antidepresivos basada en las Guías Maudsley 15ª Edición.">
+    <link rel="canonical" href="https://psqaldia.com/adswitch">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.5rem;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 4rem 1.5rem 2rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
+
+        .main-content { padding: 2rem 1.5rem 5rem; max-width: 800px; margin: auto; }
+
+        /* Contenedor de la herramienta */
+        #modalData { 
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        /* Sección de Info/Referencia */
+        .info-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+        .info-panel h2 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-panel i { color: var(--primary); }
+
+        footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-sync-alt"></i> PSQALDÍA</a>
+    </nav>
+
+    <header class="hero">
+        <h1>AD Switch</h1>
+        <p>Motor dinámico de conmutación de antidepresivos con pautas de reducción y escalada progresiva.</p>
+    </header>
+
+    <main class="main-content">
+        <div id="modalData">
+            <div style="padding:5rem; text-align:center;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i>
+                <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Cargando motor de estrategias...</p>
+            </div>
+        </div>
+
+        <section class="info-panel">
+            <h2><i class="fas fa-book-medical"></i> Base Científica</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                Las estrategias generadas por esta herramienta se basan en los protocolos de la <b>Maudsley Prescribing Guidelines in Psychiatry (15th Edition)</b>, combinados con datos de fichas técnicas y práctica clínica especializada.
+                <br><br>
+                El motor analiza las dosis de origen y objetivo para calcular el método de <i>cross-tapering</i> (solapamiento) más seguro, minimizando el riesgo de síndrome de discontinuación y el tiempo de infradosificación terapéutica.
+            </p>
+        </section>
+
+        <footer>
+            <a href="https://psqaldia.com/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
+            </a>
+        </footer>
+    </main>
+
+    <script src="/ADswitch.js"></script>
+    <script>
+        // Configuración de URL del Worker para PSQALDÍA
+        window.WORKER_URL = "https://psqaldia.com/"; 
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof window.iniciarADSwitch === 'function') {
+                await window.iniciarADSwitch();
+            }
+        });
+    </script>
+</body>
+</html>
