@@ -46,7 +46,13 @@ function abrirPortalExamenes() {
                     </div>
                     <i class="fas fa-chevron-right" style="color: var(--border);"></i>
                 </button>
-
+<button onclick="portal_irACot()" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left;">
+                    <div style="background: rgba(14, 165, 233, 0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-bone" style="color: #0ea5e9;"></i>
+                    </div>
+                    <b style="color: var(--text-main); font-size: 1.1rem; flex-grow: 1;">Traumatología</b>
+                    <i class="fas fa-chevron-right" style="color: var(--border);"></i>
+                </button>
                 <button onclick="portal_irAGine()" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left;">
                     <div style="background: rgba(219, 39, 119, 0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <i class="fas fa-female" style="color: #db2777;"></i>
@@ -90,7 +96,10 @@ async function portal_irAPed() {
     await cargarScript('ope_ped.js'); 
     openPedSelector();
 }
-
+async function portal_irACot() {
+    await cargarScript('ope_cot.js'); 
+    openCotSelector();
+}
 async function portal_irAGine() {
     await cargarScript('ope_gine.js'); 
     openGineSelector();
