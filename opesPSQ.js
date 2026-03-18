@@ -21,7 +21,7 @@ function openExamenSelector() {
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Selecciona la convocatoria para comenzar</p>
             </div>
             
-            <div style="display: grid; gap: 12px;">
+            <div style="display: grid; gap: 12px; margin-bottom: 2rem;">
                 <button onclick="iniciarExamen('22')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <b style="color: var(--text-main); font-size: 1.1rem;">Convocatoria 2022</b>
                     <i class="fas fa-chevron-right" style="color: var(--primary);"></i>
@@ -32,7 +32,7 @@ function openExamenSelector() {
                     <i class="fas fa-chevron-right" style="color: var(--primary);"></i>
                 </button>
 
-                <button onclick="iniciarExamen('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--primary); background: rgba(var(--primary-rgb), 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
+                <button onclick="iniciarExamen('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--primary); background: rgba(67, 56, 202, 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
                         <b style="color: var(--primary); font-size: 1.1rem;">Snack</b>
                         <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas aleatorias de ambos años)</small>
@@ -40,6 +40,10 @@ function openExamenSelector() {
                     <i class="fas fa-bolt" style="color: var(--primary);"></i>
                 </button>
             </div>
+
+            <button onclick="abrirPortalExamenes()" style="background: none; border: none; color: var(--text-muted); font-weight: 800; cursor: pointer; font-size: 0.8rem; letter-spacing: 1px;">
+                <i class="fas fa-arrow-left"></i> VOLVER AL PORTAL
+            </button>
         </div>
     `;
 }
