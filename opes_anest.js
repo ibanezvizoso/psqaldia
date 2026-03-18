@@ -16,7 +16,7 @@ function openAnestSelector() {
     
     if (modal) modal.style.display = 'flex';
 
-    modalData.innerHTML = `
+   modalData.innerHTML = `
         <div style="padding: 2.5rem 1.5rem; text-align: center; max-width: 500px; margin: auto;">
             <div style="margin-bottom: 2.5rem;">
                 <i class="fas fa-medkit fa-3x" style="color: var(--primary); margin-bottom: 1rem; opacity: 0.8;"></i>
@@ -24,7 +24,7 @@ function openAnestSelector() {
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Selecciona la convocatoria para comenzar</p>
             </div>
             
-            <div style="display: grid; gap: 12px;">
+            <div style="display: grid; gap: 12px; margin-bottom: 2rem;">
                 <button onclick="iniciarExamenAnest('22')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <b style="color: var(--text-main); font-size: 1.1rem;">Convocatoria 2022</b>
                     <i class="fas fa-chevron-right" style="color: var(--primary);"></i>
@@ -43,6 +43,10 @@ function openAnestSelector() {
                     <i class="fas fa-bolt" style="color: var(--primary);"></i>
                 </button>
             </div>
+
+            <button onclick="abrirPortalExamenes()" style="background: none; border: none; color: var(--text-muted); font-weight: 800; cursor: pointer; font-size: 0.8rem; letter-spacing: 1px;">
+                <i class="fas fa-arrow-left"></i> VOLVER AL PORTAL
+            </button>
         </div>
     `;
 }
