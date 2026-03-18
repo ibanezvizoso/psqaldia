@@ -1,6 +1,6 @@
 /**
  * ope_ped.js - Gestión unificada de exámenes OPE Pediatría
- * Incluye: Selector, Modo Snack, Ver explicación individual, Persistencia y Repaso de fallos.
+ * Incluye: Selector 2022/2020, Modo Snack, Ver explicación, Persistencia y Fallos.
  */
 let preguntasPed = [];
 let respuestasPed = {};
@@ -30,10 +30,15 @@ function openPedSelector() {
                     <i class="fas fa-chevron-right" style="color: #ef4444;"></i>
                 </button>
 
+                <button onclick="iniciarExamenPed('20')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
+                    <b style="color: var(--text-main); font-size: 1.1rem;">Convocatoria 2020</b>
+                    <i class="fas fa-chevron-right" style="color: #ef4444;"></i>
+                </button>
+
                 <button onclick="iniciarExamenPed('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
                         <b style="color: #ef4444; font-size: 1.1rem;">Modo Snack</b>
-                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas aleatorias)</small>
+                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas aleatorias mixtas)</small>
                     </div>
                     <i class="fas fa-bolt" style="color: #ef4444;"></i>
                 </button>
@@ -84,9 +89,21 @@ async function iniciarExamenPed(año, esContinuacion = false) {
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:#ef4444;"></i><br><br><b>Preparando preguntas...</b></div>`;
 
     try {
-        const response = await fetch(`${window.WORKER_URL}?sheet=Ope_Ped${año === 'snack' ? '22' : año}`);
-        const data = await response.json();
-        const rows = data.values || [];
+        let rows = [];
+        if (año === 'snack') {
+            // Mezclamos ambos años para el modo Snack
+            const [res22, res20] = await Promise.all([
+                fetch(`${window.WORKER_URL}?sheet=Ope_Ped22`),
+                fetch(`${window.WORKER_URL}?sheet=Ope_Ped20`)
+            ]);
+            const d22 = await res22.json();
+            const d20 = await res20.json();
+            rows = [...(d22.values || []), ...(d20.values || [])];
+        } else {
+            const response = await fetch(`${window.WORKER_URL}?sheet=Ope_Ped${año}`);
+            const data = await response.json();
+            rows = data.values || [];
+        }
 
         preguntasPed = rows
             .filter(row => row[0] && row[0].trim() !== "")
