@@ -22,7 +22,6 @@ function abrirPortalExamenes() {
                     </div>
                     <div style="flex-grow: 1;">
                         <b style="color: var(--text-main); font-size: 1.1rem; display: block;">Psiquiatría</b>
-                        <small style="color: var(--text-muted);">2022, 2020 y Snack</small>
                     </div>
                     <i class="fas fa-chevron-right" style="color: var(--border);"></i>
                 </button>
@@ -33,7 +32,6 @@ function abrirPortalExamenes() {
                     </div>
                     <div style="flex-grow: 1;">
                         <b style="color: var(--text-main); font-size: 1.1rem; display: block;">Anestesia</b>
-                        <small style="color: var(--text-muted);">2022, 2020 y Snack</small>
                     </div>
                     <i class="fas fa-chevron-right" style="color: var(--border);"></i>
                 </button>
@@ -44,7 +42,6 @@ function abrirPortalExamenes() {
                     </div>
                     <div style="flex-grow: 1;">
                         <b style="color: var(--text-main); font-size: 1.1rem; display: block;">Parte Común</b>
-                        <small style="color: var(--text-muted);">Legislación y Salud Pública</small>
                     </div>
                     <i class="fas fa-chevron-right" style="color: var(--border);"></i>
                 </button>
@@ -59,17 +56,16 @@ function abrirPortalExamenes() {
 
 // Funciones puente para cargar los scripts individuales
 async function portal_irAPsiq() {
-    await cargarScript('opesPSQ.js'); //
-    abrirSelectorPsiquiatria();
+    await cargarScript('opesPSQ.js'); 
+    openExamenSelector(); 
 }
 
 async function portal_irAAnest() {
-    // Asegúrate de que el nombre del archivo sea el correcto (opes_anest.js o ope22_anest.js)
     await cargarScript('opes_anest.js'); 
     openAnestSelector();
 }
 
 async function portal_irAComun() {
-    await cargarScript('opes_comun.js'); //
-    openComunSelector();
+    await cargarScript('opes_comun.js'); 
+    openExamenComunSelector();
 }
