@@ -4,213 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titulación de Clozapina | PSQALDÍA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="description" content="Planificador dinámico de titulación de clozapina ajustado por sexo y hábito tabáquico según la guía Maudsley 15.">
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #4338ca;
-            --primary-light: #6366f1;
+            --primary: #4338ca; 
+            --primary-light: #eef2ff; 
             --bg: #f8fafc;
-            --card: #ffffff;
-            --text-main: #1e293b;
+            --card-bg: #ffffff; 
+            --text-main: #1e293b; 
             --text-muted: #64748b;
-            --border: #e2e8f0;
+            --border: #e2e8f0; 
+            --radius: 1.5rem;
         }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); 
-            color: var(--text-main); 
-            margin: 0; padding: 0;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; line-height: 1.6; }
 
-        /* --- HEADER HERO --- */
-        .cloz-hero { 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); 
-            padding: 3rem 1.5rem 5rem; 
-            color: white;
-            text-align: center;
-            position: relative;
-        }
-        .cloz-hero h1 { margin: 0; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
-        .cloz-hero p { opacity: 0.9; font-size: 0.9rem; margin-top: 8px; font-weight: 500; }
+        /* HEADER PREMIUM (Consistente con deprescripcion.html) */
+        .header { padding: 3rem 1.5rem; text-align: center; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .logo-text { font-weight: 900; color: var(--primary); letter-spacing: 1px; text-decoration: none; font-size: 0.9rem; }
+        .header h1 { font-size: 2.5rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -1px; }
+        .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: auto; }
 
-        /* --- SELECTOR CARD --- */
-        .cloz-selector-card {
-            background: var(--card); 
-            margin: -3rem 1.5rem 2rem; 
-            padding: 1.5rem;
-            border-radius: 1.5rem; 
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+        /* REJILLA DE INFORMACIÓN */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.2rem; margin-bottom: 3rem; margin-top: -2.5rem; }
+        .info-card { background: var(--card-bg); padding: 1.2rem; border-radius: 1.25rem; border: 1px solid var(--border); display: flex; gap: 0.8rem; align-items: flex-start; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .info-card i { color: var(--primary); font-size: 1.1rem; margin-top: 3px; }
+        .info-card h3 { font-size: 0.9rem; font-weight: 800; margin: 0 0 0.3rem; }
+        .info-card p { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+
+        /* CONTENEDOR DE LA HERRAMIENTA JS */
+        #modalData { 
+            background: var(--card-bg); 
+            border-radius: var(--radius); 
             border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-            position: relative;
-            z-index: 10;
-        }
-        
-        .form-group { margin-bottom: 1.2rem; }
-        .form-label { 
-            display: block; 
-            font-size: 0.7rem; 
-            font-weight: 800; 
-            color: var(--text-muted); 
-            text-transform: uppercase; 
-            margin-bottom: 8px; 
-            letter-spacing: 0.05em; 
-        }
-        
-        .custom-input {
-            width: 100%; padding: 1rem; border-radius: 1rem; 
-            border: 2px solid #f1f5f9;
-            background: #f8fafc; font-size: 1rem; font-weight: 700; 
-            color: var(--text-main);
-            outline: none; transition: all 0.2s; box-sizing: border-box;
-            appearance: none;
-        }
-        .custom-input:focus { border-color: var(--primary-light); background: white; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
-        
-        .btn-main {
-            width: 100%; padding: 1.2rem; border-radius: 1.2rem; border: none;
-            background: var(--text-main); color: white; font-weight: 800; font-size: 1rem;
-            cursor: pointer; transition: all 0.3s; margin-top: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .btn-main:hover { transform: translateY(-2px); background: #000; }
-
-        /* --- TIMELINE DE RESULTADOS --- */
-        .cloz-results { padding: 0 1.5rem 3rem; display: none; }
-        .timeline-container { border-left: 3px solid var(--border); margin-left: 10px; padding-left: 20px; position: relative; }
-        
-        .step-card {
-            background: var(--card); border-radius: 1.3rem; border: 1px solid var(--border);
-            padding: 1.2rem; margin-bottom: 1.2rem; position: relative;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-        }
-        .step-card::before {
-            content: ''; position: absolute; left: -31px; top: 24px;
-            width: 16px; height: 16px; background: var(--primary-light);
-            border: 4px solid var(--bg); border-radius: 50%;
-        }
-        
-        .step-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .step-day { background: #eef2ff; color: var(--primary); font-weight: 900; font-size: 0.7rem; padding: 4px 10px; border-radius: 8px; }
-        .step-date { font-weight: 700; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; }
-        
-        .dose-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px; }
-        .dose-box { 
-            background: var(--bg); padding: 12px 8px; border-radius: 14px; text-align: center;
-            border: 1px solid var(--border);
-        }
-        .dose-box.total { background: var(--primary); color: white; border-color: var(--primary); }
-        .d-val { display: block; font-weight: 900; font-size: 1.2rem; line-height: 1; }
-        .d-lab { display: block; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; margin-top: 5px; opacity: 0.8; }
-
-        .btn-copy {
-            width: 100%; padding: 1.1rem; border-radius: 1.2rem; 
-            border: 2px solid var(--border); background: white;
-            color: var(--text-muted); font-weight: 800; font-size: 0.9rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin: 2rem 0;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); 
+            min-height: 400px;
+            overflow: hidden; /* Para que el diseño del JS encaje perfecto */
         }
 
-        .cloz-footer { 
-            text-align: center; font-size: 0.75rem; color: var(--text-muted); 
-            line-height: 1.6; font-style: italic; border-top: 1px dashed var(--border);
-            padding-top: 1.5rem;
-        }
+        /* SECCIÓN BIBLIOGRÁFICA */
+        .biblio-section { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
+        .biblio-section h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+        .biblio-section p { font-size: 0.85rem; font-style: italic; }
 
-        /* --- BOTÓN IDIOMA --- */
-        .lang-switch {
-            position: absolute; top: 1.5rem; right: 1.5rem;
-            background: rgba(255,255,255,0.2); border-radius: 12px; padding: 4px;
-            display: flex; gap: 4px;
-        }
-        .lang-btn {
-            background: transparent; border: none; color: white; padding: 6px 12px;
-            border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer;
-        }
-        .lang-btn.active { background: white; color: var(--primary); }
+        footer { text-align: center; margin-top: 3rem; }
+        .btn-home { color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<div id="clozapina-app">
-    <div class="cloz-hero">
-        <div class="lang-switch">
-            <button class="lang-btn active" id="btn-es" onclick="changeLang('es')">ES</button>
-            <button class="lang-btn" id="btn-en" onclick="changeLang('en')">EN</button>
+<header class="header">
+    <a href="/" class="logo-text">PSQALDÍA</a>
+    <h1>Titulación de Clozapina</h1>
+    <p>Planificación personalizada de inicio de tratamiento ajustada por factores farmacocinéticos individuales.</p>
+</header>
+
+<div class="container">
+    <div class="info-grid">
+        <div class="info-card">
+            <i class="fas fa-dna"></i>
+            <div><h3>Ajuste Metabólico</h3><p>Dosis calculadas según el impacto del sexo y el tabaco en el CYP1A2.</p></div>
         </div>
-        <h1 id="txt-title">Titulación de Clozapina</h1>
-        <p id="txt-subtitle">Ajuste por sexo y hábito tabáquico</p>
+        <div class="info-card">
+            <i class="fas fa-calendar-check"></i>
+            <div><h3>Cronología Real</h3><p>Conversión automática de días de protocolo a fechas de calendario real.</p></div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-vial"></i>
+            <div><h3>Seguridad Crítica</h3><p>Recordatorio implícito de la necesidad de monitorización hematológica.</p></div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-clipboard-list"></i>
+            <div><h3>Evidencia 2025</h3><p>Protocolos basados estrictamente en la 15ª edición de la guía Maudsley.</p></div>
+        </div>
     </div>
 
-    <div class="cloz-selector-card">
-        <div class="form-group">
-            <label class="form-label" id="txt-start">Fecha de Inicio</label>
-            <input type="date" id="cloz_start" class="custom-input">
+    <main id="modalData">
+        <div style="padding:4rem; text-align:center;">
+            <i class="fas fa-sync fa-spin fa-2x" style="color:var(--primary);"></i>
+            <p style="margin-top:1rem; color:var(--text-muted); font-weight:600;">Cargando motor de titulación...</p>
         </div>
-        <div class="form-group">
-            <label class="form-label" id="txt-profile">Perfil del Paciente</label>
-            <select id="cloz_profile" class="custom-input">
-                <option value="1">Mujer • Fumadora</option>
-                <option value="4">Mujer • No Fumadora</option>
-                <option value="7">Hombre • Fumador</option>
-                <option value="10">Hombre • No Fumador</option>
-            </select>
-        </div>
-        <button class="btn-main" id="txt-btn" onclick="generate()">GENERAR CALENDARIO</button>
-    </div>
+    </main>
 
-    <div id="cloz-results" class="cloz-results">
-        <div id="timeline" class="timeline-container"></div>
-        <button class="btn-copy" onclick="copyToClipboard()">
-            <i class="far fa-copy"></i> <span id="txt-copy">COPIAR PAUTA</span>
-        </button>
-        <div class="cloz-footer" id="txt-disclaimer">
-            Basado en Maudsley Prescribing Guidelines 15th Ed. <br> Requiere monitorización hematológica estrecha.
-        </div>
-    </div>
+    <section class="biblio-section">
+        <h4>Referencias y Guías Clínicas</h4>
+        <p><i class="fas fa-book-medical"></i> The Maudsley Prescribing Guidelines in Psychiatry, 15th Edition. David Taylor, Thomas R. E. Barnes, and Young-Hee Young. Wiley-Blackwell, 2025.</p>
+    </section>
+
+    <footer>
+        <a href="/herramientas" class="btn-home"><i class="fas fa-arrow-left"></i> Volver a Herramientas</a>
+    </footer>
 </div>
 
+<script src="/clozapina.js"></script>
 <script>
-    // Configuración Inicial
-    let currentLang = 'es';
-    let dbCloz = [];
-    const WORKER_URL = "/"; // O tu URL completa del worker si pruebas en local
-
-    const i18n = {
-        es: {
-            title: "Titulación de Clozapina", subtitle: "Ajuste por sexo y hábito tabáquico",
-            start: "Fecha de Inicio", profile: "Perfil del Paciente", btn: "GENERAR CALENDARIO",
-            copy: "COPIAR PAUTA", day: "DÍA", morning: "Mañana", night: "Noche", total: "Total",
-            copied: "¡Copiado!",
-            disclaimer: "Basado en Maudsley Prescribing Guidelines 15th Ed. <br> Requiere monitorización hematológica estrecha.",
-            profiles: ["Mujer • Fumadora", "Mujer • No Fumadora", "Hombre • Fumador", "Hombre • No Fumador"]
-        },
-        en: {
-            title: "Clozapine Titration", subtitle: "Sex and smoking habit adjustment",
-            start: "Start Date", profile: "Patient Profile", btn: "GENERATE SCHEDULE",
-            copy: "COPY SCHEDULE", day: "DAY", morning: "Morning", night: "Night", total: "Total",
-            copied: "Copied!",
-            disclaimer: "Based on Maudsley Prescribing Guidelines 15th Ed. <br> Close blood monitoring is required.",
-            profiles: ["Woman • Smoker", "Woman • Non-Smoker", "Man • Smoker", "Man • Non-Smoker"]
+    // URL del worker para que el script js sepa a dónde llamar
+    window.WORKER_URL = "/"; 
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof window.iniciarClozapina === 'function') {
+            window.iniciarClozapina();
         }
-    };
-
-    // Establecer fecha de hoy por defecto
-    document.getElementById('cloz_start').value = new Date().toISOString().split('T')[0];
-
-    async function loadData() {
-        try {
-            const res = await fetch(`${WORKER_URL}?sheet=clozapina`);
-            const data = await res.json();
-            dbCloz = data.values;
-        } catch (e) { console.error("Error cargando datos:", e); }
-    }
-
-    function changeLang(lang) {
-        currentLang = lang;
-        const t = i18n[lang];
-        document.getElementById('txt-title').innerText = t.title;
-        document.getElementById('txt-subtitle').innerText = t.subtitle;
-        document.getElementById('txt-start').innerText = t.start;
+    });
+</script>
+</body>
+</html>
