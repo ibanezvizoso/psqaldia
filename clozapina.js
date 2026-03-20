@@ -1,6 +1,6 @@
 /**
- * clozapina.js - Motor de Titulación PSQALDÍA v2.1
- * UI Rediseñada + Funciones Originales Preservadas
+ * clozapina.js - Motor de Titulación PSQALDÍA v2.2
+ * UI Corregida (Espaciado para cierre) + Funciones Originales Preservadas
  */
 
 window.clozLang = 'es';
@@ -53,7 +53,6 @@ window.iniciarClozapina = async function() {
         style.innerHTML = `
             .cloz-container { padding: 1.5rem; font-family: 'Inter', sans-serif; }
             
-            /* --- MEJORA DEL SELECTOR Y HEADER --- */
             .cloz-header-ui { 
                 background: var(--card); 
                 padding: 1.5rem; 
@@ -101,7 +100,6 @@ window.iniciarClozapina = async function() {
             }
             .btn-cloz-gen:active { transform: scale(0.98); }
 
-            /* --- TIMELINE (QUE YA TE GUSTABA) --- */
             .cloz-timeline { position: relative; padding-left: 20px; border-left: 3px solid var(--border); margin-left: 10px; }
             .cloz-card { 
                 background: var(--card); border: 1px solid var(--border); border-radius: 1.2rem; 
@@ -147,7 +145,7 @@ function renderInterfazCloz() {
     
     container.innerHTML = `
         <div class="cloz-container">
-            <div class="calc-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <div class="calc-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-right: 45px;">
                 <h2 style="font-weight:900; margin:0; font-size:1.3rem;">${t.title}</h2>
                 <div class="lang-toggle">
                     <button class="lang-btn ${window.clozLang === 'es' ? 'active' : ''}" onclick="setLanguageCloz('es')">ES</button>
