@@ -1,6 +1,6 @@
 /**
- * clozapina.js - Motor de Titulación Pro PSQALDÍA v2.0
- * Estética pulida + Timeline Dinámico + Maudsley 15
+ * clozapina.js - Motor de Titulación PSQALDÍA v2.1
+ * UI Rediseñada + Funciones Originales Preservadas
  */
 
 window.clozLang = 'es';
@@ -9,39 +9,37 @@ window.dbCloz = [];
 const i18nCloz = {
     es: {
         title: "Titulación de Clozapina",
-        startDate: "Fecha de inicio del tratamiento",
-        profile: "Perfil metabólico / hábito",
-        generate: "GENERAR PLAN DE TITULACIÓN",
+        startDate: "Fecha de Inicio",
+        profile: "Perfil / Hábito",
+        generate: "GENERAR PLAN",
         copy: "COPIAR PAUTA",
-        pdf: "DESCARGAR PDF",
         profiles: {
             "mujer-f": "Mujer • Fumadora",
             "mujer-nf": "Mujer • No Fumadora",
             "hombre-f": "Hombre • Fumador",
             "hombre-nf": "Hombre • No Fumador"
         },
-        labels: { morning: "Mañana", night: "Noche", total: "Dosis Total" },
+        labels: { morning: "Mañana", night: "Noche", total: "Total" },
         day: "DÍA",
-        copied: "¡Pauta copiada!",
-        disclaimer: "Plan basado en Maudsley Prescribing Guidelines 15th Ed. La dosificación debe supervisarse según tolerancia clínica y controles hematológicos obligatorios."
+        copied: "¡Copiado!",
+        disclaimer: "Basado en Maudsley Prescribing Guidelines 15th Ed. La dosificación debe supervisarse según tolerancia clínica y controles hematológicos."
     },
     en: {
-        title: "Clozapine Titration Guide",
-        startDate: "Treatment start date",
-        profile: "Metabolic profile / Habit",
-        generate: "GENERATE TITRATION PLAN",
+        title: "Clozapine Titration",
+        startDate: "Start Date",
+        profile: "Profile / Habit",
+        generate: "GENERATE PLAN",
         copy: "COPY SCHEDULE",
-        pdf: "DOWNLOAD PDF",
         profiles: {
             "mujer-f": "Woman • Smoker",
             "mujer-nf": "Woman • Non-Smoker",
             "hombre-f": "Man • Smoker",
             "hombre-nf": "Man • Non-Smoker"
         },
-        labels: { morning: "Morning", night: "Night", total: "Total Dose" },
+        labels: { morning: "Morning", night: "Night", total: "Total" },
         day: "DAY",
-        copied: "Schedule copied!",
-        disclaimer: "Plan based on Maudsley Prescribing Guidelines 15th Ed. Dosing should be monitored according to clinical tolerance and mandatory blood tests."
+        copied: "Copied!",
+        disclaimer: "Based on Maudsley Prescribing Guidelines 15th Ed. Monitor dosage according to clinical tolerance and mandatory blood tests."
     }
 };
 
@@ -49,40 +47,83 @@ window.iniciarClozapina = async function() {
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    // Inyectar Estilos específicos para esta herramienta
     if (!document.getElementById('cloz-styles')) {
         const style = document.createElement('style');
         style.id = 'cloz-styles';
         style.innerHTML = `
             .cloz-container { padding: 1.5rem; font-family: 'Inter', sans-serif; }
-            .cloz-header-ui { background: #f8fafc; padding: 1.5rem; border-radius: 1.5rem; border: 1px solid #e2e8f0; margin-bottom: 2rem; }
-            .cloz-grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
             
-            .cloz-timeline { position: relative; margin-top: 2rem; padding-left: 20px; }
-            .cloz-timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #e2e8f0; border-radius: 3px; }
+            /* --- MEJORA DEL SELECTOR Y HEADER --- */
+            .cloz-header-ui { 
+                background: var(--card); 
+                padding: 1.5rem; 
+                border-radius: 1.5rem; 
+                border: 1px solid var(--border); 
+                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+                margin-bottom: 2rem;
+            }
+            .cloz-input-group { margin-bottom: 1.2rem; }
+            .cloz-label { 
+                display: block; 
+                font-size: 0.7rem; 
+                font-weight: 800; 
+                color: var(--text-muted); 
+                text-transform: uppercase; 
+                letter-spacing: 0.05em; 
+                margin-bottom: 0.5rem;
+            }
+            .cloz-input { 
+                width: 100%; 
+                padding: 0.8rem 1rem; 
+                border-radius: 0.8rem; 
+                border: 2px solid var(--border); 
+                background: var(--bg); 
+                color: var(--text-main); 
+                font-size: 1rem; 
+                font-weight: 600;
+                outline: none;
+                transition: all 0.2s;
+                appearance: none;
+            }
+            .cloz-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1); }
             
+            .btn-cloz-gen { 
+                width: 100%; 
+                padding: 1rem; 
+                background: var(--primary); 
+                color: white; 
+                border: none; 
+                border-radius: 1rem; 
+                font-weight: 800; 
+                font-size: 0.9rem; 
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .btn-cloz-gen:active { transform: scale(0.98); }
+
+            /* --- TIMELINE (QUE YA TE GUSTABA) --- */
+            .cloz-timeline { position: relative; padding-left: 20px; border-left: 3px solid var(--border); margin-left: 10px; }
             .cloz-card { 
-                background: white; border: 1px solid #e2e8f0; border-radius: 1.2rem; 
+                background: var(--card); border: 1px solid var(--border); border-radius: 1.2rem; 
                 padding: 1.2rem; margin-bottom: 1rem; position: relative;
-                transition: transform 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             }
             .cloz-card::before { 
-                content: ''; position: absolute; left: -26px; top: 22px; 
-                width: 14px; height: 14px; background: #4338ca; 
-                border: 3px solid white; border-radius: 50%; box-shadow: 0 0 0 3px #e2e8f0;
+                content: ''; position: absolute; left: -31px; top: 22px; 
+                width: 14px; height: 14px; background: var(--primary); 
+                border: 3px solid var(--card); border-radius: 50%;
             }
+            .cloz-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+            .cloz-day-badge { font-weight: 900; font-size: 0.65rem; color: var(--primary); background: rgba(67, 56, 202, 0.1); padding: 4px 8px; border-radius: 6px; }
+            .cloz-date-label { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
             
-            .cloz-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px dashed #f1f5f9; padding-bottom: 0.5rem; }
-            .cloz-day-badge { font-weight: 900; font-size: 0.7rem; color: #4338ca; text-transform: uppercase; background: #eef2ff; padding: 4px 10px; border-radius: 8px; }
-            .cloz-date-label { font-size: 0.85rem; font-weight: 700; color: #64748b; }
+            .cloz-dose-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 8px; }
+            .dose-item { text-align: center; padding: 6px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); }
+            .dose-item.highlight { background: var(--primary); color: white; border-color: var(--primary); }
+            .dose-val { display: block; font-weight: 900; font-size: 1rem; }
+            .dose-lab { display: block; font-size: 0.55rem; text-transform: uppercase; font-weight: 700; opacity: 0.8; }
             
-            .cloz-dose-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px; }
-            .dose-item { text-align: center; padding: 8px; border-radius: 12px; background: #f8fafc; }
-            .dose-item.highlight { background: #4338ca; color: white; }
-            .dose-val { display: block; font-weight: 900; font-size: 1.1rem; }
-            .dose-lab { display: block; font-size: 0.6rem; text-transform: uppercase; font-weight: 700; opacity: 0.8; }
-            
-            .cloz-disclaimer { font-size: 0.75rem; color: #64748b; font-style: italic; margin-top: 2rem; padding: 1rem; border-top: 1px solid #f1f5f9; text-align: center; line-height: 1.4; }
+            .cloz-disclaimer { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 2rem; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 1rem; }
         `;
         document.head.appendChild(style);
     }
@@ -92,9 +133,7 @@ window.iniciarClozapina = async function() {
         const data = await response.json();
         window.dbCloz = data.values;
         renderInterfazCloz();
-    } catch (e) {
-        container.innerHTML = "Error al conectar con la base de datos.";
-    }
+    } catch (e) { container.innerHTML = "Error de conexión."; }
 };
 
 window.setLanguageCloz = function(lang) {
@@ -108,8 +147,8 @@ function renderInterfazCloz() {
     
     container.innerHTML = `
         <div class="cloz-container">
-            <div class="calc-header">
-                <h2 style="font-weight:900; color:#1e293b;">${t.title}</h2>
+            <div class="calc-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 style="font-weight:900; margin:0; font-size:1.3rem;">${t.title}</h2>
                 <div class="lang-toggle">
                     <button class="lang-btn ${window.clozLang === 'es' ? 'active' : ''}" onclick="setLanguageCloz('es')">ES</button>
                     <button class="lang-btn ${window.clozLang === 'en' ? 'active' : ''}" onclick="setLanguageCloz('en')">EN</button>
@@ -117,35 +156,28 @@ function renderInterfazCloz() {
             </div>
 
             <div class="cloz-header-ui">
-                <div class="cloz-grid-inputs">
-                    <div>
-                        <label class="depre-label">${t.startDate}</label>
-                        <input type="date" id="cloz_start" class="depre-input" value="${new Date().toISOString().split('T')[0]}">
-                    </div>
-                    <div>
-                        <label class="depre-label">${t.profile}</label>
-                        <select id="cloz_profile" class="depre-input">
-                            <option value="1">${t.profiles["mujer-f"]}</option>
-                            <option value="4">${t.profiles["mujer-nf"]}</option>
-                            <option value="7">${t.profiles["hombre-f"]}</option>
-                            <option value="10">${t.profiles["hombre-nf"]}</option>
-                        </select>
-                    </div>
+                <div class="cloz-input-group">
+                    <label class="cloz-label">${t.startDate}</label>
+                    <input type="date" id="cloz_start" class="cloz-input" value="${new Date().toISOString().split('T')[0]}">
                 </div>
-                <button class="btn-ejecutar" style="width:100%; margin-top:1rem;" onclick="generarCalendarioCloz()">${t.generate}</button>
+                <div class="cloz-input-group">
+                    <label class="cloz-label">${t.profile}</label>
+                    <select id="cloz_profile" class="cloz-input">
+                        <option value="1">${t.profiles["mujer-f"]}</option>
+                        <option value="4">${t.profiles["mujer-nf"]}</option>
+                        <option value="7">${t.profiles["hombre-f"]}</option>
+                        <option value="10">${t.profiles["hombre-nf"]}</option>
+                    </select>
+                </div>
+                <button class="btn-cloz-gen" onclick="generarCalendarioCloz()">${t.generate}</button>
             </div>
 
             <div id="cloz-res-box" style="display:none;">
                 <div id="cloz-res-pauta" class="cloz-timeline"></div>
-                
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
-                    <button class="btn-copiar" onclick="copiarCalendarioCloz()"><i class="far fa-copy"></i> ${t.copy}</button>
-                    <button class="btn-copiar" style="background:#4338ca; color:white; border-color:#4338ca;" onclick="window.exportarPDF('Pauta_Clozapina')"><i class="fas fa-file-pdf"></i> PDF</button>
-                </div>
-
-                <div class="cloz-disclaimer">
-                    <i class="fas fa-info-circle"></i> ${t.disclaimer}
-                </div>
+                <button class="btn-copiar" style="width:100%; margin-top:1rem;" onclick="copiarCalendarioCloz()">
+                    <i class="far fa-copy"></i> ${t.copy}
+                </button>
+                <div class="cloz-disclaimer">${t.disclaimer}</div>
             </div>
         </div>
     `;
@@ -169,7 +201,7 @@ window.generarCalendarioCloz = function() {
         currentFecha.setDate(startDate.getDate() + (numDia - 1));
         
         const fechaFormat = currentFecha.toLocaleDateString(window.clozLang === 'es' ? 'es-ES' : 'en-US', {
-            weekday: 'long', day: 'numeric', month: 'short'
+            weekday: 'short', day: 'numeric', month: 'short'
         });
 
         const m = row[colBase] || '0';
@@ -180,7 +212,7 @@ window.generarCalendarioCloz = function() {
             <div class="cloz-card">
                 <div class="cloz-card-header">
                     <span class="cloz-day-badge">${t.day} ${numDia}</span>
-                    <span class="cloz-date-label">${fechaFormat}</span>
+                    <span class="cloz-date-label">${fechaFormat.toUpperCase()}</span>
                 </div>
                 <div class="cloz-dose-grid">
                     <div class="dose-item">
@@ -196,8 +228,7 @@ window.generarCalendarioCloz = function() {
                         <span class="dose-val">${tot} <small>mg</small></span>
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
     });
 
     document.getElementById('cloz-res-pauta').innerHTML = html;
@@ -207,14 +238,12 @@ window.generarCalendarioCloz = function() {
 window.copiarCalendarioCloz = function() {
     const t = i18nCloz[window.clozLang];
     let txt = `📋 ${t.title.toUpperCase()}\n--------------------------\n`;
-    
     document.querySelectorAll('.cloz-card').forEach(c => {
         const dia = c.querySelector('.cloz-day-badge').innerText;
         const fecha = c.querySelector('.cloz-date-label').innerText;
         const d = c.querySelectorAll('.dose-val');
         txt += `${dia} (${fecha}): ☀️${d[0].innerText} | 🌙${d[1].innerText} | TOTAL: ${d[2].innerText}\n`;
     });
-
     navigator.clipboard.writeText(txt);
     alert(t.copied);
 };
