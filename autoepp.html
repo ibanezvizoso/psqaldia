@@ -23,13 +23,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
 
-        /* Navbar Estilo PSQALDÍA */
+        /* Navbar Simplificada (Igual que catatonia.html) */
         nav {
             background: var(--white);
             padding: 1rem 2rem;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: center; /* Centrado para mayor limpieza */
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
@@ -38,36 +37,44 @@
         .logo { font-weight: 800; font-size: 1.5rem; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
         .logo span { color: var(--primary); }
 
-        /* Contenedor Principal */
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
 
-        /* Hero Section */
-        .hero { text-align: center; margin-bottom: 3rem; }
-        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: var(--text); }
-        .hero p { color: var(--text-light); font-size: 1.1rem; max-width: 700px; margin: 0 auto; }
+        /* Header */
+        .hero { text-align: center; margin-bottom: 2.5rem; }
+        .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text); }
+        .hero p { color: var(--text-light); font-size: 1rem; max-width: 600px; margin: 0 auto; }
 
-        /* Tarjetas de Instrucciones */
-        .grid-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .info-card { background: var(--white); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border); transition: 0.3s; }
-        .info-card i { color: var(--primary); font-size: 1.5rem; margin-bottom: 1rem; }
-        .info-card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
-        .info-card p { font-size: 0.9rem; color: var(--text-light); }
-
-        /* El contenedor donde se inyecta la herramienta JS */
+        /* Contenedor de la Herramienta - Sin desbordes */
         #tool-wrapper {
             background: var(--white);
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
             border: 1px solid var(--border);
-            overflow: hidden;
-            min-height: 600px;
+            overflow: visible; /* Permitir que el contenido respire */
+            margin-bottom: 2rem;
         }
 
-        footer { text-align: center; padding: 3rem; color: var(--text-light); font-size: 0.9rem; }
+        /* Estilo para el botón de volver */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: var(--white);
+            border: 1px solid var(--border);
+        }
+        .back-link:hover { color: var(--primary); border-color: var(--primary); }
+
+        footer { text-align: center; padding: 2rem 1rem 4rem; }
 
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2rem; }
-            .grid-info { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -75,68 +82,40 @@
 
     <nav>
         <a href="/" class="logo">PSQ<span>ALDÍA</span></a>
-        <div style="display: flex; gap: 1.5rem;">
-            <a href="/herramientas" style="text-decoration:none; color:var(--text); font-weight:600; font-size:0.9rem;">Herramientas</a>
-            <a href="/about" style="text-decoration:none; color:var(--text); font-weight:600; font-size:0.9rem;">Sobre el proyecto</a>
-        </div>
     </nav>
 
     <div class="container">
         <header class="hero">
-            <h1>AutoEPP <span style="color:var(--primary); font-size: 1rem; vertical-align: middle; background: #eef2ff; padding: 4px 12px; border-radius: 20px;">v1.0</span></h1>
-            <p>Genera exploraciones psicopatológicas precisas y profesionalizadas en segundos. Ajuste dinámico de gramática, formatos de texto y valoración de riesgo suicida.</p>
+            <h1>AutoEPP</h1>
+            <p>Generador dinámico de Exploración Psicopatológica con lógica condicional avanzada.</p>
         </header>
-
-        <div class="grid-info">
-            <div class="info-card">
-                <i class="fas fa-venus-mars"></i>
-                <h3>Adaptación de Género</h3>
-                <p>El sistema detecta automáticamente las terminaciones y ajusta el texto si el paciente es varón o mujer.</p>
-            </div>
-            <div class="info-card">
-                <i class="fas fa-align-left"></i>
-                <h3>Formatos de Salida</h3>
-                <p>Elige entre formato por <strong>Apartados</strong> (clásico de historia clínica) o <strong>Bloque único</strong> (texto corrido).</p>
-            </div>
-            <div class="info-card">
-                <i class="fas fa-project-diagram"></i>
-                <h3>Lógica Condicional</h3>
-                <p>Al seleccionar opciones complejas (como Ideas Delirantes), se activarán automáticamente sub-categorías específicas.</p>
-            </div>
-            <div class="info-card">
-                <i class="fas fa-shield-virus"></i>
-                <h3>Módulo de Riesgo</h3>
-                <p>Activa la casilla inferior para incluir la valoración de intención suicida y factores de riesgo.</p>
-            </div>
-        </div>
 
         <div id="tool-wrapper">
             <div id="modalData">
                 <div style="padding:4rem; text-align:center;">
                     <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
-                    <p style="margin-top:1rem; font-weight:600;">Cargando base de datos clínica...</p>
+                    <p style="margin-top:1rem; font-weight:600;">Sincronizando con base de datos...</p>
                 </div>
             </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="/herramientas" class="back-link">
+                <i class="fas fa-arrow-left"></i> Volver a herramientas
+            </a>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2026 PSQALDÍA - Herramientas para la práctica clínica diaria.</p>
+        <p style="color:var(--text-light); font-size:0.8rem;">PSQALDÍA © 2026 - Herramienta de apoyo clínico</p>
     </footer>
 
-    <script>
-        // Definimos la URL de tu Worker para que autoepp.js sepa a dónde llamar
-        window.WORKER_URL = "https://psqaldia.com/";
-    </script>
-    
+    <script>window.WORKER_URL = "https://psqaldia.com/";</script>
     <script src="autoepp.js"></script>
-    
     <script>
-        // Forzamos el inicio si no se dispara con DOMContentLoaded
-        if (typeof iniciarAutoEPP === 'function') {
-            document.addEventListener('DOMContentLoaded', iniciarAutoEPP);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof iniciarAutoEPP === 'function') iniciarAutoEPP();
+        });
     </script>
 </body>
 </html>
-
