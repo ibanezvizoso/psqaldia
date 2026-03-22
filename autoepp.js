@@ -1,11 +1,11 @@
 /**
- * AutoEPP v1.0 - Generador de Exploración Psicopatológica
+ * AutoEPP v1.1 - Generador de Exploración Psicopatológica
  * PSQALDÍA © 2026
  */
 
 let dbEPP = [];
 let state = {}; 
-let config = { genero: 'masculino', formato: 'bloque', mostrarRiesgo: false }; // Por defecto Bloque Único
+let config = { genero: 'masculino', formato: 'bloque', mostrarRiesgo: false }; 
 window.activeEsfera = null;
 
 async function iniciarAutoEPP() {
@@ -32,7 +32,8 @@ async function iniciarAutoEPP() {
                 active: true,
                 sel1: item.defecto || item.opciones[0],
                 sel2: '',
-                sel3: ''
+                sel3: '',
+                multi: false // Nueva propiedad para selección múltiple
             };
         });
 
@@ -74,7 +75,6 @@ function renderEPPUI() {
             .esfera-item.active-esfera { background: #eef2ff; border-color: #4338ca; color: #4338ca; }
             .esfera-item.inactive { opacity: 0.4; filter: grayscale(1); }
             
-            /* Estilo para esferas de conducta suicida */
             .esfera-riesgo { background: #fef2f2 !important; color: #991b1b !important; border: 1px solid #fee2e2 !important; }
             .esfera-riesgo.active-esfera { background: #fee2e2 !important; border-color: #f87171 !important; color: #b91c1c !important; }
 
@@ -89,6 +89,8 @@ function renderEPPUI() {
             
             .btn-epp { padding: 12px 24px; border-radius: 10px; font-weight: 800; cursor: pointer; border: none; font-size: 0.85rem; }
             .btn-primary { background: #4338ca; color: white; }
+
+            .multi-toggle { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; }
         </style>
 
         <div class="epp-layout">
@@ -119,7 +121,7 @@ function renderEPPUI() {
                     <div class="result-area">
                         <textarea id="epp-text" readonly></textarea>
                         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:10px; margin-top:10px;">
-                            <span style="font-size:0.7rem; color:#94a3b8; font-weight:800; letter-spacing:1px;">AUTO EPP v1.0</span>
+                            <span style="font-size:0.7rem; color:#94a3b8; font-weight:800; letter-spacing:1px;">AUTO EPP v1.1</span>
                             <button class="btn-epp btn-primary" onclick="copiarEPP()"><i class="far fa-copy"></i> COPIAR EPP</button>
                         </div>
                     </div>
@@ -150,6 +152,11 @@ function renderSidebar() {
 function cumpleCondicion(valorSeleccionado, condicion) {
     if (!condicion) return false;
     const opcionesCondicion = condicion.split(' OR ').map(opt => opt.trim());
+    
+    // Si es selección múltiple (Array), comprobamos si alguno de los valores cumple la condición
+    if (Array.isArray(valorSeleccionado)) {
+        return valorSeleccionado.some(v => opcionesCondicion.includes(v));
+    }
     return opcionesCondicion.includes(valorSeleccionado);
 }
 
@@ -160,10 +167,19 @@ function selectEsfera(nombre) {
     const s = state[nombre];
     const panel = document.getElementById('options-panel');
 
-    let html = `<div style="margin-bottom:10px; font-weight:800; color:#4338ca; text-transform:uppercase; font-size:0.75rem;">Opciones: ${nombre}</div>`;
+    let html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="font-weight:800; color:#4338ca; text-transform:uppercase; font-size:0.75rem;">Opciones: ${nombre}</div>
+            <label class="multi-toggle">
+                <input type="checkbox" ${s.multi ? 'checked' : ''} onchange="toggleMulti('${nombre}', this.checked)"> Selección múltiple
+            </label>
+        </div>
+    `;
+
     html += `<div class="option-group">`;
     [...item.opciones, "No valorable"].forEach(opt => {
-        html += `<div class="chip ${s.sel1 === opt ? 'selected' : ''}" onclick="setOption('${nombre}', 1, '${opt}')">${opt}</div>`;
+        const isSelected = s.multi && Array.isArray(s.sel1) ? s.sel1.includes(opt) : s.sel1 === opt;
+        html += `<div class="chip ${isSelected ? 'selected' : ''}" onclick="setOption('${nombre}', 1, '${opt}')">${opt}</div>`;
     });
     html += `</div>`;
 
@@ -185,10 +201,39 @@ function selectEsfera(nombre) {
     panel.innerHTML = html;
 }
 
+function toggleMulti(esfera, val) {
+    state[esfera].multi = val;
+    // Resetear selección al cambiar modo para evitar conflictos
+    const item = dbEPP.find(i => i.esfera === esfera);
+    state[esfera].sel1 = val ? [item.defecto || item.opciones[0]] : (item.defecto || item.opciones[0]);
+    state[esfera].sel2 = '';
+    state[esfera].sel3 = '';
+    selectEsfera(esfera);
+    generarTextoFinal();
+}
+
 function setOption(esfera, nivel, valor) {
-    if (nivel === 1) { state[esfera].sel1 = valor; state[esfera].sel2 = ''; state[esfera].sel3 = ''; }
-    if (nivel === 2) { state[esfera].sel2 = valor; state[esfera].sel3 = ''; }
-    if (nivel === 3) { state[esfera].sel3 = valor; }
+    const s = state[esfera];
+    if (nivel === 1) {
+        if (s.multi) {
+            if (!Array.isArray(s.sel1)) s.sel1 = [s.sel1];
+            if (valor === "No valorable") {
+                s.sel1 = ["No valorable"];
+            } else {
+                s.sel1 = s.sel1.filter(v => v !== "No valorable");
+                if (s.sel1.includes(valor)) {
+                    if (s.sel1.length > 1) s.sel1 = s.sel1.filter(v => v !== valor);
+                } else {
+                    s.sel1.push(valor);
+                }
+            }
+        } else {
+            s.sel1 = valor;
+        }
+        s.sel2 = ''; s.sel3 = ''; 
+    }
+    if (nivel === 2) { s.sel2 = valor; s.sel3 = ''; }
+    if (nivel === 3) { s.sel3 = valor; }
     selectEsfera(esfera);
     generarTextoFinal();
 }
@@ -215,6 +260,13 @@ function procesarGramatica(texto, esfera) {
     return res;
 }
 
+function formatList(arr) {
+    if (arr.length === 0) return "";
+    if (arr.length === 1) return arr[0];
+    const last = arr.pop();
+    return arr.join(', ') + ' y ' + last;
+}
+
 function generarTextoFinal() {
     let eppArr = [];
     let riesgoArr = [];
@@ -224,14 +276,22 @@ function generarTextoFinal() {
         if (!s.active) return;
         
         let fragmento = "";
-        if (s.sel1 === "No valorable") {
+        const isNoValorable = s.multi && Array.isArray(s.sel1) ? s.sel1.includes("No valorable") : s.sel1 === "No valorable";
+
+        if (isNoValorable) {
             fragmento = `${item.esfera} no valorable`;
         } else {
-            fragmento = s.sel1;
-            if (s.sel2) fragmento += ` ${s.sel2}`;
-            if (s.sel3) fragmento += ` ${s.sel3}`;
+            if (Array.isArray(s.sel1)) {
+                // Procesar cada elemento de la lista múltiple
+                const list = s.sel1.map(v => procesarGramatica(v, item.esfera));
+                fragmento = formatList(list);
+            } else {
+                fragmento = procesarGramatica(s.sel1, item.esfera);
+            }
+            
+            if (s.sel2) fragmento += ` ${procesarGramatica(s.sel2, item.esfera)}`;
+            if (s.sel3) fragmento += ` ${procesarGramatica(s.sel3, item.esfera)}`;
         }
-        fragmento = procesarGramatica(fragmento, item.esfera);
         
         const line = config.formato === 'apartados' ? `${item.esfera}: ${fragmento}.` : `${fragmento}.`;
         
@@ -245,7 +305,6 @@ function generarTextoFinal() {
     if (config.formato === 'apartados') {
         document.getElementById('epp-text').value = [...eppArr, ...riesgoArr].join('\n');
     } else {
-        // Bloque único con salto de línea para el "siguiente párrafo" del riesgo
         let textoFinal = eppArr.join(' ');
         if (riesgoArr.length > 0) {
             textoFinal += (textoFinal ? '\n\n' : '') + riesgoArr.join(' ');
@@ -263,7 +322,7 @@ function copiarEPP() {
 
 function reiniciarEPP() {
     dbEPP.forEach(item => {
-        state[item.esfera] = { active: true, sel1: item.defecto || item.opciones[0], sel2: '', sel3: '' };
+        state[item.esfera] = { active: true, sel1: item.defecto || item.opciones[0], sel2: '', sel3: '', multi: false };
     });
     generarTextoFinal();
     if (window.activeEsfera) selectEsfera(window.activeEsfera);
