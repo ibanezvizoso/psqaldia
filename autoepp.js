@@ -5,7 +5,7 @@
 
 let dbEPP = [];
 let state = {}; 
-let config = { genero: 'masculino', formato: 'apartados', mostrarRiesgo: false };
+let config = { genero: 'masculino', formato: 'bloque', mostrarRiesgo: false }; // Cambiado a 'bloque' por defecto
 window.activeEsfera = null;
 
 async function iniciarAutoEPP() {
@@ -47,7 +47,6 @@ function renderEPPUI() {
     const container = document.getElementById('modalData');
     container.innerHTML = `
         <style>
-            /* CORRECCIÓN DE BLOQUEO: height auto y overflow visible */
             .epp-layout { 
                 display: flex; 
                 flex-direction: column; 
@@ -63,7 +62,6 @@ function renderEPPUI() {
             
             .epp-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; }
             
-            /* Ajuste de grid para que no bloquee en móviles */
             .epp-main { display: grid; grid-template-columns: 240px 1fr; gap: 15px; flex-grow: 1; }
             
             @media (max-width: 768px) {
@@ -97,8 +95,8 @@ function renderEPPUI() {
                         <option value="femenino">Mujer</option>
                     </select>
                     <select onchange="updateConfig('formato', this.value)" class="chip">
+                        <option value="bloque" selected>Bloque Único</option>
                         <option value="apartados">Por Apartados</option>
-                        <option value="bloque">Bloque Único</option>
                     </select>
                 </div>
                 <button class="chip" style="background:#f1f5f9;" onclick="reiniciarEPP()">Reiniciar Estándar</button>
@@ -129,8 +127,6 @@ function renderEPPUI() {
     selectEsfera(window.activeEsfera);
     generarTextoFinal();
 }
-
-// --- Resto de funciones se mantienen idénticas ---
 
 function renderSidebar() {
     const list = document.getElementById('sidebar-list');
@@ -244,4 +240,4 @@ function reiniciarEPP() {
     });
     generarTextoFinal();
     if (window.activeEsfera) selectEsfera(window.activeEsfera);
-}
+        }
