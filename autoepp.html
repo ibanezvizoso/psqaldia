@@ -10,31 +10,29 @@
     
     <style>
         :root {
-            --primary-color: #4338ca;
+            --primary: #4338ca;
+            --bg: #f8fafc;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --bg-color: #f8fafc;
+            --border: #e2e8f0;
+            --white: #ffffff;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            margin: 0; 
             padding: 0;
             line-height: 1.6;
         }
 
-        /* Cabecera Estándar PSQ al día (Copiada de tu index) */
+        /* Cabecera Estándar PSQ al día */
         header {
-            background: white;
+            background: var(--white);
             padding: 1.5rem;
             text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .logo-container {
-            display: inline-block;
+            border-bottom: 1px solid var(--border);
         }
 
         .logo-text {
@@ -45,23 +43,46 @@
             letter-spacing: -0.025em;
         }
 
-        .logo-text span {
-            color: var(--primary-color);
+        .logo-text span { color: var(--primary); }
+
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+
+        /* Hero & Header */
+        .hero { text-align: center; margin-bottom: 3rem; }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+        /* Cuadros explicativos */
+        .grid-info { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 3rem; 
         }
+        .info-card { 
+            background: var(--white); 
+            padding: 1.5rem; 
+            border-radius: 16px; 
+            border: 1px solid var(--border); 
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .info-card i { color: var(--primary); font-size: 1.5rem; margin-bottom: 1rem; }
+        .info-card h3 { font-size: 1rem; margin-bottom: 0.5rem; font-weight: 700; }
+        .info-card p { font-size: 0.85rem; color: var(--text-muted); }
 
         /* Contenedor de la Herramienta */
-        .container {
-            max-width: 1100px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .tool-header {
+        #tool-wrapper {
+            background: var(--white);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            overflow: visible; /* Clave para el scroll */
             margin-bottom: 2rem;
-            text-align: left;
         }
 
-        .back-button {
+        /* Botón Volver Inferior */
+        .back-link-bottom {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -69,62 +90,76 @@
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
-            margin-bottom: 1rem;
-            transition: color 0.2s;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            transition: 0.2s;
+            margin-top: 1rem;
         }
+        .back-link-bottom:hover { color: var(--primary); border-color: var(--primary); transform: translateY(-2px); }
 
-        .back-button:hover {
-            color: var(--primary-color);
-        }
-
-        #tool-wrapper {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            /* Importante: eliminamos overflow hidden aquí */
-        }
-
-        footer {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
+        footer { text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 0.8rem; }
 
         @media (max-width: 768px) {
-            .logo-text { font-size: 1.5rem; }
-            .container { margin: 1rem auto; }
+            .hero h1 { font-size: 1.8rem; }
+            .grid-info { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo-container">
-            <a href="/" class="logo-text">PSQ<span>al día</span></a>
-        </div>
+        <a href="/" class="logo-text">PSQ<span>al día</span></a>
     </header>
 
     <div class="container">
-        <div class="tool-header">
-            <a href="/herramientas" class="back-button"><i class="fas fa-arrow-left"></i> Volver a herramientas</a>
-            <h1 style="font-size: 2rem; font-weight: 800;">AutoEPP</h1>
-            <p style="color: var(--text-muted);">Generador inteligente de Exploración Psicopatológica.</p>
+        <div class="hero">
+            <h1>AutoEPP</h1>
+            <p>Generador inteligente de Exploración Psicopatológica con lógica condicional y adaptación gramatical.</p>
+        </div>
+
+        <div class="grid-info">
+            <div class="info-card">
+                <i class="fas fa-venus-mars"></i>
+                <h3>Género Adaptativo</h3>
+                <p>Ajuste automático de la gramática según el sexo del paciente seleccionado.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-align-left"></i>
+                <h3>Formatos de Salida</h3>
+                <p>Exporta en formato de apartados clínicos o bloque de texto único.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-project-diagram"></i>
+                <h3>Lógica en Cascada</h3>
+                <p>Las sub-opciones se activan dinámicamente según tus selecciones previas.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-shield-virus"></i>
+                <h3>Módulo de Riesgo</h3>
+                <p>Incluye valoraciones específicas de intención suicida y factores de riesgo.</p>
+            </div>
         </div>
 
         <div id="tool-wrapper">
             <div id="modalData">
                 <div style="padding:4rem; text-align:center;">
-                    <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary-color);"></i>
+                    <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
                     <p style="margin-top:1rem; font-weight:600;">Sincronizando con base de datos...</p>
                 </div>
             </div>
         </div>
+
+        <div style="text-align: center;">
+            <a href="/herramientas" class="back-link-bottom">
+                <i class="fas fa-arrow-left"></i> Volver a herramientas
+            </a>
+        </div>
     </div>
 
     <footer>
-        <p>PSQ al día © 2026</p>
+        <p>PSQ al día © 2026 - Herramienta de apoyo a la decisión clínica</p>
     </footer>
 
     <script>window.WORKER_URL = "https://psqaldia.com/";</script>
