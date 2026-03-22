@@ -5,7 +5,7 @@
 
 let dbEPP = [];
 let state = {}; 
-let config = { genero: 'masculino', formato: 'bloque', mostrarRiesgo: false }; // Cambiado a 'bloque' por defecto
+let config = { genero: 'masculino', formato: 'bloque', mostrarRiesgo: false }; // Por defecto Bloque Único
 window.activeEsfera = null;
 
 async function iniciarAutoEPP() {
@@ -140,6 +140,14 @@ function renderSidebar() {
         `).join('');
 }
 
+// Función auxiliar para manejar la lógica OR
+function cumpleCondicion(valorSeleccionado, condicion) {
+    if (!condicion) return false;
+    // Divide por " OR " y limpia espacios para comparar cada opción
+    const opcionesCondicion = condicion.split(' OR ').map(opt => opt.trim());
+    return opcionesCondicion.includes(valorSeleccionado);
+}
+
 function selectEsfera(nombre) {
     window.activeEsfera = nombre;
     renderSidebar();
@@ -154,7 +162,8 @@ function selectEsfera(nombre) {
     });
     html += `</div>`;
 
-    if (s.sel1 === item.cond1.if) {
+    // Aplicación de lógica OR para cond1
+    if (cumpleCondicion(s.sel1, item.cond1.if)) {
         html += `<div class="option-group" style="background:#f1f5f9; padding:10px; border-radius:10px;">`;
         item.cond1.then.forEach(opt => {
             html += `<div class="chip ${s.sel2 === opt ? 'selected' : ''}" onclick="setOption('${nombre}', 2, '${opt}')">${opt}</div>`;
@@ -162,7 +171,8 @@ function selectEsfera(nombre) {
         html += `</div>`;
     }
 
-    if (s.sel2 === item.cond2.if) {
+    // Aplicación de lógica OR para cond2
+    if (cumpleCondicion(s.sel2, item.cond2.if)) {
         html += `<div class="option-group" style="background:#e0e7ff; padding:10px; border-radius:10px;">`;
         item.cond2.then.forEach(opt => {
             html += `<div class="chip ${s.sel3 === opt ? 'selected' : ''}" onclick="setOption('${nombre}', 3, '${opt}')">${opt}</div>`;
@@ -240,4 +250,4 @@ function reiniciarEPP() {
     });
     generarTextoFinal();
     if (window.activeEsfera) selectEsfera(window.activeEsfera);
-        }
+}
