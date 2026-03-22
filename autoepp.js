@@ -1,5 +1,5 @@
 /**
- * AutoEPP v1.1 - Generador de Exploración Psicopatológica
+ * AutoEPP v1.2 - Generador de Exploración Psicopatológica
  * PSQALDÍA © 2026
  */
 
@@ -33,7 +33,7 @@ async function iniciarAutoEPP() {
                 sel1: item.defecto || item.opciones[0],
                 sel2: '',
                 sel3: '',
-                multi: false // Nueva propiedad para selección múltiple
+                multi: false 
             };
         });
 
@@ -121,7 +121,7 @@ function renderEPPUI() {
                     <div class="result-area">
                         <textarea id="epp-text" readonly></textarea>
                         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:10px; margin-top:10px;">
-                            <span style="font-size:0.7rem; color:#94a3b8; font-weight:800; letter-spacing:1px;">AUTO EPP v1.1</span>
+                            <span style="font-size:0.7rem; color:#94a3b8; font-weight:800; letter-spacing:1px;">AUTO EPP v1.2</span>
                             <button class="btn-epp btn-primary" onclick="copiarEPP()"><i class="far fa-copy"></i> COPIAR EPP</button>
                         </div>
                     </div>
@@ -152,8 +152,6 @@ function renderSidebar() {
 function cumpleCondicion(valorSeleccionado, condicion) {
     if (!condicion) return false;
     const opcionesCondicion = condicion.split(' OR ').map(opt => opt.trim());
-    
-    // Si es selección múltiple (Array), comprobamos si alguno de los valores cumple la condición
     if (Array.isArray(valorSeleccionado)) {
         return valorSeleccionado.some(v => opcionesCondicion.includes(v));
     }
@@ -203,7 +201,6 @@ function selectEsfera(nombre) {
 
 function toggleMulti(esfera, val) {
     state[esfera].multi = val;
-    // Resetear selección al cambiar modo para evitar conflictos
     const item = dbEPP.find(i => i.esfera === esfera);
     state[esfera].sel1 = val ? [item.defecto || item.opciones[0]] : (item.defecto || item.opciones[0]);
     state[esfera].sel2 = '';
@@ -256,15 +253,15 @@ function procesarGramatica(texto, esfera) {
     res = res.replace(/([^\s/]+)\/([^\s]+)/g, (match, m, f) => {
         return config.genero === 'masculino' ? m : f;
     });
-    res = res.replace(/X/g, esfera);
+    // Eliminación de la lógica de X (las borra del texto final)
+    res = res.replace(/X\s?/g, ''); 
     return res;
 }
 
+// Separador modificado por puntos
 function formatList(arr) {
     if (arr.length === 0) return "";
-    if (arr.length === 1) return arr[0];
-    const last = arr.pop();
-    return arr.join(', ') + ' y ' + last;
+    return arr.join('. ');
 }
 
 function generarTextoFinal() {
@@ -282,15 +279,14 @@ function generarTextoFinal() {
             fragmento = `${item.esfera} no valorable`;
         } else {
             if (Array.isArray(s.sel1)) {
-                // Procesar cada elemento de la lista múltiple
                 const list = s.sel1.map(v => procesarGramatica(v, item.esfera));
                 fragmento = formatList(list);
             } else {
                 fragmento = procesarGramatica(s.sel1, item.esfera);
             }
             
-            if (s.sel2) fragmento += ` ${procesarGramatica(s.sel2, item.esfera)}`;
-            if (s.sel3) fragmento += ` ${procesarGramatica(s.sel3, item.esfera)}`;
+            if (s.sel2) fragmento += (fragmento ? '. ' : '') + procesarGramatica(s.sel2, item.esfera);
+            if (s.sel3) fragmento += (fragmento ? '. ' : '') + procesarGramatica(s.sel3, item.esfera);
         }
         
         const line = config.formato === 'apartados' ? `${item.esfera}: ${fragmento}.` : `${fragmento}.`;
