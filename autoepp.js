@@ -177,14 +177,17 @@ function selectEsfera(nombre) {
     html += `<div class="option-group">`;
     [...item.opciones, "No valorable"].forEach(opt => {
         const isSelected = s.multi && Array.isArray(s.sel1) ? s.sel1.includes(opt) : s.sel1 === opt;
-        html += `<div class="chip ${isSelected ? 'selected' : ''}" onclick="setOption('${nombre}', 1, '${opt}')">${opt}</div>`;
+        // Aplicamos gramática al texto del botón
+        const displayLabel = opt === "No valorable" ? opt : procesarGramatica(opt, nombre);
+        html += `<div class="chip ${isSelected ? 'selected' : ''}" onclick="setOption('${nombre}', 1, '${opt}')">${displayLabel}</div>`;
     });
     html += `</div>`;
 
     if (cumpleCondicion(s.sel1, item.cond1.if)) {
         html += `<div class="option-group" style="background:#f1f5f9; padding:10px; border-radius:10px;">`;
         item.cond1.then.forEach(opt => {
-            html += `<div class="chip ${s.sel2 === opt ? 'selected' : ''}" onclick="setOption('${nombre}', 2, '${opt}')">${opt}</div>`;
+            const displayLabel = procesarGramatica(opt, nombre);
+            html += `<div class="chip ${s.sel2 === opt ? 'selected' : ''}" onclick="setOption('${nombre}', 2, '${opt}')">${displayLabel}</div>`;
         });
         html += `</div>`;
     }
@@ -192,7 +195,8 @@ function selectEsfera(nombre) {
     if (cumpleCondicion(s.sel2, item.cond2.if)) {
         html += `<div class="option-group" style="background:#e0e7ff; padding:10px; border-radius:10px;">`;
         item.cond2.then.forEach(opt => {
-            html += `<div class="chip ${s.sel3 === opt ? 'selected' : ''}" onclick="setOption('${nombre}', 3, '${opt}')">${opt}</div>`;
+            const displayLabel = procesarGramatica(opt, nombre);
+            html += `<div class="chip ${s.sel3 === opt ? 'selected' : ''}" onclick="setOption('${nombre}', 3, '${opt}')">${displayLabel}</div>`;
         });
         html += `</div>`;
     }
@@ -238,6 +242,8 @@ function setOption(esfera, nivel, valor) {
 function updateConfig(key, val) {
     config[key] = val;
     if (key === 'mostrarRiesgo') renderSidebar();
+    // Refrescamos el panel de opciones para aplicar el género a los botones
+    if (window.activeEsfera) selectEsfera(window.activeEsfera);
     generarTextoFinal();
 }
 
@@ -253,12 +259,10 @@ function procesarGramatica(texto, esfera) {
     res = res.replace(/([^\s/]+)\/([^\s]+)/g, (match, m, f) => {
         return config.genero === 'masculino' ? m : f;
     });
-    // Eliminación de la lógica de X (las borra del texto final)
     res = res.replace(/X\s?/g, ''); 
     return res;
 }
 
-// Separador modificado por puntos
 function formatList(arr) {
     if (arr.length === 0) return "";
     return arr.join('. ');
