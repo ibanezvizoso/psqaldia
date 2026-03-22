@@ -3,111 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoEPP | PSQALDÍA</title>
-    <meta name="description" content="Generador dinámico de Exploración Psicopatológica (EPP) para psiquiatría y psicología.">
+    <title>AutoEPP | PSQ al día</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root {
-            --primary: #4338ca;
-            --primary-dark: #3730a3;
-            --bg: #f8fafc;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --white: #ffffff;
-            --border: #e2e8f0;
+            --primary-color: #4338ca;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-color: #f8fafc;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
-
-        /* Navbar Simplificada (Igual que catatonia.html) */
-        nav {
-            background: var(--white);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: center; /* Centrado para mayor limpieza */
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
         }
-        .logo { font-weight: 800; font-size: 1.5rem; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        .logo span { color: var(--primary); }
 
-        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+        /* Cabecera Estándar PSQ al día (Copiada de tu index) */
+        header {
+            background: white;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
 
-        /* Header */
-        .hero { text-align: center; margin-bottom: 2.5rem; }
-        .hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text); }
-        .hero p { color: var(--text-light); font-size: 1rem; max-width: 600px; margin: 0 auto; }
+        .logo-container {
+            display: inline-block;
+        }
 
-        /* Contenedor de la Herramienta - Sin desbordes */
-        #tool-wrapper {
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-            border: 1px solid var(--border);
-            overflow: visible; /* Permitir que el contenido respire */
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: -0.025em;
+        }
+
+        .logo-text span {
+            color: var(--primary-color);
+        }
+
+        /* Contenedor de la Herramienta */
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .tool-header {
             margin-bottom: 2rem;
+            text-align: left;
         }
 
-        /* Estilo para el botón de volver */
-        .back-link {
+        .back-button {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: var(--text-light);
+            color: var(--text-muted);
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
-            transition: 0.2s;
-            padding: 10px 20px;
-            border-radius: 10px;
-            background: var(--white);
-            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+            transition: color 0.2s;
         }
-        .back-link:hover { color: var(--primary); border-color: var(--primary); }
 
-        footer { text-align: center; padding: 2rem 1rem 4rem; }
+        .back-button:hover {
+            color: var(--primary-color);
+        }
+
+        #tool-wrapper {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            /* Importante: eliminamos overflow hidden aquí */
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
 
         @media (max-width: 768px) {
-            .hero h1 { font-size: 1.8rem; }
+            .logo-text { font-size: 1.5rem; }
+            .container { margin: 1rem auto; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="/" class="logo">PSQ<span>ALDÍA</span></a>
-    </nav>
+    <header>
+        <div class="logo-container">
+            <a href="/" class="logo-text">PSQ<span>al día</span></a>
+        </div>
+    </header>
 
     <div class="container">
-        <header class="hero">
-            <h1>AutoEPP</h1>
-            <p>Generador dinámico de Exploración Psicopatológica con lógica condicional avanzada.</p>
-        </header>
+        <div class="tool-header">
+            <a href="/herramientas" class="back-button"><i class="fas fa-arrow-left"></i> Volver a herramientas</a>
+            <h1 style="font-size: 2rem; font-weight: 800;">AutoEPP</h1>
+            <p style="color: var(--text-muted);">Generador inteligente de Exploración Psicopatológica.</p>
+        </div>
 
         <div id="tool-wrapper">
             <div id="modalData">
                 <div style="padding:4rem; text-align:center;">
-                    <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
+                    <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary-color);"></i>
                     <p style="margin-top:1rem; font-weight:600;">Sincronizando con base de datos...</p>
                 </div>
             </div>
         </div>
-
-        <div style="text-align: center; margin-top: 1rem;">
-            <a href="/herramientas" class="back-link">
-                <i class="fas fa-arrow-left"></i> Volver a herramientas
-            </a>
-        </div>
     </div>
 
     <footer>
-        <p style="color:var(--text-light); font-size:0.8rem;">PSQALDÍA © 2026 - Herramienta de apoyo clínico</p>
+        <p>PSQ al día © 2026</p>
     </footer>
 
     <script>window.WORKER_URL = "https://psqaldia.com/";</script>
