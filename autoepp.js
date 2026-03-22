@@ -74,6 +74,10 @@ function renderEPPUI() {
             .esfera-item.active-esfera { background: #eef2ff; border-color: #4338ca; color: #4338ca; }
             .esfera-item.inactive { opacity: 0.4; filter: grayscale(1); }
             
+            /* Estilo para esferas de conducta suicida */
+            .esfera-riesgo { background: #fef2f2 !important; color: #991b1b !important; border: 1px solid #fee2e2 !important; }
+            .esfera-riesgo.active-esfera { background: #fee2e2 !important; border-color: #f87171 !important; color: #b91c1c !important; }
+
             .epp-content { display: flex; flex-direction: column; gap: 15px; }
             .options-panel { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; min-height: 150px; }
             .option-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #f1f5f9; }
@@ -105,8 +109,8 @@ function renderEPPUI() {
             <div class="epp-main">
                 <div class="epp-sidebar">
                     <div id="sidebar-list"></div>
-                    <label style="margin-top:20px; padding-top:10px; border-top:1px solid #f1f5f9; display:flex; align-items:center; gap:8px; font-size:0.75rem; font-weight:800; cursor:pointer;">
-                        <input type="checkbox" onchange="updateConfig('mostrarRiesgo', this.checked)"> Valoración de Riesgo
+                    <label style="margin-top:20px; padding-top:10px; border-top:1px solid #f1f5f9; display:flex; align-items:center; gap:8px; font-size:0.75rem; font-weight:800; cursor:pointer; color: #dc2626;">
+                        <input type="checkbox" onchange="updateConfig('mostrarRiesgo', this.checked)"> Valoración de conducta suicida
                     </label>
                 </div>
                 
@@ -132,18 +136,19 @@ function renderSidebar() {
     const list = document.getElementById('sidebar-list');
     list.innerHTML = dbEPP
         .filter(item => config.mostrarRiesgo || item.categoria === 'epp')
-        .map(item => `
-            <div class="esfera-item ${window.activeEsfera === item.esfera ? 'active-esfera' : ''} ${!state[item.esfera].active ? 'inactive' : ''}" onclick="selectEsfera('${item.esfera}')">
-                <span>${item.esfera}</span>
-                <i class="fas fa-times btn-del" onclick="event.stopPropagation(); toggleEsfera('${item.esfera}')"></i>
-            </div>
-        `).join('');
+        .map(item => {
+            const isRiesgo = item.categoria !== 'epp';
+            return `
+                <div class="esfera-item ${window.activeEsfera === item.esfera ? 'active-esfera' : ''} ${!state[item.esfera].active ? 'inactive' : ''} ${isRiesgo ? 'esfera-riesgo' : ''}" onclick="selectEsfera('${item.esfera}')">
+                    <span>${item.esfera}</span>
+                    <i class="fas fa-times btn-del" onclick="event.stopPropagation(); toggleEsfera('${item.esfera}')"></i>
+                </div>
+            `;
+        }).join('');
 }
 
-// Función auxiliar para manejar la lógica OR
 function cumpleCondicion(valorSeleccionado, condicion) {
     if (!condicion) return false;
-    // Divide por " OR " y limpia espacios para comparar cada opción
     const opcionesCondicion = condicion.split(' OR ').map(opt => opt.trim());
     return opcionesCondicion.includes(valorSeleccionado);
 }
@@ -162,7 +167,6 @@ function selectEsfera(nombre) {
     });
     html += `</div>`;
 
-    // Aplicación de lógica OR para cond1
     if (cumpleCondicion(s.sel1, item.cond1.if)) {
         html += `<div class="option-group" style="background:#f1f5f9; padding:10px; border-radius:10px;">`;
         item.cond1.then.forEach(opt => {
@@ -171,7 +175,6 @@ function selectEsfera(nombre) {
         html += `</div>`;
     }
 
-    // Aplicación de lógica OR para cond2
     if (cumpleCondicion(s.sel2, item.cond2.if)) {
         html += `<div class="option-group" style="background:#e0e7ff; padding:10px; border-radius:10px;">`;
         item.cond2.then.forEach(opt => {
@@ -213,12 +216,13 @@ function procesarGramatica(texto, esfera) {
 }
 
 function generarTextoFinal() {
-    let finalArr = [];
+    let eppArr = [];
+    let riesgoArr = [];
+    
     dbEPP.forEach(item => {
         const s = state[item.esfera];
         if (!s.active) return;
-        if (!config.mostrarRiesgo && item.categoria !== 'epp') return;
-
+        
         let fragmento = "";
         if (s.sel1 === "No valorable") {
             fragmento = `${item.esfera} no valorable`;
@@ -228,13 +232,26 @@ function generarTextoFinal() {
             if (s.sel3) fragmento += ` ${s.sel3}`;
         }
         fragmento = procesarGramatica(fragmento, item.esfera);
-        if (config.formato === 'apartados') {
-            finalArr.push(`${item.esfera}: ${fragmento}.`);
-        } else {
-            finalArr.push(`${fragmento}.`);
+        
+        const line = config.formato === 'apartados' ? `${item.esfera}: ${fragmento}.` : `${fragmento}.`;
+        
+        if (item.categoria === 'epp') {
+            eppArr.push(line);
+        } else if (config.mostrarRiesgo) {
+            riesgoArr.push(line);
         }
     });
-    document.getElementById('epp-text').value = finalArr.join(config.formato === 'apartados' ? '\n' : ' ');
+
+    if (config.formato === 'apartados') {
+        document.getElementById('epp-text').value = [...eppArr, ...riesgoArr].join('\n');
+    } else {
+        // Bloque único con salto de línea para el "siguiente párrafo" del riesgo
+        let textoFinal = eppArr.join(' ');
+        if (riesgoArr.length > 0) {
+            textoFinal += (textoFinal ? '\n\n' : '') + riesgoArr.join(' ');
+        }
+        document.getElementById('epp-text').value = textoFinal;
+    }
 }
 
 function copiarEPP() {
