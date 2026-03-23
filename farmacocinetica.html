@@ -92,16 +92,32 @@
             </div>
         </div>
 
-        <section class="info-panel">
-            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fas fa-graduation-cap"></i> Nota Académica</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">
-                Este simulador utiliza modelos de compartimento único y la función de Bateman para estimar la curva de concentración:
-                <br><br>
-                $$C(t) = D \cdot \frac{k_a}{k_a - k_e} \cdot (e^{-k_e t} - e^{-k_a t})$$
-                <br>
-                Los valores representados son <strong>relativos (%)</strong>. El 100% se define como el pico máximo alcanzado en estado estacionario (Steady State) tras la administración repetida de la dosis de referencia.
-            </p>
-        </section>
+       <section class="info-panel">
+    <h2 style="font-size: 1.1rem; margin-bottom: 1.2rem; font-weight: 700;">
+        <i class="fas fa-graduation-cap"></i> Fundamentos del Modelo
+    </h2>
+    
+    <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Este simulador emplea modelos de **compartimento único** y la **función de Bateman** para estimar la curva de niveles plasmáticos:
+    </p>
+
+    <div style="background: var(--primary-light); padding: 1.5rem; border-radius: 1rem; margin: 1.5rem 0; text-align: center; color: var(--primary); border: 1px solid rgba(67, 56, 202, 0.1);">
+        <div style="font-size: 1.2rem; overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
+            $$C(t) = D \cdot \frac{k_a}{k_a - k_e} \cdot (e^{-k_e t} - e^{-k_a t})$$
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1.2rem;">
+        <div><strong>C(t):</strong> Concentración en tiempo t</div>
+        <div><strong>kₐ:</strong> Constante de absorción</div>
+        <div><strong>kₑ:</strong> Constante de eliminación</div>
+        <div><strong>D:</strong> Dosis relativa</div>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1.5rem; line-height: 1.4; padding: 1rem; background: var(--bg); border-radius: 0.8rem; border-left: 4px solid var(--primary);">
+        <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Los valores son <b>relativos (%)</b>. El 100% representa el pico máximo en estado estacionario (<i>Steady State</i>).
+    </p>
+</section>
 
         
 
