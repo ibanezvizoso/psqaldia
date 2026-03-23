@@ -15,7 +15,7 @@ async function openDiagUI() {
     if (dbDiag.length === 0) {
         try {
             const pestaña = 'SSSNM';
-            const res = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const res = await fetch(`/?sheet=${pestaña}`);
             const data = await res.json();
 
             if (data.error) throw new Error(data.details || data.error);
