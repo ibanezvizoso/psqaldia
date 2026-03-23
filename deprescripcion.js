@@ -115,6 +115,14 @@ window.cambiarIdiomaDepre = function(nuevoIdioma) {
 };
 
 window.iniciarDeprescripcion = async function() {
+    if (!window.Chart) {
+        try {
+            // Usamos la función cargarScript que ya tienes en el index.html
+            await cargarScript("https://cdn.jsdelivr.net/npm/chart.js");
+        } catch (e) {
+            console.error("No se pudo cargar Chart.js desde el CDN", e);
+        }
+    }
     const container = document.getElementById('modalData');
     if (!container) return;
     const t = i18n[window.depreLang];
