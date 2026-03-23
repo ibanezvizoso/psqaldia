@@ -100,8 +100,8 @@ async function iniciarExamen(año, esContinuacion = false) {
         let rows = [];
         if (año === 'snack') {
             const [res22, res20] = await Promise.all([
-                fetch(`${window.WORKER_URL}?sheet=Ope_PSQ22`),
-                fetch(`${window.WORKER_URL}?sheet=Ope_PSQ20`)
+                fetch(`/?sheet=Ope_PSQ22`),
+    fetch(`/?sheet=Ope_PSQ20`)
             ]);
             const d22 = await res22.json();
             const d20 = await res20.json();
