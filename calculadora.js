@@ -50,7 +50,7 @@ window.iniciarInterfazCalculadora = async function() {
 
     if (!window.dbCalc) {
         try {
-            const response = await fetch(`${window.WORKER_URL}?sheet=Data_APS`);
+            const response = await fetch(`/?sheet=Data_APS`);
             const data = await response.json();
             window.dbRaw = data.values;
             window.listaFarmacos = [];
