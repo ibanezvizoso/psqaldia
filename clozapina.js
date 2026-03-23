@@ -51,7 +51,7 @@ window.iniciarClozapina = async function() {
         const style = document.createElement('style');
         style.id = 'cloz-styles';
         style.innerHTML = `
-            .cloz-container { padding: 1.5rem; font-family: 'Inter', sans-serif; }
+            .cloz-container { padding: 1.5rem; font-family: inherit; }
             
             .cloz-header-ui { 
                 background: var(--card); 
@@ -127,7 +127,7 @@ window.iniciarClozapina = async function() {
     }
 
     try {
-        const response = await fetch(`${window.WORKER_URL}?sheet=clozapina`);
+        const response = await fetch(`/?sheet=clozapina`);
         const data = await response.json();
         window.dbCloz = data.values;
         renderInterfazCloz();
