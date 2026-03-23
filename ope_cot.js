@@ -82,7 +82,7 @@ async function iniciarExamenCot(año, esContinuacion = false) {
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:#0ea5e9;"></i><br><br><b>Cargando COT...</b></div>`;
 
     try {
-        const response = await fetch(`${window.WORKER_URL}?sheet=Ope_Cot${año === 'snack' ? '20' : año}`);
+        const response = await fetch(`/?sheet=Ope_Cot${año === 'snack' ? '20' : año}`);
         const data = await response.json();
         const rows = data.values || [];
 
