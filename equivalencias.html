@@ -8,113 +8,124 @@
     <link rel="canonical" href="https://psqaldia.com/equivalencias">
     
     <link rel="stylesheet" href="/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-light: #eff6ff;
+        --secondary: #6366f1;
+        --bg: #fcfdfe;
+        --card-bg: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --border: #f1f5f9;
+        --radius: 1.25rem;
+    }
 
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-light: #eff6ff;
-            --secondary: #6366f1;
-            --bg: #fcfdfe;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border: #f1f5f9;
-            --radius: 1.25rem;
-        }
+    /* 1. Cambio a fuente nativa y suavizado profesional */
+    body { 
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        max-width: 1000px; 
+        margin: auto; 
+        padding: 0; 
+        line-height: 1.6; 
+        color: var(--text-main); 
+        background: var(--bg); 
+        -webkit-font-smoothing: antialiased;
+    }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            max-width: 1000px; 
-            margin: auto; 
-            padding: 0; 
-            line-height: 1.6; 
-            color: var(--text-main); 
-            background: var(--bg); 
-        }
+    /* 2. Navbar: Peso 700 para nitidez */
+    .nav-header { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { 
+        font-weight: 700; 
+        font-size: 1.2rem; 
+        color: var(--primary); 
+        text-decoration: none; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+        letter-spacing: -0.01em;
+    }
 
-        /* Navbar */
-        .nav-header {
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    /* 3. Hero: Más aire y tracking corregido */
+    .hero {
+        text-align: center;
+        padding: 5rem 1.5rem 4rem; /* Un poco más de aire superior */
+        background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%);
+    }
+    .hero h1 { 
+        font-size: 3rem; 
+        font-weight: 700; 
+        letter-spacing: -0.02em; /* Relajado para evitar que las letras choquen */
+        margin-bottom: 1rem; 
+        color: var(--text-main); 
+        line-height: 1.1;
+    }
+    .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: auto; }
 
-        /* Hero */
-        .hero {
-            text-align: center;
-            padding: 4rem 1.5rem;
-            background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%);
-        }
-        .hero h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; color: var(--text-main); }
-        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: auto; }
+    /* 4. Layout y Cards */
+    .main-content { padding: 0 1.5rem 4rem 1.5rem; }
+    
+    .card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 2.5rem;
+        border: 1px solid var(--border);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+        margin-bottom: 2rem;
+    }
 
-        /* Cards Layout */
-        .main-content { padding: 0 1.5rem 4rem 1.5rem; }
-        
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 2.5rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
-            margin-bottom: 2rem;
-        }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
+    h2 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-top: 0; margin-bottom: 1.2rem; }
+    h2 i { color: var(--primary); font-size: 1.1rem; }
 
-        h2 { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-top: 0; margin-bottom: 1.2rem; }
-        h2 i { color: var(--primary); font-size: 1.1rem; }
+    .feature-list { list-style: none; padding: 0; margin: 0; }
+    .feature-list li { 
+        margin-bottom: 1rem; 
+        display: flex; 
+        align-items: flex-start; 
+        gap: 12px;
+        font-size: 1.05rem;
+    }
+    .feature-list li i { color: #10b981; margin-top: 5px; font-size: 0.9rem; }
 
-        .feature-list { list-style: none; padding: 0; margin: 0; }
-        .feature-list li { 
-            margin-bottom: 1rem; 
-            display: flex; 
-            align-items: flex-start; 
-            gap: 12px;
-            font-size: 1.05rem;
-        }
-        .feature-list li i { color: #10b981; margin-top: 5px; font-size: 0.9rem; }
+    /* 5. Botón Principal: Manteniendo el impacto */
+    .cta-box { text-align: center; margin: 3rem 0; }
+    .btn-main {
+        padding: 1.25rem 3rem;
+        border-radius: 100px;
+        border: none;
+        background: var(--text-main);
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+    }
+    .btn-main:hover { transform: translateY(-2px); background: var(--primary); box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.15); }
 
-        /* Botón Principal */
-        .cta-box { text-align: center; margin: 3rem 0; }
-        .btn-main {
-            padding: 1.25rem 3rem;
-            border-radius: 100px;
-            border: none;
-            background: var(--text-main);
-            color: white;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        .btn-main:hover { transform: scale(1.03); background: var(--primary); }
+    /* Links y Footer */
+    .footer-links { text-align: center; margin-top: 4rem; padding: 2rem; border-top: 1px solid var(--border); }
+    .link-back { color: var(--primary); font-weight: 600; text-decoration: none; font-size: 1rem; transition: opacity 0.2s; }
+    .link-back:hover { text-decoration: underline; }
 
-        /* Links de navegación */
-        .footer-links { text-align: center; margin-top: 4rem; padding: 2rem; border-top: 1px solid var(--border); }
-        .link-back { color: var(--primary); font-weight: 700; text-decoration: none; font-size: 1rem; transition: opacity 0.2s; }
-        .link-back:hover { text-decoration: underline; }
-
-        /* Ref section */
-        .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 10px; padding-left: 0; }
-        
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 2.2rem; }
-            .card { padding: 1.5rem; }
-        }
-    </style>
+    .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 10px; padding-left: 0; }
+    
+    @media (max-width: 600px) {
+        .hero h1 { font-size: 2.2rem; }
+        .hero { padding: 3rem 1.5rem; }
+        .card { padding: 1.5rem; }
+    }
+</style>
 </head>
 <body>
 
