@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoEPP | PSQ al día</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/all.min.css">
     
     <style>
@@ -19,13 +17,15 @@
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text-main); 
-            margin: 0; 
-            padding: 0;
-            line-height: 1.6;
-        }
+    /* Pila nativa: usa San Francisco en iOS/Mac, Segoe UI en Windows y Roboto en Android */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background-color: var(--bg); 
+    color: var(--text-main); 
+    margin: 0; 
+    padding: 0;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased; /* Mejora la nitidez en Mac/iOS */
+}
 
         /* Cabecera Estándar PSQ al día */
         header {
