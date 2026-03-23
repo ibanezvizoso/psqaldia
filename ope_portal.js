@@ -83,29 +83,29 @@ function abrirPortalExamenes() {
 
 // Funciones puente para cargar los scripts individuales
 async function portal_irAPsiq() {
-    await cargarScript('opesPSQ.js'); 
+    await cargarScript('/opesPSQ.js'); 
     openExamenSelector(); 
 }
 
 async function portal_irAAnest() {
-    await cargarScript('opes_anest.js'); 
+    await cargarScript('/opes_anest.js'); 
     openAnestSelector();
 }
 
 async function portal_irAPed() {
-    await cargarScript('ope_ped.js'); 
+    await cargarScript('/ope_ped.js'); 
     openPedSelector();
 }
 async function portal_irACot() {
-    await cargarScript('ope_cot.js'); 
+    await cargarScript('/ope_cot.js'); 
     openCotSelector();
 }
 async function portal_irAGine() {
-    await cargarScript('ope_gine.js'); 
+    await cargarScript('/ope_gine.js'); 
     openGineSelector();
 }
 
 async function portal_irAComun() {
-    await cargarScript('opes_comun.js'); 
+    await cargarScript('/opes_comun.js'); 
     openExamenComunSelector();
 }
