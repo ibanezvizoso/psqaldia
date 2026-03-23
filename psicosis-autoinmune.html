@@ -8,119 +8,125 @@
     <link rel="canonical" href="https://psqaldia.com/psicosis-autoinmune">
     
     <link rel="stylesheet" href="/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-light: #eff6ff;
-            --bg: #fcfdfe;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border: #f1f5f9;
-            --radius: 1.25rem;
-        }
+   <style>
+    :root {
+        --primary: #2563eb;
+        --primary-light: #eff6ff;
+        --bg: #fcfdfe;
+        --card-bg: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --border: #f1f5f9;
+        --radius: 1.25rem;
+    }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); 
-            color: var(--text-main); 
-            line-height: 1.6;
-            overflow: auto !important; /* Anula el 'hidden' del JS */
-        }
+    /* 1. Cambio a fuente nativa y suavizado nítido */
+    body { 
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        line-height: 1.6;
+        overflow: auto !important;
+        -webkit-font-smoothing: antialiased;
+    }
 
-        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        
-        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+    /* 2. Navbar: Peso 700 para mayor limpieza */
+    .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+    .logo { 
+        font-weight: 700; 
+        font-size: 1.2rem; 
+        color: var(--primary); 
+        text-decoration: none; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+        letter-spacing: -0.01em;
+    }
+    
+    /* 3. Hero: Tracking corregido para que no choquen las letras */
+    .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+    .hero h1 { 
+        font-size: 2.5rem; 
+        font-weight: 700; 
+        letter-spacing: -0.02em; 
+        margin-bottom: 0.5rem; 
+        line-height: 1.1;
+    }
 
-        .main-content { padding: 0 1.5rem 5rem 1.5rem; max-width: 900px; margin: auto; }
+    .main-content { padding: 0 1.5rem 5rem 1.5rem; max-width: 900px; margin: auto; }
 
-        /* Integración del contenedor del JS */
-        #modal { 
-            display: flex !important; 
-            position: relative !important; 
-            width: 100% !important;
-            background: transparent !important;
-            z-index: 1 !important;
-            padding: 0;
-            margin-bottom: 2rem;
-        }
+    /* Contenedor del JS */
+    #modal { 
+        display: flex !important; 
+        position: relative !important; 
+        width: 100% !important;
+        background: transparent !important;
+        z-index: 1 !important;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
 
-        #modalData { 
-            width: 100%;
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
-        }
+    #modalData { 
+        width: 100%;
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+    }
 
-        /* Estilos internos de la herramienta */
-        .calc-ui { padding: 2rem !important; height: auto !important; }
-        
-        input[type="checkbox"] {
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
+    .calc-ui { padding: 2rem !important; height: auto !important; }
+    
+    input[type="checkbox"] { accent-color: var(--primary); cursor: pointer; }
 
-        /* Estilo para los grupos de checklists */
-        .pa-check-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 8px;
-            margin-bottom: 1.5rem;
-        }
+    .pa-check-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 8px;
+        margin-bottom: 1.5rem;
+    }
 
-        footer { 
-            margin-top: 4rem; 
-            padding-top: 2rem; 
-            border-top: 1px solid var(--border); 
-            font-size: 0.85rem; 
-            color: var(--text-muted); 
-        }
+    /* 4. Guía de interpretación: Más aireada */
+    .interpretation-guide {
+        background: white; 
+        padding: 2rem; 
+        border-radius: var(--radius); 
+        border: 1px solid var(--border);
+        margin-top: 1rem;
+    }
 
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 2rem; }
-            .calc-ui { padding: 1rem !important; }
-        }
-        /* Arreglo para el Modal de Red Flags */
-#rf-modal {
-    backdrop-filter: blur(8px); /* Efecto de desenfoque moderno */
-}
+    footer { 
+        margin-top: 4rem; 
+        padding-top: 2rem; 
+        border-top: 1px solid var(--border); 
+        font-size: 0.85rem; 
+        color: var(--text-muted); 
+    }
 
-#rf-modal > div {
-    background-color: white !important; /* Forzamos el fondo blanco */
-    color: var(--text-main) !important;
-    max-height: 85vh; /* Evita que se salga de la pantalla en móviles */
-    overflow-y: auto; /* Permite scroll si la lista es muy larga */
-    border: 1px solid var(--border) !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-}
+    @media (max-width: 600px) {
+        .hero h1 { font-size: 2rem; }
+        .hero { padding: 3rem 1.5rem; }
+        .calc-ui { padding: 1.2rem !important; }
+    }
 
-#rf-modal h3 {
-    color: var(--primary) !important;
-    border-bottom: 2px solid var(--primary-light);
-    padding-bottom: 10px;
-    margin-bottom: 15px !important;
-}
+    /* Estilos del Modal de Red Flags optimizados para fuente nativa */
+    #rf-modal > div {
+        background-color: white !important;
+        color: var(--text-main) !important;
+        max-height: 85vh;
+        overflow-y: auto;
+        border: 1px solid var(--border) !important;
+        border-radius: 1.5rem !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2) !important;
+    }
 
-#rf-modal ul li {
-    color: var(--text-main) !important;
-    margin-bottom: 8px !important;
-    list-style-type: none;
-    position: relative;
-    padding-left: 20px;
-}
-
-#rf-modal ul li::before {
-    content: "🚩";
-    position: absolute;
-    left: 0;
-    font-size: 0.8rem;
-}
-    </style>
+    #rf-modal h3 {
+        font-weight: 700 !important;
+        color: var(--primary) !important;
+        border-bottom: 2px solid var(--primary-light);
+        padding-bottom: 10px;
+    }
+</style>
 </head>
 <body>
 
