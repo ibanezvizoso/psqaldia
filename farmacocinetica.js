@@ -111,7 +111,7 @@ window.iniciarInterfazSSS = async function() {
         try {
             // Usamos el Worker para pedir la pestaña Data_Farmacocinetica
             const pestaña = 'Data_Farmacocinetica';
-            const res = await fetch(`${window.WORKER_URL}?sheet=${pestaña}`);
+            const res = await fetch(`/?sheet=${pestaña}`);
             const data = await res.json();
 
             // Verificamos errores del Worker
