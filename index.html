@@ -231,7 +231,7 @@ async function compartirRecurso(e, id) {
 
     async function loadData() {
         try {
-            const res = await fetch(/?sheet=${encodeURIComponent('Hoja 1')});
+            const res = await fetch(`/?sheet=${encodeURIComponent('Hoja 1')}`);
             const data = await res.json();
             if (data.error) throw new Error(data.error);
             if (data.values) {
