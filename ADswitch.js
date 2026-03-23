@@ -100,7 +100,7 @@ window.iniciarADSwitch = async function() {
     }
 
     try {
-        const response = await fetch(`${window.WORKER_URL}?sheet=${CONFIG_SW.SHEET_NAME}`);
+        const response = await fetch(`/?sheet=${CONFIG_SW.SHEET_NAME}`);
         const data = await response.json();
         const rows = data.values;
         const indicesAD = Array.from({length: 12}, (_, i) => i + 12);
