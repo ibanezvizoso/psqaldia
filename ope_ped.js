@@ -93,8 +93,8 @@ async function iniciarExamenPed(año, esContinuacion = false) {
         if (año === 'snack') {
             // Mezclamos ambos años para el modo Snack
             const [res22, res20] = await Promise.all([
-                fetch(`${window.WORKER_URL}?sheet=Ope_Ped22`),
-                fetch(`${window.WORKER_URL}?sheet=Ope_Ped20`)
+                fetch(`/?sheet=Ope_Ped22`),
+    fetch(`/?sheet=Ope_Ped20`)
             ]);
             const d22 = await res22.json();
             const d20 = await res20.json();
