@@ -92,14 +92,14 @@ async function iniciarExamenAnest(año, esContinuacion = false) {
         let rows = [];
         if (año === 'snack') {
             const [res22, res20] = await Promise.all([
-                fetch(`${window.WORKER_URL}?sheet=Ope_Anest22`),
-                fetch(`${window.WORKER_URL}?sheet=Ope_Anest20`)
+                fetch(`/?sheet=Ope_Anest22`),
+    fetch(`/?sheet=Ope_Anest20`)
             ]);
             const d22 = await res22.json();
             const d20 = await res20.json();
             rows = [...(d22.values || []), ...(d20.values || [])];
         } else {
-            const response = await fetch(`${window.WORKER_URL}?sheet=Ope_Anest${año}`);
+            const response = await fetch(`/?sheet=Ope_Anest${año}`);
             const data = await response.json();
             rows = data.values || [];
         }
