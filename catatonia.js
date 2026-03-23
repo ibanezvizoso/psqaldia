@@ -82,7 +82,7 @@ window.iniciarInterfazCatatonia = async function() {
     // 1. CARGA DE DATOS
     if (!window.dbCatatonia) {
         try {
-            const response = await fetch(`${window.WORKER_URL}?sheet=catatonia`);
+            const response = await fetch(`/?sheet=catatonia`);
             const data = await response.json();
             window.totalSintomas = data.values.length;
             window.dbCatatonia = {};
