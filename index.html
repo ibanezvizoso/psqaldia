@@ -225,7 +225,7 @@ async function compartirRecurso(e, id) {
 
     function parseDate(dateStr) {
         if (!dateStr) return new Date(0);
-        const parts = dateStr.split(/[/ -]/);
+        const parts = dateStr.split(/[\/\s-]/);
         return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
     }
 
