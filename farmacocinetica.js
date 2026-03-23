@@ -96,6 +96,15 @@ let sssChart = null;
 
 window.iniciarInterfazSSS = async function() {
     const container = document.getElementById('modalData');
+    if (typeof Chart === 'undefined') {
+        container.innerHTML = `<div class="sss-loader"><i class="fas fa-sync fa-spin fa-2x"></i><p>Cargando motor de gráficos...</p></div>`;
+        await new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = "https://cdn.jsdelivr.net/npm/chart.js";
+            s.onload = resolve;
+            document.head.appendChild(s);
+        });
+    }
     container.innerHTML = estilosSSS + `<div class="sss-loader"><i class="fas fa-sync fa-spin fa-2x"></i><p>Conectando con la base de datos PK...</p></div>`;
 
     if (!window.dbPK) {
