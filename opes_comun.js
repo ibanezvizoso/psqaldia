@@ -84,7 +84,7 @@ async function iniciarExamenComun(año, esContinuacion = false) {
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i><br><br><b style="color:var(--text-main);">Cargando OPE Común...</b></div>`;
 
     try {
-        const url = `${window.WORKER_URL}?sheet=Ope_Comun`;
+        const url = `/?sheet=Ope_Comun`;
         const response = await fetch(url);
         const data = await response.json();
 
