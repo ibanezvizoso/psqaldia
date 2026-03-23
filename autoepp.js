@@ -13,7 +13,7 @@ async function iniciarAutoEPP() {
     container.innerHTML = `<div style="padding:4rem; text-align:center;"><i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i><p>Sincronizando esferas clínicas...</p></div>`;
 
     try {
-        const res = await fetch(`${window.WORKER_URL}?sheet=epp`);
+        const res = await fetch(`/?sheet=epp`);
         const data = await res.json();
         
         if (!data.values) throw new Error("No se encontraron datos");
