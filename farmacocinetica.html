@@ -92,31 +92,37 @@
             </div>
         </div>
 
-       <section class="info-panel">
+     <section class="info-panel">
     <h2 style="font-size: 1.1rem; margin-bottom: 1.2rem; font-weight: 700;">
         <i class="fas fa-graduation-cap"></i> Fundamentos del Modelo
     </h2>
     
     <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">
-        Este simulador emplea modelos de **compartimento único** y la **función de Bateman** para estimar la curva de niveles plasmáticos:
+        Este simulador emplea modelos de <b>compartimento único</b> y la <b>función de Bateman</b> para estimar la curva de niveles plasmáticos:
     </p>
 
-    <div style="background: var(--primary-light); padding: 1.5rem; border-radius: 1rem; margin: 1.5rem 0; text-align: center; color: var(--primary); border: 1px solid rgba(67, 56, 202, 0.1);">
-        <div style="font-size: 1.2rem; overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
-            $$C(t) = D \cdot \frac{k_a}{k_a - k_e} \cdot (e^{-k_e t} - e^{-k_a t})$$
+    <div style="background: var(--primary-light); padding: 2rem 1rem; border-radius: 1rem; margin: 1.5rem 0; color: var(--primary); border: 1px solid rgba(67, 56, 202, 0.1); display: flex; justify-content: center; align-items: center; font-family: 'Times New Roman', serif; font-style: italic; overflow-x: auto;">
+        <div style="font-size: 1.3rem; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+            <span>C(t) = D ·</span>
+            <div style="display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.9em;">
+                <span style="border-bottom: 1px solid var(--primary); padding: 0 5px;">k<sub>a</sub></span>
+                <span style="padding: 0 5px;">k<sub>a</sub> - k<sub>e</sub></span>
+            </div>
+            <span>· (e<sup>-k<sub>e</sub>t</sup> - e<sup>-k<sub>a</sub>t</sup>)</span>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1.2rem;">
-        <div><strong>C(t):</strong> Concentración en tiempo t</div>
-        <div><strong>kₐ:</strong> Constante de absorción</div>
-        <div><strong>kₑ:</strong> Constante de eliminación</div>
-        <div><strong>D:</strong> Dosis relativa</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1.2rem;">
+        <div style="display: flex; gap: 5px;"><b>C(t):</b> <span>Concentración en tiempo <i>t</i></span></div>
+        <div style="display: flex; gap: 5px;"><b>k<sub>a</sub>:</b> <span>Constante de absorción</span></div>
+        <div style="display: flex; gap: 5px;"><b>k<sub>e</sub>:</b> <span>Constante de eliminación</span></div>
+        <div style="display: flex; gap: 5px;"><b>D:</b> <span>Dosis relativa</span></div>
     </div>
 
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1.5rem; line-height: 1.4; padding: 1rem; background: var(--bg); border-radius: 0.8rem; border-left: 4px solid var(--primary);">
-        <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Los valores son <b>relativos (%)</b>. El 100% representa el pico máximo en estado estacionario (<i>Steady State</i>).
-    </p>
+    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg); border-radius: 0.8rem; border-left: 4px solid var(--primary); font-size: 0.85rem; line-height: 1.4; color: var(--text-muted);">
+        <i class="fas fa-info-circle" style="color: var(--primary); margin-right: 5px;"></i> 
+        <strong>Nota:</strong> Los valores son <b>relativos (%)</b>. El 100% representa el pico máximo en estado estacionario (<i>Steady State</i>).
+    </div>
 </section>
 
         
