@@ -52,7 +52,7 @@ function renderEPPUI() {
                 display: flex; 
                 flex-direction: column; 
                 gap: 15px; 
-                font-family: 'Inter', sans-serif; 
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
                 padding: 15px; 
                 background: #f8fafc; 
                 color: #1e293b; 
@@ -85,7 +85,7 @@ function renderEPPUI() {
             .chip.selected { background: #4338ca; color: white; border-color: #4338ca; }
 
             .result-area { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; }
-            #epp-text { width: 100%; min-height: 200px; border: none; font-family: 'Georgia', serif; font-size: 1rem; line-height: 1.6; resize: vertical; outline: none; color: #334155; }
+            #epp-text { width: 100%; min-height: 200px; border: none; font-family: inherit; font-size: 1rem; line-height: 1.6; resize: vertical; outline: none; color: #334155; }
             
             .btn-epp { padding: 12px 24px; border-radius: 10px; font-weight: 800; cursor: pointer; border: none; font-size: 0.85rem; }
             .btn-primary { background: #4338ca; color: white; }
