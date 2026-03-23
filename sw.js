@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psq-v4'; // Nueva versión
+const CACHE_NAME = 'psq-v5'; // Nueva versión para activar cambios
 const ASSETS = [
   '/',
   '/index.html',
@@ -9,7 +9,9 @@ const ASSETS = [
   '/farmacocinetica.js',
   '/catatonia.html',
   '/catatonia.js',
-  '/calculadora.js'
+  '/calculadora.js',
+  '/autoepp.html', // He añadido estas dos ya que son las que
+  '/autoepp.js'    // están causando la lentitud actual
 ];
 
 // Instalación: Guardamos las herramientas principales
@@ -31,19 +33,18 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Estrategia: Network First con Cache Fallback
+// Estrategia: Cache First (Prioridad absoluta a la velocidad local)
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Si la red funciona, devolvemos la respuesta actualizada
-        return response;
-      })
-      .catch(() => {
-        // Si falla la red (offline), buscamos en caché
-        return caches.match(event.request);
-      })
+    caches.match(event.request).then(cachedResponse => {
+      // Si el recurso está en la caché, se devuelve al instante (velocidad máxima)
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      // Si no está en caché (primera vez), se pide por red normalmente
+      return fetch(event.request);
+    })
   );
 });
