@@ -64,7 +64,7 @@ const i18n = {
 
 const estilosDepre = `
 <style>
-    .depre-container { padding: 1.5rem; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
+    .depre-container { padding: 1.5rem; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; position: relative; }
     .depre-lang-tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; align-items: center; }
     .depre-tab { padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: 0.2s; }
     .depre-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
