@@ -9,60 +9,115 @@
     <link rel="stylesheet" href="/css/all.min.css">
 
     <style>
-        :root {
-            --primary: #4338ca; 
-            --primary-light: #eef2ff; 
-            --bg: #f8fafc;
-            --card-bg: #ffffff; 
-            --text-main: #1e293b; 
-            --text-muted: #64748b;
-            --border: #e2e8f0; 
-            --radius: 1.5rem;
-        }
+    :root {
+        --primary: #4338ca; 
+        --primary-light: #eef2ff; 
+        --bg: #f8fafc;
+        --card-bg: #ffffff; 
+        --text-main: #1e293b; 
+        --text-muted: #64748b;
+        --border: #e2e8f0; 
+        --radius: 1.5rem;
+    }
 
-       body { 
-    /* Cambiamos a la pila del sistema moderna */
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-    background: var(--bg); 
-    color: var(--text-main); 
-    margin: 0; 
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased; /* Suavizado para pantallas de alta densidad */
-}
+    /* 1. Cambio a fuente nativa y suavizado */
+    body { 
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        margin: 0; 
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+    }
 
-        /* HEADER PREMIUM (Consistente con deprescripcion.html) */
-        .header { padding: 3rem 1.5rem; text-align: center; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .logo-text { font-weight: 900; color: var(--primary); letter-spacing: 1px; text-decoration: none; font-size: 0.9rem; }
-        .header h1 { font-size: 2.5rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -1px; }
-        .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: auto; }
+    /* 2. Cabecera con más aire */
+    .header { 
+        padding: 4rem 1.5rem 4.5rem; /* Aumentamos ligeramente el padding inferior */
+        text-align: center; 
+        background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
+    }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+    /* 3. Ajuste de pesos: 700 es el nuevo 800 para fuentes nativas */
+    .logo-text { 
+        font-weight: 700; 
+        color: var(--primary); 
+        letter-spacing: 0.5px; 
+        text-decoration: none; 
+        font-size: 0.85rem; 
+        text-transform: uppercase;
+    }
 
-        /* REJILLA DE INFORMACIÓN */
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.2rem; margin-bottom: 3rem; margin-top: -2.5rem; }
-        .info-card { background: var(--card-bg); padding: 1.2rem; border-radius: 1.25rem; border: 1px solid var(--border); display: flex; gap: 0.8rem; align-items: flex-start; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .info-card i { color: var(--primary); font-size: 1.1rem; margin-top: 3px; }
-        .info-card h3 { font-size: 0.9rem; font-weight: 800; margin: 0 0 0.3rem; }
-        .info-card p { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+    .header h1 { 
+        font-size: 2.5rem; 
+        font-weight: 700; 
+        margin: 1rem 0 0.75rem; 
+        letter-spacing: -0.02em; /* Spacing proporcional, no fijo, para que no se peguen las letras */
+    }
 
-        /* CONTENEDOR DE LA HERRAMIENTA JS */
-        #modalData { 
-            background: var(--card-bg); 
-            border-radius: var(--radius); 
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); 
-            min-height: 400px;
-            overflow: hidden; /* Para que el diseño del JS encaje perfecto */
-        }
+    .header p { 
+        color: var(--text-muted); 
+        font-size: 1.1rem; 
+        max-width: 700px; 
+        margin: auto; 
+        opacity: 0.9;
+    }
 
-        /* SECCIÓN BIBLIOGRÁFICA */
-        .biblio-section { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
-        .biblio-section h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
-        .biblio-section p { font-size: 0.85rem; font-style: italic; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
 
-        footer { text-align: center; margin-top: 3rem; }
-        .btn-home { color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.9rem; }
-    </style>
+    /* 4. Rejilla de información: Menos solapamiento para evitar el efecto 'apelotonado' */
+    .info-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); 
+        gap: 1.2rem; 
+        margin-bottom: 3rem; 
+        margin-top: -2rem; /* Reducido de -2.5rem a -2rem */
+    }
+
+    .info-card { 
+        background: var(--card-bg); 
+        padding: 1.2rem; 
+        border-radius: 1.25rem; 
+        border: 1px solid var(--border); 
+        display: flex; 
+        gap: 0.8rem; 
+        align-items: flex-start; 
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); 
+    }
+
+    .info-card i { color: var(--primary); font-size: 1.1rem; margin-top: 3px; }
+
+    .info-card h3 { 
+        font-size: 0.9rem; 
+        font-weight: 700; /* Bajado de 800 a 700 */
+        margin: 0 0 0.3rem; 
+        color: var(--text-main);
+    }
+
+    .info-card p { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+
+    #modalData { 
+        background: var(--card-bg); 
+        border-radius: var(--radius); 
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); 
+        min-height: 400px;
+        overflow: hidden; 
+    }
+
+    .biblio-section { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
+    .biblio-section h4 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+    .biblio-section p { font-size: 0.85rem; font-style: italic; }
+
+    footer { text-align: center; margin-top: 3rem; }
+    .btn-home { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+    .btn-home:hover { color: var(--primary); }
+
+    /* Ajuste móvil para que no se amontone el título */
+    @media (max-width: 600px) {
+        .header h1 { font-size: 2rem; }
+        .header { padding: 3rem 1rem 4rem; }
+    }
+</style>
 </head>
 <body>
 
