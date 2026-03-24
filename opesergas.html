@@ -123,21 +123,45 @@
 
     <script src="ope_portal.js"></script>
 
+    <script src="ope_portal.js"></script>
+
     <script>
         let intervalTime;
         let totalSeconds = 0;
 
-        // Función para cerrar el modal por completo y reiniciar cronómetro
-        function cerrarPortal() {
+        // 1. FUNCIÓN PUENTE OBLIGATORIA PARA TU ope_portal.js
+        // Cuando pulsas una especialidad, tu portal intenta cargar el script de las preguntas usando esto:
+        function cargarScript(url) {
+            return new Promise((resolve, reject) => {
+                // Evitamos cargar el mismo script dos veces si ya se pulsó antes
+                if (document.querySelector(`script[src="${url}"]`)) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = url;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // 2. FUNCIÓN DE CIERRE (Tu ope_portal.js y opesPSQ.js llaman a "closeModal()")
+        function closeModal() {
             document.getElementById('modal').style.display = 'none';
             document.getElementById('modalData').innerHTML = ''; // Limpiar portal
             stopCronometro();
         }
 
-        // Sistema de Cronómetro
+        // Dejo también cerrarPortal por si lo usabas en el botón de la [X] de arriba
+        function cerrarPortal() {
+            closeModal();
+        }
+
+        // 3. SISTEMA DE CRONÓMETRO
         function startCronometro() {
             const cronoCont = document.getElementById('cronometro-container');
-            if(cronoCont.style.display === 'block') return; // Evitar que se duplique
+            if(cronoCont.style.display === 'block') return; 
             
             cronoCont.style.display = 'block';
             totalSeconds = 0;
@@ -158,15 +182,13 @@
             document.getElementById('cronometro').innerText = "00:00:00";
         }
 
-        // MAGIA: El Observer detecta cuando ope_portal carga un examen real para iniciar el cronómetro
+        // 4. MAGIA: Observer detecta cuando ope_portal carga un examen real para iniciar el cronómetro
         const observer = new MutationObserver((mutations) => {
-            // "contenedor-preguntas" es el ID que usan tus scripts de exámenes (opesPSQ.js, etc.)
             if (document.getElementById('contenedor-preguntas')) {
                 startCronometro();
             }
         });
 
-        // Vigilar los cambios dentro del modalData
         observer.observe(document.getElementById('modalData'), { childList: true, subtree: true });
     </script>
 </body>
