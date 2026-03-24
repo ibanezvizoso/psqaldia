@@ -158,7 +158,7 @@
 
     <footer class="site-footer">
         <img src="Logo.png" alt="PSQ AL DÍA"> 
-        <span>&copy; 2024 PSQ AL DÍA - Herramientas y recursos</span>
+        <span>&copy; 2026 PSQ AL DÍA - Herramientas y recursos</span>
     </footer>
 
     <div id="modal">
@@ -230,13 +230,14 @@
             document.getElementById('cronometro').innerText = "00:00:00";
         }
 
-        // 4. OBSERVER UNIVERSAL
+        // 4. OBSERVER UNIVERSAL - LA LUPA MEJORADA
         const observer = new MutationObserver((mutations) => {
-            // Inicia el cronómetro para CUALQUIER especialidad al detectar el contenedor de preguntas
-            if (document.getElementById('contenedor-preguntas')) {
+            // Buscamos cualquier elemento que su ID empiece por "contenedor-preguntas" (valdrá para -anest, -ped, -comun, etc)
+            const testActivo = document.querySelector('[id^="contenedor-preguntas"]');
+            
+            if (testActivo) {
                 startCronometro();
             } else {
-                // Si salimos al menú de selección, apagamos el crono
                 stopCronometro();
             }
         });
