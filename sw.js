@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psq-v6'; // VERSIÓN NUEVA: vital para borrar la caché anterior
+const CACHE_NAME = 'psq-v7'; // Subimos versión para limpiar el error anterior
 const ASSETS = [
   '/',
   '/index.html',
@@ -11,7 +11,8 @@ const ASSETS = [
   '/catatonia.js',
   '/calculadora.js',
   '/autoepp.html', 
-  '/autoepp.js'  
+  '/autoepp.js'
+  // Si quieres que los iconos carguen sin internet, añade '/css/all.min.css' aquí en el futuro
 ];
 
 // Instalación: Guardamos las herramientas principales
@@ -33,26 +34,37 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Estrategia: Cache First (Prioridad absoluta a la velocidad local)
+// Estrategia: Cache First a prueba de balas
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-
-  const requestUrl = new URL(event.request.url);
-
-  // 🔴 EXCEPCIÓN VITAL: Ignorar las peticiones al motor de datos
-  // Si la URL contiene "?sheet=", dejamos que el navegador la gestione 
-  // directamente con Cloudflare, saltándose el Service Worker.
-  if (requestUrl.searchParams.has('sheet')) {
-      return; 
+  // 1. Ignorar lo que no sea GET o no sea http/https (como extensiones de Chrome)
+  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) {
+    return;
   }
 
-  // Para el resto (HTML, JS, CSS, PNG), usamos la caché normal
+  const url = new URL(event.request.url);
+
+  // 2. EXCEPCIÓN VITAL: Dejar que los datos del Worker pasen directos a internet
+  if (url.searchParams.has('sheet')) {
+    return; 
+  }
+
+  // 3. Manejo seguro de la respuesta
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
+      // Si está en la caché, devolvemos eso al instante
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request);
+
+      // Si no está, lo pedimos a internet
+      return fetch(event.request).then(networkResponse => {
+        return networkResponse; // <-- ESTE RETURN ES EL QUE FALLABA
+      }).catch(error => {
+        // Si no hay internet y el archivo no estaba en caché, evitamos que la web colapse
+        console.warn('El Service Worker no pudo obtener:', event.request.url);
+        // Devolvemos una respuesta vacía controlada para no lanzar el TypeError
+        return new Response('', { status: 404, statusText: 'Not Found offline' });
+      });
     })
   );
 });
