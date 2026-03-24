@@ -257,7 +257,7 @@ async function compartirRecurso(e, id) {
             if (data.values) {
                 db = data.values.map(row => ({ 
                     fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'',
-                    categoria: (row[5]||'Otros').trim().toUpperCase(), accion: row[6]||'', password: row[7]||'',
+                    categoria: (row[5]||'Otros').trim().toUpperCase(), accion: row[6]||'', 
                     script: row[8]||'', id: slugify(row[1] || 'item') 
                 }));
             }
@@ -276,30 +276,12 @@ async function compartirRecurso(e, id) {
         card.id = 'anchor-' + item.id;
         
         let textoBoton = "ACCEDER"; 
-        let iconoLock = (item.password && item.password.trim() !== "") ? '<i class="fas fa-lock" style="margin-right:8px; opacity:0.5; font-size:0.9rem;"></i>' : ""; 
 
-
-        card.onclick = async () => {
-    // Si el Worker nos dice que está protegido
-    if (item.password === "PROTECTED") {
-        const userPass = prompt("Contenido protegido. Introduce la contraseña:");
-        if (!userPass) return; // El usuario canceló
-
-        // Validamos contra el Worker (v2.6)
-        // Usamos item.fecha porque es row[0] en tu Sheet, que es lo que el Worker usa para buscar
-        const res = await fetch(`/?sheet=Hoja 1&checkPass=${encodeURIComponent(userPass)}&id=${encodeURIComponent(item.fecha)}`);
-        const val = await res.json();
-
-        if (!val.success) {
-            alert("Contraseña incorrecta.");
-            return;
-        }
-    }
-    
-    // Si no tiene contraseña o la validación fue exitosa:
-    window.history.pushState({}, '', `/${item.id}`); 
-    openModal(item.id); 
-};
+        // Al hacer clic, abre el modal al instante (sin preguntar contraseña)
+        card.onclick = () => {
+            window.history.pushState({}, '', `/${item.id}`); 
+            openModal(item.id); 
+        };
 
         const shareUrl = window.location.origin + '/' + item.id;
         const shareText = item.accion !== '' ? `🛠️ *Herramienta*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}*: ${shareUrl}`;
@@ -308,7 +290,7 @@ async function compartirRecurso(e, id) {
             <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-                <div class="tit">${iconoLock}${item.titulo}</div>
+                <div class="tit">${item.titulo}</div>
                 <div class="res">${item.resumen}</div>
                 <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
                 <div class="card-actions">
