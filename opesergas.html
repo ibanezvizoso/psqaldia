@@ -3,155 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal OPE | PSQ AL DÍA</title>
+    <title>Portal de Exámenes OPE | PSQ AL DÍA</title>
+    <meta name="description" content="Entrena para tu examen OPE con nuestro simulador inteligente. Exámenes oficiales, cronómetro y recuento de aciertos.">
     <link rel="stylesheet" href="css/all.min.css">
     <link rel="icon" type="image/png" href="Logo.png">
     <style>
         :root {
-            /* Variables de color de tu sistema (ope_portal.js / opesPSQ.js) */
-            --primary: #4338ca;
-            --primary-light: rgba(67, 56, 202, 0.1);
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --bg: #f8fafc;
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --bg-light: #f4f7f6;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            
+            /* Variables necesarias para los JS de tu portal */
+            --primary: #3498db;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
             --card: #ffffff;
-            --border: #e2e8f0;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --border: #ecf0f1;
         }
 
-        body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text-main); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: var(--bg-light); color: var(--primary-color); line-height: 1.6; }
 
-        /* Estética Landing */
-        .hero { padding: 5rem 1rem; text-align: center; background: white; border-bottom: 1px solid var(--border); }
-        .hero h1 { font-size: 3rem; font-weight: 900; margin-bottom: 1rem; color: var(--text-main); }
-        .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem; }
+        /* Navbar */
+        nav { background: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 999; }
+        .logo-container { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: bold; font-size: 1.2rem; }
+        .logo-container img { height: 40px; margin-right: 10px; }
+        .nav-links a { text-decoration: none; color: var(--primary-color); margin-left: 20px; transition: color 0.3s; }
 
-        .btn-start {
-            background: var(--primary); color: white; padding: 1.2rem 2.5rem; border-radius: 99px;
-            font-weight: 800; font-size: 1.1rem; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(67, 56, 202, 0.3);
-            transition: transform 0.2s;
+        /* Hero */
+        .hero { padding: 4rem 2rem; text-align: center; background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%); color: white; }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 2rem; opacity: 0.9; }
+
+        /* Features */
+        .container { max-width: 1000px; margin: -3rem auto 3rem; padding: 0 1rem; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .feature-card { background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); text-align: center; }
+        .feature-card i { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1rem; }
+
+        /* Botón Principal */
+        .btn-primary { display: inline-block; background-color: var(--accent-color); color: white; padding: 1.2rem 2.5rem; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); transition: all 0.3s; }
+        .btn-primary:hover { background-color: #2980b9; transform: scale(1.05); }
+
+        /* === MODAL EXAMEN (Adaptado para ope_portal.js) === */
+        #modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; 
         }
-        .btn-start:hover { transform: translateY(-3px); }
-
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; max-width: 1000px; margin: 4rem auto; padding: 0 1rem; }
-        .feature-card { background: white; padding: 2rem; border-radius: 24px; border: 1px solid var(--border); text-align: center; }
-        .feature-card i { font-size: 2rem; color: var(--primary); margin-bottom: 1rem; }
-        .feature-card h3 { margin: 0.5rem 0; font-weight: 800; }
-        .feature-card p { color: var(--text-muted); font-size: 0.95rem; }
-
-        /* MODAL (Necesario para tus scripts) */
-        #modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px);
-            display: none; justify-content: center; align-items: center; z-index: 9999;
-        }
-        .modal-content {
-            background: white; width: 95%; max-width: 800px; max-height: 90vh;
-            border-radius: 30px; overflow-y: auto; position: relative; box-shadow: var(--shadow);
-        }
-
-        /* Cronómetro flotante */
-        #timer-display {
-            position: fixed; top: 20px; right: 20px; background: var(--primary); color: white;
-            padding: 10px 20px; border-radius: 12px; font-weight: 800; font-family: monospace;
-            z-index: 10000; display: none; box-shadow: var(--shadow);
+        
+        .modal-content { 
+            background: var(--white); width: 95%; max-width: 800px; max-height: 90vh; 
+            border-radius: 12px; display: flex; flex-direction: column; overflow-y: auto; position: relative;
         }
 
-        @media (max-width: 600px) { .hero h1 { font-size: 2rem; } }
+        /* Contenedor del cronómetro */
+        #cronometro-container {
+            display: none; background: var(--accent-color); color: white; font-family: monospace; 
+            font-size: 1.2rem; padding: 10px 20px; text-align: center; font-weight: bold;
+            position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-cerrar-modal {
+            position: absolute; top: 15px; right: 20px; background: none; border: none; 
+            font-size: 24px; color: #888; cursor: pointer; z-index: 1002;
+        }
+        .btn-cerrar-modal:hover { color: #333; }
     </style>
 </head>
 <body>
 
+    <nav>
+        <a href="/" class="logo-container">
+            <img src="Logo.png" alt="Logo">
+            <span>PSQ AL DÍA</span>
+        </a>
+    </nav>
+
     <header class="hero">
-        <img src="Logo.png" alt="PSQ AL DÍA" style="height: 60px; margin-bottom: 1.5rem;">
-        <h1>Portal de Exámenes OPE</h1>
-        <p>La herramienta definitiva para preparar tu plaza. Exámenes reales, explicaciones detalladas y control de tiempo.</p>
-        <button class="btn-start" onclick="iniciarPortal()">
-            <i class="fas fa-sign-in-alt"></i> ENTRAR AL PORTAL
+        <h1>Simulador de Exámenes OPE del SERGAS</h1>
+        <p>Practica con el histórico de exámenes oficiales.</p>
+        <button class="btn-primary" onclick="abrirPortalExamenes()"> 
+            <i class="fas fa-play"></i> Comenzar Entrenamiento
         </button>
     </header>
 
-    <section class="features">
-        <div class="feature-card">
-            <i class="fas fa-lightbulb"></i>
-            <h3>Con Explicaciones</h3>
-            <p>No solo sabrás si has acertado; cada pregunta incluye explicaciones breves.</p>
-        </div>
-        <div class="feature-card">
-            <i class="fas fa-history"></i>
-            <h3>Histórico Real</h3>
-            <p>Accede a las convocatorias previas</p>
-        </div>
-        <div class="feature-card">
-            <i class="fas fa-bolt"></i>
-            <h3>Modo Snack</h3>
-            <p>¿Poco tiempo? Entrena con 10 preguntas rápidas seleccionadas al azar.</p>
-        </div>
-    </section>
-
-    <div id="modal">
-        <div class="modal-content" id="modalData">
+    <div class="container">
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-stopwatch"></i>
+                <h3>Control de Tiempo</h3>
+                <p>Cronómetro integrado para que entrenes tu ritmo de respuesta.</p>
             </div>
+            <div class="feature-card">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Explicaciones</h3>
+                <p>Repasa tus respuestas con explicaciones detalladas para entender los fallos.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Modo Móvil</h3>
+                <p>Interfaz optimizada para hacer test cómodamente desde cualquier lugar.</p>
+            </div>
+        </div>
     </div>
 
-    <div id="timer-display">00:00:00</div>
+    <div id="modal">
+        <div class="modal-content">
+            <button class="btn-cerrar-modal" onclick="cerrarPortal()">✕</button>
+            
+            <div id="cronometro-container">
+                <i class="fas fa-clock"></i> <span id="cronometro">00:00:00</span>
+            </div>
+            
+            <div id="modalData"></div>
+        </div>
+    </div>
 
-    <script src="ope_portal.js"></script> <script>
-        // Función puente para cargar scripts (necesaria para ope_portal.js)
-        async function cargarScript(url) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = url;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
+    <script src="ope_portal.js"></script>
 
-        // Función para cerrar el modal (usada en tus scripts)
-        function closeModal() {
+    <script>
+        let intervalTime;
+        let totalSeconds = 0;
+
+        // Función para cerrar el modal por completo y reiniciar cronómetro
+        function cerrarPortal() {
             document.getElementById('modal').style.display = 'none';
-            stopTimer();
+            document.getElementById('modalData').innerHTML = ''; // Limpiar portal
+            stopCronometro();
         }
 
-        function iniciarPortal() {
-            // Llama a la función de tu ope_portal.js
-            abrirPortalExamenes();
-        }
-
-        // --- LÓGICA DEL CRONÓMETRO ---
-        let timerInterval;
-        let seconds = 0;
-
-        function startTimer() {
-            const display = document.getElementById('timer-display');
-            display.style.display = 'block';
-            seconds = 0;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                seconds++;
-                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-                const s = (seconds % 60).toString().padStart(2, '0');
-                display.innerText = `${h}:${m}:${s}`;
+        // Sistema de Cronómetro
+        function startCronometro() {
+            const cronoCont = document.getElementById('cronometro-container');
+            if(cronoCont.style.display === 'block') return; // Evitar que se duplique
+            
+            cronoCont.style.display = 'block';
+            totalSeconds = 0;
+            clearInterval(intervalTime);
+            
+            intervalTime = setInterval(() => {
+                totalSeconds++;
+                const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+                const s = (totalSeconds % 60).toString().padStart(2, '0');
+                document.getElementById('cronometro').innerText = `${h}:${m}:${s}`;
             }, 1000);
         }
 
-        function stopTimer() {
-            clearInterval(timerInterval);
-            document.getElementById('timer-display').style.display = 'none';
+        function stopCronometro() {
+            clearInterval(intervalTime);
+            document.getElementById('cronometro-container').style.display = 'none';
+            document.getElementById('cronometro').innerText = "00:00:00";
         }
 
-        // Observer para detectar cuándo empieza un examen y arrancar el cronómetro
+        // MAGIA: El Observer detecta cuando ope_portal carga un examen real para iniciar el cronómetro
         const observer = new MutationObserver((mutations) => {
-            // Si en el modal aparece el contenedor de preguntas de opesPSQ.js
+            // "contenedor-preguntas" es el ID que usan tus scripts de exámenes (opesPSQ.js, etc.)
             if (document.getElementById('contenedor-preguntas')) {
-                if (document.getElementById('timer-display').style.display === 'none') {
-                    startTimer();
-                }
+                startCronometro();
             }
         });
 
+        // Vigilar los cambios dentro del modalData
         observer.observe(document.getElementById('modalData'), { childList: true, subtree: true });
     </script>
 </body>
