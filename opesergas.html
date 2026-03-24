@@ -24,6 +24,7 @@
             --border: #ecf0f1;
         }
 
+        /* FLEXBOX en el body para que el footer siempre quede abajo */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
@@ -31,7 +32,6 @@
             background-color: var(--bg-light); 
             color: var(--primary-color); 
             line-height: 1.6; 
-            /* Flexbox para mantener el footer siempre abajo */
             display: flex; 
             flex-direction: column; 
             min-height: 100vh; 
@@ -48,21 +48,51 @@
         .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
         .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 2rem; opacity: 0.9; }
 
-        /* Features */
+        /* Features - FLEXBOX PARA QUE SEAN EN HORIZONTAL */
         .container { 
             max-width: 1000px; 
             margin: -3rem auto 3rem; 
             padding: 0 1rem; 
-            /* Esto hace que el contenedor empuje el footer hacia abajo */
-            flex: 1; 
+            flex: 1; /* Esto empuja el footer hacia abajo */
+            width: 100%;
+            box-sizing: border-box;
         }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .feature-card { background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); text-align: center; }
+        .features { 
+            display: flex; 
+            justify-content: center; 
+            gap: 20px; 
+            flex-wrap: wrap; /* Permite que bajen si la pantalla es muy pequeña (móvil) */
+        }
+        .feature-card { 
+            background: var(--white); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            box-shadow: var(--shadow); 
+            text-align: center; 
+            flex: 1; /* Todas ocupan lo mismo en horizontal */
+            min-width: 250px; 
+        }
         .feature-card i { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1rem; }
 
         /* Botón Principal */
         .btn-primary { display: inline-block; background-color: var(--accent-color); color: white; padding: 1.2rem 2.5rem; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); transition: all 0.3s; }
         .btn-primary:hover { background-color: #2980b9; transform: scale(1.05); }
+
+        /* === FOOTER SUTIL === */
+        .site-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 2rem;
+            color: #888;
+            font-size: 0.95rem;
+        }
+        .site-footer img {
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
 
         /* === MODAL EXAMEN (Adaptado para ope_portal.js) === */
         #modal { 
@@ -87,22 +117,6 @@
             font-size: 24px; color: #888; cursor: pointer; z-index: 1002;
         }
         .btn-cerrar-modal:hover { color: #333; }
-
-        /* === FOOTER (Mejora estética para no acabar brusco) === */
-        .site-footer {
-            text-align: center;
-            padding: 2rem 1rem;
-            margin-top: 3rem;
-            border-top: 1px solid #e0e0e0;
-            color: #888;
-            font-size: 0.9rem;
-        }
-        .site-footer img {
-            height: 25px;
-            vertical-align: middle;
-            margin-right: 8px;
-            opacity: 0.6;
-        }
     </style>
 </head>
 <body>
@@ -143,8 +157,8 @@
     </div>
 
     <footer class="site-footer">
-        <img src="Logo.png" alt="Mini logo"> 
-        <span>&copy; 2026 PSQ AL DÍA.</span>
+        <img src="Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2024 PSQ AL DÍA - Herramientas y recursos</span>
     </footer>
 
     <div id="modal">
@@ -166,7 +180,6 @@
         let totalSeconds = 0;
 
         // 1. FUNCIÓN PUENTE OBLIGATORIA PARA TU ope_portal.js
-        // Cuando pulsas una especialidad, tu portal intenta cargar el script de las preguntas usando esto:
         function cargarScript(url) {
             return new Promise((resolve, reject) => {
                 // Evitamos cargar el mismo script dos veces si ya se pulsó antes
@@ -182,14 +195,13 @@
             });
         }
 
-        // 2. FUNCIÓN DE CIERRE (Tu ope_portal.js y opesPSQ.js llaman a "closeModal()")
+        // 2. FUNCIÓN DE CIERRE
         function closeModal() {
             document.getElementById('modal').style.display = 'none';
             document.getElementById('modalData').innerHTML = ''; // Limpiar portal
             stopCronometro();
         }
 
-        // Dejo también cerrarPortal por si lo usabas en el botón de la [X] de arriba
         function cerrarPortal() {
             closeModal();
         }
@@ -218,10 +230,14 @@
             document.getElementById('cronometro').innerText = "00:00:00";
         }
 
-        // 4. MAGIA: Observer detecta cuando ope_portal carga un examen real para iniciar el cronómetro
+        // 4. OBSERVER UNIVERSAL
         const observer = new MutationObserver((mutations) => {
+            // Inicia el cronómetro para CUALQUIER especialidad al detectar el contenedor de preguntas
             if (document.getElementById('contenedor-preguntas')) {
                 startCronometro();
+            } else {
+                // Si salimos al menú de selección, apagamos el crono
+                stopCronometro();
             }
         });
 
