@@ -24,7 +24,18 @@
             --border: #ecf0f1;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: var(--bg-light); color: var(--primary-color); line-height: 1.6; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg-light); 
+            color: var(--primary-color); 
+            line-height: 1.6; 
+            /* Flexbox para mantener el footer siempre abajo */
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+        }
 
         /* Navbar */
         nav { background: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 999; }
@@ -38,7 +49,13 @@
         .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 2rem; opacity: 0.9; }
 
         /* Features */
-        .container { max-width: 1000px; margin: -3rem auto 3rem; padding: 0 1rem; }
+        .container { 
+            max-width: 1000px; 
+            margin: -3rem auto 3rem; 
+            padding: 0 1rem; 
+            /* Esto hace que el contenedor empuje el footer hacia abajo */
+            flex: 1; 
+        }
         .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .feature-card { background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); text-align: center; }
         .feature-card i { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1rem; }
@@ -70,6 +87,22 @@
             font-size: 24px; color: #888; cursor: pointer; z-index: 1002;
         }
         .btn-cerrar-modal:hover { color: #333; }
+
+        /* === FOOTER (Mejora estética para no acabar brusco) === */
+        .site-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+            border-top: 1px solid #e0e0e0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .site-footer img {
+            height: 25px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +142,11 @@
         </div>
     </div>
 
+    <footer class="site-footer">
+        <img src="Logo.png" alt="Mini logo"> 
+        <span>&copy; 2024 PSQ AL DÍA. Herramientas y recursos.</span>
+    </footer>
+
     <div id="modal">
         <div class="modal-content">
             <button class="btn-cerrar-modal" onclick="cerrarPortal()">✕</button>
@@ -120,8 +158,6 @@
             <div id="modalData"></div>
         </div>
     </div>
-
-    <script src="ope_portal.js"></script>
 
     <script src="ope_portal.js"></script>
 
