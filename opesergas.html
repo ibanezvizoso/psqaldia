@@ -1,1 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Exámenes OPE | PSQ AL DÍA</title>
+    <meta name="description" content="Entrena para tu examen OPE con nuestro simulador inteligente. Exámenes oficiales, estadísticas y modo estudio.">
+    <link rel="stylesheet" href="css/all.min.css"> <link rel="icon" type="image/png" href="Logo.png">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-light: #f4f7f6;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--primary-color);
+            line-height: 1.6;
+        }
+
+        /* Navbar similar al index */
+        nav {
+            background: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logo-container img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--primary-color);
+            margin-left: 20px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        /* Features Grid */
+        .container {
+            max-width: 1000px;
+            margin: -3rem auto 3rem;
+            padding: 0 1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Call to Action */
+        .cta-section {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        footer {
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="logo-container">
+            <img src="Logo.png" alt="PSQ AL DÍA Logo">
+            <span>PSQ AL DÍA</span>
+        </a>
+        <div class="nav-links">
+            <a href="/"><i class="fas fa-home"></i> Inicio</a>
+            <a href="/herramientas"><i class="fas fa-tools"></i> Herramientas</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Entrena tu OPE como un profesional</h1>
+        <p>Accede a nuestro portal de simulacros diseñado para maximizar tu rendimiento. Practica con exámenes reales y mejora tu técnica de test.</p>
+        <a href="ope_portal.html" class="btn-primary">
+            <i class="fas fa-rocket"></i> Entrar al Portal de Exámenes
+        </a>
+    </header>
+
+    <div class="container">
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-history"></i>
+                <h3>Histórico Oficial</h3>
+                <p>Base de datos actualizada con exámenes de convocatorias anteriores para que no haya sorpresas.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-stopwatch"></i>
+                <h3>Modo Simulacro</h3>
+                <p>Cronómetro real y penalización por fallos para que sientas la presión del día del examen.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>Feedback Inmediato</h3>
+                <p>Revisa tus aciertos y errores al momento con explicaciones detalladas en cada pregunta.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Multiplataforma</h3>
+                <p>Estudia en el hospital, en el bus o en casa. Optimizado para móvil, tablet y PC.</p>
+            </div>
+        </div>
+    </div>
+
+    <section class="cta-section">
+        <h2>¿Listo para conseguir tu plaza?</h2>
+        <p>Empieza ahora mismo. No requiere registro, solo tus ganas de aprender.</p>
+        <br>
+        <a href="ope_portal.html" class="btn-primary">Comenzar Test</a>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 PSQ AL DÍA - Herramientas para profesionales de Salud Mental</p>
+    </footer>
+
+</body>
+</html>
