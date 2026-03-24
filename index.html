@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="icon" href="/Logo.png">
+    <link rel="apple-touch-icon" href="/Logo.png"> <link rel="manifest" href="/manifest.json">
+
+    <link rel="stylesheet" href="/css/all.min.css">
     <script>
         if (window.location.hostname.includes("pages.dev")) {
             window.location.replace("https://psqaldia.com" + window.location.pathname + window.location.search);
@@ -132,7 +136,13 @@
 </div>
 
 <script>
-  
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(error => {
+        console.warn('Aviso: Service Worker no registrado.', error);
+      });
+    });
+  }
   
   function slugify(text) {
       return text.toString().toLowerCase().trim()
