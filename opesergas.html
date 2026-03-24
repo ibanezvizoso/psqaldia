@@ -3,234 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Exámenes OPE | PSQ AL DÍA</title>
-    <meta name="description" content="Entrena para tu examen OPE con nuestro simulador inteligente. Exámenes oficiales, cronómetro y recuento de aciertos.">
+    <title>Portal OPE | PSQ AL DÍA</title>
     <link rel="stylesheet" href="css/all.min.css">
     <link rel="icon" type="image/png" href="Logo.png">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --success-color: #27ae60;
-            --bg-light: #f4f7f6;
-            --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            /* Variables de color de tu sistema (ope_portal.js / opesPSQ.js) */
+            --primary: #4338ca;
+            --primary-light: rgba(67, 56, 202, 0.1);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: var(--bg-light); color: var(--primary-color); line-height: 1.6; }
+        body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text-main); }
 
-        /* Navbar */
-        nav { background: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 999; }
-        .logo-container { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: bold; font-size: 1.2rem; }
-        .logo-container img { height: 40px; margin-right: 10px; }
-        .nav-links a { text-decoration: none; color: var(--primary-color); margin-left: 20px; transition: color 0.3s; }
+        /* Estética Landing */
+        .hero { padding: 5rem 1rem; text-align: center; background: white; border-bottom: 1px solid var(--border); }
+        .hero h1 { font-size: 3rem; font-weight: 900; margin-bottom: 1rem; color: var(--text-main); }
+        .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem; }
 
-        /* Hero */
-        .hero { padding: 4rem 2rem; text-align: center; background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%); color: white; }
-        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-        .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 2rem; opacity: 0.9; }
+        .btn-start {
+            background: var(--primary); color: white; padding: 1.2rem 2.5rem; border-radius: 99px;
+            font-weight: 800; font-size: 1.1rem; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(67, 56, 202, 0.3);
+            transition: transform 0.2s;
+        }
+        .btn-start:hover { transform: translateY(-3px); }
 
-        /* Features */
-        .container { max-width: 1000px; margin: -3rem auto 3rem; padding: 0 1rem; }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .feature-card { background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); text-align: center; }
-        .feature-card i { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1rem; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; max-width: 1000px; margin: 4rem auto; padding: 0 1rem; }
+        .feature-card { background: white; padding: 2rem; border-radius: 24px; border: 1px solid var(--border); text-align: center; }
+        .feature-card i { font-size: 2rem; color: var(--primary); margin-bottom: 1rem; }
+        .feature-card h3 { margin: 0.5rem 0; font-weight: 800; }
+        .feature-card p { color: var(--text-muted); font-size: 0.95rem; }
 
-        /* Botón Principal */
-        .btn-primary { display: inline-block; background-color: var(--accent-color); color: white; padding: 1.2rem 2.5rem; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); transition: all 0.3s; }
-        .btn-primary:hover { background-color: #2980b9; transform: scale(1.05); }
+        /* MODAL (Necesario para tus scripts) */
+        #modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .modal-content {
+            background: white; width: 95%; max-width: 800px; max-height: 90vh;
+            border-radius: 30px; overflow-y: auto; position: relative; box-shadow: var(--shadow);
+        }
 
-        /* === MODAL EXAMEN === */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: var(--white); width: 95%; max-width: 800px; height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-        
-        .modal-header { background: var(--primary-color); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .timer-container { font-family: monospace; font-size: 1.2rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 5px; }
-        
-        .modal-body { padding: 2rem; flex: 1; overflow-y: auto; }
-        .opcion-label { display: block; background: #eee; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
-        .opcion-label:hover { border-color: var(--accent-color); }
-        input[type="radio"] { margin-right: 10px; }
+        /* Cronómetro flotante */
+        #timer-display {
+            position: fixed; top: 20px; right: 20px; background: var(--primary); color: white;
+            padding: 10px 20px; border-radius: 12px; font-weight: 800; font-family: monospace;
+            z-index: 10000; display: none; box-shadow: var(--shadow);
+        }
 
-        .modal-footer { padding: 1rem; background: #f1f1f1; display: flex; justify-content: space-between; }
-        .btn-nav { padding: 10px 20px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; font-weight: bold; }
-        .btn-finalizar { background: var(--success-color); color: white; border: none; }
-
-        #results-container { text-align: center; padding: 2rem; }
-        .score-big { font-size: 3rem; font-weight: bold; color: var(--accent-color); }
+        @media (max-width: 600px) { .hero h1 { font-size: 2rem; } }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="/" class="logo-container">
-            <img src="Logo.png" alt="Logo">
-            <span>PSQ AL DÍA</span>
-        </a>
-    </nav>
-
     <header class="hero">
-        <h1>Simulador de Exámenes OPE</h1>
-        <p>Practica con el histórico de preguntas oficiales y mide tu tiempo para el día del examen.</p>
-        <button class="btn-primary" onclick="openExamModal('opesPSQ')"> 
-            <i class="fas fa-play"></i> Comenzar Entrenamiento
+        <img src="Logo.png" alt="PSQ AL DÍA" style="height: 60px; margin-bottom: 1.5rem;">
+        <h1>Portal de Exámenes OPE</h1>
+        <p>La herramienta definitiva para preparar tu plaza. Exámenes reales, explicaciones detalladas y control de tiempo.</p>
+        <button class="btn-start" onclick="iniciarPortal()">
+            <i class="fas fa-sign-in-alt"></i> ENTRAR AL PORTAL
         </button>
     </header>
 
-    <div class="container">
-        <div class="features">
-            <div class="feature-card">
-                <i class="fas fa-stopwatch"></i>
-                <h3>Control de Tiempo</h3>
-                <p>Cronómetro integrado para que entrenes tu ritmo de respuesta.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-check-double"></i>
-                <h3>Recuento de Aciertos</h3>
-                <p>Comprueba cuántas preguntas has acertado al finalizar el test.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-mobile-alt"></i>
-                <h3>Modo Móvil</h3>
-                <p>Interfaz optimizada para hacer test cómodamente desde cualquier lugar.</p>
-            </div>
+    <section class="features">
+        <div class="feature-card">
+            <i class="fas fa-lightbulb"></i>
+            <h3>Con Explicaciones</h3>
+            <p>No solo sabrás si has acertado; entenderás el porqué gracias a las explicaciones incluidas en cada pregunta.</p>
         </div>
+        <div class="feature-card">
+            <i class="fas fa-history"></i>
+            <h3>Histórico Real</h3>
+            <p>Accede a las convocatorias de 2020 y 2022 de forma íntegra o en modo aleatorio.</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-bolt"></i>
+            <h3>Modo Snack</h3>
+            <p>¿Poco tiempo? Entrena con 10 preguntas rápidas seleccionadas al azar.</p>
+        </div>
+    </section>
+
+    <div id="modal">
+        <div class="modal-content" id="modalData">
+            </div>
     </div>
 
-    <div class="modal-overlay" id="examModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span id="title-sheet">Simulador</span>
-                <div class="timer-container"><i class="fas fa-clock"></i> <span id="cronometro">00:00:00</span></div>
-                <button style="background:none; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeExamModal()">✕</button>
-            </div>
+    <div id="timer-display">00:00:00</div>
 
-            <div class="modal-body">
-                <div id="loading-state">Cargando preguntas...</div>
-
-                <div id="test-container" style="display:none;">
-                    <p style="color:#666">Pregunta <span id="current-idx">1</span> de <span id="total-idx">0</span></p>
-                    <div id="pregunta-texto" style="font-size:1.2rem; font-weight:bold; margin-bottom:20px;"></div>
-                    <div id="opciones-container"></div>
-                </div>
-
-                <div id="results-container" style="display:none;">
-                    <h2>¡Test Finalizado!</h2>
-                    <div class="score-big" id="score-final">0</div>
-                    <p>Aciertos totales</p>
-                    <p>Tiempo empleado: <strong id="time-final"></strong></p>
-                    <button class="btn-primary" onclick="closeExamModal()" style="margin-top:20px;">Volver al inicio</button>
-                </div>
-            </div>
-
-            <div class="modal-footer" id="modal-footer" style="display:none;">
-                <button class="btn-nav" id="btn-prev" onclick="changeQuestion(-1)">Anterior</button>
-                <button class="btn-nav btn-finalizar" id="btn-finalizar" onclick="finalizarTest()" style="display:none;">Finalizar</button>
-                <button class="btn-nav" id="btn-next" onclick="changeQuestion(1)">Siguiente</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let preguntas = [];
-        let respuestasUsuario = [];
-        let indiceActual = 0;
-        let totalSeconds = 0;
-        let intervalTime;
-
-        async function openExamModal(sheetName) {
-            document.getElementById('examModal').classList.add('active');
-            document.getElementById('loading-state').style.display = 'block';
-            document.getElementById('test-container').style.display = 'none';
-            document.getElementById('results-container').style.display = 'none';
-            
-            try {
-                // FETCH RELATIVO como en tus otras herramientas
-                const response = await fetch(`/?sheet=${encodeURIComponent(sheetName)}`);
-                const data = await response.json();
-
-                if (data && data.values) {
-                    // Mapeo: Col A: Pregunta, B-E: Opciones, F: Correcta (0-3)
-                    preguntas = data.values.filter(row => row[0]).map(row => ({
-                        texto: row[0],
-                        opciones: [row[1], row[2], row[3], row[4]],
-                        correcta: parseInt(row[5])
-                    }));
-
-                    respuestasUsuario = new Array(preguntas.length).fill(null);
-                    document.getElementById('total-idx').innerText = preguntas.length;
-                    
-                    document.getElementById('loading-state').style.display = 'none';
-                    document.getElementById('test-container').style.display = 'block';
-                    document.getElementById('modal-footer').style.display = 'flex';
-                    
-                    renderPregunta();
-                    startCronometro();
-                } else {
-                    document.getElementById('loading-state').innerText = "Error: No se encontraron datos en la hoja '" + sheetName + "'";
-                }
-            } catch (e) {
-                document.getElementById('loading-state').innerText = "Error de conexión con el Worker.";
-            }
-        }
-
-        function renderPregunta() {
-            const p = preguntas[indiceActual];
-            document.getElementById('current-idx').innerText = indiceActual + 1;
-            document.getElementById('pregunta-texto').innerText = p.texto;
-            
-            const cont = document.getElementById('opciones-container');
-            cont.innerHTML = '';
-
-            p.opciones.forEach((op, i) => {
-                if(!op) return;
-                const label = document.createElement('label');
-                label.className = 'opcion-label';
-                const checked = respuestasUsuario[indiceActual] === i ? 'checked' : '';
-                label.innerHTML = `<input type="radio" name="ope" onclick="respuestasUsuario[${indiceActual}]=${i}" ${checked}> ${op}`;
-                cont.appendChild(label);
+    <script src="ope_portal.js"></script> <script>
+        // Función puente para cargar scripts (necesaria para ope_portal.js)
+        async function cargarScript(url) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = url;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
             });
-
-            document.getElementById('btn-prev').disabled = (indiceActual === 0);
-            document.getElementById('btn-next').style.display = (indiceActual === preguntas.length - 1) ? 'none' : 'block';
-            document.getElementById('btn-finalizar').style.display = (indiceActual === preguntas.length - 1) ? 'block' : 'none';
         }
 
-        function changeQuestion(step) {
-            indiceActual += step;
-            renderPregunta();
+        // Función para cerrar el modal (usada en tus scripts)
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            stopTimer();
         }
 
-        function finalizarTest() {
-            clearInterval(intervalTime);
-            let aciertos = 0;
-            preguntas.forEach((p, i) => {
-                if(respuestasUsuario[i] === p.correcta) aciertos++;
-            });
-
-            document.getElementById('test-container').style.display = 'none';
-            document.getElementById('modal-footer').style.display = 'none';
-            document.getElementById('results-container').style.display = 'block';
-            document.getElementById('score-final').innerText = aciertos;
-            document.getElementById('time-final').innerText = document.getElementById('cronometro').innerText;
+        function iniciarPortal() {
+            // Llama a la función de tu ope_portal.js
+            abrirPortalExamenes();
         }
 
-        function closeExamModal() {
-            document.getElementById('examModal').classList.remove('active');
-            clearInterval(intervalTime);
-        }
+        // --- LÓGICA DEL CRONÓMETRO ---
+        let timerInterval;
+        let seconds = 0;
 
-        function startCronometro() {
-            totalSeconds = 0;
-            intervalTime = setInterval(() => {
-                totalSeconds++;
-                const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-                const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-                const s = (totalSeconds % 60).toString().padStart(2, '0');
-                document.getElementById('cronometro').innerText = `${h}:${m}:${s}`;
+        function startTimer() {
+            const display = document.getElementById('timer-display');
+            display.style.display = 'block';
+            seconds = 0;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                seconds++;
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                display.innerText = `${h}:${m}:${s}`;
             }, 1000);
         }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display').style.display = 'none';
+        }
+
+        // Observer para detectar cuándo empieza un examen y arrancar el cronómetro
+        const observer = new MutationObserver((mutations) => {
+            // Si en el modal aparece el contenedor de preguntas de opesPSQ.js
+            if (document.getElementById('contenedor-preguntas')) {
+                if (document.getElementById('timer-display').style.display === 'none') {
+                    startTimer();
+                }
+            }
+        });
+
+        observer.observe(document.getElementById('modalData'), { childList: true, subtree: true });
     </script>
 </body>
 </html>
