@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psq-v5'; // Nueva versión para activar cambios
+const CACHE_NAME = 'psq-v6'; // VERSIÓN NUEVA: vital para borrar la caché anterior
 const ASSETS = [
   '/',
   '/index.html',
@@ -10,8 +10,8 @@ const ASSETS = [
   '/catatonia.html',
   '/catatonia.js',
   '/calculadora.js',
-  '/autoepp.html', // He añadido estas dos ya que son las que
-  '/autoepp.js'    // están causando la lentitud actual
+  '/autoepp.html', 
+  '/autoepp.js'  
 ];
 
 // Instalación: Guardamos las herramientas principales
@@ -37,13 +37,21 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
+  const requestUrl = new URL(event.request.url);
+
+  // 🔴 EXCEPCIÓN VITAL: Ignorar las peticiones al motor de datos
+  // Si la URL contiene "?sheet=", dejamos que el navegador la gestione 
+  // directamente con Cloudflare, saltándose el Service Worker.
+  if (requestUrl.searchParams.has('sheet')) {
+      return; 
+  }
+
+  // Para el resto (HTML, JS, CSS, PNG), usamos la caché normal
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      // Si el recurso está en la caché, se devuelve al instante (velocidad máxima)
       if (cachedResponse) {
         return cachedResponse;
       }
-      // Si no está en caché (primera vez), se pide por red normalmente
       return fetch(event.request);
     })
   );
