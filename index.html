@@ -132,14 +132,7 @@
 </div>
 
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // Usamos '/sw.js' (con la barra) y capturamos el error silenciosamente
-      navigator.serviceWorker.register('/sw.js').catch(error => {
-        console.warn('Proxy del SERGAS detectado: SW bloqueado. Funcionando en modo online estándar.');
-      });
-    });
-  }
+  
   
   function slugify(text) {
       return text.toString().toLowerCase().trim()
