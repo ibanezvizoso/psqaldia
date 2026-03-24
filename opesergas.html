@@ -48,7 +48,7 @@
         .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
         .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 2rem; opacity: 0.9; }
 
-        /* Features - FLEXBOX PARA QUE SEAN EN HORIZONTAL */
+        /* Features - FLEXBOX PARA QUE SEAN EN HORIZONTAL Y CUADREN */
         .container { 
             max-width: 1000px; 
             margin: -3rem auto 3rem; 
@@ -70,7 +70,7 @@
             box-shadow: var(--shadow); 
             text-align: center; 
             flex: 1; /* Todas ocupan lo mismo en horizontal */
-            min-width: 250px; 
+            min-width: 220px; /* Reducido un poco para que quepan las 4 bien */
         }
         .feature-card i { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1rem; }
 
@@ -147,6 +147,11 @@
                 <i class="fas fa-lightbulb"></i>
                 <h3>Explicaciones</h3>
                 <p>Repasa tus respuestas con explicaciones breves.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-pie"></i>
+                <h3>Análisis de Fallos</h3>
+                <p>Recuento de aciertos al finalizar y opción de repetir solo las preguntas que has fallado.</p>
             </div>
             <div class="feature-card">
                 <i class="fas fa-mobile-alt"></i>
