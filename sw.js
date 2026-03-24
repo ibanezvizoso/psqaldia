@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psq-v7'; // Subimos versión para limpiar el error anterior
+const CACHE_NAME = 'psq-v9'; // Versión 9 para forzar la limpieza total
 const ASSETS = [
   '/',
   '/index.html',
@@ -12,58 +12,65 @@ const ASSETS = [
   '/calculadora.js',
   '/autoepp.html', 
   '/autoepp.js'
-  // Si quieres que los iconos carguen sin internet, añade '/css/all.min.css' aquí en el futuro
 ];
 
-// Instalación: Guardamos las herramientas principales
+// Instalación: Guardamos la estructura principal
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Fuerza a que este SW se instale de inmediato
 });
 
-// Activación: Limpieza de versiones antiguas
+// Activación: Borramos cualquier rastro de las versiones anteriores
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
     ))
   );
+  self.clients.claim(); // Toma el control de la página sin tener que recargar
 });
 
-// Estrategia: Cache First a prueba de balas
+// Estrategia Fetch: Cache First + Escudo Anti-Proxy
 self.addEventListener('fetch', event => {
-  // 1. Ignorar lo que no sea GET o no sea http/https (como extensiones de Chrome)
-  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) {
-    return;
-  }
+  // Ignoramos peticiones que no sean GET
+  if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
-  // 2. EXCEPCIÓN VITAL: Dejar que los datos del Worker pasen directos a internet
-  if (url.searchParams.has('sheet')) {
+  // 🛡️ EL ESCUDO ANTI-PROXY (SERGAS) 🛡️
+  // Si pedimos datos del Worker, CSS, fuentes de FontAwesome o el manifest.json,
+  // abortamos la intercepción. El navegador los pedirá de forma nativa
+  // y el Proxy del hospital le dejará pasar sin pedir autenticación fantasma.
+  if (
+    url.searchParams.has('sheet') || 
+    url.pathname.endsWith('.css') || 
+    url.pathname.endsWith('.woff2') || 
+    url.pathname.endsWith('.woff') || 
+    url.pathname.endsWith('.ttf') || 
+    url.pathname.endsWith('.json')
+  ) {
     return; 
   }
 
-  // 3. Manejo seguro de la respuesta
+  // Para HTML y JS (lo que está en ASSETS), usamos la caché local
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      // Si está en la caché, devolvemos eso al instante
+      // Si lo tenemos guardado, lo devolvemos al instante
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      // Si no está, lo pedimos a internet
-      return fetch(event.request).then(networkResponse => {
-        return networkResponse; // <-- ESTE RETURN ES EL QUE FALLABA
-      }).catch(error => {
-        // Si no hay internet y el archivo no estaba en caché, evitamos que la web colapse
-        console.warn('El Service Worker no pudo obtener:', event.request.url);
-        // Devolvemos una respuesta vacía controlada para no lanzar el TypeError
-        return new Response('', { status: 404, statusText: 'Not Found offline' });
+      // Si no, vamos a buscarlo a la red
+      return fetch(event.request).catch(() => {
+        // 🛑 EVITAMOS EL ERROR "TypeError: Failed to convert value to Response"
+        // Si no hay internet, devolvemos un texto de error en lugar de dejar que colapse
+        return new Response('Error de conexión local. El proxy bloqueó la petición o no hay internet.', { 
+          status: 503, 
+          statusText: 'Service Unavailable',
+          headers: new Headers({ 'Content-Type': 'text/plain' })
+        });
       });
     })
   );
