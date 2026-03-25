@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diferencial SS vs SNM | PSQALDÍA</title>
-    <meta name="description" content="Herramienta clínica de diagnóstico diferencial entre Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno basada en evidencia.">
+    <title>Diferencial SS vs SNM | PSQ AL DÍA</title>
+    <meta name="description" content="Herramienta clínica de diagnóstico diferencial entre Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno basada en criterios de Hunter y Levenson.">
     <link rel="canonical" href="https://psqaldia.com/ss-snm">
+    <link rel="icon" type="image/png" href="/Logo.png">
     
     <link rel="stylesheet" href="/css/all.min.css">
 
@@ -13,175 +14,202 @@
         :root {
             --primary: #2563eb;
             --primary-light: #eff6ff;
-            --secondary: #6366f1;
             --bg: #fcfdfe;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #475569;
             --border: #f1f5f9;
-            --radius: 1.25rem;
+            --radius: 1.5rem;
         }
 
-        /* Reset y Base */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-    /* Pila nativa: Máximo rendimiento y nitidez */
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-    background: var(--bg); 
-    color: var(--text-main); 
-    line-height: 1.6;
-    overflow: auto !important; 
-    -webkit-font-smoothing: antialiased;
-}
-
-        /* Layout */
-        .nav-header { 
-            padding: 1.5rem 2rem; 
-            max-width: 1000px; 
-            margin: auto;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
         
-        .hero { 
-            text-align: center; 
-            padding: 4rem 1.5rem 2rem 1.5rem; 
-            background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
-        }
-        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; color: var(--text-main); }
-        .hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: auto; }
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-        .main-content { 
-            padding: 2rem 1.5rem 5rem 1.5rem; 
-            max-width: 900px; 
-            margin: auto; 
-        }
+        .main-content { padding: 0 1.5rem 5rem; max-width: 1000px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
-        /* Ajustes para integrar el modal como contenido de página */
-        #modal { 
-            display: flex !important; /* Forzamos visualización */
-            position: relative !important; 
-            width: 100% !important;
-            height: auto !important;
-            background: transparent !important;
-            z-index: 1 !important;
-            padding: 0;
+        /* --- GRID DE BENEFICIOS --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 3rem;
+            margin-top: -1rem;
         }
 
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+        /* Contenedor de la herramienta (Adaptación del Modal) */
+        #modal { display: flex !important; position: relative !important; width: 100% !important; z-index: 1 !important; margin-bottom: 2rem; }
         #modalData { 
-            width: 100%;
+            width: 100%; max-width: 800px; margin: auto;
             background: var(--card-bg);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
             overflow: hidden;
         }
 
-        /* Estilos internos que inyecta tu JS */
-        .calc-ui { 
-            padding: 2rem !important; 
-            height: auto !important; /* Permite que crezca verticalmente */
+        /* Estilos inyectados por diagnostico.js */
+        .calc-ui { padding: 2rem !important; height: auto !important; }
+        #check-list-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px !important; margin-top: 1.5rem !important; }
+        #check-list-container label { 
+            background: #fff !important; padding: 1rem !important; border: 1px solid var(--border) !important; 
+            border-radius: 12px !important; font-weight: 600; font-size: 0.85rem !important; transition: 0.2s all ease; 
         }
+        #check-list-container label:hover { border-color: var(--primary) !important; background: var(--primary-light) !important; }
 
-        #check-list-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 12px !important;
-            margin-top: 1.5rem !important;
-        }
-
-        #check-list-container label {
-            background: #fff !important;
-            padding: 1rem !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 12px !important;
-            font-weight: 600;
-            font-size: 0.85rem !important;
-            transition: 0.2s all ease;
-        }
-
-        #check-list-container label:hover {
-            border-color: var(--primary) !important;
-            background: var(--primary-light) !important;
-        }
-
-        /* Footer y Referencias */
-        .references-section {
-            margin-top: 2rem;
+        /* Panel de Referencias */
+        .info-panel {
+            background: white;
             padding: 2rem;
-            background: #fff;
             border-radius: var(--radius);
             border: 1px solid var(--border);
+            margin: 3rem auto 0;
+            max-width: 800px;
         }
-        .references-section h2 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
-        .ref-list { list-style: none; color: var(--text-muted); font-size: 0.9rem; }
-        .ref-list li { margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px; }
+        .info-panel h2 { font-size: 1.1rem; margin-top: 0; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-panel i { color: var(--primary); }
+        .ref-list { list-style: none; padding: 0; color: var(--text-muted); font-size: 0.9rem; }
+        .ref-list li { margin-bottom: 0.6rem; display: flex; align-items: center; gap: 10px; }
         .ref-list li::before { content: "•"; color: var(--primary); font-weight: bold; }
 
-        .back-nav { text-align: center; margin-top: 3rem; }
-        .link-home { color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.95rem; }
-        .link-home:hover { text-decoration: underline; }
+        /* Navegación y Footer Final */
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .site-bottom-info {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: #f8fafc;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img {
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
 
         @media (max-width: 600px) {
             .hero h1 { font-size: 2rem; }
-            .calc-ui { padding: 1rem !important; }
-            #check-list-container { grid-template-columns: 1fr; }
+            .nav-header { padding: 1rem; }
+            .features-grid { gap: 1rem; }
+            .calc-ui { padding: 1.2rem !important; }
         }
     </style>
 </head>
 <body>
 
     <nav class="nav-header">
-        <a href="https://psqaldia.com" class="logo">
-            <i class="fas fa-brain"></i> PSQALDÍA
-        </a>
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
     </nav>
 
     <header class="hero">
         <h1>SS vs SNM</h1>
-        <p>Herramienta avanzada de diagnóstico diferencial para la distinción clínica entre toxicidad serotoninérgica y neuroléptica.</p>
+        <p>Herramienta avanzada para la distinción clínica entre toxicidad serotoninérgica y neuroléptica.</p>
     </header>
 
     <main class="main-content">
+        
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-vial"></i></div>
+                <h3>Criterios de Hunter</h3>
+                <p>Algoritmo de decisión para el diagnóstico de Síndrome Serotoninérgico basado en la presencia de clonus y agitación.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-clipboard-list"></i></div>
+                <h3>Criterios de Levenson</h3>
+                <p>Evaluación de criterios mayores (rigidez, fiebre) y menores para la sospecha de Síndrome Neuroléptico Maligno.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-balance-scale"></i></div>
+                <h3>Diferencial Dinámico</h3>
+                <p>Comparación instantánea de perfiles de instauración, reflejos y motilidad gastrointestinal para una distinción precisa.</p>
+            </div>
+        </section>
+
         <div id="modal">
             <div id="modalData">
-                <div style="padding:4rem; text-align:center;">
+                <div style="padding:5rem; text-align:center;">
                     <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
                     <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Sincronizando criterios clínicos...</p>
                 </div>
             </div>
         </div>
 
-        <section class="references-section">
-            <h2><i class="fas fa-book-medical"></i> Referencias</h2>
+        <section class="info-panel">
+            <h2><i class="fas fa-book-medical"></i> Referencias y Metodología</h2>
             <ul class="ref-list">
-                <li>Criterios de Hunter</li>
-                <li>Criterios de Levenson</li>
+                <li><strong>Criterios de Hunter:</strong> Dunkley EJ, et al. The Hunter Serotonin Toxicity Criteria. QJM. 2003.</li>
+                <li><strong>Criterios de Levenson:</strong> Levenson JL. Neuroleptic Malignant Syndrome. Am J Psychiatry. 1985.</li>
+                <li>Análisis diferencial basado en perfiles de instauración (horas vs. días) y examen neurológico.</li>
             </ul>
         </section>
 
-        <div class="back-nav">
-            <a href="https://psqaldia.com" class="link-home">
-                <i class="fas fa-arrow-left"></i> Volver a PSQALDÍA
+        <footer class="nav-footer">
+            <a href="https://psqaldia.com/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
             </a>
-        </div>
+        </footer>
     </main>
+
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Soporte a la Decisión Clínica en Toxicidad Psiquiátrica</span>
+    </footer>
 
     <script>
         window.WORKER_URL = "https://psqaldia.com/"; 
 
-        // Forzar carga directa al iniciar
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof openDiagUI === 'function') {
                 openDiagUI();
-                
-                // Pequeño ajuste tras la carga para asegurar que el scroll esté habilitado
-                setTimeout(() => {
-                    document.body.style.overflow = 'auto';
-                }, 500);
+                setTimeout(() => { document.body.style.overflow = 'auto'; }, 500);
             }
         });
     </script>
