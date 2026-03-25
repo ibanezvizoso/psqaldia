@@ -6,6 +6,7 @@
     <title>AD Switch: Cambio de Antidepresivos | PSQALDÍA</title>
     <meta name="description" content="Guía interactiva de conmutación y rotación de antidepresivos basada en las Guías Maudsley 15ª Edición.">
     <link rel="canonical" href="https://psqaldia.com/adswitch">
+    <link rel="icon" type="image/png" href="/Logo.png">
     
     <link rel="stylesheet" href="/css/all.min.css">
    
@@ -22,24 +23,59 @@
         }
 
         body { 
-    /* Nueva pila de fuentes nativas */
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-    background: var(--bg); 
-    color: var(--text-main); 
-    line-height: 1.6;
-    margin: 0;
-    /* Suavizado de fuente opcional para mejores acabados */
-    -webkit-font-smoothing: antialiased;
-}
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
         
-        .hero { text-align: center; padding: 4rem 1.5rem 2rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
         .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-        .main-content { padding: 2rem 1.5rem 5rem; max-width: 800px; margin: auto; }
+        .main-content { padding: 0 1.5rem 5rem; max-width: 1000px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+
+        /* --- NUEVO GRID DE CARACTERÍSTICAS --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            margin-top: -1rem; /* Eleva ligeramente las tarjetas */
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
         /* Contenedor de la herramienta */
         #modalData { 
@@ -49,6 +85,8 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
             overflow: hidden;
             min-height: 400px;
+            max-width: 800px; /* Mantenemos la herramienta centrada y no muy ancha */
+            margin: auto;
         }
 
         /* Sección de Info/Referencia */
@@ -57,16 +95,40 @@
             padding: 2rem;
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            margin-top: 2rem;
+            margin-top: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .info-panel h2 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-panel h2 { font-size: 1.1rem; margin-top: 0; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
         .info-panel i { color: var(--primary); }
 
-        footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
-        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        /* Footer de navegación */
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- NUEVO FOOTER SUTIL FINAL --- */
+        .site-bottom-info {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: #f8fafc; /* Un gris muy sutil */
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img {
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
 
         @media (max-width: 600px) {
             .hero h1 { font-size: 2rem; }
+            .nav-header { padding: 1rem; }
+            .features-grid { gap: 1rem; }
+            .feature-card { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -82,6 +144,27 @@
     </header>
 
     <main class="main-content">
+        
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-random"></i></div>
+                <h3>Pautas Personalizadas</h3>
+                <p>Genera estrategias dinámicas de solapamiento (cross-tapering) o cambio directo ajustadas a las dosis de origen y destino.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Seguridad Clínica</h3>
+                <p>Calcula pasos progresivos para minimizar el riesgo de síndrome de discontinuación y toxicidad serotoninérgica durante el cambio.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-book-medical"></i></div>
+                <h3>Evidencia Actualizada</h3>
+                <p>Motor de cálculo basado estrictamente en los protocolos de la <b>Maudsley Prescribing Guidelines (15ª Ed.)</b> y práctica clínica.</p>
+            </div>
+        </section>
+
         <div id="modalData">
             <div style="padding:5rem; text-align:center;">
                 <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i>
@@ -90,20 +173,23 @@
         </div>
 
         <section class="info-panel">
-            <h2><i class="fas fa-book-medical"></i> Base Científica</h2>
-            <p style="font-size: 0.9rem; color: var(--text-muted);">
-                Las estrategias generadas por esta herramienta se basan en los protocolos de la <b>Maudsley Prescribing Guidelines in Psychiatry (15th Edition)</b>, combinados con datos de fichas técnicas y práctica clínica especializada.
-                <br><br>
-                El motor analiza las dosis de origen y objetivo para calcular si es posible el direct switch o el método de <i>cross-tapering</i> (solapamiento) más seguro, minimizando el riesgo de toxicidad farmacológica, síndrome de discontinuación y el tiempo de infradosificación terapéutica.
+            <h2><i class="fas fa-info-circle"></i> Base Científica y Uso</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">
+                El motor analiza las dosis de origen y objetivo para calcular el método de <i>cross-tapering</i> (solapamiento) más seguro. Esta herramienta es un asistente a la decisión clínica y no sustituye el juicio del profesional sanitario. Verifique siempre las interacciones potenciales y la situación clínica del paciente antes de iniciar un cambio.
             </p>
         </section>
 
-        <footer>
+        <footer class="nav-footer">
             <a href="https://psqaldia.com/herramientas" class="link-back">
                 <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
             </a>
         </footer>
     </main>
+
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Herramientas de Ayuda a la Decisión Clínica</span>
+    </footer>
 
     <script src="/ADswitch.js"></script>
     <script>
