@@ -117,6 +117,15 @@
             font-size: 24px; color: #888; cursor: pointer; z-index: 1002;
         }
         .btn-cerrar-modal:hover { color: #333; }
+        .back-link { 
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--accent-color); 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--primary-color); }
     </style>
 </head>
 <body>
@@ -162,8 +171,10 @@
     </div>
 
     <footer class="site-footer">
+        <a href="/" class="back-link"><i class="fas fa-home"></i> Volver al inicio</a><br>
+        
         <img src="Logo.png" alt="PSQ AL DÍA"> 
-        <span>&copy; 2026 PSQ AL DÍA - Herramientas y recursos</span>
+        <span>&copy; 2026 PSQ AL DÍA - Portal OPE</span>
     </footer>
 
     <div id="modal">
