@@ -6,6 +6,7 @@
     <title>Exploración de la Catatonía | PSQALDÍA</title>
     <meta name="description" content="Definiciones y maniobras de exploración de catatonía. Evaluación por DSM-5, Taylor & Fink y Lohr & Wisniewski.">
     <link rel="canonical" href="https://psqaldia.com/catatonia">
+    <link rel="icon" type="image/png" href="/Logo.png">
     
     <link rel="stylesheet" href="/css/all.min.css">
     <style>
@@ -13,48 +14,80 @@
             --primary: #2563eb;
             --primary-light: #eff6ff;
             --bg: #fcfdfe;
-            --bg-alt: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #475569;
             --border: #f1f5f9;
-            --radius: 1.25rem;
+            --radius: 1.5rem;
         }
 
         body { 
-    /* Cambiamos a la pila del sistema */
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-    background: var(--bg); 
-    color: var(--text-main); 
-    line-height: 1.5;
-    overflow: auto !important; 
-    -webkit-font-smoothing: antialiased; /* Suavizado para iOS/Mac */
-}
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .nav-header { padding: 1.5rem 2rem; max-width: 1200px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .nav-header { padding: 1.5rem 2rem; max-width: 1200px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
         
-        .hero { text-align: center; padding: 3rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-        .main-content { padding: 0 1rem 5rem 1rem; max-width: 1100px; margin: auto; }
+        .main-content { padding: 0 1rem 5rem 1rem; max-width: 1100px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+
+        /* --- GRID DE BENEFICIOS --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            margin-top: -1rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
         /* Contenedor principal de la herramienta */
         #modalData { 
             background: var(--card-bg);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
             min-height: 600px;
             overflow: hidden;
+            margin-bottom: 3rem;
         }
 
-        /* Ajustes de scroll para la tabla en móviles */
-        .cat-scroll-container {
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Guía de Colores (Leyenda) */
+        /* Leyenda */
         .legend {
             display: flex;
             justify-content: center;
@@ -67,18 +100,42 @@
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
 
-        footer { 
-            margin-top: 4rem; 
-            padding: 2rem; 
+        /* Panel de Referencias */
+        .info-panel {
             background: white;
+            padding: 2rem;
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            font-size: 0.85rem; 
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Navegación y Footer Final */
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .site-bottom-info {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: #f8fafc;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img {
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
         }
 
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.8rem; }
             .legend { flex-direction: column; align-items: center; gap: 0.5rem; }
+            .features-grid { gap: 1rem; }
         }
     </style>
 </head>
@@ -89,11 +146,32 @@
     </nav>
 
     <header class="hero">
-        <h1>Exploración Catatonía</h1>
-        <p>Definiciones, maniobras de exploración y criterios diagnósticos según DSM-5-TR, Taylor & Fink y Lohr & Wisniewski.</p>
+        <h1>Exploración de la Catatonía</h1>
+        <p>Protocolo estructurado de detección y criterios diagnósticos internacionales.</p>
     </header>
 
     <main class="main-content">
+        
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-stethoscope"></i></div>
+                <h3>Metodología en Fases</h3>
+                <p>Exploración organizada en tres niveles críticos: observación espontánea, entrevista dirigida y examen físico dinámico.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-list-check"></i></div>
+                <h3>Multicriterio Clínico</h3>
+                <p>Matriz de evaluación compatible simultáneamente con DSM-5-TR, Taylor & Fink y Lohr & Wisniewski.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-book-medical"></i></div>
+                <h3>Guía de Maniobras</h3>
+                <p>Acceso inmediato a definiciones técnicas y procedimientos de exploración específicos para cada signo identificado.</p>
+            </div>
+        </section>
+
         <div class="legend">
             <div class="legend-item"><div class="dot" style="background: hsla(140, 70%, 92%, 1)"></div> Actividad Aumentada</div>
             <div class="legend-item"><div class="dot" style="background: hsla(50, 85%, 90%, 1)"></div> Actividad anormal</div>
@@ -107,38 +185,40 @@
             </div>
         </div>
 
-        <footer>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                <div>
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-stethoscope"></i> Metodología</h3>
-                    <p style="color: var(--text-muted);">Exploración estructurada en tres fases (Observación, Entrevista y Examen Físico). La herramienta permite la consulta de definiciones y maniobras específicas para cada signo catatónico.</p>
-                </div>
-                <div>
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-book-open"></i> Referencias</h3>
-                    <ul style="list-style: none; padding: 0; color: var(--text-muted); font-size: 0.8rem;">
-                        <li style="margin-bottom: 8px;">• <strong>DSM-5-TR</strong></li>
-                        <li style="margin-bottom: 8px;">• <strong>Taylor & Fink</strong></li>
-                        <li>• <strong>Lohr & Wisniewski</strong></li>
-                    </ul>
-                </div>
+        <section class="info-panel">
+            <div>
+                <h3 style="margin-top:0; margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;"><i class="fas fa-info-circle"></i> Aplicación Clínica</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Esta herramienta facilita la detección sistemática de la catatonía en el entorno asistencial, permitiendo una cuantificación objetiva de los signos observados y explorados.</p>
             </div>
-            <div style="text-align: center; margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-                <a href="https://psqaldia.com" style="color: var(--primary); font-weight: 800; text-decoration: none;">
-                    <i class="fas fa-arrow-left"></i> VOLVER A PSQALDÍA
-                </a>
+            <div>
+                <h3 style="margin-top:0; margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;"><i class="fas fa-book"></i> Referencias</h3>
+                <ul style="list-style: none; padding: 0; color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                    <li style="margin-bottom: 8px;">• <strong>DSM-5-TR</strong> (Diagnostic and Statistical Manual)</li>
+                    <li style="margin-bottom: 8px;">• <strong>Taylor & Fink</strong> (The Catatonia Rating Scale)</li>
+                    <li>• <strong>Lohr & Wisniewski</strong> (Catatonia criteria sets)</li>
+                </ul>
             </div>
+        </section>
+
+        <footer class="nav-footer">
+            <a href="https://psqaldia.com/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
+            </a>
         </footer>
     </main>
 
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Protocolos de Exploración Neuropsiquiátrica</span>
+    </footer>
+
     <script src="/catatonia.js"></script>
     <script>
-        // Configuración necesaria para el script
         window.WORKER_URL = "https://psqaldia.com/"; 
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (typeof window.iniciarInterfazCatatonia === 'function') {
                 await window.iniciarInterfazCatatonia();
-                // Aseguramos que el scroll del body esté activo después de que el JS lo toque
                 document.body.style.overflow = 'auto';
             }
         });
