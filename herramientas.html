@@ -3,154 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herramientas Clínicas para Psiquiatría | PSQALDÍA</title>
+    <title>Herramientas Clínicas para Psiquiatría | PSQ AL DÍA</title>
     <meta name="description" content="Calculadoras y utilidades diagnósticas avanzadas para la práctica psiquiátrica: Equivalencias, Catatonía, Farmacocinética y más.">
-    
     <link rel="stylesheet" href="/css/all.min.css">
-
+    <link rel="icon" type="image/png" href="/Logo.png">
+    
     <style>
-    :root {
-        --primary: #4338ca; --primary-light: #eef2ff; --bg: #f8fafc;
-        --card: #ffffff; --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
-    }
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-light: #f4f7f6;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --text-muted: #7f8c8d;
+        }
 
-    /* 1. Fuente Nativa y suavizado profesional */
-    body { 
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-        background: var(--bg); 
-        color: var(--text-main); 
-        margin: 0; 
-        padding: 0; 
-        -webkit-font-smoothing: antialiased;
-    }
-    
-    /* 2. Header con tracking corregido */
-    .header { 
-        padding: 3rem 1rem 4rem; 
-        text-align: center; 
-        background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
-    }
-    
-    .header h1 { 
-        font-size: 2.5rem; 
-        font-weight: 700; 
-        margin-bottom: 0.5rem; 
-        letter-spacing: -0.02em; 
-    }
-    
-    .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg-light); 
+            color: var(--primary-color); 
+            line-height: 1.6; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+        }
 
-    .tools-grid { 
-        max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; 
-        margin-top: -1.5rem; /* Elevamos ligeramente el grid sobre el degradado */
-    }
+        /* Navbar */
+        nav { background: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 999; }
+        .logo-container { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: bold; font-size: 1.2rem; }
+        .logo-container img { height: 40px; margin-right: 10px; }
 
-    /* 3. Tarjetas: Peso 700 para títulos */
-    .tool-card {
-        background: var(--card); border: 1px solid var(--border); border-radius: 1.5rem;
-        padding: 2rem; text-decoration: none; color: inherit; transition: all 0.3s ease;
-        display: flex; flex-direction: column; gap: 1rem;
-    }
-    .tool-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 15px 30px -10px rgba(67, 56, 202, 0.1); }
-    
-    .icon-box { 
-        width: 50px; height: 50px; background: var(--primary-light); color: var(--primary); 
-        border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
-    }
+        /* Hero */
+        .hero { padding: 4rem 2rem; text-align: center; background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%); color: white; }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; letter-spacing: -1px; }
+        .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 1rem; opacity: 0.9; }
 
-    .tool-card h2 { font-size: 1.25rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
-    .tool-card p { font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
-    
-    .tool-card .btn-go { 
-        margin-top: auto; font-weight: 700; color: var(--primary); font-size: 0.85rem; 
-        display: flex; align-items: center; gap: 5px; text-transform: uppercase; letter-spacing: 0.5px;
-    }
+        /* Grid de Herramientas */
+        .container { 
+            max-width: 1100px; 
+            margin: -3rem auto 3rem; 
+            padding: 0 1rem; 
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .features { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+        }
 
-    footer { text-align: center; padding: 4rem 1rem; }
-    .back-link { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: color 0.2s; }
-    .back-link:hover { color: var(--primary); }
+        .feature-card { 
+            background: var(--white); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            box-shadow: var(--shadow); 
+            text-align: center; 
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid transparent;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-color);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
 
-    /* Ajuste específico para el logo PSQALDÍA */
-    .header .logo-brand {
-        font-weight: 700; 
-        color: var(--primary); 
-        letter-spacing: 1px; 
-        font-size: 0.9rem;
-    }
-</style>
+        .feature-card i { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1.5rem; }
+        .feature-card h3 { margin: 0 0 0.8rem 0; font-size: 1.3rem; font-weight: 700; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0 0 1.5rem 0; flex-grow: 1; }
+
+        .btn-go {
+            font-weight: 700;
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: var(--white);
+            border-top: 1px solid #eee;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .site-footer img {
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+        .back-link { 
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--accent-color); 
+            text-decoration: none; 
+            font-weight: 600; 
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .container { margin-top: -2rem; }
+        }
+    </style>
 </head>
 <body>
 
-<header class="header">
-    <a href="/" style="text-decoration: none; display: inline-block; margin-bottom: 1rem;">
-        <div style="font-weight: 900; color: var(--primary); letter-spacing: 1px; transition: opacity 0.2s;" 
-             onmouseover="this.style.opacity='0.7'" 
-             onmouseout="this.style.opacity='1'">
-             PSQALDÍA
+    <nav>
+        <a href="/" class="logo-container">
+            <img src="/Logo.png" alt="Logo">
+            <span>PSQ AL DÍA</span>
+        </a>
+    </nav>
+
+    <header class="hero">
+        <h1>Herramientas Clínicas</h1>
+        <p>Utilidades interactivas para asistir en la toma de decisiones psiquiátricas.</p>
+    </header>
+
+    <div class="container">
+        <div class="features">
+            <a href="/equivalencias" class="feature-card">
+                <i class="fas fa-exchange-alt"></i>
+                <h3>Equivalencias APS</h3>
+                <p>Calculadora de dosis equivalentes de antipsicóticos y estrategias de switch basadas en Maudsley e INTEGRATE.</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="/adswitch" class="feature-card">
+                <i class="fas fa-sync"></i>
+                <h3>AD Switch</h3>
+                <p>Motor dinámico de cambio de antidepresivos con pautas de cross-tapering según Maudsley 15ª Ed.</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="/farmacocinetica" class="feature-card">
+                <i class="fas fa-wave-square"></i>
+                <h3>Farmacocinética</h3>
+                <p>Simulador de niveles plasmáticos y escenarios tras cambios de dosis (Start, Stop & Switch).</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="/catatonia" class="feature-card">
+                <i class="fas fa-brain"></i>
+                <h3>Exploración Catatonía</h3>
+                <p>Criterios diagnósticos y definiciones de Taylor & Fink, Lohr & Wisniewski y DSM-5.</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="/ss-snm" class="feature-card">
+                <i class="fas fa-stethoscope"></i>
+                <h3>SS vs SNM</h3>
+                <p>Diferencial de Síndrome Serotoninérgico y Neuroléptico Maligno mediante criterios Hunter y Levenson.</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="/clozapina" class="feature-card">
+                <i class="fas fa-calendar-check"></i>
+                <h3>Titulación Clozapina</h3>
+                <p>Planificador interactivo de inicio seguro ajustado por sexo y tabaco según Maudsley 15.</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="/psicosis-autoinmune" class="feature-card">
+                <i class="fas fa-shield-virus"></i>
+                <h3>Psicosis Autoinmune</h3>
+                <p>Algoritmo de sospecha y diagnóstico basado en los criterios internacionales de Pollak et al.</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="/deprescripcion" class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>Deprescripción</h3>
+                <p>Planificador de reducción gradual hiperbólica basada en la ocupación de receptores.</p>
+                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            </a>
         </div>
-    </a>
-    <h1>Herramientas</h1>
-    <p>Herramientas interactivas para asistir en la toma de decisiones clínicas.</p>
-</header>
+    </div>
 
-<main class="tools-grid">
-    <a href="/equivalencias" class="tool-card">
-        <div class="icon-box"><i class="fas fa-exchange-alt"></i></div>
-        <h2>Equivalencias APS</h2>
-        <p>Calculadora de dosis equivalentes de antipsicóticos, con estrategias de switch detalladas, basada en Maudsley, Leucht & INTEGRATE.</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-<a href="/adswitch" class="tool-card">
-        <div class="icon-box"><i class="fas fa-sync"></i></div>
-        <h2>AD Switch</h2>
-        <p>Motor dinámico de cambio de antidepresivos. Genera pautas de cambio, incluyendo estrategias de solapamiento (cross-tapering) basadas en la Guía Maudsley 15ª Ed.</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-    <a href="/farmacocinetica" class="tool-card">
-        <div class="icon-box"><i class="fas fa-wave-square"></i></div>
-        <h2>Simulador farmacocinético Start, Stop & Switch</h2>
-        <p>Modelado de niveles plasmáticos y simulación de escenarios tras cambios de dosis.</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-
-    <a href="/catatonia" class="tool-card">
-        <div class="icon-box"><i class="fas fa-brain"></i></div>
-        <h2>Exploración Catatonía</h2>
-        <p>Definiciones, exploración y criterios diagnósticos (DSM, Taylor & Fink, Lohr & Wisniewski).</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-
-    <a href="/ss-snm" class="tool-card">
-        <div class="icon-box"><i class="fas fa-stethoscope"></i></div>
-        <h2>SS vs SNM</h2>
-        <p>Diagnóstico diferencial de Síndrome Serotoninérgico y Síndrome Neuroléptico Maligno mediante criterios de Hunter y Levenson.</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-    <a href="/clozapina" class="tool-card">
-        <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
-        <h2>Titulación de Clozapina</h2>
-        <p>Planificador interactivo para el inicio seguro de clozapina según Maudsley 15. Genera un calendario de dosis personalizado ajustado por sexo y hábito tabáquico.</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-    
-    <a href="/psicosis-autoinmune" class="tool-card">
-        <div class="icon-box"><i class="fas fa-shield-virus"></i></div>
-        <h2>Psicosis Autoinmune</h2>
-        <p>Algoritmo de sospecha y diagnóstico de psicosis autoinmune según criterios de Pollak et al.</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-    <a href="/deprescripcion" class="tool-card">
-        <div class="icon-box"><i class="fas fa-chart-line"></i></div>
-        <h2>Deprescripción Hiperbólica</h2>
-        <p>Planificador de reducción gradual y segura de psicofármacos basado en modelos de ocupación de receptores y pautas lentas.</p>
-        <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-    </a>
-</main>
-
-<footer>
-    <a href="/" class="back-link"><i class="fas fa-home"></i> Volver al inicio</a>
-</footer>
+    <footer class="site-footer">
+        <a href="/" class="back-link"><i class="fas fa-home"></i> Volver al inicio</a><br>
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Herramientas Clínicas</span>
+    </footer>
 
 </body>
 </html>
