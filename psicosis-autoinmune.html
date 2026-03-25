@@ -6,127 +6,131 @@
     <title>Criterios de Psicosis Autoinmune | PSQALDÍA</title>
     <meta name="description" content="Herramienta clínica basada en los criterios de Pollak et al. para el diagnóstico de psicosis de etiología autoinmune y encefalitis.">
     <link rel="canonical" href="https://psqaldia.com/psicosis-autoinmune">
+    <link rel="icon" type="image/png" href="/Logo.png">
     
     <link rel="stylesheet" href="/css/all.min.css">
 
-   <style>
-    :root {
-        --primary: #2563eb;
-        --primary-light: #eff6ff;
-        --bg: #fcfdfe;
-        --card-bg: #ffffff;
-        --text-main: #0f172a;
-        --text-muted: #475569;
-        --border: #f1f5f9;
-        --radius: 1.25rem;
-    }
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.5rem;
+        }
 
-    /* 1. Cambio a fuente nativa y suavizado nítido */
-    body { 
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-        background: var(--bg); 
-        color: var(--text-main); 
-        line-height: 1.6;
-        overflow: auto !important;
-        -webkit-font-smoothing: antialiased;
-    }
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    /* 2. Navbar: Peso 700 para mayor limpieza */
-    .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
-    .logo { 
-        font-weight: 700; 
-        font-size: 1.2rem; 
-        color: var(--primary); 
-        text-decoration: none; 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-        letter-spacing: -0.01em;
-    }
-    
-    /* 3. Hero: Tracking corregido para que no choquen las letras */
-    .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-    .hero h1 { 
-        font-size: 2.5rem; 
-        font-weight: 700; 
-        letter-spacing: -0.02em; 
-        margin-bottom: 0.5rem; 
-        line-height: 1.1;
-    }
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-    .main-content { padding: 0 1.5rem 5rem 1.5rem; max-width: 900px; margin: auto; }
+        .main-content { padding: 0 1.5rem 5rem; max-width: 1000px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
-    /* Contenedor del JS */
-    #modal { 
-        display: flex !important; 
-        position: relative !important; 
-        width: 100% !important;
-        background: transparent !important;
-        z-index: 1 !important;
-        padding: 0;
-        margin-bottom: 2rem;
-    }
+        /* --- GRID DE BENEFICIOS --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            margin-top: -1rem;
+        }
 
-    #modalData { 
-        width: 100%;
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
-    }
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
 
-    .calc-ui { padding: 2rem !important; height: auto !important; }
-    
-    input[type="checkbox"] { accent-color: var(--primary); cursor: pointer; }
+        .feature-card:hover { transform: translateY(-3px); }
 
-    .pa-check-group {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 8px;
-        margin-bottom: 1.5rem;
-    }
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
 
-    /* 4. Guía de interpretación: Más aireada */
-    .interpretation-guide {
-        background: white; 
-        padding: 2rem; 
-        border-radius: var(--radius); 
-        border: 1px solid var(--border);
-        margin-top: 1rem;
-    }
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
-    footer { 
-        margin-top: 4rem; 
-        padding-top: 2rem; 
-        border-top: 1px solid var(--border); 
-        font-size: 0.85rem; 
-        color: var(--text-muted); 
-    }
+        /* Contenedor de la herramienta */
+        #modal { display: flex !important; position: relative !important; width: 100% !important; z-index: 1 !important; margin-bottom: 3rem; }
+        #modalData { 
+            width: 100%; max-width: 800px; margin: auto;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
 
-    @media (max-width: 600px) {
-        .hero h1 { font-size: 2rem; }
-        .hero { padding: 3rem 1.5rem; }
-        .calc-ui { padding: 1.2rem !important; }
-    }
+        /* Paneles de Información */
+        .info-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin: 2rem auto 0;
+            max-width: 800px;
+        }
+        .info-panel h2 { font-size: 1.1rem; margin-top: 0; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-panel i { color: var(--primary); }
 
-    /* Estilos del Modal de Red Flags optimizados para fuente nativa */
-    #rf-modal > div {
-        background-color: white !important;
-        color: var(--text-main) !important;
-        max-height: 85vh;
-        overflow-y: auto;
-        border: 1px solid var(--border) !important;
-        border-radius: 1.5rem !important;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2) !important;
-    }
+        /* Guía de interpretación visual */
+        .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-top: 1rem; }
+        .guide-item { padding: 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; border-left: 4px solid; }
 
-    #rf-modal h3 {
-        font-weight: 700 !important;
-        color: var(--primary) !important;
-        border-bottom: 2px solid var(--primary-light);
-        padding-bottom: 10px;
-    }
-</style>
+        /* Navegación y Footer Final */
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .site-bottom-info {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: #f8fafc;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img {
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2.2rem; }
+            .nav-header { padding: 1rem; }
+            .features-grid { gap: 1rem; }
+            .calc-ui { padding: 1.2rem !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -136,42 +140,70 @@
 
     <header class="hero">
         <h1>Psicosis Autoinmune</h1>
-        <p>Algoritmo de sospecha clínica y criterios diagnósticos internacionales.</p>
+        <p>Algoritmo de sospecha clínica y criterios diagnósticos internacionales de consenso.</p>
     </header>
 
     <main class="main-content">
+        
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-file-medical-alt"></i></div>
+                <h3>Criterios de Pollak</h3>
+                <p>Implementación del algoritmo de consenso internacional (Lancet 2020) para la identificación de psicosis autoinmune.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-layer-group"></i></div>
+                <h3>Niveles de Evidencia</h3>
+                <p>Clasificación automática en tres categorías (Posible, Probable o Definitiva) según hallazgos clínicos y paraclícnicos.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-flag"></i></div>
+                <h3>Red Flags</h3>
+                <p>Detección proactiva de banderas rojas clínicas que obligan a descartar una encefalitis autoinmune subyacente.</p>
+            </div>
+        </section>
+
         <div id="modal">
             <div id="modalData">
-                <div style="padding:4rem; text-align:center;">
+                <div style="padding:5rem; text-align:center;">
                     <i class="fas fa-sync fa-spin fa-2x" style="color:var(--primary);"></i>
-                    <p style="margin-top:1rem; font-weight:700;">Cargando criterios diagnósticos...</p>
+                    <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Cargando criterios diagnósticos...</p>
                 </div>
             </div>
         </div>
 
-        <section style="background: white; padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border);">
-            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fas fa-info-circle" style="color: var(--primary);"></i> Guía de interpretación</h2>
+        <section class="info-panel">
+            <h2><i class="fas fa-info-circle"></i> Guía de interpretación</h2>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
-                Este algoritmo permite clasificar la sospecha de psicosis autoinmune en tres niveles de certidumbre. El inicio agudo (menos de 3 meses) es el criterio base necesario para considerar la etiología autoinmune en ausencia de otras causas claras.
+                Este algoritmo permite clasificar la sospecha de psicosis autoinmune en tres niveles de certidumbre. El inicio agudo (menos de 3 meses) es el criterio base necesario para considerar la etiología autoinmune.
             </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.8rem; font-weight: 700;">
-                <div style="color: #ca8a04; border-left: 4px solid #fef08a; padding-left: 10px;">POSIBLE: Inicio abrupto + 1 criterio clínico.</div>
-                <div style="color: #ea580c; border-left: 4px solid #fed7aa; padding-left: 10px;">PROBABLE: Posible + alteraciones en LCR, RM o EEG.</div>
-                <div style="color: #e11d48; border-left: 4px solid #fda4af; padding-left: 10px;">DEFINITIVA: Probable + Anticuerpos positivos en LCR.</div>
+            <div class="guide-grid">
+                <div class="guide-item" style="color: #ca8a04; background: #fefce8; border-color: #fef08a;">POSIBLE: Inicio abrupto + 1 criterio clínico.</div>
+                <div class="guide-item" style="color: #ea580c; background: #fff7ed; border-color: #fed7aa;">PROBABLE: Posible + alteraciones en LCR, RM o EEG.</div>
+                <div class="guide-item" style="color: #e11d48; background: #fff1f2; border-color: #fda4af;">DEFINITIVA: Probable + Anticuerpos positivos en LCR.</div>
             </div>
         </section>
 
-        <footer>
-            <p><strong>Referencia bibliográfica:</strong></p>
-            <p>Pollak TA, et al. <em>Autoimmune psychosis: an international consensus on an to the diagnosis and management of psychosis of
-suspected autoimmune origin</em>. The Lancet Psychiatry. 2020;7(1):93-108.</p>
-            <div style="margin-top: 2rem; text-align: center;">
-                <a href="https://psqaldia.com" style="color: var(--primary); font-weight: 700; text-decoration: none;">
-                    <i class="fas fa-arrow-left"></i> Volver a PSQALDÍA
-                </a>
-            </div>
+        <section class="info-panel" style="margin-top: 2rem;">
+            <h2><i class="fas fa-book"></i> Referencia bibliográfica</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+                Pollak TA, et al. <em>Autoimmune psychosis: an international consensus on an approach to the diagnosis and management of psychosis of suspected autoimmune origin</em>. The Lancet Psychiatry. 2020;7(1):93-108.
+            </p>
+        </section>
+
+        <footer class="nav-footer">
+            <a href="https://psqaldia.com/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
+            </a>
         </footer>
     </main>
+
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Herramientas clínicas</span>
+    </footer>
 
     <script src="/autoinmune.js"></script>
     <script>
@@ -180,8 +212,7 @@ suspected autoimmune origin</em>. The Lancet Psychiatry. 2020;7(1):93-108.</p>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof openAutoimmuneUI === 'function') {
                 openAutoimmuneUI();
-                // Forzamos el scroll habilitado
-                document.body.style.overflow = 'auto';
+                setTimeout(() => { document.body.style.overflow = 'auto'; }, 500);
             }
         });
     </script>
