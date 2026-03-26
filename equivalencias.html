@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equivalencias y switch entre Antipsicóticos | PSQALDÍA</title>
+    <title>Equivalencias y switch entre Antipsicóticos | PSQ AL DÍA</title>
     <meta name="description" content="Herramienta clínica para switch de antipsicóticos: dosis equivalentes, mínima eficaz, máxima en ficha técnica, y estrategias de switch detalladas.">
     <link rel="canonical" href="https://psqaldia.com/equivalencias">
+    <link rel="icon" type="image/png" href="/Logo.png">
     
     <link rel="stylesheet" href="/css/all.min.css">
 <style>
@@ -21,7 +22,6 @@
         --radius: 1.25rem;
     }
 
-    /* 1. Cambio a fuente nativa y suavizado profesional */
     body { 
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
         max-width: 1000px; 
@@ -31,9 +31,11 @@
         color: var(--text-main); 
         background: var(--bg); 
         -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
     }
 
-    /* 2. Navbar: Peso 700 para nitidez */
     .nav-header { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
     .logo { 
         font-weight: 700; 
@@ -46,24 +48,22 @@
         letter-spacing: -0.01em;
     }
 
-    /* 3. Hero: Más aire y tracking corregido */
     .hero {
         text-align: center;
-        padding: 5rem 1.5rem 4rem; /* Un poco más de aire superior */
+        padding: 5rem 1.5rem 4rem;
         background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%);
     }
     .hero h1 { 
         font-size: 3rem; 
         font-weight: 700; 
-        letter-spacing: -0.02em; /* Relajado para evitar que las letras choquen */
+        letter-spacing: -0.02em; 
         margin-bottom: 1rem; 
         color: var(--text-main); 
         line-height: 1.1;
     }
     .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: auto; }
 
-    /* 4. Layout y Cards */
-    .main-content { padding: 0 1.5rem 4rem 1.5rem; }
+    .main-content { padding: 0 1.5rem 4rem 1.5rem; flex: 1; }
     
     .card {
         background: var(--card-bg);
@@ -94,7 +94,6 @@
     }
     .feature-list li i { color: #10b981; margin-top: 5px; font-size: 0.9rem; }
 
-    /* 5. Botón Principal: Manteniendo el impacto */
     .cta-box { text-align: center; margin: 3rem 0; }
     .btn-main {
         padding: 1.25rem 3rem;
@@ -113,12 +112,30 @@
     }
     .btn-main:hover { transform: translateY(-2px); background: var(--primary); box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.15); }
 
-    /* Links y Footer */
-    .footer-links { text-align: center; margin-top: 4rem; padding: 2rem; border-top: 1px solid var(--border); }
-    .link-back { color: var(--primary); font-weight: 600; text-decoration: none; font-size: 1rem; transition: opacity 0.2s; }
-    .link-back:hover { text-decoration: underline; }
+    /* Estilos nuevos para la navegación inferior y footer */
+    .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+    .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .ref-section li { font-size: 0.85rem; color: var(--text-muted); list-style: none; margin-bottom: 10px; padding-left: 0; }
+    .site-bottom-info {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: #f8fafc;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        border-top: 1px solid var(--border);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .site-bottom-info img {
+        height: 18px;
+        vertical-align: middle;
+        margin-right: 8px;
+        opacity: 0.4;
+        filter: grayscale(100%);
+    }
+
+    .ref-section { list-style: none; padding: 0; margin: 0; }
+    .ref-section li { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
     
     @media (max-width: 600px) {
         .hero h1 { font-size: 2.2rem; }
@@ -170,22 +187,26 @@
 
         <div id="modalData"></div>
 
-        <footer class="card" style="margin-top: 4rem;">
-            <h2 style="font-size: 1.1rem;"><i class="fas fa-book-medical"></i> Bibliografía de Referencia</h2>
+        <section style="background: white; padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border); margin: 4rem auto 0; max-width: 800px;">
+            <h2 style="font-size: 1.1rem; margin-top: 0; margin-bottom: 1rem;"><i class="fas fa-book-medical"></i> Bibliografía de Referencia</h2>
             <ul class="ref-section">
                 <li><strong>Taylor D, et al.</strong> <em>The Maudsley Prescribing Guidelines in Psychiatry</em>, 15ª Ed. (2025).</li>
                 <li><strong>Leucht S, et al.</strong> Dose-Response Meta-Analysis. Am J Psychiatry. 2020;177(4):342‑353.</li>
                 <li><strong>McCutcheon R, et al.</strong> INTEGRATE Guidelines. The Lancet Psychiatry. 2025;12(5):384‑394.</li>
             </ul>
-        </footer>
+        </section>
 
-        <div class="footer-links">
-            <p style="color: var(--text-muted); margin-bottom: 1rem;">¿Buscas otras calculadoras?</p>
-            <a href="https://psqaldia.com" class="link-back">
-                Explora el resto de herramientas en PSQALDÍA <i class="fas fa-arrow-right"></i>
+        <footer class="nav-footer">
+            <a href="/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
             </a>
-        </div>
+        </footer>
     </main>
+
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Ayuda a la Decisión Clínica</span>
+    </footer>
 
     <script>
         window.WORKER_URL = "https://psqaldia.com/"; 
