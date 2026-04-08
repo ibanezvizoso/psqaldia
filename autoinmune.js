@@ -48,7 +48,7 @@ function openAutoimmuneUI() {
 
     modalData.innerHTML = `
         <div class="calc-ui" style="padding: 1.2rem; display: flex; flex-direction: column; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-            <div style="position: sticky; top: 0; background: var(--card); z-index: 10; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);">
+            <div style="position: sticky; top: 0; background: var(--card-bg); z-index: 10; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);">
                 <h2 style="font-weight:800; font-size: 1.1rem; margin:0 0 0.8rem 0; color: var(--text-main); text-align:center;">Psicosis Autoinmune</h2>
 
                 <div style="display: flex; gap: 4px; height: 10px; margin-bottom: 0.5rem;">
@@ -173,7 +173,7 @@ function openRedFlags() {
     rfModal.onclick = () => rfModal.remove();
     
     rfModal.innerHTML = `
-        <div style="background:var(--card); padding:1.5rem; border-radius:1.5rem; max-width:400px; width:100%; box-shadow: 0 20px 25px rgba(0,0,0,0.5); border: 1px solid var(--border); font-family: system-ui, -apple-system, sans-serif;" onclick="event.stopPropagation()">
+        <div style="background:var(--card-bg); padding:1.5rem; border-radius:1.5rem; max-width:400px; width:100%; box-shadow: 0 20px 25px rgba(0,0,0,0.5); border: 1px solid var(--border); font-family: system-ui, -apple-system, sans-serif;" onclick="event.stopPropagation()">
             <h3 style="margin-top:0; color:var(--text-main); font-weight:800; font-size:1.1rem;">Red Flags encefalitis (Pollak et al.)</h3>
             <ul style="font-size:0.8rem; line-height:1.5; padding-left:1.1rem; color:var(--text-main); margin-bottom:0;">
                 ${flags.map(f => `<li style="margin-bottom:4px;">${f}</li>`).join('')}
