@@ -1,6 +1,6 @@
 /**
  * ope_cardio.js - Gestión unificada de exámenes OPE Cardiología
- * Incluye: Selector, Modo Snack, Ver explicación, Persistencia y Fallos.
+ * v4.1 - Soporte Convocatorias 2020, 2022 y Snack Híbrido
  */
 let preguntasCar = [];
 let respuestasCar = {};
@@ -30,10 +30,15 @@ function openCarSelector() {
                     <i class="fas fa-chevron-right" style="color: #b91c1c;"></i>
                 </button>
 
+                <button onclick="iniciarExamenCar('20')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
+                    <b style="color: var(--text-main); font-size: 1.1rem;">Convocatoria 2020</b>
+                    <i class="fas fa-chevron-right" style="color: #b91c1c;"></i>
+                </button>
+
                 <button onclick="iniciarExamenCar('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid #b91c1c; background: rgba(185, 28, 28, 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
                         <b style="color: #b91c1c; font-size: 1.1rem;">Modo Snack</b>
-                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas aleatorias)</small>
+                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas de todas las OPEs)</small>
                     </div>
                     <i class="fas fa-bolt" style="color: #b91c1c;"></i>
                 </button>
@@ -46,9 +51,6 @@ function openCarSelector() {
     `;
 }
 
-/**
- * Persistencia: Guardar estado
- */
 function guardarEstadoCar() {
     const estado = {
         año: añoCarActual,
@@ -60,7 +62,7 @@ function guardarEstadoCar() {
 }
 
 /**
- * Carga de datos
+ * Carga de datos con soporte para snack multi-hoja
  */
 async function iniciarExamenCar(año, esContinuacion = false) {
     if (!esContinuacion && localStorage.getItem('psq_save_car')) {
@@ -82,10 +84,21 @@ async function iniciarExamenCar(año, esContinuacion = false) {
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:#b91c1c;"></i><br><br><b>Cargando Cardiología...</b></div>`;
 
     try {
-        // Carga la hoja Ope_Car22 (si es snack usa la misma como base)
-        const response = await fetch(`/?sheet=Ope_Car${año === 'snack' ? '22' : año}`);
-        const data = await response.json();
-        const rows = data.values || [];
+        let rows = [];
+
+        if (año === 'snack') {
+            // Carga ambas hojas en paralelo para el modo Snack
+            const [res20, res22] = await Promise.all([
+                fetch('/?sheet=Ope_Car20').then(r => r.json()),
+                fetch('/?sheet=Ope_Car22').then(r => r.json())
+            ]);
+            rows = [...(res20.values || []), ...(res22.values || [])];
+        } else {
+            // Carga solo la convocatoria seleccionada
+            const response = await fetch(`/?sheet=Ope_Car${año}`);
+            const data = await response.json();
+            rows = data.values || [];
+        }
 
         preguntasCar = rows
             .filter(row => row[0] && row[0].trim() !== "")
@@ -104,7 +117,7 @@ async function iniciarExamenCar(año, esContinuacion = false) {
         renderizarExamenCar();
         guardarEstadoCar();
     } catch (error) {
-        modalData.innerHTML = `<div style="padding:2rem; text-align:center;">Error: ${error.message}</div>`;
+        modalData.innerHTML = `<div style="padding:2rem; text-align:center;">Error al cargar datos. Comprueba tu conexión.</div>`;
     }
 }
 
