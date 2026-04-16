@@ -1,6 +1,6 @@
 /**
- * aes.js - Motor de Titulación de Antiepilépticos PSQALDÍA v1.0
- * Estructura de inyección dinámica compatible con columna Acción: iniciarAES()
+ * aes.js - Motor de Titulación de Antiepilepticos PSQALDÍA v1.1
+ * Estructura 100% simétrica a clozapina.js
  */
 
 window.aesLang = 'es';
@@ -8,16 +8,16 @@ window.dbAES = [];
 
 const i18nAES = {
     es: {
-        title: "Titulación de Antiepilépticos",
+        title: "Titulación de Antiepilepticos",
         startDate: "Fecha de Inicio",
         drug: "Fármaco",
         target: "Dosis Objetivo",
         generate: "GENERAR PLAN",
         copy: "COPIAR PAUTA",
-        labels: { morning: "Mañana", midday: "Mediodía", night: "Noche" },
+        labels: { morning: "Mañana", midday: "Mediodía", night: "Noche", total: "Total" },
         day: "PASO",
         copied: "¡Copiado!",
-        disclaimer: "Bibliografía: Stahl Guía del prescriptor, fichas técnicas y experiencia clínica. La dosificación debe supervisarse según tolerancia clínica."
+        disclaimer: "Bibliografía: Stahl Guía del prescriptor y fichas técnicas. La dosificación debe supervisarse según tolerancia clínica."
     },
     en: {
         title: "AED Titration",
@@ -26,10 +26,10 @@ const i18nAES = {
         target: "Target Dose",
         generate: "GENERATE PLAN",
         copy: "COPY SCHEDULE",
-        labels: { morning: "Morning", midday: "Midday", night: "Night" },
+        labels: { morning: "Morning", midday: "Midday", night: "Night", total: "Total" },
         day: "STEP",
         copied: "Copied!",
-        disclaimer: "References: Stahl's Prescriber's Guide, product labels, and clinical experience. Dosage should be monitored according to clinical tolerance."
+        disclaimer: "References: Stahl's Prescriber's Guide and product labels. Dosage should be monitored according to clinical tolerance."
     }
 };
 
@@ -37,14 +37,13 @@ window.iniciarAES = async function() {
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    // Inyectar Estilos (Clonando la estética de Clozapina)
     if (!document.getElementById('aes-styles')) {
         const style = document.createElement('style');
         style.id = 'aes-styles';
         style.innerHTML = `
             .aes-container { padding: 1.5rem; font-family: inherit; }
             .aes-header-ui { 
-                background: var(--card-bg); 
+                background: var(--card); 
                 padding: 1.5rem; 
                 border-radius: 1.5rem; 
                 border: 1px solid var(--border); 
@@ -75,22 +74,24 @@ window.iniciarAES = async function() {
 
             .aes-timeline { position: relative; padding-left: 20px; border-left: 3px solid var(--border); margin-left: 10px; }
             .aes-card { 
-                background: var(--card-bg); border: 1px solid var(--border); border-radius: 1.2rem; 
+                background: var(--card); border: 1px solid var(--border); border-radius: 1.2rem; 
                 padding: 1.2rem; margin-bottom: 1rem; position: relative;
                 box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             }
             .aes-card::before { 
                 content: ''; position: absolute; left: -31px; top: 22px; 
                 width: 14px; height: 14px; background: var(--primary); 
-                border: 3px solid var(--card-bg); border-radius: 50%;
+                border: 3px solid var(--card); border-radius: 50%;
             }
             .aes-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
             .aes-step-badge { font-weight: 900; font-size: 0.65rem; color: var(--primary); background: rgba(67, 56, 202, 0.1); padding: 4px 8px; border-radius: 6px; }
             .aes-date-label { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
             
-            .aes-dose-list { display: flex; flex-direction: column; gap: 4px; }
-            .aes-dose-row { font-size: 1rem; font-weight: 600; color: var(--text-main); }
-            .aes-dose-row span { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 800; margin-right: 8px; }
+            .aes-dose-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1.2fr; gap: 6px; }
+            .dose-item { text-align: center; padding: 6px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); }
+            .dose-item.highlight { background: var(--primary); color: white; border-color: var(--primary); }
+            .dose-val { display: block; font-weight: 900; font-size: 0.9rem; }
+            .dose-lab { display: block; font-size: 0.5rem; text-transform: uppercase; font-weight: 700; opacity: 0.8; }
             
             .aes-disclaimer { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 2rem; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 1rem; }
         `;
@@ -166,7 +167,6 @@ window.actualizarDosisObjetivo = function() {
     if (!drugIdx) { targetSelect.disabled = true; return; }
 
     const row = window.dbAES[drugIdx];
-    // Cadencia 3: Pauta (i), Target (i+1), Intervalo (i+2) empezando en Col B (index 1)
     for (let i = 1; i < row.length; i += 3) {
         const targetVal = row[i+1];
         if (targetVal) {
@@ -198,16 +198,12 @@ window.generarCalendarioAES = function() {
         currentFecha.setDate(startDate.getDate() + diasAcumulados);
         
         const fechaFormat = currentFecha.toLocaleDateString(window.aesLang === 'es' ? 'es-ES' : 'en-US', {
-            weekday: 'long', day: 'numeric', month: 'long'
+            weekday: 'short', day: 'numeric', month: 'short'
         });
 
-        // Formatear dosis Mañana-Mediodía-Noche
         const pautaRaw = row[i] || "0-0-0";
-        const doses = pautaRaw.split('-').map(d => d.trim());
-        let doseHtml = '';
-        if (doses[0] && doses[0] !== '0') doseHtml += `<div class="aes-dose-row"><span>${t.labels.morning}</span>${doses[0]} mg</div>`;
-        if (doses[1] && doses[1] !== '0') doseHtml += `<div class="aes-dose-row"><span>${t.labels.midday}</span>${doses[1]} mg</div>`;
-        if (doses[2] && doses[2] !== '0') doseHtml += `<div class="aes-dose-row"><span>${t.labels.night}</span>${doses[2]} mg</div>`;
+        const doses = pautaRaw.split('-').map(d => d.trim() || '0');
+        const totalDose = doses.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
 
         html += `
             <div class="aes-card">
@@ -215,8 +211,23 @@ window.generarCalendarioAES = function() {
                     <span class="aes-step-badge">${t.day} ${stepCount}</span>
                     <span class="aes-date-label">${fechaFormat.toUpperCase()}</span>
                 </div>
-                <div class="aes-dose-list">
-                    ${doseHtml || '0 mg'}
+                <div class="aes-dose-grid">
+                    <div class="dose-item">
+                        <span class="dose-lab">☀️ ${t.labels.morning.substring(0,3)}</span>
+                        <span class="dose-val">${doses[0]}</span>
+                    </div>
+                    <div class="dose-item">
+                        <span class="dose-lab">⛅ ${t.labels.midday.substring(0,3)}</span>
+                        <span class="dose-val">${doses[1]}</span>
+                    </div>
+                    <div class="dose-item">
+                        <span class="dose-lab">🌙 ${t.labels.night.substring(0,3)}</span>
+                        <span class="dose-val">${doses[2]}</span>
+                    </div>
+                    <div class="dose-item highlight">
+                        <span class="dose-lab">Σ ${t.labels.total}</span>
+                        <span class="dose-val">${totalDose} <small>mg</small></span>
+                    </div>
                 </div>
             </div>`;
         
@@ -235,8 +246,8 @@ window.copiarCalendarioAES = function() {
     document.querySelectorAll('.aes-card').forEach(c => {
         const step = c.querySelector('.aes-step-badge').innerText;
         const fecha = c.querySelector('.aes-date-label').innerText;
-        const doses = Array.from(c.querySelectorAll('.aes-dose-row')).map(div => div.innerText).join(' | ');
-        txt += `${step} (${fecha}): ${doses}\n`;
+        const d = c.querySelectorAll('.dose-val');
+        txt += `${step} (${fecha}): ☀️${d[0].innerText} | ⛅${d[1].innerText} | 🌙${d[2].innerText} | TOTAL: ${d[3].innerText}\n`;
     });
     navigator.clipboard.writeText(txt);
     alert(t.copied);
