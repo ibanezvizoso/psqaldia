@@ -1,154 +1,172 @@
 /**
- * aes.js - Motor PSQALDÍA v4.0
- * Corregido para uso con columna Acción: iniciarAES()
+ * aes.js - Motor de Titulación AES v4.2
+ * Estructura idéntica a clozapina.js para integración total en PSQALDÍA
  */
-window.dbAES = [];
-window.langAES = 'es';
 
-// Función principal que llamarás desde la columna "Acción" de tu Sheets
-window.iniciarAES = async function() {
-    // 1. Seteamos fecha por defecto
-    const dateEl = document.getElementById('startDate');
-    if (dateEl) dateEl.valueAsDate = new Date();
-    
-    // 2. Renderizamos interfaz inicial
-    updateUIAES();
-    
-    // 3. Carga de datos
-    try {
-        const r = await fetch('https://psqaldia.com/?sheet=AES');
-        const j = await r.json();
-        window.dbAES = j.values;
-        initSelectsAES();
-    } catch (e) { 
-        console.error("Error cargando AES:", e); 
-    }
-};
+window.aesLang = 'es';
+window.dbAES = [];
 
 const i18nAES = {
     es: {
-        title: "Titulación de FAE",
-        subtitle: "Planificador dinámico para el inicio de fármacos antiepilépticos.",
-        i1t: "Seguridad", i1p: "Titulación progresiva para reducir el riesgo de efectos adversos cutáneos o sistémicos.",
-        i2t: "Precisión", i2p: "Cronograma automático basado en los intervalos de seguridad de cada fármaco.",
-        i3t: "Individualizado", i3p: "Selección de dosis objetivo según la indicación y respuesta del paciente.",
-        setup: "Configuración",
-        lDrug: "Fármaco", lTarget: "Dosis Objetivo", lDate: "Fecha de Inicio",
-        btnGen: "GENERAR PLAN", btnCopy: "COPIAR PLAN",
-        copied: "Plan copiado con éxito",
-        bTitle: "Referencias Clínicas",
-        bStahl: "Stahl's Essential Psychopharmacology: Guía del prescriptor.",
-        bFichas: "Fichas técnicas oficiales (AEMPS / EMA).",
-        bExp: "Experiencia clínica.",
-        morn: "Mañana", mid: "Mediodía", night: "Noche", from: "Desde el"
+        title: "Configuración del Tratamiento",
+        startDate: "Fecha de Inicio",
+        drug: "Fármaco",
+        target: "Dosis Objetivo",
+        generate: "GENERAR PLAN",
+        copy: "COPIAR PLAN LIMPIO",
+        copied: "¡Copiado!",
+        labels: { morning: "Mañana", midday: "Mediodía", night: "Noche" },
+        from: "Desde el",
+        disclaimer: "Basado en Stahl's Prescriber's Guide y Fichas Técnicas. La titulación debe ajustarse según tolerancia clínica."
     },
     en: {
-        title: "AED Titration",
-        subtitle: "Dynamic planner for initiating anti-epileptic drugs.",
-        i1t: "Safety", i1p: "Progressive titration to reduce the risk of serious skin or systemic reactions.",
-        i2t: "Precision", i2p: "Automatic timeline based on specific drug safety intervals.",
-        i3t: "Tailored", i3p: "Target dose selection based on indication and patient response.",
-        setup: "Setup",
-        lDrug: "Medication", lTarget: "Target Dose", lDate: "Start Date",
-        btnGen: "GENERATE PLAN", btnCopy: "COPY PLAN",
-        copied: "Plan copied to clipboard",
-        bTitle: "Clinical References",
-        bStahl: "Stahl's Essential Psychopharmacology: Prescriber's Guide.",
-        bFichas: "Official prescribing information (EMA / FDA).",
-        bExp: "Protocols based on clinical experience and expert consensus.",
-        morn: "Morning", mid: "Midday", night: "Night", from: "Starting"
+        title: "Treatment Setup",
+        startDate: "Start Date",
+        drug: "Medication",
+        target: "Target Dose",
+        generate: "GENERATE PLAN",
+        copy: "COPY CLEAN PLAN",
+        copied: "Copied!",
+        labels: { morning: "Morning", midday: "Midday", night: "Night" },
+        from: "Starting on",
+        disclaimer: "Based on Stahl's Prescriber's Guide and FDA/EMA labels. Titration should be adjusted according to clinical tolerance."
     }
 };
 
-window.setLangAES = function(l) {
-    window.langAES = l;
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase() === l));
-    updateUIAES();
-    if(document.getElementById('res-box').style.display === 'block') renderPlanAES();
+window.iniciarAES = async function() {
+    const container = document.getElementById('modalData');
+    if (!container) return;
+
+    // Inyectar Estilos específicos (estilo Clozapina)
+    if (!document.getElementById('aes-styles')) {
+        const style = document.createElement('style');
+        style.id = 'aes-styles';
+        style.innerHTML = `
+            .aes-ui { padding: 2rem; }
+            .aes-header-ui { background: var(--bg); padding: 1.5rem; border-radius: 1.2rem; border: 1px solid var(--border); margin-bottom: 2rem; }
+            .aes-input-group { margin-bottom: 1.2rem; }
+            .aes-label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+            .aes-input { width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 2px solid var(--border); font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; }
+            .btn-aes { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 1rem; font-weight: 800; cursor: pointer; }
+            .aes-timeline { border-left: 3px solid var(--border); padding-left: 20px; margin-left: 10px; margin-top: 2rem; }
+            .aes-card { background: white; border: 1px solid var(--border); border-radius: 1.2rem; padding: 1.2rem; margin-bottom: 1rem; position: relative; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+            .aes-card::before { content: ''; position: absolute; left: -31px; top: 22px; width: 14px; height: 14px; background: var(--primary); border: 3px solid white; border-radius: 50%; }
+            .aes-date { color: var(--primary); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
+            .aes-doses { font-size: 1.1rem; font-weight: 700; margin-top: 0.3rem; }
+            .lang-btn { background: #eee; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.7rem; font-weight:800; }
+            .lang-btn.active { background: var(--primary); color:white; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    try {
+        const response = await fetch('/?sheet=AES');
+        const data = await response.json();
+        window.dbAES = data.values;
+        renderInterfazAES();
+    } catch (e) { container.innerHTML = "<p style='padding:2rem;'>Error conectando con el servidor.</p>"; }
 };
 
-function updateUIAES() {
-    const t = i18nAES[window.langAES];
-    const map = {
-        'ui-title':'title', 'ui-subtitle':'subtitle', 'ui-i1-t':'i1t', 'ui-i1-p':'i1p',
-        'ui-i2-t':'i2t', 'ui-i2-p':'i2p', 'ui-i3-t':'i3t', 'ui-i3-p':'i3p',
-        'ui-setup-h':'setup', 'ui-l-drug':'lDrug', 'ui-l-target':'lTarget', 'ui-l-date':'lDate',
-        'btnGen':'btnGen', 'ui-b-copy':'btnCopy', 'ui-b-title':'bTitle',
-        'ui-b-stahl':'bStahl', 'ui-b-fichas':'bFichas', 'ui-b-exp':'bExp'
-    };
-    for(let id in map) { if(document.getElementById(id)) document.getElementById(id).innerText = t[map[id]]; }
+window.setLangAES = function(l) { window.aesLang = l; renderInterfazAES(); };
+
+function renderInterfazAES() {
+    const t = i18nAES[window.aesLang];
+    const container = document.getElementById('modalData');
+    
+    container.innerHTML = `
+        <div class="aes-ui">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 style="font-weight:900; margin:0; font-size:1.3rem;">${t.title}</h2>
+                <div>
+                    <button class="lang-btn ${window.aesLang==='es'?'active':''}" onclick="setLangAES('es')">ES</button>
+                    <button class="lang-btn ${window.aesLang==='en'?'active':''}" onclick="setLangAES('en')">EN</button>
+                </div>
+            </div>
+
+            <div class="aes-header-ui">
+                <div class="aes-input-group">
+                    <label class="aes-label">${t.drug}</label>
+                    <select id="drugSelect" class="aes-input" onchange="updateTargetsAES()">
+                        <option value="">-- Seleccionar --</option>
+                        ${window.dbAES.map((row, i) => row[0] ? `<option value="${i}">${row[0]}</option>` : '').join('')}
+                    </select>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="aes-input-group">
+                        <label class="aes-label">${t.target}</label>
+                        <select id="targetDose" class="aes-input" disabled><option>--</option></select>
+                    </div>
+                    <div class="aes-input-group">
+                        <label class="aes-label">${t.startDate}</label>
+                        <input type="date" id="startDate" class="aes-input" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                </div>
+                <button class="btn-aes" onclick="generarCalendarioAES()">${t.generate}</button>
+            </div>
+            <div id="aes-res-box" style="display:none;">
+                <div id="aes-timeline" class="aes-timeline"></div>
+                <button class="btn-aes" style="background:#f1f5f9; color:var(--text-main); border:1px solid var(--border); margin-top:1.5rem;" onclick="copiarAES()">
+                    <i class="far fa-copy"></i> ${t.copy}
+                </button>
+                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:1.5rem; text-align:center;">${t.disclaimer}</p>
+            </div>
+        </div>
+    `;
 }
 
-function initSelectsAES() {
-    const s = document.getElementById('drugSelect');
-    if (!s) return;
-    s.innerHTML = `<option value="">-- ${i18nAES[window.langAES].lDrug} --</option>`;
-    window.dbAES.forEach((row, i) => { if(row[0]) { const o = document.createElement('option'); o.value = i; o.textContent = row[0]; s.appendChild(o); } });
-}
-
-// Escuchador de eventos delegado para el cambio de fármaco
-document.addEventListener('change', (e) => {
-    if (e.target && e.target.id === 'drugSelect') {
-        const row = window.dbAES[e.target.value];
-        const ts = document.getElementById('targetDose');
-        if (!ts) return;
-        ts.innerHTML = '';
-        if(!row) return;
-        // Cadencia de 3: Pauta(i), Target(i+1), Intervalo(i+2) desde columna B (index 1)
-        for (let i = 1; i < row.length; i += 3) {
-            if (row[i+1]) { 
-                const o = document.createElement('option'); 
-                o.value = i; 
-                o.textContent = `${row[i+1]} mg/${window.langAES==='es'?'día':'day'}`; 
-                ts.appendChild(o); 
-            }
+window.updateTargetsAES = function() {
+    const drugIdx = document.getElementById('drugSelect').value;
+    const ts = document.getElementById('targetDose');
+    ts.innerHTML = '';
+    if(!drugIdx) { ts.disabled = true; return; }
+    
+    const row = window.dbAES[drugIdx];
+    for (let i = 1; i < row.length; i += 3) {
+        if (row[i+1]) {
+            let o = document.createElement('option');
+            o.value = i;
+            o.textContent = `${row[i+1]} mg/${window.aesLang==='es'?'día':'day'}`;
+            ts.appendChild(o);
         }
-        ts.disabled = false;
-        document.getElementById('btnGen').disabled = false;
     }
-});
+    ts.disabled = false;
+};
 
-function formatDoseAES(p) {
-    const d = p.split('-').map(v => v.trim());
-    const t = i18nAES[window.langAES];
-    let res = [];
-    if(d[0] && d[0] !== '0') res.push(`${t.morn}: ${d[0]} mg`);
-    if(d[1] && d[1] !== '0') res.push(`${t.mid}: ${d[1]} mg`);
-    if(d[2] && d[2] !== '0') res.push(`${t.night}: ${d[2]} mg`);
-    return res.length > 0 ? res.join(', ') : "0 mg";
-}
-
-window.renderPlanAES = function() {
-    const drugSelect = document.getElementById('drugSelect');
-    if (!drugSelect.value) return;
-
-    const row = window.dbAES[drugSelect.value];
+window.generarCalendarioAES = function() {
+    const drugRow = window.dbAES[document.getElementById('drugSelect').value];
     const targetIdx = parseInt(document.getElementById('targetDose').value);
     const start = new Date(document.getElementById('startDate').value);
-    const list = document.getElementById('plan-list');
-    const t = i18nAES[window.langAES];
+    const t = i18nAES[window.aesLang];
     
-    list.innerHTML = `<h3 style="font-weight:800; color:var(--primary); margin-bottom:1.5rem;">${row[0]}</h3>`;
+    let html = '';
     let offset = 0;
     
     for (let i = 1; i <= targetIdx; i += 3) {
         const d = new Date(start); d.setDate(start.getDate() + offset);
-        const ds = d.toLocaleDateString(window.langAES==='es'?'es-ES':'en-US', { weekday: 'long', day: 'numeric', month: 'long' });
-        list.innerHTML += `
-            <div class="step-card">
-                <div class="step-date">${t.from} ${ds}</div>
-                <div class="step-doses">${formatDoseAES(row[i])}</div>
+        const ds = d.toLocaleDateString(window.aesLang==='es'?'es-ES':'en-US', { weekday: 'long', day: 'numeric', month: 'long' });
+        
+        const doses = drugRow[i].split('-').map(v => v.trim());
+        let dText = [];
+        if(doses[0] && doses[0] !== '0') dText.push(`${t.labels.morning}: ${doses[0]} mg`);
+        if(doses[1] && doses[1] !== '0') dText.push(`${t.labels.midday}: ${doses[1]} mg`);
+        if(doses[2] && doses[2] !== '0') dText.push(`${t.labels.night}: ${doses[2]} mg`);
+
+        html += `
+            <div class="aes-card">
+                <div class="aes-date">${t.from} ${ds}</div>
+                <div class="aes-doses">${dText.join(', ')}</div>
             </div>`;
-        offset += (parseInt(row[i+2]) || 0);
+        offset += (parseInt(drugRow[i+2]) || 0);
     }
-    document.getElementById('res-box').style.display = 'block';
+    document.getElementById('aes-timeline').innerHTML = html;
+    document.getElementById('aes-res-box').style.display = 'block';
 };
 
-window.copyPlanAES = function() {
+window.copiarAES = function() {
     const drug = window.dbAES[document.getElementById('drugSelect').value][0];
     let txt = `${drug.toUpperCase()}\n`;
-    document.querySelectorAll('.step-card').forEach(c => {
-        txt += `• ${c.querySelector('.step-date').innerText}: ${c.querySelector('.step-doses').innerText}\n`;
+    document.querySelectorAll('.aes-card').forEach(c => {
+        txt += `• ${c.querySelector('.aes-date').innerText}: ${c.querySelector('.aes-doses').innerText}\n`;
     });
-    navigator.clipboard.writeText(txt).then(() => alert(i18nAES[window.langAES].copied));
+    navigator.clipboard.writeText(txt).then(() => alert(i18nAES[window.aesLang].copied));
 };
