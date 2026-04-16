@@ -24,19 +24,22 @@
             font-family: system-ui, -apple-system, sans-serif; 
             background: var(--bg); color: var(--text-main); 
             margin: 0; line-height: 1.6; -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column; min-height: 100vh;
         }
 
+        /* Nav Header estándar del proyecto */
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+
         .hero { 
-            padding: 4rem 1.5rem 4.5rem; text-align: center; 
+            padding: 4rem 1.5rem 3rem; text-align: center; 
             background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
         }
-        .logo-link { font-weight: 800; color: var(--primary); text-decoration: none; font-size: 1.1rem; }
         .hero h1 { font-size: 2.8rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -0.04em; }
         .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; flex: 1; }
 
-        /* Info Grid Superior */
         .info-grid { 
             display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
             gap: 1.2rem; margin-bottom: 3rem; margin-top: -2rem; 
@@ -50,7 +53,6 @@
         .info-card h3 { font-size: 0.9rem; font-weight: 700; margin: 0 0 0.3rem; }
         .info-card p { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
 
-        /* Tarjeta de la Herramienta */
         #tool-main {
             background: var(--card-bg); border-radius: var(--radius);
             border: 1px solid var(--border); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
@@ -82,7 +84,6 @@
             padding: 1rem; border-radius: 1rem; font-weight: 700; cursor: pointer; margin-top: 1.5rem;
         }
 
-        /* Timeline de pauta */
         .pauta-container { margin-top: 3rem; border-left: 3px solid var(--border); padding-left: 20px; margin-left: 10px; }
         .step-card {
             background: white; border: 1px solid var(--border); border-radius: 1.2rem;
@@ -97,22 +98,26 @@
         .step-date { color: var(--primary); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
         .step-doses { font-size: 1.15rem; font-weight: 700; margin-top: 0.4rem; }
 
-        /* Bibliografía */
-        .biblio { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
-        .biblio h4 { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; color: var(--text-main); }
-        .biblio p { font-size: 0.85rem; font-style: italic; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+        /* Estilo estándar de bibliografía */
+        .biblio-section { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
+        .biblio-section h4 { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; color: var(--text-main); }
+        .biblio-section p { font-size: 0.85rem; font-style: italic; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
 
-        footer { text-align: center; margin-top: 2rem; padding-bottom: 4rem; }
-        .btn-back { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        footer { text-align: center; margin-top: 3rem; padding-bottom: 5rem; }
+        .btn-home { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+        .btn-home:hover { color: var(--primary); }
     </style>
 </head>
 <body>
 
-<header class="hero">
-    <a href="/" class="logo-link">PSQALDÍA</a>
+<header class="nav-header">
+    <a href="/" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+</header>
+
+<section class="hero">
     <h1 id="ui-title">Titulación de FAE</h1>
     <p id="ui-subtitle">Planificador dinámico para el inicio de fármacos antiepilépticos.</p>
-</header>
+</section>
 
 <div class="container">
     <div class="info-grid">
@@ -164,7 +169,7 @@
         </div>
     </main>
 
-    <section class="biblio">
+    <section class="biblio-section">
         <h4 id="ui-b-title">Referencias Clínicas</h4>
         <p><i class="fas fa-book"></i> <span id="ui-b-stahl">Stahl's Essential Psychopharmacology: Prescriber's Guide.</span></p>
         <p><i class="fas fa-file-medical"></i> <span id="ui-b-fichas">Fichas técnicas oficiales (AEMPS / EMA).</span></p>
@@ -172,7 +177,7 @@
     </section>
 
     <footer>
-        <a href="/herramientas" class="btn-back"><i class="fas fa-arrow-left"></i> Volver a Herramientas</a>
+        <a href="/herramientas" class="btn-home"><i class="fas fa-arrow-left"></i> Volver a Herramientas</a>
     </footer>
 </div>
 
