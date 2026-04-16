@@ -1,6 +1,6 @@
 /**
- * aes.js - Motor de Titulación de Antiepilepticos PSQALDÍA v1.1
- * Estructura 100% simétrica a clozapina.js
+ * aes.js - Motor de Titulación de Antiepilepticos PSQALDÍA v1.2
+ * Estructura simétrica a clozapina.js - Sin emojis, texto profesional.
  */
 
 window.aesLang = 'es';
@@ -8,7 +8,7 @@ window.dbAES = [];
 
 const i18nAES = {
     es: {
-        title: "Titulación de Antiepilepticos",
+        title: "Titulación de Antiepilépticos",
         startDate: "Fecha de Inicio",
         drug: "Fármaco",
         target: "Dosis Objetivo",
@@ -16,7 +16,7 @@ const i18nAES = {
         copy: "COPIAR PAUTA",
         labels: { morning: "Mañana", midday: "Mediodía", night: "Noche", total: "Total" },
         day: "PASO",
-        copied: "¡Copiado!",
+        copied: "¡Copiado al portapapeles!",
         disclaimer: "Bibliografía: Stahl Guía del prescriptor y fichas técnicas. La dosificación debe supervisarse según tolerancia clínica."
     },
     en: {
@@ -28,7 +28,7 @@ const i18nAES = {
         copy: "COPY SCHEDULE",
         labels: { morning: "Morning", midday: "Midday", night: "Night", total: "Total" },
         day: "STEP",
-        copied: "Copied!",
+        copied: "Copied to clipboard!",
         disclaimer: "References: Stahl's Prescriber's Guide and product labels. Dosage should be monitored according to clinical tolerance."
     }
 };
@@ -87,13 +87,19 @@ window.iniciarAES = async function() {
             .aes-step-badge { font-weight: 900; font-size: 0.65rem; color: var(--primary); background: rgba(67, 56, 202, 0.1); padding: 4px 8px; border-radius: 6px; }
             .aes-date-label { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
             
-            .aes-dose-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1.2fr; gap: 6px; }
-            .dose-item { text-align: center; padding: 6px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); }
-            .dose-item.highlight { background: var(--primary); color: white; border-color: var(--primary); }
-            .dose-val { display: block; font-weight: 900; font-size: 0.9rem; }
-            .dose-lab { display: block; font-size: 0.5rem; text-transform: uppercase; font-weight: 700; opacity: 0.8; }
+            .aes-dose-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
+            .dose-item { text-align: center; padding: 8px 4px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); }
+            .dose-item.highlight { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+            .dose-val { display: block; font-weight: 900; font-size: 1rem; }
+            .dose-lab { display: block; font-size: 0.6rem; text-transform: uppercase; font-weight: 700; opacity: 0.7; margin-bottom: 2px; }
             
             .aes-disclaimer { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 2rem; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 1rem; }
+            
+            .btn-copiar { 
+                background: var(--primary); color: white; border: none; padding: 0.8rem; 
+                border-radius: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+            }
+            .btn-copiar:hover { opacity: 0.9; }
         `;
         document.head.appendChild(style);
     }
@@ -103,7 +109,7 @@ window.iniciarAES = async function() {
         const data = await response.json();
         window.dbAES = data.values;
         renderInterfazAES();
-    } catch (e) { container.innerHTML = "Error de conexión."; }
+    } catch (e) { container.innerHTML = "Error de conexión con el servidor."; }
 };
 
 window.setLanguageAES = function(lang) {
@@ -213,19 +219,19 @@ window.generarCalendarioAES = function() {
                 </div>
                 <div class="aes-dose-grid">
                     <div class="dose-item">
-                        <span class="dose-lab">☀️ ${t.labels.morning.substring(0,3)}</span>
+                        <span class="dose-lab">${t.labels.morning}</span>
                         <span class="dose-val">${doses[0]}</span>
                     </div>
                     <div class="dose-item">
-                        <span class="dose-lab">⛅ ${t.labels.midday.substring(0,3)}</span>
+                        <span class="dose-lab">${t.labels.midday}</span>
                         <span class="dose-val">${doses[1]}</span>
                     </div>
                     <div class="dose-item">
-                        <span class="dose-lab">🌙 ${t.labels.night.substring(0,3)}</span>
+                        <span class="dose-lab">${t.labels.night}</span>
                         <span class="dose-val">${doses[2]}</span>
                     </div>
                     <div class="dose-item highlight">
-                        <span class="dose-lab">Σ ${t.labels.total}</span>
+                        <span class="dose-lab">${t.labels.total}</span>
                         <span class="dose-val">${totalDose} <small>mg</small></span>
                     </div>
                 </div>
@@ -247,7 +253,7 @@ window.copiarCalendarioAES = function() {
         const step = c.querySelector('.aes-step-badge').innerText;
         const fecha = c.querySelector('.aes-date-label').innerText;
         const d = c.querySelectorAll('.dose-val');
-        txt += `${step} (${fecha}): ☀️${d[0].innerText} | ⛅${d[1].innerText} | 🌙${d[2].innerText} | TOTAL: ${d[3].innerText}\n`;
+        txt += `${step} (${fecha}): Mañana: ${d[0].innerText} | Mediodía: ${d[1].innerText} | Noche: ${d[2].innerText} | TOTAL: ${d[3].innerText}\n`;
     });
     navigator.clipboard.writeText(txt);
     alert(t.copied);
