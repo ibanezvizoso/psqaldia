@@ -1,156 +1,130 @@
 /**
- * aes.js - Motor de Antiepilépticos PSQALDÍA con soporte multiidioma
+ * aes.js - Versión Final PSQALDÍA
  */
-let aesData = [];
-let currentLang = 'es';
+let db = [];
+let lang = 'es';
 
 const i18n = {
     es: {
         title: "Titulación de FAE",
-        subtitle: "Planificador dinámico de inicio de fármacos antiepilépticos.",
+        subtitle: "Planificador dinámico para el inicio de fármacos antiepilépticos.",
+        i1t: "Seguridad", i1p: "Titulación progresiva para reducir el riesgo de efectos adversos cutáneos o sistémicos.",
+        i2t: "Precisión", i2p: "Cronograma automático basado en los intervalos de seguridad de cada fármaco.",
+        i3t: "Individualizado", i3p: "Selección de dosis objetivo según la indicación y respuesta del paciente.",
         setup: "Configuración",
-        drug: "Fármaco",
-        target: "Dosis Objetivo",
-        date: "Fecha de Inicio",
-        generate: "GENERAR PLAN",
-        copy: "COPIAR PAUTA",
-        copied: "¡Copiado!",
-        morning: "Mañana",
-        midday: "Mediodía",
-        night: "Noche",
-        disclaimer: "Consulte siempre la ficha técnica. La titulación debe ajustarse según tolerancia clínica.",
-        from: "Desde el"
+        lDrug: "Fármaco", lTarget: "Dosis Objetivo", lDate: "Fecha de Inicio",
+        btnGen: "GENERAR PLAN", btnCopy: "COPIAR PLAN LIMPIO",
+        copied: "Plan copiado con éxito",
+        bTitle: "Referencias Clínicas",
+        bStahl: "Stahl's Essential Psychopharmacology: Guía del prescriptor.",
+        bFichas: "Fichas técnicas oficiales (AEMPS / EMA).",
+        bExp: "Protocolos basados en experiencia clínica y consenso de expertos.",
+        morn: "Mañana", mid: "Mediodía", night: "Noche", from: "Desde el"
     },
     en: {
         title: "AED Titration",
-        subtitle: "Dynamic starter planner for anti-epileptic drugs.",
+        subtitle: "Dynamic planner for initiating anti-epileptic drugs.",
+        i1t: "Safety", i1p: "Progressive titration to reduce the risk of serious skin or systemic reactions.",
+        i2t: "Precision", i2p: "Automatic timeline based on specific drug safety intervals.",
+        i3t: "Tailored", i3p: "Target dose selection based on indication and patient response.",
         setup: "Setup",
-        drug: "Medication",
-        target: "Target Dose",
-        date: "Start Date",
-        generate: "GENERATE PLAN",
-        copy: "COPY SCHEDULE",
-        copied: "Copied!",
-        morning: "Morning",
-        midday: "Midday",
-        night: "Night",
-        disclaimer: "Always consult the prescribing information. Titration should be adjusted based on clinical tolerance.",
-        from: "Starting"
+        lDrug: "Medication", lTarget: "Target Dose", lDate: "Start Date",
+        btnGen: "GENERATE PLAN", btnCopy: "COPY CLEAN PLAN",
+        copied: "Plan copied to clipboard",
+        bTitle: "Clinical References",
+        bStahl: "Stahl's Essential Psychopharmacology: Prescriber's Guide.",
+        bFichas: "Official prescribing information (EMA / FDA).",
+        bExp: "Protocols based on clinical experience and expert consensus.",
+        morn: "Morning", mid: "Midday", night: "Night", from: "Starting"
     }
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('startDate').valueAsDate = new Date();
     updateUI();
-    
     try {
-        const res = await fetch('https://psqaldia.com/?sheet=AES');
-        const json = await res.json();
-        aesData = json.values;
-        populateDrugs();
-    } catch (e) { console.error("Error cargando AES", e); }
+        const r = await fetch('https://psqaldia.com/?sheet=AES');
+        const j = await r.json();
+        db = j.values;
+        initSelects();
+    } catch (e) { console.error(e); }
 });
 
-function setLanguage(lang) {
-    currentLang = lang;
-    document.querySelectorAll('.lang-btn').forEach(b => {
-        b.classList.toggle('active', b.innerText.toLowerCase() === lang);
-    });
+function setLang(l) {
+    lang = l;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase() === l));
     updateUI();
-    if(document.getElementById('results-box').style.display === 'block') generarPauta();
+    if(document.getElementById('res-box').style.display === 'block') renderPlan();
 }
 
 function updateUI() {
-    const t = i18n[currentLang];
-    document.getElementById('ui-title').innerText = t.title;
-    document.getElementById('ui-subtitle').innerText = t.subtitle;
-    document.getElementById('ui-setup-title').innerText = t.setup;
-    document.getElementById('ui-label-drug').innerText = t.drug;
-    document.getElementById('ui-label-target').innerText = t.target;
-    document.getElementById('ui-label-date').innerText = t.date;
-    document.getElementById('btnGenerate').innerText = t.generate;
-    document.getElementById('ui-btn-copy').innerText = t.copy;
-    document.getElementById('ui-disclaimer').innerText = t.disclaimer;
+    const t = i18n[lang];
+    const map = {
+        'ui-title':'title', 'ui-subtitle':'subtitle', 'ui-i1-t':'i1t', 'ui-i1-p':'i1p',
+        'ui-i2-t':'i2t', 'ui-i2-p':'i2p', 'ui-i3-t':'i3t', 'ui-i3-p':'i3p',
+        'ui-setup-h':'setup', 'ui-l-drug':'lDrug', 'ui-l-target':'lTarget', 'ui-l-date':'lDate',
+        'btnGen':'btnGen', 'ui-b-copy':'btnCopy', 'ui-b-title':'bTitle',
+        'ui-b-stahl':'bStahl', 'ui-b-fichas':'bFichas', 'ui-b-exp':'bExp'
+    };
+    for(let id in map) { if(document.getElementById(id)) document.getElementById(id).innerText = t[map[id]]; }
 }
 
-function populateDrugs() {
-    const select = document.getElementById('drugSelect');
-    select.innerHTML = `<option value="">-- ${i18n[currentLang].drug} --</option>`;
-    aesData.forEach((row, i) => {
-        if(row[0]) {
-            let opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = row[0];
-            select.appendChild(opt);
-        }
-    });
+function initSelects() {
+    const s = document.getElementById('drugSelect');
+    s.innerHTML = `<option value="">-- ${i18n[lang].lDrug} --</option>`;
+    db.forEach((row, i) => { if(row[0]) { const o = document.createElement('option'); o.value = i; o.textContent = row[0]; s.appendChild(o); } });
 }
 
 document.getElementById('drugSelect').addEventListener('change', (e) => {
-    const row = aesData[e.target.value];
-    const targetSelect = document.getElementById('targetDose');
-    targetSelect.innerHTML = '';
+    const row = db[e.target.value];
+    const ts = document.getElementById('targetDose');
+    ts.innerHTML = '';
     if(!row) return;
-
     for (let i = 1; i < row.length; i += 3) {
-        if (row[i+1]) {
-            let opt = document.createElement('option');
-            opt.value = i; 
-            opt.textContent = `${row[i+1]} mg/${currentLang === 'es' ? 'día' : 'day'}`;
-            targetSelect.appendChild(opt);
-        }
+        if (row[i+1]) { const o = document.createElement('option'); o.value = i; o.textContent = `${row[i+1]} mg/${lang==='es'?'día':'day'}`; ts.appendChild(o); }
     }
-    targetSelect.disabled = false;
-    document.getElementById('btnGenerate').disabled = false;
+    ts.disabled = false;
+    document.getElementById('btnGen').disabled = false;
 });
 
-function formatDoseText(pauta) {
-    const doses = pauta.split('-').map(d => d.trim());
-    const t = i18n[currentLang];
-    let parts = [];
-    if(doses[0] && doses[0] !== '0') parts.push(`${t.morning}: ${doses[0]} mg`);
-    if(doses[1] && doses[1] !== '0') parts.push(`${t.midday}: ${doses[1]} mg`);
-    if(doses[2] && doses[2] !== '0') parts.push(`${t.night}: ${doses[2]} mg`);
-    return parts.join(', ');
+function formatDose(p) {
+    const d = p.split('-').map(v => v.trim());
+    const t = i18n[lang];
+    let res = [];
+    if(d[0] && d[0] !== '0') res.push(`${t.morn}: ${d[0]} mg`);
+    if(d[1] && d[1] !== '0') res.push(`${t.mid}: ${d[1]} mg`);
+    if(d[2] && d[2] !== '0') res.push(`${t.night}: ${d[2]} mg`);
+    return res.join(', ');
 }
 
-window.generarPauta = function() {
-    const drugRow = aesData[document.getElementById('drugSelect').value];
+window.renderPlan = function() {
+    const row = db[document.getElementById('drugSelect').value];
     const targetIdx = parseInt(document.getElementById('targetDose').value);
-    const startDate = new Date(document.getElementById('startDate').value);
-    const list = document.getElementById('results-list');
-    const t = i18n[currentLang];
+    const start = new Date(document.getElementById('startDate').value);
+    const list = document.getElementById('plan-list');
+    const t = i18n[lang];
     
-    list.innerHTML = `<h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;">${drugRow[0]}</h3>`;
-    let daysDiff = 0;
+    list.innerHTML = `<h3 style="font-weight:800; color:var(--primary); margin-bottom:1.5rem;">${row[0]}</h3>`;
+    let offset = 0;
     
     for (let i = 1; i <= targetIdx; i += 3) {
-        const currentLineDate = new Date(startDate);
-        currentLineDate.setDate(startDate.getDate() + daysDiff);
-        const dateStr = currentLineDate.toLocaleDateString(currentLang === 'es' ? 'es-ES' : 'en-US', {
-            weekday: 'long', day: 'numeric', month: 'long'
-        });
-
+        const d = new Date(start); d.setDate(start.getDate() + offset);
+        const ds = d.toLocaleDateString(lang==='es'?'es-ES':'en-US', { weekday: 'long', day: 'numeric', month: 'long' });
         list.innerHTML += `
             <div class="step-card">
-                <div class="step-header"><span class="step-date">${t.from} ${dateStr}</span></div>
-                <div class="step-doses">${formatDoseText(drugRow[i])}</div>
+                <div class="step-date">${t.from} ${ds}</div>
+                <div class="step-doses">${formatDose(row[i])}</div>
             </div>`;
-        daysDiff += (parseInt(drugRow[i+2]) || 0);
+        offset += (parseInt(row[i+2]) || 0);
     }
-    document.getElementById('results-box').style.display = 'block';
+    document.getElementById('res-box').style.display = 'block';
 };
 
-window.copiarPauta = function() {
-    const t = i18n[currentLang];
-    const drugName = aesData[document.getElementById('drugSelect').value][0];
-    let txt = `📋 ${drugName.toUpperCase()} (${t.title})\n`;
-    
-    document.querySelectorAll('.step-card').forEach(card => {
-        const date = card.querySelector('.step-date').innerText;
-        const doses = card.querySelector('.step-doses').innerText;
-        txt += `• ${date}: ${doses}\n`;
+window.copyPlan = function() {
+    const drug = db[document.getElementById('drugSelect').value][0];
+    let txt = `${drug.toUpperCase()}\n`;
+    document.querySelectorAll('.step-card').forEach(c => {
+        txt += `• ${c.querySelector('.step-date').innerText}: ${c.querySelector('.step-doses').innerText}\n`;
     });
-    
-    navigator.clipboard.writeText(txt).then(() => alert(t.copied));
+    navigator.clipboard.writeText(txt).then(() => alert(i18n[lang].copied));
 };
