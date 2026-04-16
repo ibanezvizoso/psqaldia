@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titulación de Antiepilépticos | PSQALDÍA</title>
-    <meta name="description" content="Planificador dinámico para el inicio de fármacos antiepilépticos con escalada de dosis personalizada.">
-    
     <link rel="stylesheet" href="/css/all.min.css">
-
     <style>
     :root {
         --primary: #4338ca; 
@@ -17,7 +14,7 @@
         --text-main: #1e293b; 
         --text-muted: #64748b;
         --border: #e2e8f0; 
-        --radius: 1rem;
+        --radius: 1.5rem;
     }
 
     body { 
@@ -30,7 +27,7 @@
     }
 
     .header { 
-        padding: 3rem 1.5rem;
+        padding: 4rem 1.5rem 4.5rem;
         text-align: center; 
         background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
     }
@@ -38,108 +35,113 @@
     .logo-text { 
         font-weight: 700; color: var(--primary); 
         text-decoration: none; font-size: 0.85rem; 
-        text-transform: uppercase; letter-spacing: 1px;
+        text-transform: uppercase; letter-spacing: 0.5px;
     }
 
-    h1 { font-size: 2.2rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+    .header h1 { font-size: 2.5rem; font-weight: 700; margin: 1rem 0 0.75rem; letter-spacing: -0.02em; }
+    .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: auto; opacity: 0.9; }
 
-    .container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
 
-    /* Tarjetas de Selección */
-    .setup-card {
+    #tool-container {
         background: var(--card-bg);
-        padding: 2rem;
         border-radius: var(--radius);
         border: 1px solid var(--border);
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+        padding: 2rem;
+        margin-top: -2rem;
     }
 
-    .form-group { margin-bottom: 1.5rem; }
-    label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    /* Selector de Idioma - Estilo Clozapina */
+    .lang-toggle { display: flex; gap: 5px; }
+    .lang-btn {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        cursor: pointer;
+        color: var(--text-muted);
+    }
+    .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .input-group { margin-bottom: 1.2rem; }
+    .label-ui { display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
     
     select, input {
-        width: 100%;
-        padding: 0.75rem;
-        border-radius: 0.6rem;
-        border: 1px solid var(--border);
-        font-size: 1rem;
-        background: #fff;
+        width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 2px solid var(--border);
+        font-size: 1rem; font-weight: 600; outline: none; transition: 0.2s;
+    }
+    select:focus, input:focus { border-color: var(--primary); }
+
+    .btn-main {
+        width: 100%; background: var(--primary); color: white; border: none; padding: 1rem;
+        border-radius: 1rem; font-weight: 800; cursor: pointer; transition: 0.2s;
+    }
+    .btn-main:disabled { opacity: 0.5; }
+    .btn-copy {
+        background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border);
+        width: 100%; padding: 0.8rem; border-radius: 0.8rem; font-weight: 700; cursor: pointer; margin-top: 1.5rem;
     }
 
-    .btn-generate {
-        width: 100%;
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 1rem;
-        border-radius: 0.6rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: opacity 0.2s;
-    }
-    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* Cuadros de Pauta */
     .step-card {
-        background: white;
-        border-left: 4px solid var(--primary);
-        padding: 1.25rem;
-        border-radius: 0.6rem;
-        margin-bottom: 1rem;
-        border-top: 1px solid var(--border);
-        border-right: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
+        background: var(--bg); border: 1px solid var(--border); border-radius: 1.2rem;
+        padding: 1.2rem; margin-bottom: 1rem; border-left: 4px solid var(--primary);
     }
-    .step-date { color: var(--primary); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; }
-    .step-doses { font-size: 1.1rem; margin-top: 0.25rem; }
+    .step-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .step-date { color: var(--primary); text-transform: uppercase; }
+    .step-doses { font-size: 1.05rem; font-weight: 600; }
 
-    /* Cuadro Informativo (Disclaimer) */
-    .info-box {
-        background: #f1f5f9;
-        padding: 1.5rem;
-        border-radius: var(--radius);
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        margin-top: 3rem;
-        border: 1px dashed var(--border);
-    }
+    .disclaimer { font-size: 0.75rem; color: var(--text-muted); margin-top: 2rem; border-top: 1px dashed var(--border); padding-top: 1rem; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="header">
+<header class="header">
     <a href="/" class="logo-text">PSQALDÍA</a>
-    <h1>Titulación de FAE</h1>
-    <p>Generador de pautas de inicio para fármacos antiepilépticos.</p>
-</div>
+    <h1 id="ui-title">Titulación de FAE</h1>
+    <p id="ui-subtitle">Planificador dinámico de inicio de fármacos antiepilépticos.</p>
+</header>
 
 <div class="container">
-    <div class="setup-card">
-        <div class="form-group">
-            <label>Selecciona el Fármaco</label>
-            <select id="drugSelect"><option>Cargando...</option></select>
+    <main id="tool-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h2 style="font-weight:900; margin:0; font-size:1.2rem;" id="ui-setup-title">Configuración</h2>
+            <div class="lang-toggle">
+                <button class="lang-btn active" onclick="setLanguage('es')">ES</button>
+                <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+            </div>
         </div>
-        
-        <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group">
-                <label>Dosis Objetivo</label>
+
+        <div class="setup-grid">
+            <div class="input-group">
+                <label class="label-ui" id="ui-label-drug">Fármaco</label>
+                <select id="drugSelect"><option>Cargando...</option></select>
+            </div>
+            <div class="input-group">
+                <label class="label-ui" id="ui-label-target">Dosis Objetivo</label>
                 <select id="targetDose" disabled><option>--</option></select>
             </div>
-            <div class="form-group">
-                <label>Fecha de Inicio</label>
+            <div class="input-group">
+                <label class="label-ui" id="ui-label-date">Fecha de Inicio</label>
                 <input type="date" id="startDate">
             </div>
         </div>
 
-        <button id="btnGenerate" class="btn-generate" disabled>GENERAR PLAN</button>
-    </div>
+        <button id="btnGenerate" class="btn-main" disabled onclick="generarPauta()">GENERAR PLAN</button>
 
-    <div id="results"></div>
-
-    <div class="info-box">
-        <i class="fas fa-info-circle"></i> <strong>Nota clínica:</strong> Esta herramienta es una ayuda para la planificación. Las pautas de titulación pueden requerir ajustes según la respuesta clínica, la aparición de efectos adversos (como exantemas en lamotrigina) o interacciones farmacológicas. Consulte siempre la ficha técnica.
-    </div>
+        <div id="results-box" style="display:none; margin-top:2rem;">
+            <div id="results-list"></div>
+            <button class="btn-copy" onclick="copiarPauta()">
+                <i class="far fa-copy"></i> <span id="ui-btn-copy">COPIAR PAUTA</span>
+            </button>
+            <div class="disclaimer" id="ui-disclaimer">
+                Consulte siempre la ficha técnica. La titulación debe ajustarse según tolerancia clínica.
+            </div>
+        </div>
+    </main>
 </div>
 
 <script src="aes.js"></script>
