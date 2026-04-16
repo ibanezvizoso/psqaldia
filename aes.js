@@ -1,48 +1,102 @@
 /**
- * aes.js - Motor de Antiepilépticos PSQALDÍA
+ * aes.js - Motor de Antiepilépticos PSQALDÍA con soporte multiidioma
  */
 let aesData = [];
+let currentLang = 'es';
+
+const i18n = {
+    es: {
+        title: "Titulación de FAE",
+        subtitle: "Planificador dinámico de inicio de fármacos antiepilépticos.",
+        setup: "Configuración",
+        drug: "Fármaco",
+        target: "Dosis Objetivo",
+        date: "Fecha de Inicio",
+        generate: "GENERAR PLAN",
+        copy: "COPIAR PAUTA",
+        copied: "¡Copiado!",
+        morning: "Mañana",
+        midday: "Mediodía",
+        night: "Noche",
+        disclaimer: "Consulte siempre la ficha técnica. La titulación debe ajustarse según tolerancia clínica.",
+        from: "Desde el"
+    },
+    en: {
+        title: "AED Titration",
+        subtitle: "Dynamic starter planner for anti-epileptic drugs.",
+        setup: "Setup",
+        drug: "Medication",
+        target: "Target Dose",
+        date: "Start Date",
+        generate: "GENERATE PLAN",
+        copy: "COPY SCHEDULE",
+        copied: "Copied!",
+        morning: "Morning",
+        midday: "Midday",
+        night: "Night",
+        disclaimer: "Always consult the prescribing information. Titration should be adjusted based on clinical tolerance.",
+        from: "Starting"
+    }
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('startDate').valueAsDate = new Date();
+    updateUI();
     
     try {
-        // Buscamos en la pestaña "AES" a través de tu Worker
         const res = await fetch('https://psqaldia.com/?sheet=AES');
         const json = await res.json();
         aesData = json.values;
-        
-        const select = document.getElementById('drugSelect');
-        select.innerHTML = '<option value="">-- Seleccionar --</option>';
-        
-        aesData.forEach((row, i) => {
-            if(row[0]) {
-                let opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = row[0];
-                select.appendChild(opt);
-            }
-        });
-    } catch (e) {
-        console.error("Error cargando Sheets", e);
-    }
+        populateDrugs();
+    } catch (e) { console.error("Error cargando AES", e); }
 });
+
+function setLanguage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.toLowerCase() === lang);
+    });
+    updateUI();
+    if(document.getElementById('results-box').style.display === 'block') generarPauta();
+}
+
+function updateUI() {
+    const t = i18n[currentLang];
+    document.getElementById('ui-title').innerText = t.title;
+    document.getElementById('ui-subtitle').innerText = t.subtitle;
+    document.getElementById('ui-setup-title').innerText = t.setup;
+    document.getElementById('ui-label-drug').innerText = t.drug;
+    document.getElementById('ui-label-target').innerText = t.target;
+    document.getElementById('ui-label-date').innerText = t.date;
+    document.getElementById('btnGenerate').innerText = t.generate;
+    document.getElementById('ui-btn-copy').innerText = t.copy;
+    document.getElementById('ui-disclaimer').innerText = t.disclaimer;
+}
+
+function populateDrugs() {
+    const select = document.getElementById('drugSelect');
+    select.innerHTML = `<option value="">-- ${i18n[currentLang].drug} --</option>`;
+    aesData.forEach((row, i) => {
+        if(row[0]) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = row[0];
+            select.appendChild(opt);
+        }
+    });
+}
 
 document.getElementById('drugSelect').addEventListener('change', (e) => {
     const row = aesData[e.target.value];
     const targetSelect = document.getElementById('targetDose');
     targetSelect.innerHTML = '';
-    
     if(!row) return;
 
-    // Cadencia: Pauta (i), Target (i+1), Intervalo (i+2)
-    // Saltos de 3 en 3 desde columna B (índice 1)
     for (let i = 1; i < row.length; i += 3) {
-        const targetValue = row[i+1];
-        if (targetValue && targetValue.trim() !== "") {
+        if (row[i+1]) {
             let opt = document.createElement('option');
             opt.value = i; 
-            opt.textContent = `${targetValue} mg/día`;
+            opt.textContent = `${row[i+1]} mg/${currentLang === 'es' ? 'día' : 'day'}`;
             targetSelect.appendChild(opt);
         }
     }
@@ -51,44 +105,52 @@ document.getElementById('drugSelect').addEventListener('change', (e) => {
 });
 
 function formatDoseText(pauta) {
-    // Formato esperado en Sheets: "Mañana-Mediodía-Noche" (ej: "25-0-50")
     const doses = pauta.split('-').map(d => d.trim());
+    const t = i18n[currentLang];
     let parts = [];
-    if(doses[0] && doses[0] !== '0') parts.push(`Mañana: ${doses[0]} mg`);
-    if(doses[1] && doses[1] !== '0') parts.push(`Mediodía: ${doses[1]} mg`);
-    if(doses[2] && doses[2] !== '0') parts.push(`Noche: ${doses[2]} mg`);
-    return parts.length > 0 ? parts.join(', ') : "0 mg";
+    if(doses[0] && doses[0] !== '0') parts.push(`${t.morning}: ${doses[0]} mg`);
+    if(doses[1] && doses[1] !== '0') parts.push(`${t.midday}: ${doses[1]} mg`);
+    if(doses[2] && doses[2] !== '0') parts.push(`${t.night}: ${doses[2]} mg`);
+    return parts.join(', ');
 }
 
-document.getElementById('btnGenerate').addEventListener('click', () => {
+window.generarPauta = function() {
     const drugRow = aesData[document.getElementById('drugSelect').value];
     const targetIdx = parseInt(document.getElementById('targetDose').value);
     const startDate = new Date(document.getElementById('startDate').value);
-    const results = document.getElementById('results');
+    const list = document.getElementById('results-list');
+    const t = i18n[currentLang];
     
-    results.innerHTML = `<h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Plan: ${drugRow[0]}</h2>`;
-    
+    list.innerHTML = `<h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;">${drugRow[0]}</h3>`;
     let daysDiff = 0;
     
-    // Iteramos por los escalones hasta llegar al seleccionado
     for (let i = 1; i <= targetIdx; i += 3) {
-        const pauta = drugRow[i];
-        const intervalo = parseInt(drugRow[i+2]) || 0;
-        
         const currentLineDate = new Date(startDate);
         currentLineDate.setDate(startDate.getDate() + daysDiff);
-        
-        const dateString = currentLineDate.toLocaleDateString('es-ES', {
+        const dateStr = currentLineDate.toLocaleDateString(currentLang === 'es' ? 'es-ES' : 'en-US', {
             weekday: 'long', day: 'numeric', month: 'long'
         });
 
-        results.innerHTML += `
+        list.innerHTML += `
             <div class="step-card">
-                <div class="step-date">A partir del ${dateString}</div>
-                <div class="step-doses">${formatDoseText(pauta)}</div>
-            </div>
-        `;
-        
-        daysDiff += intervalo;
+                <div class="step-header"><span class="step-date">${t.from} ${dateStr}</span></div>
+                <div class="step-doses">${formatDoseText(drugRow[i])}</div>
+            </div>`;
+        daysDiff += (parseInt(drugRow[i+2]) || 0);
     }
-});
+    document.getElementById('results-box').style.display = 'block';
+};
+
+window.copiarPauta = function() {
+    const t = i18n[currentLang];
+    const drugName = aesData[document.getElementById('drugSelect').value][0];
+    let txt = `📋 ${drugName.toUpperCase()} (${t.title})\n`;
+    
+    document.querySelectorAll('.step-card').forEach(card => {
+        const date = card.querySelector('.step-date').innerText;
+        const doses = card.querySelector('.step-doses').innerText;
+        txt += `• ${date}: ${doses}\n`;
+    });
+    
+    navigator.clipboard.writeText(txt).then(() => alert(t.copied));
+};
