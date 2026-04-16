@@ -3,145 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Titulación de Antiepilépticos | PSQALDÍA</title>
+    <title>Titulación de FAE | PSQALDÍA</title>
+    <meta name="description" content="Planificador dinámico para el inicio de fármacos antiepilépticos.">
+    <link rel="icon" type="image/png" href="/Logo.png">
     <link rel="stylesheet" href="/css/all.min.css">
+
     <style>
-    :root {
-        --primary: #4338ca; 
-        --primary-light: #eef2ff; 
-        --bg: #f8fafc;
-        --card-bg: #ffffff; 
-        --text-main: #1e293b; 
-        --text-muted: #64748b;
-        --border: #e2e8f0; 
-        --radius: 1.5rem;
-    }
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.5rem;
+        }
 
-    body { 
-        font-family: system-ui, -apple-system, sans-serif; 
-        background: var(--bg); 
-        color: var(--text-main); 
-        margin: 0; 
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-    }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: var(--bg); color: var(--text-main); 
+            margin: 0; line-height: 1.6; -webkit-font-smoothing: antialiased;
+        }
 
-    .header { 
-        padding: 4rem 1.5rem 4.5rem;
-        text-align: center; 
-        background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
-    }
+        .hero { 
+            padding: 4rem 1.5rem 4.5rem; text-align: center; 
+            background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
+        }
+        .logo-link { font-weight: 800; color: var(--primary); text-decoration: none; font-size: 1.1rem; }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -0.04em; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-    .logo-text { 
-        font-weight: 700; color: var(--primary); 
-        text-decoration: none; font-size: 0.85rem; 
-        text-transform: uppercase; letter-spacing: 0.5px;
-    }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
 
-    .header h1 { font-size: 2.5rem; font-weight: 700; margin: 1rem 0 0.75rem; letter-spacing: -0.02em; }
-    .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: auto; opacity: 0.9; }
+        /* Info Grid Superior */
+        .info-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1.2rem; margin-bottom: 3rem; margin-top: -2rem; 
+        }
+        .info-card { 
+            background: var(--card-bg); padding: 1.2rem; border-radius: 1.25rem; 
+            border: 1px solid var(--border); display: flex; gap: 0.8rem; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); 
+        }
+        .info-card i { color: var(--primary); font-size: 1.1rem; margin-top: 3px; }
+        .info-card h3 { font-size: 0.9rem; font-weight: 700; margin: 0 0 0.3rem; }
+        .info-card p { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
 
-    .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+        /* Tarjeta de la Herramienta */
+        #tool-main {
+            background: var(--card-bg); border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+            padding: 2.5rem; margin-bottom: 3rem;
+        }
 
-    #tool-container {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
-        padding: 2rem;
-        margin-top: -2rem;
-    }
+        .lang-toggle { display: flex; gap: 5px; }
+        .lang-btn {
+            background: var(--bg); border: 1px solid var(--border); padding: 6px 12px;
+            border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; color: var(--text-muted);
+        }
+        .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-    /* Selector de Idioma - Estilo Clozapina */
-    .lang-toggle { display: flex; gap: 5px; }
-    .lang-btn {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        padding: 5px 10px;
-        border-radius: 8px;
-        font-size: 0.75rem;
-        font-weight: 800;
-        cursor: pointer;
-        color: var(--text-muted);
-    }
-    .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .label-ui { display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
+        
+        select, input {
+            width: 100%; padding: 0.85rem; border-radius: 0.8rem; border: 2px solid var(--border);
+            font-size: 1rem; font-weight: 600; outline: none; background: var(--bg); box-sizing: border-box;
+        }
+        select:focus, input:focus { border-color: var(--primary); }
 
-    .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-    .input-group { margin-bottom: 1.2rem; }
-    .label-ui { display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
-    
-    select, input {
-        width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 2px solid var(--border);
-        font-size: 1rem; font-weight: 600; outline: none; transition: 0.2s;
-    }
-    select:focus, input:focus { border-color: var(--primary); }
+        .btn-gen {
+            width: 100%; background: var(--primary); color: white; border: none; padding: 1.1rem;
+            border-radius: 1rem; font-weight: 800; cursor: pointer; margin-top: 2rem; transition: 0.2s;
+        }
+        .btn-copy {
+            width: 100%; background: #f8fafc; color: var(--text-main); border: 1px solid var(--border); 
+            padding: 1rem; border-radius: 1rem; font-weight: 700; cursor: pointer; margin-top: 1.5rem;
+        }
 
-    .btn-main {
-        width: 100%; background: var(--primary); color: white; border: none; padding: 1rem;
-        border-radius: 1rem; font-weight: 800; cursor: pointer; transition: 0.2s;
-    }
-    .btn-main:disabled { opacity: 0.5; }
-    .btn-copy {
-        background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border);
-        width: 100%; padding: 0.8rem; border-radius: 0.8rem; font-weight: 700; cursor: pointer; margin-top: 1.5rem;
-    }
+        /* Timeline de pauta */
+        .pauta-container { margin-top: 3rem; border-left: 3px solid var(--border); padding-left: 20px; margin-left: 10px; }
+        .step-card {
+            background: white; border: 1px solid var(--border); border-radius: 1.2rem;
+            padding: 1.5rem; margin-bottom: 1.2rem; position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .step-card::before {
+            content: ''; position: absolute; left: -31px; top: 22px; 
+            width: 14px; height: 14px; background: var(--primary); 
+            border: 3px solid white; border-radius: 50%;
+        }
+        .step-date { color: var(--primary); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
+        .step-doses { font-size: 1.15rem; font-weight: 700; margin-top: 0.4rem; }
 
-    .step-card {
-        background: var(--bg); border: 1px solid var(--border); border-radius: 1.2rem;
-        padding: 1.2rem; margin-bottom: 1rem; border-left: 4px solid var(--primary);
-    }
-    .step-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem; }
-    .step-date { color: var(--primary); text-transform: uppercase; }
-    .step-doses { font-size: 1.05rem; font-weight: 600; }
+        /* Bibliografía */
+        .biblio { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
+        .biblio h4 { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; color: var(--text-main); }
+        .biblio p { font-size: 0.85rem; font-style: italic; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
 
-    .disclaimer { font-size: 0.75rem; color: var(--text-muted); margin-top: 2rem; border-top: 1px dashed var(--border); padding-top: 1rem; text-align: center; }
+        footer { text-align: center; margin-top: 2rem; padding-bottom: 4rem; }
+        .btn-back { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<header class="header">
-    <a href="/" class="logo-text">PSQALDÍA</a>
+<header class="hero">
+    <a href="/" class="logo-link">PSQALDÍA</a>
     <h1 id="ui-title">Titulación de FAE</h1>
-    <p id="ui-subtitle">Planificador dinámico de inicio de fármacos antiepilépticos.</p>
+    <p id="ui-subtitle">Planificador dinámico para el inicio de fármacos antiepilépticos.</p>
 </header>
 
 <div class="container">
-    <main id="tool-container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-            <h2 style="font-weight:900; margin:0; font-size:1.2rem;" id="ui-setup-title">Configuración</h2>
+    <div class="info-grid">
+        <div class="info-card">
+            <i class="fas fa-shield-alt"></i>
+            <div><h3 id="ui-i1-t">Seguridad</h3><p id="ui-i1-p">Titulación progresiva para reducir el riesgo de efectos adversos cutáneos o sistémicos.</p></div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-clock"></i>
+            <div><h3 id="ui-i2-t">Precisión</h3><p id="ui-i2-p">Cronograma automático basado en los intervalos de seguridad de cada fármaco.</p></div>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-user-check"></i>
+            <div><h3 id="ui-i3-t">Individualizado</h3><p id="ui-i3-p">Selección de dosis objetivo según la indicación y respuesta del paciente.</p></div>
+        </div>
+    </div>
+
+    <main id="tool-main">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="ui-setup-h" style="font-weight:900; margin:0; font-size:1.3rem;">Configuración</h2>
             <div class="lang-toggle">
-                <button class="lang-btn active" onclick="setLanguage('es')">ES</button>
-                <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn active" onclick="setLang('es')">ES</button>
+                <button class="lang-btn" onclick="setLang('en')">EN</button>
             </div>
         </div>
 
-        <div class="setup-grid">
-            <div class="input-group">
-                <label class="label-ui" id="ui-label-drug">Fármaco</label>
+        <div class="form-grid">
+            <div>
+                <label class="label-ui" id="ui-l-drug">Fármaco</label>
                 <select id="drugSelect"><option>Cargando...</option></select>
             </div>
-            <div class="input-group">
-                <label class="label-ui" id="ui-label-target">Dosis Objetivo</label>
+            <div>
+                <label class="label-ui" id="ui-l-target">Dosis Objetivo</label>
                 <select id="targetDose" disabled><option>--</option></select>
             </div>
-            <div class="input-group">
-                <label class="label-ui" id="ui-label-date">Fecha de Inicio</label>
+            <div>
+                <label class="label-ui" id="ui-l-date">Fecha de Inicio</label>
                 <input type="date" id="startDate">
             </div>
         </div>
 
-        <button id="btnGenerate" class="btn-main" disabled onclick="generarPauta()">GENERAR PLAN</button>
+        <button id="btnGen" class="btn-gen" disabled onclick="renderPlan()">GENERAR PLAN</button>
 
-        <div id="results-box" style="display:none; margin-top:2rem;">
-            <div id="results-list"></div>
-            <button class="btn-copy" onclick="copiarPauta()">
-                <i class="far fa-copy"></i> <span id="ui-btn-copy">COPIAR PAUTA</span>
+        <div id="res-box" style="display:none; margin-top:2.5rem;">
+            <div id="plan-list" class="pauta-container"></div>
+            <button class="btn-copy" onclick="copyPlan()">
+                <i class="far fa-copy"></i> <span id="ui-b-copy">COPIAR PLAN LIMPIO</span>
             </button>
-            <div class="disclaimer" id="ui-disclaimer">
-                Consulte siempre la ficha técnica. La titulación debe ajustarse según tolerancia clínica.
-            </div>
         </div>
     </main>
+
+    <section class="biblio">
+        <h4 id="ui-b-title">Referencias Clínicas</h4>
+        <p><i class="fas fa-book"></i> <span id="ui-b-stahl">Stahl's Essential Psychopharmacology: Prescriber's Guide.</span></p>
+        <p><i class="fas fa-file-medical"></i> <span id="ui-b-fichas">Fichas técnicas oficiales (AEMPS / EMA).</span></p>
+        <p><i class="fas fa-user-md"></i> <span id="ui-b-exp">Protocolos basados en experiencia clínica y consenso de expertos.</span></p>
+    </section>
+
+    <footer>
+        <a href="/herramientas" class="btn-back"><i class="fas fa-arrow-left"></i> Volver a Herramientas</a>
+    </footer>
 </div>
 
 <script src="aes.js"></script>
