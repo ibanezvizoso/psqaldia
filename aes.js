@@ -18,7 +18,7 @@ const i18n = {
         bTitle: "Referencias Clínicas",
         bStahl: "Stahl's Essential Psychopharmacology: Guía del prescriptor.",
         bFichas: "Fichas técnicas oficiales (AEMPS / EMA).",
-        bExp: "Protocolos basados en experiencia clínica y consenso de expertos.",
+        bExp: "Experiencia clínica.",
         morn: "Mañana", mid: "Mediodía", night: "Noche", from: "Desde el"
     },
     en: {
