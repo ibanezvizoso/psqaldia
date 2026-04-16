@@ -21,7 +21,7 @@
         }
 
         body { 
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background: var(--bg); color: var(--text-main); 
             margin: 0; line-height: 1.6; -webkit-font-smoothing: antialiased;
             display: flex; flex-direction: column; min-height: 100vh;
@@ -38,26 +38,27 @@
         .hero h1 { font-size: 2.8rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -0.04em; margin-top: 0; }
         .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; flex: 1; width: 100%; box-sizing: border-box; }
+        .container { max-width: 1000px; margin: auto; padding: 0 1.5rem 5rem; flex: 1; width: 100%; box-sizing: border-box; }
 
-        /* Info Grid Superior */
+        /* Info Grid Superior con recuadros más grandes (estilo SS vs SNM) */
         .info-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); 
-            gap: 1.2rem; margin-bottom: 3rem; margin-top: -2rem; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 1.5rem; margin-bottom: 3rem; margin-top: -1rem; 
         }
         .info-card { 
-            background: var(--card-bg); padding: 1.2rem; border-radius: 1.25rem; 
-            border: 1px solid var(--border); display: flex; gap: 0.8rem; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); 
+            background: var(--card-bg); padding: 2rem; border-radius: var(--radius); 
+            border: 1px solid var(--border); text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02); transition: transform 0.2s;
         }
-        .info-card i { color: var(--primary); font-size: 1.1rem; margin-top: 3px; }
-        .info-card h3 { font-size: 0.9rem; font-weight: 700; margin: 0 0 0.3rem; }
-        .info-card p { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+        .info-card:hover { transform: translateY(-3px); }
+        .info-card i { color: var(--primary); font-size: 2rem; background: var(--primary-light); width: 60px; height: 60px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+        .info-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .info-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
         /* Tarjeta de la Herramienta */
         #tool-main {
             background: var(--card-bg); border-radius: var(--radius);
-            border: 1px solid var(--border); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
             padding: 2.5rem; margin-bottom: 3rem;
         }
 
@@ -103,45 +104,59 @@
         .step-date { color: var(--primary); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
         .step-doses { font-size: 1.15rem; font-weight: 700; margin-top: 0.4rem; }
 
-        /* Bibliografía estándar del proyecto */
-        .biblio-section { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); }
-        .biblio-section h4 { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; color: var(--text-main); }
-        .biblio-section p { font-size: 0.85rem; font-style: italic; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+        /* Bibliografía y Notas */
+        .biblio-section { padding: 2rem; background: white; border-radius: var(--radius); border: 1px solid var(--border); margin: 3rem auto 0; }
+        .biblio-section h4 { font-size: 1.1rem; font-weight: 700; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+        .biblio-section i { color: var(--primary); }
+        .biblio-section p { font-size: 0.9rem; font-style: italic; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; color: var(--text-muted); }
 
-        /* Pie de página estándar */
-        footer { text-align: center; margin-top: 3rem; padding-bottom: 5rem; }
-        .btn-home { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
-        .btn-home:hover { color: var(--primary); }
+        /* Navegación y Footer Final (Estilo SS vs SNM) */
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .site-bottom-info {
+            text-align: center; padding: 2rem 1rem; background: #f8fafc;
+            font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img { height: 18px; vertical-align: middle; margin-right: 8px; opacity: 0.4; filter: grayscale(100%); }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .info-grid { gap: 1rem; }
+        }
     </style>
 </head>
 <body>
 
-<header class="nav-header">
-    <a href="/" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
-</header>
+<nav class="nav-header">
+    <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+</nav>
 
-<section class="hero">
+<header class="hero">
     <h1 id="ui-title">Titulación de FAE</h1>
     <p id="ui-subtitle">Planificador dinámico para el inicio de fármacos antiepilépticos.</p>
-</section>
+</header>
 
-<div class="container">
-    <div class="info-grid">
+<main class="container">
+    <section class="info-grid">
         <div class="info-card">
             <i class="fas fa-shield-alt"></i>
-            <div><h3 id="ui-i1-t">Seguridad</h3><p id="ui-i1-p">Titulación progresiva para reducir el riesgo de efectos adversos cutáneos o sistémicos.</p></div>
+            <h3 id="ui-i1-t">Seguridad</h3>
+            <p id="ui-i1-p">Titulación progresiva para reducir el riesgo de efectos adversos cutáneos o sistémicos.</p>
         </div>
         <div class="info-card">
             <i class="fas fa-clock"></i>
-            <div><h3 id="ui-i2-t">Precisión</h3><p id="ui-i2-p">Cronograma automático basado en los intervalos de seguridad de cada fármaco.</p></div>
+            <h3 id="ui-i2-t">Precisión</h3>
+            <p id="ui-i2-p">Cronograma automático basado en los intervalos de seguridad de cada fármaco.</p>
         </div>
         <div class="info-card">
             <i class="fas fa-user-check"></i>
-            <div><h3 id="ui-i3-t">Individualizado</h3><p id="ui-i3-p">Selección de dosis objetivo según la indicación y respuesta del paciente.</p></div>
+            <h3 id="ui-i3-t">Individualizado</h3>
+            <p id="ui-i3-p">Selección de dosis objetivo según la indicación y respuesta del paciente.</p>
         </div>
-    </div>
+    </section>
 
-    <main id="tool-main">
+    <div id="tool-main">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2 id="ui-setup-h" style="font-weight:900; margin:0; font-size:1.3rem;">Configuración</h2>
             <div class="lang-toggle">
@@ -173,19 +188,26 @@
                 <i class="far fa-copy"></i> <span id="ui-b-copy">COPIAR PLAN LIMPIO</span>
             </button>
         </div>
-    </main>
+    </div>
 
     <section class="biblio-section">
-        <h4 id="ui-b-title">Referencias Clínicas</h4>
+        <h4 id="ui-b-title"><i class="fas fa-book-medical"></i> Referencias Clínicas</h4>
         <p><i class="fas fa-book"></i> <span id="ui-b-stahl">Stahl's Essential Psychopharmacology: Prescriber's Guide.</span></p>
         <p><i class="fas fa-file-medical"></i> <span id="ui-b-fichas">Fichas técnicas oficiales (AEMPS / EMA).</span></p>
-        <p><i class="fas fa-user-md"></i> <span id="ui-b-exp">Protocolos basados en experiencia clínica y consenso de expertos.</span></p>
+        <p><i class="fas fa-user-md"></i> <span id="ui-b-exp">Experiencia clínica.</span></p>
     </section>
 
-    <footer>
-        <a href="/herramientas" class="btn-home"><i class="fas fa-arrow-left"></i> Volver a Herramientas</a>
+    <footer class="nav-footer">
+        <a href="https://psqaldia.com/herramientas" class="link-back">
+            <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
+        </a>
     </footer>
-</div>
+</main>
+
+<footer class="site-bottom-info">
+    <img src="/Logo.png" alt="PSQ AL DÍA"> 
+    <span>&copy; 2026 PSQ AL DÍA - Herramientas clínicas</span>
+</footer>
 
 <script src="aes.js"></script>
 </body>
