@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titulación de Antiepilépticos | PSQALDÍA</title>
+    <meta name="description" content="Planificador dinámico para el inicio de fármacos antiepilépticos con escalada de dosis personalizada.">
+    
+    <link rel="stylesheet" href="/css/all.min.css">
+
+    <style>
+    :root {
+        --primary: #4338ca; 
+        --primary-light: #eef2ff; 
+        --bg: #f8fafc;
+        --card-bg: #ffffff; 
+        --text-main: #1e293b; 
+        --text-muted: #64748b;
+        --border: #e2e8f0; 
+        --radius: 1rem;
+    }
+
+    body { 
+        font-family: system-ui, -apple-system, sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        margin: 0; 
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .header { 
+        padding: 3rem 1.5rem;
+        text-align: center; 
+        background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
+    }
+
+    .logo-text { 
+        font-weight: 700; color: var(--primary); 
+        text-decoration: none; font-size: 0.85rem; 
+        text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    h1 { font-size: 2.2rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+    /* Tarjetas de Selección */
+    .setup-card {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+
+    .form-group { margin-bottom: 1.5rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    
+    select, input {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 0.6rem;
+        border: 1px solid var(--border);
+        font-size: 1rem;
+        background: #fff;
+    }
+
+    .btn-generate {
+        width: 100%;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 0.6rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Cuadros de Pauta */
+    .step-card {
+        background: white;
+        border-left: 4px solid var(--primary);
+        padding: 1.25rem;
+        border-radius: 0.6rem;
+        margin-bottom: 1rem;
+        border-top: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+    }
+    .step-date { color: var(--primary); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; }
+    .step-doses { font-size: 1.1rem; margin-top: 0.25rem; }
+
+    /* Cuadro Informativo (Disclaimer) */
+    .info-box {
+        background: #f1f5f9;
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 3rem;
+        border: 1px dashed var(--border);
+    }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a href="/" class="logo-text">PSQALDÍA</a>
+    <h1>Titulación de FAE</h1>
+    <p>Generador de pautas de inicio para fármacos antiepilépticos.</p>
+</div>
+
+<div class="container">
+    <div class="setup-card">
+        <div class="form-group">
+            <label>Selecciona el Fármaco</label>
+            <select id="drugSelect"><option>Cargando...</option></select>
+        </div>
+        
+        <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label>Dosis Objetivo</label>
+                <select id="targetDose" disabled><option>--</option></select>
+            </div>
+            <div class="form-group">
+                <label>Fecha de Inicio</label>
+                <input type="date" id="startDate">
+            </div>
+        </div>
+
+        <button id="btnGenerate" class="btn-generate" disabled>GENERAR PLAN</button>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="info-box">
+        <i class="fas fa-info-circle"></i> <strong>Nota clínica:</strong> Esta herramienta es una ayuda para la planificación. Las pautas de titulación pueden requerir ajustes según la respuesta clínica, la aparición de efectos adversos (como exantemas en lamotrigina) o interacciones farmacológicas. Consulte siempre la ficha técnica.
+    </div>
+</div>
+
+<script src="aes.js"></script>
+</body>
+</html>
