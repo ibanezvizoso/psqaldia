@@ -3,164 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evolutivo Alta Voluntaria | PSQALDÍA</title>
+    <title>Alta Voluntaria | PSQALDÍA</title>
+    <meta name="description" content="Asistente para la redacción de informes médico-legales de alta voluntaria en psiquiatría.">
+    <link rel="icon" type="image/png" href="/Logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="/css/all.min.css">
+
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { border: none; border-radius: 12px; transition: 0.3s; }
-        .btn-psq { background-color: #2c3e50; color: white; border-radius: 8px; }
-        .btn-psq:hover { background-color: #1a252f; color: white; }
-        .form-label { font-weight: 600; color: #34495e; }
-        .header-psq { background: white; padding: 1rem; border-bottom: 2px solid #eee; margin-bottom: 2rem; }
-        #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 450px; font-size: 0.95rem; }
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.5rem;
+        }
+
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); color: var(--text-main); 
+            margin: 0; line-height: 1.6; -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+
+        .hero { 
+            padding: 4rem 1.5rem 3.5rem; text-align: center; 
+            background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); 
+        }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; margin: 0; letter-spacing: -0.04em; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0.5rem auto 0; }
+
+        .container { max-width: 1000px; margin: auto; padding: 0 1.5rem 5rem; flex: 1; width: 100%; box-sizing: border-box; }
+
+        /* Cuadros de información */
+        .info-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 1.5rem; margin-bottom: 3rem; margin-top: -1rem; 
+        }
+        .info-card { 
+            background: var(--card-bg); padding: 2rem; border-radius: var(--radius); 
+            border: 1px solid var(--border); text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02);
+        }
+        .info-card i { color: var(--primary); font-size: 2rem; background: var(--primary-light); width: 60px; height: 60px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+        .info-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.8rem; }
+        .info-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; }
+
+        /* El Formulario y Resultado */
+        .main-card { 
+            background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); padding: 2.5rem;
+        }
+
+        .form-label { font-weight: 700; color: var(--text-main); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.02em; }
+        .form-control, .form-select { border-radius: 0.8rem; border: 1px solid var(--border); padding: 0.75rem 1rem; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+
+        .btn-psq { background: var(--primary); color: white; border: none; border-radius: 1rem; padding: 1.2rem; font-weight: 800; transition: 0.2s; width: 100%; margin-top: 1rem; }
+        .btn-psq:hover { background: #1d4ed8; transform: translateY(-2px); color: white; }
+
+        #resultadoIA { 
+            background: #f8fafc; border: 1px solid var(--border); border-radius: 1rem; 
+            padding: 1.5rem; white-space: pre-wrap; font-size: 1rem; color: var(--text-main);
+            min-height: 200px; margin-top: 1.5rem;
+        }
+
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; }
+
+        .site-bottom-info { text-align: center; padding: 2rem 1rem; background: #f8fafc; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+        .site-bottom-info img { height: 18px; vertical-align: middle; margin-right: 8px; opacity: 0.4; }
+
+        .gender-selector .btn-check:checked + .btn-outline-primary { background-color: var(--primary); border-color: var(--primary); color: white; }
+
+        @media (max-width: 600px) { .hero h1 { font-size: 2.2rem; } .main-card { padding: 1.5rem; } }
     </style>
 </head>
 <body>
 
-<div class="header-psq shadow-sm">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a href="/" class="text-decoration-none text-dark fw-bold"> <i class="fas fa-arrow-left me-2"></i> PSQALDÍA</a>
-        <h5 class="mb-0">Asistente: Evolutivo Alta Voluntaria</h5>
-    </div>
-</div>
+<nav class="nav-header">
+    <a href="/" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+</nav>
 
-<div class="container mb-5">
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="card shadow-sm p-4 mb-4">
-                <form id="altaForm">
-                    <div class="mb-3">
-                        <label class="form-label">Nombre del Paciente (opcional)</label>
-                        <input type="text" id="nombrePaciente" class="form-control" placeholder="Nombre completo o iniciales">
-                    </div>
+<header class="hero">
+    <h1>Alta Voluntaria</h1>
+    <p>Generador de evolutivos médico-legales para psiquiatría.</p>
+</header>
 
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Fecha</label>
-                            <input type="date" id="fecha" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Hora</label>
-                            <input type="time" id="hora" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Género</label>
-                            <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="genero" id="genH" value="H" checked onclick="actualizarEPP()">
-                                <label class="btn btn-outline-primary" for="genH">H</label>
-                                <input type="radio" class="btn-check" name="genero" id="genM" value="M" onclick="actualizarEPP()">
-                                <label class="btn btn-outline-danger" for="genM">M</label>
-                            </div>
-                        </div>
-                    </div>
+<main class="container">
+    <section class="info-grid">
+        <div class="info-card">
+            <i class="fas fa-gavel"></i>
+            <h3>Blindaje Legal</h3>
+            <p>Redacción orientada a justificar la capacidad de toma de decisiones del paciente.</p>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-file-medical-alt"></i>
+            <h3>Estandarizado</h3>
+            <p>Estructura coherente que integra motivos, riesgos y plan de seguimiento.</p>
+        </div>
+        <div class="info-card">
+            <i class="fas fa-magic"></i>
+            <h3>Dinámico</h3>
+            <p>Ajuste automático de género y concordancia gramatical mediante IA.</p>
+        </div>
+    </section>
 
-                    <div class="mb-3">
-                        <label class="form-label">Motivos aducidos (múltiple):</label>
-                        <div class="form-check">
-                            <input class="form-check-input motivo" type="checkbox" value="mejoría de los síntomas">
-                            <label class="form-check-label">Mejoría de los síntomas</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input motivo" type="checkbox" value="remisión de ideas de suicidio">
-                            <label class="form-check-label">Remisión de ideas de suicidio</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input motivo" type="checkbox" value="empeoramiento en contexto de ingreso">
-                            <label class="form-check-label">Empeoramiento en contexto de ingreso</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input motivo" type="checkbox" value="preferencia por tratamiento ambulatorio">
-                            <label class="form-check-label">Preferencia por tratamiento ambulatorio</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input motivo" type="checkbox" value="deseo de acompañamiento familiar">
-                            <label class="form-check-label">Deseo de acompañamiento familiar</label>
-                        </div>
-                        <input type="text" id="otrosMotivos" class="form-control form-control-sm mt-2" placeholder="Otros motivos...">
-                    </div>
-
-                    <hr>
-
-                    <div class="row mb-3">
-                        <div class="col-md-7">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="checkRiesgos" onclick="toggleRiesgos()">
-                                <label class="form-check-label fw-bold">Se explican riesgos:</label>
-                            </div>
-                            <div id="contenedorRiesgos" class="d-none">
-                                <textarea id="textoRiesgos" class="form-control" rows="2" placeholder="Recaída, abandono tto..."></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label small">Capacidad/Comprensión:</label>
-    
-                            <div class="form-check small">
-                                <input class="form-check-input capacidad" type="checkbox" data-tipo="alteracion" value="no presenta alteraciones cognitivas" checked>
-                                <label class="form-check-label">No alteraciones cognitivas</label>
-                            </div>
-                            <div class="form-check small">
-                                <input class="form-check-input capacidad" type="checkbox" data-tipo="alteracion" value="no presenta alteraciones psicopatológicas significativas" checked>
-                                <label class="form-check-label">No alteraciones psicopatológicas</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label d-flex justify-content-between align-items-center">
-                            Exploración psicopatológica:
-                            <div class="btn-group btn-group-sm">
-                                <input type="radio" class="btn-check" name="tipoExp" id="expNormal" checked onclick="setExploracion('default')">
-                                <label class="btn btn-outline-secondary" for="expNormal">Por defecto</label>
-                                <input type="radio" class="btn-check" name="tipoExp" id="expLibre" onclick="setExploracion('libre')">
-                                <label class="btn btn-outline-secondary" for="expLibre">Texto libre</label>
-                            </div>
-                        </label>
-                        <div id="contenedorExploracion" class="d-none mt-2">
-                            <textarea id="textoExploracion" class="form-control" rows="5"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="checkFamilia" checked>
-                        <label class="form-check-label fw-bold">Comunicación familiar (acuerdo).</label>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Plan al alta (múltiple):</label>
-                        <div class="form-check small">
-                            <input class="form-check-input check-plan" type="checkbox" value="Acudirá a cita programada con psiquiatría en USM de referencia">
-                            <label class="form-check-label">Cita programada en USM</label>
-                        </div>
-                        <div class="form-check small">
-                            <input class="form-check-input check-plan" type="checkbox" value="Continuará con su tratamiento psicofarmacológico habitual">
-                            <label class="form-check-label">Continuar tto. habitual</label>
-                        </div>
-                        <div class="form-check small">
-                            <input class="form-check-input check-plan" type="checkbox" value="En caso de empeoramiento clínico acudirá al servicio de urgencias de referencia">
-                            <label class="form-check-label">Urgencias si empeoramiento</label>
-                        </div>
-                        <textarea id="planAltaLibre" class="form-control mt-2" rows="2" placeholder="Otros detalles del plan..."></textarea>
-                    </div>
-
-                    <button type="button" onclick="redactarEvolutivo()" class="btn btn-psq w-100 p-3 shadow">
-                        <i class="fas fa-magic me-2"></i> REDACTAR CON IA
-                    </button>
-                </form>
+    <div class="main-card">
+        <form id="altaForm">
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Nombre / Iniciales</label>
+                    <input type="text" id="nombrePaciente" class="form-control" placeholder="Ej: J.P.G.">
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" id="fecha" class="form-control">
+                </div>
+                <div class="col-md-3 col-6">
+                    <label class="form-label">Hora</label>
+                    <input type="time" id="hora" class="form-control">
+                </div>
             </div>
+
+            <div class="mb-4">
+                <label class="form-label">Género del Paciente</label>
+                <div class="btn-group w-100 gender-selector" role="group">
+                    <input type="radio" class="btn-check" name="genero" id="genH" value="H" onclick="actualizarEPP()">
+                    <label class="btn btn-outline-primary" for="genH">Masculino (H)</label>
+                    <input type="radio" class="btn-check" name="genero" id="genM" value="M" onclick="actualizarEPP()">
+                    <label class="btn btn-outline-primary" for="genM">Femenino (M)</label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Motivos del alta voluntaria</label>
+                <div class="row g-2 mt-1">
+                    <div class="col-md-6"><div class="form-check"><input class="form-check-input motivo" type="checkbox" value="mejoría de los síntomas"><label class="form-check-label">Mejoría de síntomas</label></div></div>
+                    <div class="col-md-6"><div class="form-check"><input class="form-check-input motivo" type="checkbox" value="preferencia por tto. ambulatorio"><label class="form-check-label">Tto. Ambulatorio</label></div></div>
+                    <div class="col-md-6"><div class="form-check"><input class="form-check-input motivo" type="checkbox" value="deseo de soporte familiar"><label class="form-check-label">Acompañamiento familiar</label></div></div>
+                    <div class="col-md-6"><div class="form-check"><input class="form-check-input motivo" type="checkbox" value="disconformidad con el ingreso"><label class="form-check-label">Disconformidad ingreso</label></div></div>
+                </div>
+                <input type="text" id="otrosMotivos" class="form-control mt-2" placeholder="Otros motivos específicos...">
+            </div>
+
+            <hr class="my-4" style="opacity: 0.1;">
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="checkRiesgos" onclick="toggleRiesgos()">
+                        <label class="form-check-label fw-bold">Se explican riesgos específicos</label>
+                    </div>
+                    <div id="contenedorRiesgos" class="d-none">
+                        <textarea id="textoRiesgos" class="form-control" rows="2" placeholder="Recaída, abandono de tratamiento, riesgo de autolisis..."></textarea>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Capacidad Objetivada</label>
+                    <div class="form-check small"><input class="form-check-input capacidad" type="checkbox" data-tipo="comprension" value="comprende la información recibida"><label class="form-check-label">Comprende información</label></div>
+                    <div class="form-check small"><input class="form-check-input capacidad" type="checkbox" data-tipo="alteracion" value="no presenta alteraciones cognitivas"><label class="form-check-label">Sin déficit cognitivo</label></div>
+                    <div class="form-check small"><input class="form-check-input capacidad" type="checkbox" data-tipo="alteracion" value="no presenta psicopatología que anule su juicio"><label class="form-check-label">Juicio de realidad conservado</label></div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    Exploración Psicopatológica
+                    <div class="btn-group btn-group-sm">
+                        <input type="radio" class="btn-check" name="tipoExp" id="expNormal" onclick="setExploracion('default')">
+                        <label class="btn btn-outline-secondary" for="expNormal">Por defecto</label>
+                        <input type="radio" class="btn-check" name="tipoExp" id="expLibre" onclick="setExploracion('libre')">
+                        <label class="btn btn-outline-secondary" for="expLibre">Libre</label>
+                    </div>
+                </label>
+                <div id="contenedorExploracion" class="d-none mt-2">
+                    <textarea id="textoExploracion" class="form-control" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="checkFamilia">
+                        <label class="form-check-label fw-bold">Conformidad y soporte familiar contrastado</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Plan de Seguimiento</label>
+                    <div class="form-check small"><input class="form-check-input check-plan" type="checkbox" value="Acudirá a cita programada con psiquiatría en USM"><label class="form-check-label">Cita en USM</label></div>
+                    <div class="form-check small"><input class="form-check-input check-plan" type="checkbox" value="Continuará con su tratamiento psicofarmacológico habitual"><label class="form-check-label">Continuar tto. habitual</label></div>
+                    <div class="form-check small"><input class="form-check-input check-plan" type="checkbox" value="En caso de empeoramiento acudirá a Urgencias"><label class="form-check-label">Urgencias si empeora</label></div>
+                    <textarea id="planAltaLibre" class="form-control mt-2" rows="2" placeholder="Otras indicaciones..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" onclick="redactarEvolutivo()" class="btn btn-psq">
+                <i class="fas fa-magic me-2"></i> GENERAR REDACCIÓN HC
+            </button>
+        </form>
+
+        <div id="resultadoIA" class="mt-4">
+            <p class="text-muted text-center m-0">Los resultados aparecerán aquí tras pulsar el botón.</p>
         </div>
 
-        <div class="col-lg-6">
-            <div class="card shadow-sm p-4 sticky-top" style="top: 20px;">
-                <label class="form-label text-primary fw-bold">Propuesta de redacción (HC):</label>
-                <div id="resultadoIA" class="form-control p-3 mb-3">Los resultados aparecerán aquí...</div>
-                <button class="btn btn-outline-secondary btn-sm" onclick="copyResult()">
-                    <i class="fas fa-copy me-1"></i> Copiar al portapapeles
-                </button>
-            </div>
+        <div class="mt-3 text-end" id="btnCopyCont" style="display:none;">
+            <button class="btn btn-link btn-sm text-decoration-none" onclick="copyResult()">
+                <i class="fas fa-copy me-1"></i> Copiar texto
+            </button>
         </div>
     </div>
-</div>
+
+    <footer class="nav-footer">
+        <a href="/herramientas" class="link-back"><i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS</a>
+    </footer>
+</main>
+
+<footer class="site-bottom-info">
+    <img src="/Logo.png" alt="PSQ AL DÍA"> 
+    <span>&copy; 2026 PSQ AL DÍA - Herramientas clínicas</span>
+</footer>
 
 <script>
     const EPP_H = "Consciente. Abordable y colaborador. Orientado globalmente. Atento. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímico. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
@@ -170,7 +237,6 @@
         const ahora = new Date();
         document.getElementById('fecha').value = ahora.toISOString().split('T')[0];
         document.getElementById('hora').value = ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        actualizarEPP();
     };
 
     function toggleRiesgos() {
@@ -178,16 +244,25 @@
     }
 
     function actualizarEPP() {
-        const genero = document.querySelector('input[name="genero"]:checked').value;
+        const genChecked = document.querySelector('input[name="genero"]:checked');
+        if (!genChecked) return;
+        
         const area = document.getElementById('textoExploracion');
         if (document.getElementById('expNormal').checked) {
-            area.value = (genero === 'H') ? EPP_H : EPP_M;
+            area.value = (genChecked.value === 'H') ? EPP_H : EPP_M;
         }
     }
 
     function setExploracion(tipo) {
         const contenedor = document.getElementById('contenedorExploracion');
+        const genChecked = document.querySelector('input[name="genero"]:checked');
+        
         if (tipo === 'default') {
+            if (!genChecked) {
+                alert("Selecciona primero el género para cargar el texto por defecto.");
+                document.getElementById('expNormal').checked = false;
+                return;
+            }
             contenedor.classList.add('d-none');
             actualizarEPP();
         } else {
@@ -196,60 +271,59 @@
         }
     }
 
-    // Busca esta parte en tu script actual y reemplázala:
-async function redactarEvolutivo() {
-    const btn = event.currentTarget;
-    const resDiv = document.getElementById('resultadoIA');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
-    
-    const capacidadSel = Array.from(document.querySelectorAll('.capacidad:checked'));
-
-    const datos = {
-        nombre: document.getElementById('nombrePaciente').value || "el paciente",
-        fecha: document.getElementById('fecha').value,
-        hora: document.getElementById('hora').value,
-        genero: document.querySelector('input[name="genero"]:checked').value,
-        motivos: Array.from(document.querySelectorAll('.motivo:checked')).map(el => el.value),
-        otrosMotivos: document.getElementById('otrosMotivos').value,
-        epp: document.getElementById('textoExploracion').value,
-        riesgosCheck: document.getElementById('checkRiesgos').checked,
-        riesgosTexto: document.getElementById('textoRiesgos').value,
-        capacidadItems: capacidadSel.map(el => ({ val: el.value, tipo: el.dataset.tipo })),
-        familia: document.getElementById('checkFamilia').checked,
-        planChecks: Array.from(document.querySelectorAll('.check-plan:checked')).map(el => el.value),
-        planLibre: document.getElementById('planAltaLibre').value
-    };
-
-    try {
-        const response = await fetch('/api/ia', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                toolId: 'alta-voluntaria', // <--- IMPORTANTE: Este ID debe estar en tu Excel
-                context: JSON.stringify(datos) 
-            })
-        });
-        
-        const data = await response.json();
-        
-        // La IA de Cloudflare devuelve el texto en data.response
-        if (data.response) {
-            resDiv.innerText = data.response.replace(/\*\*|Párrafo \d+:|###|##/g, '').trim();
-        } else {
-            resDiv.innerText = "Error: La IA no devolvió una respuesta válida.";
+    async function redactarEvolutivo() {
+        const genChecked = document.querySelector('input[name="genero"]:checked');
+        if (!genChecked) {
+            alert("Por favor, selecciona el género del paciente.");
+            return;
         }
-    } catch (e) {
-        resDiv.innerText = "Error: Verifica la conexión con el Worker.";
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
+
+        const btn = event.currentTarget;
+        const resDiv = document.getElementById('resultadoIA');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando con IA...';
+        
+        const datos = {
+            nombre: document.getElementById('nombrePaciente').value || "el paciente",
+            fecha: document.getElementById('fecha').value,
+            hora: document.getElementById('hora').value,
+            genero: genChecked.value,
+            motivos: Array.from(document.querySelectorAll('.motivo:checked')).map(el => el.value),
+            otrosMotivos: document.getElementById('otrosMotivos').value,
+            epp: document.getElementById('textoExploracion').value,
+            riesgosCheck: document.getElementById('checkRiesgos').checked,
+            riesgosTexto: document.getElementById('textoRiesgos').value,
+            capacidadItems: Array.from(document.querySelectorAll('.capacidad:checked')).map(el => ({ val: el.value, tipo: el.dataset.tipo })),
+            familia: document.getElementById('checkFamilia').checked,
+            planChecks: Array.from(document.querySelectorAll('.check-plan:checked')).map(el => el.value),
+            planLibre: document.getElementById('planAltaLibre').value
+        };
+
+        try {
+            const response = await fetch('/api/ia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    toolId: 'alta-voluntaria',
+                    context: JSON.stringify(datos) 
+                })
+            });
+            const data = await response.json();
+            if (data.response) {
+                resDiv.innerText = data.response.replace(/\*\*|Párrafo \d+:|###|##/g, '').trim();
+                document.getElementById('btnCopyCont').style.display = 'block';
+            }
+        } catch (e) {
+            resDiv.innerText = "Error de conexión. Inténtalo de nuevo.";
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-magic me-2"></i> GENERAR REDACCIÓN HC';
+        }
     }
-}
 
     function copyResult() {
         navigator.clipboard.writeText(document.getElementById('resultadoIA').innerText);
-        alert('Copiado');
+        alert('Texto copiado al portapapeles');
     }
 </script>
 </body>
