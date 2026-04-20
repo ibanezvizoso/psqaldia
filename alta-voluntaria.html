@@ -199,47 +199,56 @@
         }
     }
 
-    async function redactarEvolutivo() {
-        const btn = event.currentTarget;
-        const resDiv = document.getElementById('resultadoIA');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+    // Busca esta parte en tu script actual y reemplázala:
+async function redactarEvolutivo() {
+    const btn = event.currentTarget;
+    const resDiv = document.getElementById('resultadoIA');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+    
+    const capacidadSel = Array.from(document.querySelectorAll('.capacidad:checked'));
+
+    const datos = {
+        nombre: document.getElementById('nombrePaciente').value || "el paciente",
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        genero: document.querySelector('input[name="genero"]:checked').value,
+        motivos: Array.from(document.querySelectorAll('.motivo:checked')).map(el => el.value),
+        otrosMotivos: document.getElementById('otrosMotivos').value,
+        epp: document.getElementById('textoExploracion').value,
+        riesgosCheck: document.getElementById('checkRiesgos').checked,
+        riesgosTexto: document.getElementById('textoRiesgos').value,
+        capacidadItems: capacidadSel.map(el => ({ val: el.value, tipo: el.dataset.tipo })),
+        familia: document.getElementById('checkFamilia').checked,
+        planChecks: Array.from(document.querySelectorAll('.check-plan:checked')).map(el => el.value),
+        planLibre: document.getElementById('planAltaLibre').value
+    };
+
+    try {
+        const response = await fetch('/api/ia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                toolId: 'alta-voluntaria', // <--- IMPORTANTE: Este ID debe estar en tu Excel
+                context: JSON.stringify(datos) 
+            })
+        });
         
-        // Recogemos por separado para la lógica del Worker
-        const capacidadSel = Array.from(document.querySelectorAll('.capacidad:checked'));
-
-        const datos = {
-            nombre: document.getElementById('nombrePaciente').value || "el paciente",
-            fecha: document.getElementById('fecha').value,
-            hora: document.getElementById('hora').value,
-            genero: document.querySelector('input[name="genero"]:checked').value,
-            motivos: Array.from(document.querySelectorAll('.motivo:checked')).map(el => el.value),
-            otrosMotivos: document.getElementById('otrosMotivos').value,
-            epp: document.getElementById('textoExploracion').value,
-            riesgosCheck: document.getElementById('checkRiesgos').checked,
-            riesgosTexto: document.getElementById('textoRiesgos').value,
-            // Enviamos los tipos para que el Worker sepa cómo unir
-            capacidadItems: capacidadSel.map(el => ({ val: el.value, tipo: el.dataset.tipo })),
-            familia: document.getElementById('checkFamilia').checked,
-            planChecks: Array.from(document.querySelectorAll('.check-plan:checked')).map(el => el.value),
-            planLibre: document.getElementById('planAltaLibre').value
-        };
-
-        try {
-            const response = await fetch('/api/ia', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ context: JSON.stringify(datos) })
-            });
-            const data = await response.json();
+        const data = await response.json();
+        
+        // La IA de Cloudflare devuelve el texto en data.response
+        if (data.response) {
             resDiv.innerText = data.response.replace(/\*\*|Párrafo \d+:|###|##/g, '').trim();
-        } catch (e) {
-            resDiv.innerText = "Error: Verifica la conexión con el Worker.";
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
+        } else {
+            resDiv.innerText = "Error: La IA no devolvió una respuesta válida.";
         }
+    } catch (e) {
+        resDiv.innerText = "Error: Verifica la conexión con el Worker.";
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
     }
+}
 
     function copyResult() {
         navigator.clipboard.writeText(document.getElementById('resultadoIA').innerText);
