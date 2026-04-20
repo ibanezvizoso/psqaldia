@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <link rel="icon" href="/Logo.png">
-    <link rel="apple-touch-icon" href="/Logo.png"> 
-    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/Logo.png"> <link rel="manifest" href="/manifest.json">
+
     <link rel="stylesheet" href="/css/all.min.css">
     <script>
         if (window.location.hostname.includes("pages.dev")) {
@@ -15,9 +15,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSQALDÍA | Tu web/app para la psiquiatría clínica</title>
     <meta name="description" content="Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.">
+    
     <meta name="theme-color" content="#4338ca">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
+    
+    
     <style>
         :root {
             --bg: #f8fafc; --card: #ffffff; --primary: #4338ca; --whatsapp: #22c55e;
@@ -30,69 +33,59 @@
             }
         }
         body { 
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s; 
-        }
-
+    /* Esta es la pila de fuentes del sistema moderno */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
+                 Helvetica, Arial, sans-serif, "Apple Color Emoji", 
+                 "Segoe UI Emoji", "Segoe UI Symbol"; 
+    background: var(--bg); 
+    color: var(--text-main); 
+    margin: 0; 
+    padding: 0; 
+    transition: background 0.3s; 
+}
         header { background: var(--bg); padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 100; transition: transform 0.4s ease; display: flex; align-items: center; justify-content: space-between; }
         header.hide { transform: translateY(-100%); }
         .menu-toggle { background: none; border: none; color: var(--text-main); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; z-index: 110; width: 40px; display: flex; align-items: center; justify-content: center; }
         .logo-img { max-height: 80px; width: auto; display: block; margin: 0 auto; position: absolute; left: 50%; transform: translateX(-50%); }
-        
-        /* VISOR PRINCIPAL: Blindado a 1 columna en móvil */
-        #app, #favs-app { 
-            display: grid !important; 
-            grid-template-columns: 1fr !important; 
-            gap: 1.5rem !important; 
-            width: 100% !important;
-            max-width: 500px !important; /* Evita que las tarjetas se estiren demasiado hacia los lados */
-            margin: 0 auto !important;
-        }
-
-        /* DISEÑO MOSAICO: Solo para pantallas grandes */
-        @media (min-width: 768px) {
-            #app, #favs-app {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
-                max-width: 1100px !important;
-                gap: 2rem !important;
-            }
-        }
-
-        /* TARJETAS: Forzamos verticalidad */
-        .card { 
-            background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); 
-            transition: 0.3s; cursor: pointer; display: flex !important; flex-direction: column !important; 
-            position: relative; width: 100% !important;
-        }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        .card-img { width: 100%; height: 180px; object-fit: cover; background: var(--border); }
-        .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-
-        /* MODALES: Corregido el efecto apaisado */
-        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-        .modal-content { 
-            background: var(--card); color: var(--text-main); width: 100% !important; 
-            max-width: 450px !important; /* Tamaño vertical de tarjeta móvil */
-            border-radius: 2rem; position: relative; overflow-y: auto; max-height: 90vh; 
-            display: flex !important; flex-direction: column !important;
-        }
-
-        /* Estilos de apoyo (Menu, Botones, etc) */
+        .header-spacer { width: 40px; }
         .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .side-menu.open { left: 0; }
         .menu-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1999; display: none; }
         .menu-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .menu-link { padding: 1rem 1.5rem; display: flex; align-items: center; gap: 15px; text-decoration: none; color: var(--text-main); font-weight: 700; border-left: 4px solid transparent; }
+        .menu-nav { display: flex; flex-direction: column; padding: 1rem 0; }
+        .menu-link { padding: 1rem 1.5rem; display: flex; align-items: center; gap: 15px; text-decoration: none; color: var(--text-main); font-weight: 700; transition: 0.2s; border-left: 4px solid transparent; }
+        .menu-link:hover { background: var(--bg); border-left-color: var(--primary); }
+        .menu-link i { width: 20px; color: var(--text-muted); text-align: center; }
         .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; }
-        #search { width: 100%; padding: 1.1rem 1.5rem; border-radius: 50px; border: 2px solid var(--border); background: var(--card); color: var(--text-main); margin-bottom: 1.5rem; }
-        .f-btn { padding: 0.6rem 1.2rem; border-radius: 50px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.8rem; font-weight: 800; color: var(--text-muted); }
-        .f-btn.active { background: var(--text-main); color: var(--bg); }
+        .search-area { max-width: 600px; margin: 1rem auto 2.5rem; text-align: center; }
+        #search { width: 100%; padding: 1.1rem 1.5rem; border-radius: 50px; border: 2px solid var(--border); background: var(--card); color: var(--text-main); font-size: 1rem; outline: none; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .filter-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 1rem; }
+        .f-btn { padding: 0.6rem 1.2rem; border-radius: 50px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; transition: 0.3s; color: var(--text-muted); }
+        .f-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
+        .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
+        #app, #favs-app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .card-img { width: 100%; height: 180px; object-fit: cover; background: var(--border); }
+        .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+        .fav-btn { position: absolute; top: 1rem; right: 1rem; background: var(--card); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; font-size: 1.1rem; color: #cbd5e1; transition: 0.2s; }
+        .fav-btn.is-fav { color: var(--fav); }
         .tag { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; }
-        .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: var(--text-main); }
+        .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: var(--text-main); line-height: 1.2; }
+        .res { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 5px; font-weight: 600; opacity: 0.8; }
+        .card-actions { display: flex; gap: 0.75rem; margin-top: auto; }
         .btn { flex: 1; padding: 0.8rem; border-radius: 1rem; text-decoration: none; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-share { background: #64748b; color: white; flex: 0 0 55px; }
+        .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 55px; font-size: 1.4rem; }
+        .btn-share { background: #64748b; color: white; flex: 0 0 55px; font-size: 1.2rem; }
         footer { margin-top: 5rem; padding: 3rem 1rem; border-top: 1px solid var(--border); text-align: center; }
+        #installBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none; align-items: center; gap: 10px; }
+        #iosAlert { position: fixed; bottom: 20px; left: 10px; right: 10px; background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1001; display: none; align-items: center; gap: 12px; animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        .modal-content { background: var(--card); color: var(--text-main); width: 100%; max-width: 600px; border-radius: 2rem; position: relative; overflow-y: auto; max-height: 90vh; }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--card); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 20; }
     </style>
 </head>
 <body>
@@ -119,37 +112,149 @@
 <div class="container">
     <div class="search-area">
         <input type="text" id="search" placeholder="Buscar..." oninput="filter()">
-        <div id="filterContainer" class="filter-buttons" style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:1rem;"></div>
+        <div id="filterContainer" class="filter-buttons"></div>
     </div>
-    <div id="favs-title" class="section-title" style="font-size:0.9rem; font-weight:800; color:var(--text-muted); margin:2rem 0 1rem; text-transform:uppercase; display:none;"><i class="fas fa-star"></i> Mis Favoritos</div>
+    <div id="favs-title" class="section-title"><i class="fas fa-star"></i> Mis Favoritos</div>
     <div id="favs-app"></div>
-    <div id="main-title" class="section-title" style="font-size:0.9rem; font-weight:800; color:var(--text-muted); margin:2rem 0 1rem; text-transform:uppercase; display:none;">Todos los Recursos</div>
+    <div id="main-title" class="section-title">Todos los Recursos</div>
     <div id="app"></div>
 </div>
 <footer>
     <div style="margin-bottom: 1rem; font-weight: 800; opacity: 0.5; font-size: 0.8rem; letter-spacing: 1px;">PSQALDÍA © 2026</div>
     <a href="#" onclick="openLegal(); return false;" style="color: var(--text-muted); font-size: 0.7rem; text-decoration: underline;">Ver Aviso Legal y Responsabilidad</a>
 </footer>
-
+<button id="installBtn"><i class="fas fa-download"></i> INSTALAR APP</button>
+<div id="iosAlert">
+    <div style="font-size: 1.5rem;">📲</div>
+    <div style="font-size: 0.85rem; line-height: 1.3;"><b>¡Instala PSQALDÍA!</b> Pulsa compartir <i class="fa-solid fa-arrow-up-from-bracket"></i> y luego selecciona <b>"Añadir a la pantalla de inicio"</b>.</div>
+    <button onclick="document.getElementById('iosAlert').style.display='none'" style="background:none; border:none; color:var(--text-muted); font-weight:bold;">X</button>
+</div>
 <div id="modal" class="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="close-modal" onclick="closeModal()" style="position:absolute; top:1rem; right:1rem; cursor:pointer; z-index:20; background:var(--card); border-radius:50%; width:2.5rem; height:2.5rem; display:flex; align-items:center; justify-content:center; border:1px solid var(--border);"><i class="fas fa-times"></i></div>
+        <div class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></div>
         <div id="modalData"></div>
     </div>
 </div>
 
 <script>
-    /* Lógica original de PSQALDÍA - NO SE MUEVE NI UNA COMA */
-    let db = [], favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), currentCategory = 'TODOS', lastScrollY = window.scrollY;
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(error => {
+        console.warn('Aviso: Service Worker no registrado.', error);
+      });
+    });
+  }
+  
+  function slugify(text) {
+      return text.toString().toLowerCase().trim()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-');
+  }
 
-    function slugify(text) {
-        return text.toString().toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+    let db = [], 
+        favorites = JSON.parse(localStorage.getItem('psq_favs') || '[]'), 
+        currentCategory = 'TODOS', 
+        lastScrollY = window.scrollY, 
+        deferredPrompt;
+
+    function cargarScript(nombreArchivo) {
+        return new Promise((resolve, reject) => {
+            if (!nombreArchivo || nombreArchivo.trim() === "" || nombreArchivo === "#") return resolve();
+            if (document.querySelector(`script[src="${nombreArchivo}"]`)) return resolve();
+            const s = document.createElement('script');
+            s.src = nombreArchivo;
+            s.onload = resolve;
+            s.onerror = () => reject(new Error(`Error cargando ${nombreArchivo}`));
+            document.head.appendChild(s);
+        });
+    }
+async function compartirRecurso(e, id) {
+    e.stopPropagation(); // Importante: evita que se abra el modal al compartir
+    const item = db.find(i => i.id === id);
+    if (!item) return;
+
+    const shareUrl = window.location.origin + '/' + item.id;
+    const shareTitle = `${item.titulo} | PSQALDÍA`;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: shareTitle,
+                text: `${item.titulo}: ${item.resumen}`,
+                url: shareUrl
+            });
+        } catch (err) {
+            console.log("Compartido cancelado");
+        }
+    } else {
+        // Si estás en PC, usamos WhatsApp como siempre
+        const waText = `*${item.titulo}*: ${shareUrl}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`, '_blank');
+    }
+}
+    function toggleMenu() {
+        const menu = document.getElementById('sideMenu'), overlay = document.getElementById('menuOverlay');
+        const isOpen = menu.classList.contains('open');
+        menu.classList.toggle('open');
+        overlay.style.display = isOpen ? 'none' : 'block';
+        document.body.style.overflow = isOpen ? 'auto' : 'hidden';
+    }
+
+    async function openAbout() {
+        toggleMenu();
+        const modalData = document.getElementById('modalData');
+        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
+        document.getElementById('modal').style.display = 'flex';
+        try {
+            const response = await fetch('/about.html');
+            modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error.</div>';
+        } catch (e) { modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>'; }
+    }
+
+    async function openLegal() {
+        const modalData = document.getElementById('modalData');
+        modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
+        document.getElementById('modal').style.display = 'flex';
+        try {
+            const response = await fetch('/legal.html');
+            modalData.innerHTML = response.ok ? await response.text() : '<div style="padding:2.5rem;">Error.</div>';
+        } catch (e) { modalData.innerHTML = '<div style="padding:2.5rem;">Error de conexión.</div>'; }
+    }
+
+    function openSettings() {
+        toggleMenu();
+        document.getElementById('modalData').innerHTML = `<div style="padding:2.5rem;"><h2>Ajustes</h2><button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button></div>`;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function clearFavs() { if(confirm("¿Seguro?")) { favorites = []; localStorage.setItem('psq_favs', '[]'); filter(); closeModal(); } }
+
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('mainHeader');
+        if (window.scrollY > lastScrollY && window.scrollY > 100) header.classList.add('hide');
+        else header.classList.remove('hide');
+        lastScrollY = window.scrollY;
+    });
+
+    function getPasteColor(str) {
+        let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        const h = Math.abs(hash) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return `background-color: hsl(${h}, 70%, ${isDark?25:92}%); color: hsl(${h}, 70%, ${isDark?90:25}%); border: 1px solid hsl(${h}, 70%, ${isDark?40:80}%);`;
+    }
+
+    function parseDate(dateStr) {
+        if (!dateStr) return new Date(0);
+        const parts = dateStr.split(/[\/\s-]/);
+        return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
     }
 
     async function loadData() {
         try {
             const res = await fetch(`/?sheet=${encodeURIComponent('Hoja 1')}`);
             const data = await res.json();
+            if (data.error) throw new Error(data.error);
             if (data.values) {
                 db = data.values.map(row => ({ 
                     fecha: row[0]||'', titulo: row[1]||'', resumen: row[2]||'', link: row[3]||'', imagen: row[4]||'',
@@ -157,77 +262,122 @@
                     script: row[8]||'', id: slugify(row[1] || 'item') 
                 }));
             }
-            db.sort((a, b) => {
-                const dateA = a.fecha.split('/').reverse().join('');
-                const dateB = b.fecha.split('/').reverse().join('');
-                return dateB.localeCompare(dateA);
-            });
+            db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
             createFilterButtons(); renderAll(); checkSharedResource();
-        } catch (e) { console.error("Error:", e); }
+        } catch (e) { 
+            console.error("Error:", e); 
+            document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos.</div>';
+        }
     }
 
     function createCard(item) {
         const isFav = favorites.includes(item.id);
-        const card = document.createElement('div'); card.className = 'card';
-        card.onclick = () => { window.history.pushState({}, '', `/${item.id}`); openModal(item.id); };
-        card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" style="position:absolute; top:1rem; right:1rem; background:var(--card); border:none; width:35px; height:35px; border-radius:50%; cursor:pointer; color:${isFav?'var(--fav)':'#cbd5e1'}; z-index:10;" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
-            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img">
+        const card = document.createElement('div'); 
+        card.className = 'card'; 
+        card.id = 'anchor-' + item.id;
+        
+        let textoBoton = "ACCEDER"; 
+
+        // Al hacer clic, abre el modal al instante (sin preguntar contraseña)
+        card.onclick = () => {
+            window.history.pushState({}, '', `/${item.id}`); 
+            openModal(item.id); 
+        };
+
+        const shareUrl = window.location.origin + '/' + item.id;
+        const shareText = item.accion !== '' ? `🛠️ *Herramienta*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}*: ${shareUrl}`;
+        
+        card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
+            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
             <div class="card-content">
-                <span class="tag" style="background:#eee; color:#333; ${getPasteColor(item.categoria)}">${item.categoria}</span>
+                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
-                <div class="card-date" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:1rem;"><i class="far fa-calendar-alt"></i> ${item.fecha}</div>
-                <div class="card-actions" style="display:flex; gap:0.75rem; margin-top:auto;">
-                    <button class="btn btn-primary">ACCEDER</button>
-                    <button class="btn btn-share" onclick="compartirRecurso(event, '${item.id}')"><i class="fa-solid fa-share-nodes"></i></button>
+                <div class="res">${item.resumen}</div>
+                <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
+                <div class="card-actions">
+                    <button class="btn btn-primary">${textoBoton}</button> 
+                    <button class="btn btn-share" onclick="compartirRecurso(event, '${item.id}')">
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </button>
                 </div>
             </div>`;
         return card;
     }
 
-    function openModal(id) {
-        const item = db.find(i => i.id === id); if (!item) return;
-        let accessBtn = `<a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a>`;
-        if (item.accion && item.accion !== '') accessBtn = `<button class="btn btn-primary" onclick="ejecutarAccion('${item.id}')">ACCEDER</button>`;
-        document.getElementById('modalData').innerHTML = `
-            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
-            <div style="padding:2rem;">
-                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
-                <h2 style="margin:1rem 0;">${item.titulo}</h2>
-                <p style="line-height:1.6;">${item.resumen}</p>
-                <div class="card-actions" style="display:flex; gap:10px; margin-top:20px;">
-                    ${accessBtn}
-                    <button class="btn btn-share" style="flex:0 0 60px;" onclick="compartirRecurso(event, '${item.id}')"><i class="fa-solid fa-share-nodes"></i></button>
-                </div>
-            </div>`;
-        document.getElementById('modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+   function openModal(id) {
+    const item = db.find(i => i.id === id); 
+    if (!item) return;
+    
+    let accessBtn = `<a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a>`;
+    if (item.accion && item.accion !== '') {
+        accessBtn = `<button class="btn btn-primary" onclick="ejecutarAccion('${item.id}')">ACCEDER</button>`;
     }
+
+    document.getElementById('modalData').innerHTML = `
+        <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
+        <div style="padding:2rem;">
+            <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
+            <h2 style="margin:1rem 0;">${item.titulo}</h2>
+            <p style="color:var(--text-main); line-height:1.6;">${item.resumen}</p>
+            <div class="card-actions" style="margin-top:20px;">
+                ${accessBtn}
+                <button class="btn btn-share" style="flex: 0 0 60px;" onclick="compartirRecurso(event, '${item.id}')">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </button>
+            </div>
+        </div>`;
+        
+    document.getElementById('modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
 
     async function ejecutarAccion(id) {
         const item = db.find(i => i.id === id); if (!item) return;
-        if (item.script) {
-            const s = document.createElement('script'); s.src = item.script;
-            document.head.appendChild(s);
-            s.onload = () => { if(window[item.accion]) window[item.accion](); };
+        document.getElementById('modalData').innerHTML = '<div style="padding:4rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x"></i><p style="margin-top:1rem;">Iniciando...</p></div>';
+        if (item.script && item.script !== "" && item.script !== "#") {
+            try { await cargarScript(item.script); } catch (e) { alert("Error al cargar módulo."); openModal(id); return; }
+        }
+        if (item.accion && typeof window[item.accion] === 'function') {
+            await window[item.accion](); 
+        } else {
+            alert("No se pudo iniciar."); openModal(id);
         }
     }
 
-    function closeModal() { document.getElementById('modal').style.display = 'none'; document.body.style.overflow = 'auto'; window.history.pushState({}, '', '/'); }
-    function toggleFavorite(e, id) { e.stopPropagation(); favorites = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id]; localStorage.setItem('psq_favs', JSON.stringify(favorites)); filter(); }
-    function filter() { const q = document.getElementById('search').value.toLowerCase(); const filtered = db.filter(i => (i.titulo.toLowerCase().includes(q) || i.resumen.toLowerCase().includes(q)) && (currentCategory === 'TODOS' || i.categoria === currentCategory)); renderAll(filtered); }
+    function closeModal() { 
+        document.getElementById('modal').style.display = 'none'; 
+        document.body.style.overflow = 'auto';
+        if (window.location.pathname !== '/') window.history.pushState({}, '', '/');
+    }
     
+    function toggleFavorite(e, id) { 
+        e.stopPropagation(); 
+        favorites = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id]; 
+        localStorage.setItem('psq_favs', JSON.stringify(favorites)); 
+        filter(); 
+    }
+
+    function filter() {
+        const q = document.getElementById('search').value.toLowerCase().trim();
+        const filtered = db.filter(i => (i.titulo.toLowerCase().includes(q) || i.resumen.toLowerCase().includes(q)) && (currentCategory === 'TODOS' || i.categoria === currentCategory));
+        renderAll(filtered);
+    }
+
     function renderAll(dataToRender = db) {
         const favsApp = document.getElementById('favs-app'), app = document.getElementById('app');
         const favsList = dataToRender.filter(i => favorites.includes(i.id)), othersList = dataToRender.filter(i => !favorites.includes(i.id));
         favsApp.innerHTML = ''; app.innerHTML = '';
-        if (favsList.length > 0 && currentCategory === 'TODOS') { document.getElementById('favs-title').style.display = 'block'; favsList.forEach(i => favsApp.appendChild(createCard(i))); }
-        else { document.getElementById('favs-title').style.display = 'none'; }
-        document.getElementById('main-title').style.display = (favsList.length > 0) ? 'block' : 'none';
+        if (favsList.length > 0 && currentCategory === 'TODOS') { 
+            document.getElementById('favs-title').style.display = 'block'; 
+            favsList.forEach(i => favsApp.appendChild(createCard(i))); 
+        } else { document.getElementById('favs-title').style.display = 'none'; }
+        document.getElementById('main-title').style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
         othersList.forEach(i => app.appendChild(createCard(i)));
     }
 
     function createFilterButtons() {
         const container = document.getElementById('filterContainer'), cats = ['TODOS', ...new Set(db.map(i => i.categoria))];
+        container.innerHTML = '';
         cats.forEach(cat => {
             const btn = document.createElement('button'); btn.className = `f-btn ${cat === currentCategory ? 'active' : ''}`; btn.textContent = cat;
             btn.onclick = () => { currentCategory = cat; document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); filter(); };
@@ -235,15 +385,21 @@
         });
     }
 
-    function getPasteColor(str) {
-        let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        const h = Math.abs(hash) % 360; return `background-color: hsl(${h}, 70%, 90%); color: hsl(${h}, 70%, 20%);`;
+    async function checkSharedResource() {
+        let sharedId = window.location.pathname.replace(/^\/|\/$/g, '');
+        if (!sharedId || sharedId === "" || sharedId === "index.html") sharedId = new URLSearchParams(window.location.search).get('id');
+        if (!sharedId) return;
+        const cleanId = sharedId.replace('psq-', '');
+        const item = db.find(i => i.id === cleanId);
+        if (item) {
+            setTimeout(() => { openModal(item.id); document.getElementById('anchor-' + item.id)?.scrollIntoView({ behavior: 'smooth' }); }, 600);
+        }
     }
 
-    function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); document.getElementById('menuOverlay').style.display = document.getElementById('sideMenu').classList.contains('open') ? 'block' : 'none'; }
-    async function compartirRecurso(e, id) { e.stopPropagation(); const item = db.find(i => i.id === id); if (navigator.share) navigator.share({ title: item.titulo, url: window.location.origin + '/' + item.id }); }
-    function checkSharedResource() { const path = window.location.pathname.substring(1); if (path) { setTimeout(() => openModal(path), 500); } }
-
+    window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
+    document.getElementById('installBtn').addEventListener('click', () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
+    
     loadData();
 </script>
 </body>
