@@ -13,8 +13,7 @@
         .btn-psq:hover { background-color: #1a252f; color: white; }
         .form-label { font-weight: 600; color: #34495e; }
         .header-psq { background: white; padding: 1rem; border-bottom: 2px solid #eee; margin-bottom: 2rem; }
-        #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 400px; font-size: 0.95rem; }
-        .btn-group-toggle .btn { margin-bottom: 5px; }
+        #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 450px; font-size: 0.95rem; }
     </style>
 </head>
 <body>
@@ -31,6 +30,11 @@
         <div class="col-lg-6">
             <div class="card shadow-sm p-4 mb-4">
                 <form id="altaForm">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Paciente (opcional)</label>
+                        <input type="text" id="nombrePaciente" class="form-control" placeholder="Nombre completo o iniciales">
+                    </div>
+
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="form-label">Fecha</label>
@@ -44,9 +48,9 @@
                             <label class="form-label">Género</label>
                             <div class="btn-group w-100" role="group">
                                 <input type="radio" class="btn-check" name="genero" id="genH" value="H" checked onclick="actualizarEPP()">
-                                <label class="btn btn-outline-primary" for="genH">Hombre</label>
+                                <label class="btn btn-outline-primary" for="genH">H</label>
                                 <input type="radio" class="btn-check" name="genero" id="genM" value="M" onclick="actualizarEPP()">
-                                <label class="btn btn-outline-danger" for="genM">Mujer</label>
+                                <label class="btn btn-outline-danger" for="genM">M</label>
                             </div>
                         </div>
                     </div>
@@ -93,8 +97,12 @@
                                 <label class="form-check-label">Sin alt. cognitivas</label>
                             </div>
                             <div class="form-check small">
-                                <input class="form-check-input capacidad" type="checkbox" value="sin alteraciones psicopatológicas significativas en capacidad de decisión" checked>
+                                <input class="form-check-input capacidad" type="checkbox" value="sin alteraciones psicopatológicas significativas en su capacidad de decisión" checked>
                                 <label class="form-check-label">Decisión conservada</label>
+                            </div>
+                            <div class="form-check small">
+                                <input class="form-check-input capacidad" type="checkbox" value="comprende la información recibida" checked>
+                                <label class="form-check-label">Comprende información</label>
                             </div>
                         </div>
                     </div>
@@ -120,8 +128,23 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Plan al alta:</label>
-                        <textarea id="planAlta" class="form-control" rows="2" placeholder="CSM, medicación..."></textarea>
+                        <label class="form-label">Plan al alta (múltiple):</label>
+                        <div class="form-check small">
+                            <input class="form-check-input check-plan" type="checkbox" value="acudirá a cita programada con psiquiatría en USM de referencia">
+                            <label class="form-check-label">Cita programada en USM</label>
+                        </div>
+                        <div class="form-check small">
+                            <input class="form-check-input check-plan" type="checkbox" value="continuará con su tratamiento psicofarmacológico habitual">
+                            <label class="form-check-label">Continuar tto. habitual</label>
+                        </div>
+                        <div class="form-check small">
+                            <input class="form-check-input check-plan" type="checkbox" value="en caso de empeoramiento clínico acudirá al servicio de urgencias de referencia">
+                            <label class="form-check-label">Urgencias si empeoramiento</label>
+                        </div>
+                        <div class="mt-2">
+                            <label class="form-label small text-muted">Plan adicional / Texto libre:</label>
+                            <textarea id="planAltaLibre" class="form-control" rows="2" placeholder="Otras citas, recomendaciones..."></textarea>
+                        </div>
                     </div>
 
                     <button type="button" onclick="redactarEvolutivo()" class="btn btn-psq w-100 p-3 shadow">
@@ -133,7 +156,7 @@
 
         <div class="col-lg-6">
             <div class="card shadow-sm p-4 sticky-top" style="top: 20px;">
-                <label class="form-label text-primary fw-bold">Propuesta de redacción:</label>
+                <label class="form-label text-primary fw-bold">Propuesta de redacción (HC):</label>
                 <div id="resultadoIA" class="form-control p-3 mb-3">Los resultados aparecerán aquí...</div>
                 <button class="btn btn-outline-secondary btn-sm" onclick="copyResult()">
                     <i class="fas fa-copy me-1"></i> Copiar al portapapeles
@@ -157,23 +180,19 @@
     function actualizarEPP() {
         const genero = document.querySelector('input[name="genero"]:checked').value;
         const area = document.getElementById('textoExploracion');
-        const esDefault = document.getElementById('expNormal').checked;
-        
-        if (esDefault) {
+        if (document.getElementById('expNormal').checked) {
             area.value = (genero === 'H') ? EPP_H : EPP_M;
         }
     }
 
     function setExploracion(tipo) {
         const contenedor = document.getElementById('contenedorExploracion');
-        const area = document.getElementById('textoExploracion');
-        
         if (tipo === 'default') {
             contenedor.classList.add('d-none');
             actualizarEPP();
         } else {
             contenedor.classList.remove('d-none');
-            area.focus();
+            document.getElementById('textoExploracion').focus();
         }
     }
 
@@ -184,14 +203,19 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
         
         const datos = {
+            nombre: document.getElementById('nombrePaciente').value || "el paciente",
+            fecha: document.getElementById('fecha').value,
+            hora: document.getElementById('hora').value,
             genero: document.querySelector('input[name="genero"]:checked').value,
             motivos: Array.from(document.querySelectorAll('.motivo:checked')).map(el => el.value),
-            otros: document.getElementById('otrosMotivos').value,
+            otrosMotivos: document.getElementById('otrosMotivos').value,
             epp: document.getElementById('textoExploracion').value,
-            riesgos: document.getElementById('checkRiesgos').checked ? document.getElementById('textoRiesgos').value : "No especificados",
+            riesgosCheck: document.getElementById('checkRiesgos').checked,
+            riesgosTexto: document.getElementById('textoRiesgos').value,
             capacidad: Array.from(document.querySelectorAll('.capacidad:checked')).map(el => el.value),
             familia: document.getElementById('checkFamilia').checked,
-            plan: document.getElementById('planAlta').value
+            planChecks: Array.from(document.querySelectorAll('.check-plan:checked')).map(el => el.value),
+            planLibre: document.getElementById('planAltaLibre').value
         };
 
         try {
@@ -200,13 +224,14 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     context: JSON.stringify(datos),
-                    prompt: "Redacta una nota de evolución médica para un alta voluntaria. Usa los datos proporcionados para crear un texto profesional, legalmente robusto y coherente."
+                    prompt: "Redacta una nota evolutiva médica para un alta voluntaria. Formato: Solo párrafos de texto plano, sin encabezados ni negritas. Esquema: Párrafo 1 (Inicio con fecha, hora, nombre y motivos) -> Párrafo 2 (Riesgos explicados y valoración de la capacidad de decisión) -> Párrafo 3 (Escribir exactamente 'Exploración psicopatológica en el momento del alta: ' seguido del texto de la EPP entregado) -> Párrafo 4 (Comunicación familiar y plan de seguimiento al alta)."
                 })
             });
             const data = await response.json();
-            resDiv.innerText = data.response;
+            // Limpieza extra por si la IA pone asteriscos
+            resDiv.innerText = data.response.replace(/\*\*/g, '').trim();
         } catch (e) {
-            resDiv.innerText = "Error: Asegúrate de que el Worker esté desplegado con el binding de AI.";
+            resDiv.innerText = "Error: Verifica la conexión con el Worker y los AI Bindings.";
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
@@ -216,7 +241,7 @@
     function copyResult() {
         const text = document.getElementById('resultadoIA').innerText;
         navigator.clipboard.writeText(text);
-        alert('Texto copiado');
+        alert('Copiado al portapapeles');
     }
 </script>
 </body>
