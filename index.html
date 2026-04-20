@@ -64,16 +64,14 @@
         .f-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
         .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
         #app, #favs-app { 
-    display: grid; 
-    grid-template-columns: 1fr; /* Una sola columna por defecto (móvil) */
+    display: grid !important; 
+    grid-template-columns: 1fr !important; /* Forzamos 1 columna siempre */
     gap: 1.5rem; 
 }
 
-/* Solo a partir de tablets/PC se pone en modo mosaico */
 @media (min-width: 768px) {
     #app, #favs-app {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
     }
 }
         .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
