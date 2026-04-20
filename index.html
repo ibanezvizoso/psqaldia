@@ -63,16 +63,28 @@
         .f-btn { padding: 0.6rem 1.2rem; border-radius: 50px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; transition: 0.3s; color: var(--text-muted); }
         .f-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
         .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
-        #app, #favs-app { 
+        /* FUERZA BRUTA: 1 columna para TODO por defecto */
+#app, #favs-app { 
     display: grid !important; 
-    grid-template-columns: 1fr !important; /* Forzamos 1 columna siempre */
-    gap: 1.5rem; 
+    grid-template-columns: 1fr !important; 
+    gap: 1.2rem !important; 
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
 }
 
-@media (min-width: 768px) {
+/* Solo en pantallas de ordenador (más de 1024px) permitimos el mosaico */
+@media (min-width: 1024px) {
     #app, #favs-app {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+        gap: 2rem !important;
     }
+}
+
+/* Por si acaso: Forzamos que las tarjetas no se encojan */
+.card {
+    width: 100% !important;
+    min-width: 0 !important;
 }
         .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
