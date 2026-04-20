@@ -85,10 +85,12 @@
                     <div class="row mb-3">
                         <div class="col-md-7">
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="checkRiesgos">
+                                <input class="form-check-input" type="checkbox" id="checkRiesgos" onclick="toggleRiesgos()">
                                 <label class="form-check-label fw-bold">Se explican riesgos:</label>
                             </div>
-                            <textarea id="textoRiesgos" class="form-control" rows="2" placeholder="Recaída, abandono tto..."></textarea>
+                            <div id="contenedorRiesgos" class="d-none">
+                                <textarea id="textoRiesgos" class="form-control" rows="2" placeholder="Recaída, abandono tto..."></textarea>
+                            </div>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small">Capacidad/Comprensión:</label>
@@ -141,10 +143,7 @@
                             <input class="form-check-input check-plan" type="checkbox" value="en caso de empeoramiento clínico acudirá al servicio de urgencias de referencia">
                             <label class="form-check-label">Urgencias si empeoramiento</label>
                         </div>
-                        <div class="mt-2">
-                            <label class="form-label small text-muted">Plan adicional / Texto libre:</label>
-                            <textarea id="planAltaLibre" class="form-control" rows="2" placeholder="Otras citas, recomendaciones..."></textarea>
-                        </div>
+                        <textarea id="planAltaLibre" class="form-control mt-2" rows="2" placeholder="Otros detalles del plan..."></textarea>
                     </div>
 
                     <button type="button" onclick="redactarEvolutivo()" class="btn btn-psq w-100 p-3 shadow">
@@ -176,6 +175,11 @@
         document.getElementById('hora').value = ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         actualizarEPP();
     };
+
+    function toggleRiesgos() {
+        const contenedor = document.getElementById('contenedorRiesgos');
+        contenedor.classList.toggle('d-none', !document.getElementById('checkRiesgos').checked);
+    }
 
     function actualizarEPP() {
         const genero = document.querySelector('input[name="genero"]:checked').value;
@@ -224,14 +228,13 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     context: JSON.stringify(datos),
-                    prompt: "Redacta una nota evolutiva médica para un alta voluntaria. Formato: Solo párrafos de texto plano, sin encabezados ni negritas. Esquema: Párrafo 1 (Inicio con fecha, hora, nombre y motivos) -> Párrafo 2 (Riesgos explicados y valoración de la capacidad de decisión) -> Párrafo 3 (Escribir exactamente 'Exploración psicopatológica en el momento del alta: ' seguido del texto de la EPP entregado) -> Párrafo 4 (Comunicación familiar y plan de seguimiento al alta)."
+                    prompt: "Redacta una nota evolutiva médica de alta voluntaria. Sin encabezados, sin negritas, solo párrafos de texto plano. Estructura: Inicio con fecha/hora/motivos -> Párrafo de Riesgos y capacidad (unifica sin repetir conceptos) -> EPP -> Plan."
                 })
             });
             const data = await response.json();
-            // Limpieza extra por si la IA pone asteriscos
             resDiv.innerText = data.response.replace(/\*\*/g, '').trim();
         } catch (e) {
-            resDiv.innerText = "Error: Verifica la conexión con el Worker y los AI Bindings.";
+            resDiv.innerText = "Error: Verifica la conexión con el Worker.";
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
@@ -239,9 +242,8 @@
     }
 
     function copyResult() {
-        const text = document.getElementById('resultadoIA').innerText;
-        navigator.clipboard.writeText(text);
-        alert('Copiado al portapapeles');
+        navigator.clipboard.writeText(document.getElementById('resultadoIA').innerText);
+        alert('Copiado');
     }
 </script>
 </body>
