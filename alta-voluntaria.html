@@ -13,7 +13,8 @@
         .btn-psq:hover { background-color: #1a252f; color: white; }
         .form-label { font-weight: 600; color: #34495e; }
         .header-psq { background: white; padding: 1rem; border-bottom: 2px solid #eee; margin-bottom: 2rem; }
-        #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; }
+        #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 400px; font-size: 0.95rem; }
+        .btn-group-toggle .btn { margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -31,13 +32,22 @@
             <div class="card shadow-sm p-4 mb-4">
                 <form id="altaForm">
                     <div class="row mb-3">
-                        <div class="col">
+                        <div class="col-md-4">
                             <label class="form-label">Fecha</label>
                             <input type="date" id="fecha" class="form-control">
                         </div>
-                        <div class="col">
+                        <div class="col-md-4">
                             <label class="form-label">Hora</label>
                             <input type="time" id="hora" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Género</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="genero" id="genH" value="H" checked onclick="actualizarEPP()">
+                                <label class="btn btn-outline-primary" for="genH">Hombre</label>
+                                <input type="radio" class="btn-check" name="genero" id="genM" value="M" onclick="actualizarEPP()">
+                                <label class="btn btn-outline-danger" for="genM">Mujer</label>
+                            </div>
                         </div>
                     </div>
 
@@ -63,9 +73,7 @@
                             <input class="form-check-input motivo" type="checkbox" value="deseo de acompañamiento familiar">
                             <label class="form-check-label">Deseo de acompañamiento familiar</label>
                         </div>
-                        <div class="mt-2">
-                            <input type="text" id="otrosMotivos" class="form-control form-control-sm" placeholder="Otros motivos...">
-                        </div>
+                        <input type="text" id="otrosMotivos" class="form-control form-control-sm mt-2" placeholder="Otros motivos...">
                     </div>
 
                     <hr>
@@ -74,55 +82,50 @@
                         <div class="col-md-7">
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="checkbox" id="checkRiesgos">
-                                <label class="form-check-label fw-bold">Se explican riesgos asociados:</label>
+                                <label class="form-check-label fw-bold">Se explican riesgos:</label>
                             </div>
-                            <textarea id="textoRiesgos" class="form-control" rows="3" placeholder="Ej: riesgo de recaída, auto/heteroagresividad..."></textarea>
+                            <textarea id="textoRiesgos" class="form-control" rows="2" placeholder="Recaída, abandono tto..."></textarea>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small">Capacidad/Comprensión:</label>
                             <div class="form-check small">
-                                <input class="form-check-input capacidad" type="checkbox" value="no presenta alteraciones cognitivas">
+                                <input class="form-check-input capacidad" type="checkbox" value="no presenta alteraciones cognitivas" checked>
                                 <label class="form-check-label">Sin alt. cognitivas</label>
                             </div>
                             <div class="form-check small">
-                                <input class="form-check-input capacidad" type="checkbox" value="sin alteraciones psicopatológicas que afecten de forma significativa su capacidad de decisión">
-                                <label class="form-check-label">Capacidad de decisión conservada</label>
-                            </div>
-                            <div class="form-check small">
-                                <input class="form-check-input capacidad" type="checkbox" value="comprende la información recibida">
-                                <label class="form-check-label">Comprende información</label>
+                                <input class="form-check-input capacidad" type="checkbox" value="sin alteraciones psicopatológicas significativas en capacidad de decisión" checked>
+                                <label class="form-check-label">Decisión conservada</label>
                             </div>
                         </div>
                     </div>
-<div class="mb-4">
-    <label class="form-label d-flex justify-content-between align-items-center">
-        Exploración psicopatológica:
-        <div class="btn-group btn-group-sm" role="group">
-            <input type="radio" class="btn-check" name="tipoExp" id="expNormal" autocomplete="off" checked onclick="setExploracion('default')">
-            <label class="btn btn-outline-secondary" for="expNormal">Por defecto</label>
 
-            <input type="radio" class="btn-check" name="tipoExp" id="expLibre" autocomplete="off" onclick="setExploracion('libre')">
-            <label class="btn btn-outline-secondary" for="expLibre">Texto libre</label>
-        </div>
-    </label>
-    
-    <div id="contenedorExploracion" class="mt-2 d-none">
-        <textarea id="textoExploracion" class="form-control" rows="4" placeholder="Describa el estado mental actual..."></textarea>
-        <div class="form-text text-muted">Escriba aquí los hallazgos específicos de la exploración actual.</div>
-    </div>
-</div>
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            Exploración psicopatológica:
+                            <div class="btn-group btn-group-sm">
+                                <input type="radio" class="btn-check" name="tipoExp" id="expNormal" checked onclick="setExploracion('default')">
+                                <label class="btn btn-outline-secondary" for="expNormal">Por defecto</label>
+                                <input type="radio" class="btn-check" name="tipoExp" id="expLibre" onclick="setExploracion('libre')">
+                                <label class="btn btn-outline-secondary" for="expLibre">Texto libre</label>
+                            </div>
+                        </label>
+                        <div id="contenedorExploracion" class="d-none mt-2">
+                            <textarea id="textoExploracion" class="form-control" rows="5"></textarea>
+                        </div>
+                    </div>
+
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="checkFamilia">
-                        <label class="form-check-label fw-bold">Comunicación con familiares, se muestran de acuerdo.</label>
+                        <input class="form-check-input" type="checkbox" id="checkFamilia" checked>
+                        <label class="form-check-label fw-bold">Comunicación familiar (acuerdo).</label>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Plan al alta:</label>
-                        <textarea id="planAlta" class="form-control" rows="2" placeholder="Cita en CSM, medicación..."></textarea>
+                        <textarea id="planAlta" class="form-control" rows="2" placeholder="CSM, medicación..."></textarea>
                     </div>
 
                     <button type="button" onclick="redactarEvolutivo()" class="btn btn-psq w-100 p-3 shadow">
-                        <i class="fas fa-magic me-2"></i> REDACTAR EVOLUTIVO CON IA
+                        <i class="fas fa-magic me-2"></i> REDACTAR CON IA
                     </button>
                 </form>
             </div>
@@ -130,10 +133,8 @@
 
         <div class="col-lg-6">
             <div class="card shadow-sm p-4 sticky-top" style="top: 20px;">
-                <label class="form-label text-primary"><i class="fas fa-pen-nib me-2"></i> Propuesta de redacción:</label>
-                <div id="resultadoIA" class="form-control p-3 mb-3" style="min-height: 400px; font-size: 0.95rem;">
-                    Los resultados aparecerán aquí...
-                </div>
+                <label class="form-label text-primary fw-bold">Propuesta de redacción:</label>
+                <div id="resultadoIA" class="form-control p-3 mb-3">Los resultados aparecerán aquí...</div>
                 <button class="btn btn-outline-secondary btn-sm" onclick="copyResult()">
                     <i class="fas fa-copy me-1"></i> Copiar al portapapeles
                 </button>
@@ -143,24 +144,79 @@
 </div>
 
 <script>
-    // Aquí irá la lógica JS para conectar con el Worker que crearemos luego
-    function redactarEvolutivo() {
-        const btn = event.target;
+    const EPP_H = "Consciente. Abordable y colaborador. Orientado globalmente. Atento. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímico. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
+    const EPP_M = "Consciente. Abordable y colaboradora. Orientada globalmente. Atenta. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímica. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
+
+    window.onload = () => {
+        const ahora = new Date();
+        document.getElementById('fecha').value = ahora.toISOString().split('T')[0];
+        document.getElementById('hora').value = ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        actualizarEPP();
+    };
+
+    function actualizarEPP() {
+        const genero = document.querySelector('input[name="genero"]:checked').value;
+        const area = document.getElementById('textoExploracion');
+        const esDefault = document.getElementById('expNormal').checked;
+        
+        if (esDefault) {
+            area.value = (genero === 'H') ? EPP_H : EPP_M;
+        }
+    }
+
+    function setExploracion(tipo) {
+        const contenedor = document.getElementById('contenedorExploracion');
+        const area = document.getElementById('textoExploracion');
+        
+        if (tipo === 'default') {
+            contenedor.classList.add('d-none');
+            actualizarEPP();
+        } else {
+            contenedor.classList.remove('d-none');
+            area.focus();
+        }
+    }
+
+    async function redactarEvolutivo() {
+        const btn = event.currentTarget;
+        const resDiv = document.getElementById('resultadoIA');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
         
-        // Simulación por ahora (próximo paso: conectar al Worker)
-        setTimeout(() => {
-            document.getElementById('resultadoIA').innerText = "Aquí aparecerá el texto redactado profesionalmente por la IA de Cloudflare basándose en tus checks...";
+        const datos = {
+            genero: document.querySelector('input[name="genero"]:checked').value,
+            motivos: Array.from(document.querySelectorAll('.motivo:checked')).map(el => el.value),
+            otros: document.getElementById('otrosMotivos').value,
+            epp: document.getElementById('textoExploracion').value,
+            riesgos: document.getElementById('checkRiesgos').checked ? document.getElementById('textoRiesgos').value : "No especificados",
+            capacidad: Array.from(document.querySelectorAll('.capacidad:checked')).map(el => el.value),
+            familia: document.getElementById('checkFamilia').checked,
+            plan: document.getElementById('planAlta').value
+        };
+
+        try {
+            const response = await fetch('/api/ia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    context: JSON.stringify(datos),
+                    prompt: "Redacta una nota de evolución médica para un alta voluntaria. Usa los datos proporcionados para crear un texto profesional, legalmente robusto y coherente."
+                })
+            });
+            const data = await response.json();
+            resDiv.innerText = data.response;
+        } catch (e) {
+            resDiv.innerText = "Error: Asegúrate de que el Worker esté desplegado con el binding de AI.";
+        } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR EVOLUTIVO CON IA';
-        }, 1000);
+            btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
+        }
     }
 
     function copyResult() {
         const text = document.getElementById('resultadoIA').innerText;
         navigator.clipboard.writeText(text);
-        alert('Copiado');
+        alert('Texto copiado');
     }
 </script>
 </body>
