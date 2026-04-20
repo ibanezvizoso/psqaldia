@@ -1,5 +1,5 @@
 /**
- * Herramienta: Evolutivo Alta Voluntaria (Encapsulada para evitar conflictos)
+ * Herramienta: Evolutivo Alta Voluntaria (Aislamiento Total)
  * PSQALDÍA © 2026
  */
 
@@ -8,15 +8,25 @@ const EPP_M_AV = "Consciente. Abordable y colaboradora. Orientada globalmente. A
 
 async function openAltaVoluntariaUI() {
     const modalData = document.getElementById('modalData');
+    const modalContent = modalData.closest('.modal-content');
+
+    // --- PASO 1: LIMPIEZA CRÍTICA ---
+    // Esto borra cualquier <link> de Bootstrap que se haya filtrado en el HTML real
+    modalData.innerHTML = ''; 
     
-    // 1. Creamos el Shadow Root (la burbuja de aislamiento)
-    // Esto evita que el CSS de Bootstrap se escape a la home.
+    // Ajustamos el ancho del modal de la home para que quepa tu diseño de 2 columnas
+    if (modalContent) {
+        modalContent.style.maxWidth = "1000px";
+        modalContent.style.width = "95%";
+    }
+
+    // --- PASO 2: CREACIÓN DE LA BURBUJA (SHADOW DOM) ---
     if (!modalData.shadowRoot) {
         modalData.attachShadow({ mode: 'open' });
     }
     const shadow = modalData.shadowRoot;
 
-    // 2. Inyectamos el contenido IDENTICO dentro del Shadow DOM
+    // --- PASO 3: INYECCIÓN IDENTICA ---
     shadow.innerHTML = `
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -27,9 +37,10 @@ async function openAltaVoluntariaUI() {
             .btn-psq:hover { background-color: #1a252f; color: white; }
             .form-label { font-weight: 600; color: #34495e; }
             #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 450px; font-size: 0.95rem; color: #0f172a; }
+            .card { border: 1px solid #dee2e6; border-radius: 0.375rem; background-color: #fff; }
         </style>
 
-        <div class="container-fluid p-4" style="background-color: #fcfdfe; color: #0f172a; min-height: 100vh;">
+        <div class="container-fluid p-4" style="background-color: #fcfdfe; color: #0f172a; min-height: 100vh; border-radius: 2rem;">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold text-primary"><i class="fas fa-brain"></i> Alta Voluntaria</h4>
                 <span class="badge rounded-pill bg-light text-dark border">Asistente de Redacción IA</span>
@@ -150,7 +161,7 @@ async function openAltaVoluntariaUI() {
         </div>
     `;
 
-    // 3. Asignar lógica (dentro del Shadow DOM los onclick directos fallan, los ponemos por JS)
+    // --- PASO 4: LÓGICA INTERNA ---
     const get = (id) => shadow.getElementById(id);
     
     const ahora = new Date();
