@@ -226,13 +226,12 @@
             const response = await fetch('/api/ia', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    context: JSON.stringify(datos),
-                    prompt: "Redacta una nota evolutiva médica de alta voluntaria. Sin encabezados, sin negritas, solo párrafos de texto plano. Estructura: Inicio con fecha/hora/motivos -> Párrafo de Riesgos y capacidad (unifica sin repetir conceptos) -> EPP -> Plan."
-                })
+                body: JSON.stringify({ context: JSON.stringify(datos) })
             });
             const data = await response.json();
-            resDiv.innerText = data.response.replace(/\*\*/g, '').trim();
+            // Limpieza estricta de cualquier residuo visual de la IA
+            let textoFinal = data.response.replace(/\*\*|Párrafo \d+:|###|##/g, '').trim();
+            resDiv.innerText = textoFinal;
         } catch (e) {
             resDiv.innerText = "Error: Verifica la conexión con el Worker.";
         } finally {
