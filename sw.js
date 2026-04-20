@@ -1,4 +1,4 @@
-const CACHE_NAME = 'psq-v12'; // Subimos a v10 para invalidar la anterior
+const CACHE_NAME = 'psq-v-REPARAR-MOBILE'; // Subimos a v10 para invalidar la anterior
 
 const ASSETS = [
 
