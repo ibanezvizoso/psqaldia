@@ -1,24 +1,24 @@
 /**
- * Herramienta: Evolutivo Alta Voluntaria (AISLAMIENTO TOTAL CON IFRAME)
+ * Asistente: Alta Voluntaria (Versión Blindada v3.0)
  * PSQALDÍA © 2026
  */
 
 async function openAltaVoluntariaUI() {
     const modalData = document.getElementById('modalData');
     
-    // 1. Limpiamos el contenido previo
-    modalData.innerHTML = '';
+    // 1. RECUPERAR LOOK ORIGINAL: Borramos cualquier rastro de Bootstrap del index.html
+    document.querySelectorAll('link[href*="bootstrap"]').forEach(el => el.remove());
 
-    // 2. Creamos un iframe para aislar Bootstrap por completo de la home
+    // 2. Limpiamos el modal y preparamos el Iframe
+    modalData.innerHTML = '';
     const iframe = document.createElement('iframe');
     iframe.style.width = '100%';
-    iframe.style.height = '85vh'; // Ajusta la altura según necesites
+    iframe.style.height = '85vh'; 
     iframe.style.border = 'none';
     iframe.style.borderRadius = '1.5rem';
     
     modalData.appendChild(iframe);
 
-    // 3. Escribimos TU código HTML exacto dentro del iframe
     const doc = iframe.contentWindow.document;
     doc.open();
     doc.write(`
@@ -29,24 +29,25 @@ async function openAltaVoluntariaUI() {
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <style>
-                body { background-color: #fcfdfe; font-family: system-ui, sans-serif; padding: 20px; }
-                .btn-psq { background-color: #2c3e50; color: white; border-radius: 8px; }
+                body { background-color: #fcfdfe; font-family: system-ui, sans-serif; padding: 20px; color: #0f172a; }
+                .btn-psq { background-color: #2c3e50; color: white; border-radius: 8px; font-weight: bold; }
                 .btn-psq:hover { background-color: #1a252f; color: white; }
-                .form-label { font-weight: 600; color: #34495e; }
-                #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 400px; font-size: 0.95rem; padding: 15px; }
-                .sticky-top { top: 10px; }
+                .form-label { font-weight: 700; color: #34495e; font-size: 0.9rem; }
+                #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 450px; font-size: 0.95rem; padding: 15px; border-radius: 4px; }
+                .card { border-radius: 12px; border: 1px solid #f1f5f9; }
+                .badge-psq { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
             </style>
         </head>
         <body>
             <div class="container-fluid">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="fw-bold text-primary"><i class="fas fa-brain"></i> Alta Voluntaria</h4>
-                    <span class="badge rounded-pill bg-light text-dark border">Asistente IA</span>
+                    <span class="badge rounded-pill badge-psq p-2 px-3">Asistente de Redacción IA</span>
                 </div>
 
                 <div class="row">
                     <div class="col-lg-6">
-                        <div class="card shadow-sm p-4 mb-4 border-0">
+                        <div class="card shadow-sm p-4 mb-4">
                             <form id="altaForm">
                                 <div class="mb-3">
                                     <label class="form-label">Nombre del Paciente (opcional)</label>
@@ -92,7 +93,7 @@ async function openAltaVoluntariaUI() {
                                             <label class="form-check-label fw-bold">Se explican riesgos:</label>
                                         </div>
                                         <div id="contenedorRiesgosAV" style="display:none">
-                                            <textarea id="textoRiesgosAV" class="form-control" rows="2" placeholder="Recaída, abandono tto..."></textarea>
+                                            <textarea id="textoRiesgosAV" class="form-control" rows="2" placeholder="Recaída, abandono tto, empeoramiento..."></textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-5">
@@ -124,9 +125,19 @@ async function openAltaVoluntariaUI() {
 
                                 <div class="mb-3">
                                     <label class="form-label">Plan al alta (múltiple):</label>
-                                    <div class="form-check small"><input class="form-check-input check-planAV" type="checkbox" value="Acudirá a cita programada"><label class="form-check-label">Cita USM</label></div>
-                                    <div class="form-check small"><input class="form-check-input check-planAV" type="checkbox" value="Continuará tto habitual"><label class="form-check-label">Continuar tto</label></div>
-                                    <textarea id="planAltaLibreAV" class="form-control mt-2" rows="2" placeholder="Otros detalles..."></textarea>
+                                    <div class="form-check small">
+                                        <input class="form-check-input check-planAV" type="checkbox" value="Acudirá a cita programada con psiquiatría en USM de referencia">
+                                        <label class="form-check-label">Cita programada en USM</label>
+                                    </div>
+                                    <div class="form-check small">
+                                        <input class="form-check-input check-planAV" type="checkbox" value="Continuará con su tratamiento psicofarmacológico habitual">
+                                        <label class="form-check-label">Continuar tto. habitual</label>
+                                    </div>
+                                    <div class="form-check small">
+                                        <input class="form-check-input check-planAV" type="checkbox" value="En caso de empeoramiento clínico acudirá al servicio de urgencias de referencia">
+                                        <label class="form-check-label">Urgencias si empeoramiento</label>
+                                    </div>
+                                    <textarea id="planAltaLibreAV" class="form-control mt-2" rows="2" placeholder="Otros detalles del plan..."></textarea>
                                 </div>
 
                                 <button type="button" id="btnRedactarAV" class="btn btn-psq w-100 p-3 shadow">
@@ -137,7 +148,7 @@ async function openAltaVoluntariaUI() {
                     </div>
 
                     <div class="col-lg-6">
-                        <div class="card shadow-sm p-4 border-0 sticky-top" style="background-color: #fff9e6; border-left: 5px solid #f1c40f !important;">
+                        <div class="card shadow-sm p-4 sticky-top" style="background-color: #fff9e6; border-left: 5px solid #f1c40f !important; top: 10px;">
                             <label class="form-label text-primary fw-bold">Propuesta de redacción (HC):</label>
                             <div id="resultadoIA">Los resultados aparecerán aquí...</div>
                             <button id="btnCopiarAV" class="btn btn-outline-secondary btn-sm mt-3">
@@ -152,7 +163,6 @@ async function openAltaVoluntariaUI() {
                 const EPP_H = "Consciente. Abordable y colaborador. Orientado globalmente. Atento. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímico. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
                 const EPP_M = "Consciente. Abordable y colaboradora. Orientada globalmente. Atenta. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímica. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
 
-                // Inicializar
                 const ahora = new Date();
                 document.getElementById('fechaAV').value = ahora.toISOString().split('T')[0];
                 document.getElementById('horaAV').value = ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -180,15 +190,24 @@ async function openAltaVoluntariaUI() {
 
                 document.getElementById('btnRedactarAV').onclick = async () => {
                     const btn = document.getElementById('btnRedactarAV');
+                    const resDiv = document.getElementById('resultadoIA');
                     btn.disabled = true;
-                    btn.innerHTML = 'Procesando...';
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
 
                     const datos = {
                         nombre: document.getElementById('nombrePaciente').value || "el paciente",
                         fecha: document.getElementById('fechaAV').value,
+                        hora: document.getElementById('horaAV').value,
+                        genero: document.querySelector('input[name="generoAV"]:checked')?.value || "N/S",
                         motivos: Array.from(document.querySelectorAll('.motivoAV:checked')).map(el => el.value),
+                        otrosMotivos: document.getElementById('otrosMotivosAV').value,
                         epp: document.getElementById('textoExploracionAV').value,
-                        plan: document.getElementById('planAltaLibreAV').value
+                        riesgosCheck: document.getElementById('checkRiesgosAV').checked,
+                        riesgosTexto: document.getElementById('textoRiesgosAV').value,
+                        capacidadItems: Array.from(document.querySelectorAll('.capacidadAV:checked')).map(el => el.value),
+                        familia: document.getElementById('checkFamiliaAV').checked,
+                        planChecks: Array.from(document.querySelectorAll('.check-planAV:checked')).map(el => el.value),
+                        planLibre: document.getElementById('planAltaLibreAV').value
                     };
 
                     try {
@@ -198,9 +217,9 @@ async function openAltaVoluntariaUI() {
                             body: JSON.stringify({ toolId: 'alta-voluntaria', context: JSON.stringify(datos) })
                         });
                         const data = await response.json();
-                        document.getElementById('resultadoIA').innerText = data.response || "Error IA";
+                        resDiv.innerText = data.response ? data.response.replace(/\\\\*\\\\*|###|##/g, '').trim() : "Error en la IA.";
                     } catch (e) {
-                        document.getElementById('resultadoIA').innerText = "Error de conexión";
+                        resDiv.innerText = "Error de conexión con el Worker.";
                     } finally {
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
@@ -209,7 +228,7 @@ async function openAltaVoluntariaUI() {
 
                 document.getElementById('btnCopiarAV').onclick = () => {
                     navigator.clipboard.writeText(document.getElementById('resultadoIA').innerText);
-                    alert('Copiado');
+                    alert('Copiado al portapapeles');
                 };
             <\/script>
         </body>
