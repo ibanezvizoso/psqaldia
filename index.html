@@ -64,16 +64,27 @@
         .f-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
         .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
         /* FUERZA BRUTA: 1 columna para TODO por defecto */
+/* 1. CORRECCIÓN DEL VISOR: Forzamos 1 sola columna en móvil */
 #app, #favs-app { 
     display: grid !important; 
-    grid-template-columns: 1fr !important; 
-    gap: 1.2rem !important; 
+    grid-template-columns: 1fr !important; /* Una sola columna obligatoria */
+    gap: 1.5rem !important; 
     width: 100% !important;
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
+    max-width: 100% !important;
+    padding: 0 !important;
 }
 
-/* Solo en pantallas de ordenador (más de 1024px) permitimos el mosaico */
+/* 2. CORRECCIÓN DE MODALES: Para que no se vean "apaisados" */
+.modal-content {
+    width: 95% !important; 
+    max-width: 500px !important; /* Estrechamos el máximo para que sea más vertical */
+    margin: auto !important;
+    border-radius: 2rem !important;
+    height: auto !important;
+    max-height: 90vh !important; /* Evita que se salga de la pantalla */
+}
+
+/* 3. MODO MOSAICO: Solo para pantallas realmente grandes (PC) */
 @media (min-width: 1024px) {
     #app, #favs-app {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
