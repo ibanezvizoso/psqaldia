@@ -1,238 +1,165 @@
 /**
- * Asistente: Alta Voluntaria (Versión Blindada v3.0)
+ * Herramienta: Evolutivo Alta Voluntaria (Versión Nativa v4.0)
  * PSQALDÍA © 2026
+ * SIN BOOTSTRAP - SIN CONFLICTOS
  */
+
+// 1. LIMPIEZA TOTAL: Borramos rastro de Bootstrap del index por si acaso
+document.querySelectorAll('link[href*="bootstrap"]').forEach(el => el.remove());
+
+const EPP_H_AV = "Consciente. Abordable y colaborador. Orientado globalmente. Atento. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímico. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
+const EPP_M_AV = "Consciente. Abordable y colaboradora. Orientada globalmente. Atenta. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímica. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
 
 async function openAltaVoluntariaUI() {
     const modalData = document.getElementById('modalData');
     
-    // 1. RECUPERAR LOOK ORIGINAL: Borramos cualquier rastro de Bootstrap del index.html
-    document.querySelectorAll('link[href*="bootstrap"]').forEach(el => el.remove());
+    modalData.innerHTML = `
+        <div style="padding: 1.5rem; color: var(--text-main); font-family: system-ui, sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                <h2 style="margin:0; font-size: 1.2rem; font-weight: 800; color: var(--primary);"><i class="fas fa-brain"></i> Alta Voluntaria</h2>
+                <span style="font-size: 0.7rem; font-weight: 800; background: var(--bg); padding: 5px 12px; border-radius: 50px; border: 1px solid var(--border); color: var(--text-muted);">ASISTENTE IA</span>
+            </div>
 
-    // 2. Limpiamos el modal y preparamos el Iframe
-    modalData.innerHTML = '';
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '100%';
-    iframe.style.height = '85vh'; 
-    iframe.style.border = 'none';
-    iframe.style.borderRadius = '1.5rem';
-    
-    modalData.appendChild(iframe);
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
+                <div style="flex: 1; min-width: 300px;">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        
+                        <div>
+                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:5px;">NOMBRE DEL PACIENTE</label>
+                            <input type="text" id="nombreAV" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-main);" placeholder="Nombre o iniciales">
+                        </div>
 
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <style>
-                body { background-color: #fcfdfe; font-family: system-ui, sans-serif; padding: 20px; color: #0f172a; }
-                .btn-psq { background-color: #2c3e50; color: white; border-radius: 8px; font-weight: bold; }
-                .btn-psq:hover { background-color: #1a252f; color: white; }
-                .form-label { font-weight: 700; color: #34495e; font-size: 0.9rem; }
-                #resultadoIA { background-color: #fff9e6; border-left: 5px solid #f1c40f; white-space: pre-wrap; min-height: 450px; font-size: 0.95rem; padding: 15px; border-radius: 4px; }
-                .card { border-radius: 12px; border: 1px solid #f1f5f9; }
-                .badge-psq { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
-            </style>
-        </head>
-        <body>
-            <div class="container-fluid">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="fw-bold text-primary"><i class="fas fa-brain"></i> Alta Voluntaria</h4>
-                    <span class="badge rounded-pill badge-psq p-2 px-3">Asistente de Redacción IA</span>
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex:1">
+                                <label style="display:block; font-weight:700; font-size:0.8rem;">FECHA</label>
+                                <input type="date" id="fechaAV" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-main);">
+                            </div>
+                            <div style="flex:1">
+                                <label style="display:block; font-weight:700; font-size:0.8rem;">HORA</label>
+                                <input type="time" id="horaAV" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-main);">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:8px;">MOTIVOS ADUCIDOS</label>
+                            <div style="font-size:0.85rem; display:flex; flex-direction:column; gap:6px;">
+                                <label><input type="checkbox" class="m-av" value="mejoría de los síntomas"> Mejoría de los síntomas</label>
+                                <label><input type="checkbox" class="m-av" value="remisión de ideas de suicidio"> Remisión de ideas de suicidio</label>
+                                <label><input type="checkbox" class="m-av" value="empeoramiento en contexto de ingreso"> Empeoramiento por ingreso</label>
+                                <label><input type="checkbox" class="m-av" value="preferencia por tto ambulatorio"> Preferencia tto ambulatorio</label>
+                                <label><input type="checkbox" class="m-av" value="deseo de acompañamiento familiar"> Deseo acompañamiento familiar</label>
+                                <input type="text" id="otrosMotivosAV" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border); margin-top:5px;" placeholder="Otros motivos...">
+                            </div>
+                        </div>
+
+                        <div style="padding:1rem; background:var(--bg); border-radius:12px; border:1px solid var(--border);">
+                            <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:8px;">RIESGOS Y CAPACIDAD</label>
+                            <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="checkRiesgosAV"> <b>Se explican riesgos</b></label>
+                            <textarea id="textoRiesgosAV" style="width:100%; display:none; padding:8px; border-radius:8px; border:1px solid var(--border); margin-bottom:10px;" rows="2" placeholder="Describir riesgos..."></textarea>
+                            
+                            <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:5px;">
+                                <label><input type="checkbox" class="c-av" value="no presenta alteraciones cognitivas"> No presenta alteraciones cognitivas</label>
+                                <label><input type="checkbox" class="c-av" value="no presenta alteraciones psicopatológicas"> No presenta alteraciones psicopatológicas</label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:8px;">EXPLORACIÓN PSICOPATOLÓGICA</label>
+                            <div style="margin-bottom:10px; display:flex; gap:10px;">
+                                <label><input type="radio" name="t-exp" id="expDef" checked> Defecto</label>
+                                <label><input type="radio" name="t-exp" id="expLib"> Libre</label>
+                            </div>
+                            <textarea id="textoExploracionAV" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-main);" rows="4"></textarea>
+                        </div>
+
+                        <div style="padding:1rem; border: 1px solid var(--border); border-radius:12px;">
+                            <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:8px;">PLAN AL ALTA</label>
+                            <div style="font-size:0.85rem; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+                                <label><input type="checkbox" class="p-av" value="cita programada en USM"> Cita programada en USM</label>
+                                <label><input type="checkbox" class="p-av" value="continuará tto habitual"> Continuará tto habitual</label>
+                                <label><input type="checkbox" class="p-av" value="acudirá a urgencias si empeora"> Urgencias si empeoramiento</label>
+                            </div>
+                            <textarea id="planLibreAV" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border);" placeholder="Otros detalles del plan..."></textarea>
+                        </div>
+
+                        <button onclick="redactarEvolutivo_AV(this)" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer; font-size:1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fas fa-magic"></i> REDACTAR CON IA
+                        </button>
+                    </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card shadow-sm p-4 mb-4">
-                            <form id="altaForm">
-                                <div class="mb-3">
-                                    <label class="form-label">Nombre del Paciente (opcional)</label>
-                                    <input type="text" id="nombrePaciente" class="form-control" placeholder="Nombre o iniciales">
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">Fecha</label>
-                                        <input type="date" id="fechaAV" class="form-control">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Hora</label>
-                                        <input type="time" id="horaAV" class="form-control">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Género</label>
-                                        <div class="btn-group w-100" role="group">
-                                            <input type="radio" class="btn-check" name="generoAV" id="genHAV" value="H">
-                                            <label class="btn btn-outline-primary" for="genHAV">H</label>
-                                            <input type="radio" class="btn-check" name="generoAV" id="genMAV" value="M">
-                                            <label class="btn btn-outline-danger" for="genMAV">M</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Motivos aducidos (múltiple):</label>
-                                    <div class="form-check"><input class="form-check-input motivoAV" type="checkbox" value="mejoría de los síntomas"><label class="form-check-label">Mejoría de los síntomas</label></div>
-                                    <div class="form-check"><input class="form-check-input motivoAV" type="checkbox" value="remisión de ideas de suicidio"><label class="form-check-label">Remisión de ideas de suicidio</label></div>
-                                    <div class="form-check"><input class="form-check-input motivoAV" type="checkbox" value="empeoramiento en contexto de ingreso"><label class="form-check-label">Empeoramiento en contexto de ingreso</label></div>
-                                    <div class="form-check"><input class="form-check-input motivoAV" type="checkbox" value="preferencia por tratamiento ambulatorio"><label class="form-check-label">Preferencia por tratamiento ambulatorio</label></div>
-                                    <div class="form-check"><input class="form-check-input motivoAV" type="checkbox" value="deseo de acompañamiento familiar"><label class="form-check-label">Deseo de acompañamiento familiar</label></div>
-                                    <input type="text" id="otrosMotivosAV" class="form-control form-control-sm mt-2" placeholder="Otros motivos...">
-                                </div>
-
-                                <hr>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-7">
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="checkRiesgosAV">
-                                            <label class="form-check-label fw-bold">Se explican riesgos:</label>
-                                        </div>
-                                        <div id="contenedorRiesgosAV" style="display:none">
-                                            <textarea id="textoRiesgosAV" class="form-control" rows="2" placeholder="Recaída, abandono tto, empeoramiento..."></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-5">
-                                        <label class="form-label small">Capacidad/Comprensión:</label>
-                                        <div class="form-check small"><input class="form-check-input capacidadAV" type="checkbox" value="no presenta alteraciones cognitivas"><label class="form-check-label">No alt. cognitivas</label></div>
-                                        <div class="form-check small"><input class="form-check-input capacidadAV" type="checkbox" value="no presenta alteraciones psicopatológicas significativas"><label class="form-check-label">No alt. psicopatológicas</label></div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label d-flex justify-content-between align-items-center">
-                                        Exploración psicopatológica:
-                                        <div class="btn-group btn-group-sm">
-                                            <input type="radio" class="btn-check" name="tipoExpAV" id="expNormalAV" checked>
-                                            <label class="btn btn-outline-secondary" for="expNormalAV">Por defecto</label>
-                                            <input type="radio" class="btn-check" name="tipoExpAV" id="expLibreAV">
-                                            <label class="btn btn-outline-secondary" for="expLibreAV">Texto libre</label>
-                                        </div>
-                                    </label>
-                                    <div id="contExploracionAV" style="display:none" class="mt-2">
-                                        <textarea id="textoExploracionAV" class="form-control" rows="5"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="checkFamiliaAV">
-                                    <label class="form-check-label fw-bold">Comunicación familiar (acuerdo).</label>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Plan al alta (múltiple):</label>
-                                    <div class="form-check small">
-                                        <input class="form-check-input check-planAV" type="checkbox" value="Acudirá a cita programada con psiquiatría en USM de referencia">
-                                        <label class="form-check-label">Cita programada en USM</label>
-                                    </div>
-                                    <div class="form-check small">
-                                        <input class="form-check-input check-planAV" type="checkbox" value="Continuará con su tratamiento psicofarmacológico habitual">
-                                        <label class="form-check-label">Continuar tto. habitual</label>
-                                    </div>
-                                    <div class="form-check small">
-                                        <input class="form-check-input check-planAV" type="checkbox" value="En caso de empeoramiento clínico acudirá al servicio de urgencias de referencia">
-                                        <label class="form-check-label">Urgencias si empeoramiento</label>
-                                    </div>
-                                    <textarea id="planAltaLibreAV" class="form-control mt-2" rows="2" placeholder="Otros detalles del plan..."></textarea>
-                                </div>
-
-                                <button type="button" id="btnRedactarAV" class="btn btn-psq w-100 p-3 shadow">
-                                    <i class="fas fa-magic me-2"></i> REDACTAR CON IA
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <div class="card shadow-sm p-4 sticky-top" style="background-color: #fff9e6; border-left: 5px solid #f1c40f !important; top: 10px;">
-                            <label class="form-label text-primary fw-bold">Propuesta de redacción (HC):</label>
-                            <div id="resultadoIA">Los resultados aparecerán aquí...</div>
-                            <button id="btnCopiarAV" class="btn btn-outline-secondary btn-sm mt-3">
-                                <i class="fas fa-copy me-1"></i> Copiar al portapapeles
-                            </button>
-                        </div>
+                <div style="flex: 1; min-width: 300px;">
+                    <div style="position: sticky; top: 0;">
+                        <label style="display:block; font-weight:800; color:var(--primary); font-size:0.75rem; margin-bottom:10px; letter-spacing:1px;">PROPUESTA PARA HISTORIA CLÍNICA</label>
+                        <div id="resultadoIA" style="background: #fff9e6; border-left: 5px solid #f1c40f; padding: 1.5rem; border-radius: 8px; min-height: 450px; font-size: 0.95rem; line-height: 1.6; color: #1e293b; white-space: pre-wrap; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">Rellena los datos y pulsa redactar...</div>
+                        
+                        <button onclick="copyAV()" style="width:100%; margin-top:1rem; padding:10px; background:var(--text-muted); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">
+                            <i class="fas fa-copy"></i> COPIAR AL PORTAPAPELES
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
+    `;
 
-            <script>
-                const EPP_H = "Consciente. Abordable y colaborador. Orientado globalmente. Atento. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímico. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
-                const EPP_M = "Consciente. Abordable y colaboradora. Orientada globalmente. Atenta. Lenguaje fluido y espontáneo. Discurso coherente. No alteraciones psicomotrices. No alteraciones en el contenido del pensamiento. No alteraciones sensoperceptivas. Eutímica. No apatía ni anhedonia. No ansiedad patológica. Sueño conservado. Normorexia. No auto ni heteroagresividad. No ideas de suicidio en este momento.";
+    // INICIALIZACIÓN DE LÓGICA
+    const get = (id) => document.getElementById(id);
+    const ahora = new Date();
+    get('fechaAV').value = ahora.toISOString().split('T')[0];
+    get('horaAV').value = ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                const ahora = new Date();
-                document.getElementById('fechaAV').value = ahora.toISOString().split('T')[0];
-                document.getElementById('horaAV').value = ahora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    // Toggles
+    get('checkRiesgosAV').onchange = (e) => get('textoRiesgosAV').style.display = e.target.checked ? 'block' : 'none';
+    
+    const setEPP = () => {
+        if(get('expDef').checked) {
+            const gen = prompt("¿Género del paciente? (H/M)").toUpperCase();
+            get('textoExploracionAV').value = (gen === 'M') ? EPP_M_AV : EPP_H_AV;
+        }
+    };
+    get('expDef').onchange = setEPP;
+    get('expLib').onchange = () => get('textoExploracionAV').value = "";
+    
+    // Ejecutar EPP por defecto al inicio si se desea
+    setEPP();
+}
 
-                document.getElementById('checkRiesgosAV').onclick = () => {
-                    document.getElementById('contenedorRiesgosAV').style.display = document.getElementById('checkRiesgosAV').checked ? 'block' : 'none';
-                };
+async function redactarEvolutivo_AV(btn) {
+    const resDiv = document.getElementById('resultadoIA');
+    const oldHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> PROCESANDO...';
 
-                const actualizarEPP = () => {
-                    const gen = document.querySelector('input[name="generoAV"]:checked')?.value;
-                    if (document.getElementById('expNormalAV').checked && gen) {
-                        document.getElementById('textoExploracionAV').value = (gen === 'H') ? EPP_H : EPP_M;
-                    }
-                };
+    const datos = {
+        nombre: document.getElementById('nombreAV').value || "el paciente",
+        fecha: document.getElementById('fechaAV').value,
+        hora: document.getElementById('horaAV').value,
+        motivos: Array.from(document.querySelectorAll('.m-av:checked')).map(el => el.value),
+        riesgos: document.getElementById('textoRiesgosAV').value,
+        capacidad: Array.from(document.querySelectorAll('.c-av:checked')).map(el => el.value),
+        exploracion: document.getElementById('textoExploracionAV').value,
+        plan: Array.from(document.querySelectorAll('.p-av:checked')).map(el => el.value),
+        planExtra: document.getElementById('planLibreAV').value
+    };
 
-                document.querySelectorAll('input[name="generoAV"]').forEach(r => r.onchange = actualizarEPP);
-                document.getElementById('expNormalAV').onchange = () => {
-                    document.getElementById('contExploracionAV').style.display = 'none';
-                    actualizarEPP();
-                };
-                document.getElementById('expLibreAV').onchange = () => {
-                    document.getElementById('contExploracionAV').style.display = 'block';
-                    document.getElementById('textoExploracionAV').focus();
-                };
+    try {
+        const response = await fetch('/api/ia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ toolId: 'alta-voluntaria', context: JSON.stringify(datos) })
+        });
+        const data = await response.json();
+        resDiv.innerText = data.response ? data.response.replace(/\*\*|###/g, '').trim() : "Error en la respuesta de la IA.";
+    } catch (e) {
+        resDiv.innerText = "Error: Verifica la conexión con el Worker.";
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+    }
+}
 
-                document.getElementById('btnRedactarAV').onclick = async () => {
-                    const btn = document.getElementById('btnRedactarAV');
-                    const resDiv = document.getElementById('resultadoIA');
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
-
-                    const datos = {
-                        nombre: document.getElementById('nombrePaciente').value || "el paciente",
-                        fecha: document.getElementById('fechaAV').value,
-                        hora: document.getElementById('horaAV').value,
-                        genero: document.querySelector('input[name="generoAV"]:checked')?.value || "N/S",
-                        motivos: Array.from(document.querySelectorAll('.motivoAV:checked')).map(el => el.value),
-                        otrosMotivos: document.getElementById('otrosMotivosAV').value,
-                        epp: document.getElementById('textoExploracionAV').value,
-                        riesgosCheck: document.getElementById('checkRiesgosAV').checked,
-                        riesgosTexto: document.getElementById('textoRiesgosAV').value,
-                        capacidadItems: Array.from(document.querySelectorAll('.capacidadAV:checked')).map(el => el.value),
-                        familia: document.getElementById('checkFamiliaAV').checked,
-                        planChecks: Array.from(document.querySelectorAll('.check-planAV:checked')).map(el => el.value),
-                        planLibre: document.getElementById('planAltaLibreAV').value
-                    };
-
-                    try {
-                        const response = await fetch('/api/ia', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ toolId: 'alta-voluntaria', context: JSON.stringify(datos) })
-                        });
-                        const data = await response.json();
-                        resDiv.innerText = data.response ? data.response.replace(/\\\\*\\\\*|###|##/g, '').trim() : "Error en la IA.";
-                    } catch (e) {
-                        resDiv.innerText = "Error de conexión con el Worker.";
-                    } finally {
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-magic me-2"></i> REDACTAR CON IA';
-                    }
-                };
-
-                document.getElementById('btnCopiarAV').onclick = () => {
-                    navigator.clipboard.writeText(document.getElementById('resultadoIA').innerText);
-                    alert('Copiado al portapapeles');
-                };
-            <\/script>
-        </body>
-        </html>
-    `);
-    doc.close();
+function copyAV() {
+    const text = document.getElementById('resultadoIA').innerText;
+    navigator.clipboard.writeText(text);
+    alert('Texto copiado');
 }
