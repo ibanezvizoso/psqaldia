@@ -72,6 +72,15 @@ function abrirPortalExamenes() {
                     <i class="fas fa-chevron-right" style="color: var(--border);"></i>
                 </button>
 
+              <button onclick="portal_irAUro()" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left;">
+    <div style="background: rgba(14, 165, 233, 0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <i class="fas fa-microscope" style="color: #0ea5e9;"></i>
+    </div>
+    <div style="flex-grow: 1;">
+        <b style="color: var(--text-main); font-size: 1.1rem; display: block;">Urología</b>
+    </div>
+    <i class="fas fa-chevron-right" style="color: var(--border);"></i>
+</button>
                 <button onclick="portal_irAComun()" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left;">
                     <div style="background: rgba(245, 158, 11, 0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <i class="fas fa-gavel" style="color: #f59e0b;"></i>
@@ -117,7 +126,10 @@ async function portal_irAGine() {
     await cargarScript('/ope_gine.js'); 
     openGineSelector();
 }
-
+async function portal_irAUro() {
+    await cargarScript('/ope_uro.js'); 
+    openUroSelector();
+}
 async function portal_irAComun() {
     await cargarScript('/opes_comun.js'); 
     openExamenComunSelector();
