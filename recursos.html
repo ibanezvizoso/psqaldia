@@ -53,32 +53,41 @@
             box-sizing: border-box; border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* Contenedor de Filtros de Categoría */
+        /* Contenedor de Filtros Ajustado a Varias Filas */
         #category-filters {
-            padding: 15px 15px 10px 15px;
+            padding: 15px;
             display: flex;
+            flex-wrap: wrap; /* Permite que los botones salten de fila */
             gap: 8px;
-            overflow-x: auto;
-            white-space: nowrap;
             border-bottom: 1px solid #f1f5f9;
+            max-height: 200px; /* Evita que los botones ocupen todo el sidebar si hay demasiados */
+            overflow-y: auto;
         }
-        /* Ocultar scrollbar pero permitir scroll */
-        #category-filters::-webkit-scrollbar { display: none; }
 
         .filter-btn {
-            padding: 6px 14px;
+            padding: 7px 14px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             cursor: pointer;
             border: 2px solid transparent;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             text-transform: uppercase;
-            opacity: 0.6;
+            letter-spacing: 0.02em;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            opacity: 0.7;
         }
+
+        .filter-btn:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
         .filter-btn.active {
             opacity: 1;
             border-color: var(--text-main);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transform: scale(1.05);
         }
 
@@ -115,23 +124,25 @@
 
         @media (max-width: 768px) {
             header { top: 10px; left: 10px; right: 10px; padding: 10px 15px; }
-            #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 45%; border-radius: 20px 20px 0 0; }
+            #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 50%; border-radius: 20px 20px 0 0; }
+            #category-filters { padding: 10px; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>📍 Localiza recursos PSQALDÍA</h1>
+    <h1>📍 Recursos PSQALDÍA</h1>
     <select id="areaSelect">
-        <option value="todas">Cargando...</option>
+        <option value="todas">Cargando áreas...</option>
     </select>
 </header>
 
 <div id="sidebar">
-    <div id="category-filters"></div>
+    <div id="category-filters">
+        </div>
     <div id="resource-list">
-        <p style="text-align:center; color:var(--text-muted); padding-top:20px;">Cargando...</p>
+        <p style="text-align:center; color:var(--text-muted); padding-top:20px;">Localizando recursos...</p>
     </div>
 </div>
 
@@ -156,10 +167,11 @@
     const coloresCategorias = {};
 
     function getPastelColor(categoria) {
-        if (!categoria || categoria === 'todas') return '#e2e8f0';
+        if (!categoria || categoria === 'todas') return '#f1f5f9';
         if (coloresCategorias[categoria]) return coloresCategorias[categoria];
+        // Colores pastel con saturación constante para armonía visual
         const hue = Math.floor(Math.random() * 360);
-        const color = `hsl(${hue}, 75%, 85%)`;
+        const color = `hsl(${hue}, 80%, 88%)`;
         coloresCategorias[categoria] = color;
         return color;
     }
@@ -172,6 +184,7 @@
             if (!data.values) return;
 
             todosLosRecursos = data.values.map((row, index) => {
+                // Fila 1 es el header, fila 2 es el primer hospital
                 if (row[0] === "Nombre" || !row[5]) return null;
                 return {
                     id: index,
@@ -188,7 +201,7 @@
             poblarFiltrosCategoria();
             actualizarVista();
         } catch (e) {
-            resourceList.innerHTML = '<p style="text-align:center;">Error al cargar datos.</p>';
+            resourceList.innerHTML = '<p style="text-align:center;">Error al conectar con la base de datos.</p>';
         }
     }
 
@@ -209,8 +222,8 @@
         // Botón "Todas"
         const btnAll = document.createElement('div');
         btnAll.className = 'filter-btn active';
-        btnAll.textContent = 'Todas';
-        btnAll.style.backgroundColor = '#e2e8f0';
+        btnAll.textContent = 'Ver Todo';
+        btnAll.style.backgroundColor = '#f1f5f9';
         btnAll.onclick = () => setCategoria('todas', btnAll);
         categoryContainer.appendChild(btnAll);
 
@@ -249,7 +262,7 @@
         const bounds = [];
 
         if (filtrados.length === 0) {
-            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No hay recursos con este filtro.</p>';
+            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No hay recursos que coincidan con estos filtros.</p>';
             return;
         }
 
@@ -283,21 +296,21 @@
                 item.className = 'recurso-item';
                 item.innerHTML = `
                     <span class="badge" style="background:${color}">${r.categoria}</span>
-                    <h3 style="margin:0 0 5px 0; font-size:1rem;">${r.nombre}</h3>
+                    <h3 style="margin:0 0 5px 0; font-size:0.95rem;">${r.nombre}</h3>
                     <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">📍 ${r.direccion}</p>
                 `;
                 item.onclick = () => {
-                    map.flyTo([lat, lon], 15, { duration: 1.5 });
+                    map.flyTo([lat, lon], 16, { duration: 1.5 });
                     marker.openPopup();
                     if (window.innerWidth <= 768) {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        resourceList.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
                 resourceList.appendChild(item);
             }
         });
 
-        if (bounds.length > 0) map.fitBounds(bounds, { padding: [80, 80] });
+        if (bounds.length > 0) map.fitBounds(bounds, { padding: [80, 80], maxZoom: 15 });
     }
 
     areaSelect.onchange = actualizarVista;
