@@ -49,8 +49,43 @@
             position: absolute; top: 90px; left: 20px; bottom: 20px;
             width: 380px; background: var(--bg-glass); backdrop-filter: blur(8px);
             border-radius: 20px; box-shadow: var(--shadow); z-index: 1000;
-            overflow-y: auto; padding: 20px; box-sizing: border-box;
-            border: 1px solid rgba(255,255,255,0.3);
+            display: flex; flex-direction: column;
+            box-sizing: border-box; border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Contenedor de Filtros de Categoría */
+        #category-filters {
+            padding: 15px 15px 10px 15px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        /* Ocultar scrollbar pero permitir scroll */
+        #category-filters::-webkit-scrollbar { display: none; }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+        .filter-btn.active {
+            opacity: 1;
+            border-color: var(--text-main);
+            transform: scale(1.05);
+        }
+
+        #resource-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
         }
 
         .recurso-item { 
@@ -80,21 +115,24 @@
 
         @media (max-width: 768px) {
             header { top: 10px; left: 10px; right: 10px; padding: 10px 15px; }
-            #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 35%; border-radius: 20px 20px 0 0; }
+            #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 45%; border-radius: 20px 20px 0 0; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>📍 Localiza recursos de psiquiatría, adicciones, sociocomunitarios, etc. </h1>
+    <h1>📍 Localiza recursos PSQALDÍA</h1>
     <select id="areaSelect">
         <option value="todas">Cargando...</option>
     </select>
 </header>
 
 <div id="sidebar">
-    <p style="text-align:center; color:var(--text-muted); padding-top:20px;">Localizando recursos...</p>
+    <div id="category-filters"></div>
+    <div id="resource-list">
+        <p style="text-align:center; color:var(--text-muted); padding-top:20px;">Cargando...</p>
+    </div>
 </div>
 
 <div id="map"></div>
@@ -110,15 +148,18 @@
     }).addTo(map);
 
     const areaSelect = document.getElementById('areaSelect');
-    const sidebar = document.getElementById('sidebar');
+    const categoryContainer = document.getElementById('category-filters');
+    const resourceList = document.getElementById('resource-list');
+    
     let todosLosRecursos = [];
+    let categoriaActiva = 'todas';
     const coloresCategorias = {};
 
     function getPastelColor(categoria) {
-        if (!categoria) return '#cbd5e1';
+        if (!categoria || categoria === 'todas') return '#e2e8f0';
         if (coloresCategorias[categoria]) return coloresCategorias[categoria];
         const hue = Math.floor(Math.random() * 360);
-        const color = `hsl(${hue}, 75%, 75%)`;
+        const color = `hsl(${hue}, 75%, 85%)`;
         coloresCategorias[categoria] = color;
         return color;
     }
@@ -130,11 +171,8 @@
             
             if (!data.values) return;
 
-            // ELIMINADO EL .slice(1) PARA NO PERDER LA FILA 2
             todosLosRecursos = data.values.map((row, index) => {
-                // Verificamos si la fila es el encabezado (contiene la palabra "Nombre" en la primera columna)
                 if (row[0] === "Nombre" || !row[5]) return null;
-
                 return {
                     id: index,
                     nombre: row[0] || "Sin nombre",
@@ -144,17 +182,17 @@
                     categoria: row[6] || "General",
                     descripcion: row[7] || ""
                 };
-            }).filter(r => r !== null); // Filtramos los nulos (encabezados y filas sin coordenadas)
+            }).filter(r => r !== null);
 
-            poblarSelector();
-            actualizarVista('todas');
+            poblarSelectorArea();
+            poblarFiltrosCategoria();
+            actualizarVista();
         } catch (e) {
-            console.error(e);
-            sidebar.innerHTML = '<p style="text-align:center;">Error al cargar datos.</p>';
+            resourceList.innerHTML = '<p style="text-align:center;">Error al cargar datos.</p>';
         }
     }
 
-    function poblarSelector() {
+    function poblarSelectorArea() {
         const areas = [...new Set(todosLosRecursos.map(r => r.area))].sort();
         areaSelect.innerHTML = '<option value="todas">🌍 Todas las áreas</option>';
         areas.forEach(a => {
@@ -164,18 +202,59 @@
         });
     }
 
+    function poblarFiltrosCategoria() {
+        const categorias = [...new Set(todosLosRecursos.map(r => r.categoria))].sort();
+        categoryContainer.innerHTML = '';
+
+        // Botón "Todas"
+        const btnAll = document.createElement('div');
+        btnAll.className = 'filter-btn active';
+        btnAll.textContent = 'Todas';
+        btnAll.style.backgroundColor = '#e2e8f0';
+        btnAll.onclick = () => setCategoria('todas', btnAll);
+        categoryContainer.appendChild(btnAll);
+
+        categorias.forEach(cat => {
+            const color = getPastelColor(cat);
+            const btn = document.createElement('div');
+            btn.className = 'filter-btn';
+            btn.textContent = cat;
+            btn.style.backgroundColor = color;
+            btn.onclick = () => setCategoria(cat, btn);
+            categoryContainer.appendChild(btn);
+        });
+    }
+
+    function setCategoria(cat, elemento) {
+        categoriaActiva = cat;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        elemento.classList.add('active');
+        actualizarVista();
+    }
+
     let markersLayer = L.layerGroup().addTo(map);
 
-    function actualizarVista(filtro) {
+    function actualizarVista() {
         markersLayer.clearLayers();
-        sidebar.innerHTML = "";
-        const filtrados = filtro === 'todas' ? todosLosRecursos : todosLosRecursos.filter(r => r.area === filtro);
+        resourceList.innerHTML = "";
+        
+        const areaFiltro = areaSelect.value;
+        
+        const filtrados = todosLosRecursos.filter(r => {
+            const cumpleArea = (areaFiltro === 'todas' || r.area === areaFiltro);
+            const cumpleCat = (categoriaActiva === 'todas' || r.categoria === categoriaActiva);
+            return cumpleArea && cumpleCat;
+        });
+
         const bounds = [];
+
+        if (filtrados.length === 0) {
+            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No hay recursos con este filtro.</p>';
+            return;
+        }
 
         filtrados.forEach(r => {
             const coordsRaw = r.coords.split(',');
-            if(coordsRaw.length < 2) return;
-
             const lat = parseFloat(coordsRaw[0].trim());
             const lon = parseFloat(coordsRaw[1].trim());
 
@@ -192,7 +271,7 @@
                 const marker = L.marker([lat, lon], { icon }).addTo(markersLayer);
                 marker.bindPopup(`
                     <div class="popup-info">
-                        <span class="badge" style="background:${color}; color:#1e293b">${r.categoria}</span>
+                        <span class="badge" style="background:${color}">${r.categoria}</span>
                         <b style="display:block; margin-bottom:5px;">${r.nombre}</b>
                         <p style="margin:0; font-size:0.8rem; color:#64748b">${r.direccion}</p>
                     </div>
@@ -203,7 +282,7 @@
                 const item = document.createElement('div');
                 item.className = 'recurso-item';
                 item.innerHTML = `
-                    <span class="badge" style="background:${color}; color:#1e293b">${r.categoria}</span>
+                    <span class="badge" style="background:${color}">${r.categoria}</span>
                     <h3 style="margin:0 0 5px 0; font-size:1rem;">${r.nombre}</h3>
                     <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">📍 ${r.direccion}</p>
                 `;
@@ -214,14 +293,14 @@
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
-                sidebar.appendChild(item);
+                resourceList.appendChild(item);
             }
         });
 
         if (bounds.length > 0) map.fitBounds(bounds, { padding: [80, 80] });
     }
 
-    areaSelect.onchange = (e) => actualizarVista(e.target.value);
+    areaSelect.onchange = actualizarVista;
     cargarDatos();
 </script>
 
