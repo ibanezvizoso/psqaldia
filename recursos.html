@@ -24,134 +24,63 @@
             color: var(--text-main);
         }
 
-        /* Contenedor del Mapa */
-        #map { 
-            position: absolute;
-            top: 0; bottom: 0; left: 0; right: 0;
-            z-index: 1;
-        }
+        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; }
 
-        /* Header Flotante */
         header { 
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(8px);
-            padding: 12px 24px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto;
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            background: var(--bg-glass); backdrop-filter: blur(8px);
+            padding: 12px 24px; border-radius: 16px;
+            box-shadow: var(--shadow); z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1200px; margin: 0 auto;
             border: 1px solid rgba(255,255,255,0.3);
         }
 
         h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
         
         select { 
-            padding: 10px 16px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-main);
-            outline: none;
-            transition: all 0.2s;
-            cursor: pointer;
+            padding: 10px 16px; border-radius: 12px; border: 1px solid #e2e8f0;
+            background: white; font-family: inherit; font-size: 0.9rem;
+            font-weight: 600; color: var(--text-main); outline: none;
+            transition: all 0.2s; cursor: pointer;
         }
-        select:hover { border-color: var(--primary); }
 
-        /* Sidebar Moderno */
         #sidebar { 
-            position: absolute;
-            top: 90px;
-            left: 20px;
-            bottom: 20px;
-            width: 380px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(8px);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 20px;
-            box-sizing: border-box;
+            position: absolute; top: 90px; left: 20px; bottom: 20px;
+            width: 380px; background: var(--bg-glass); backdrop-filter: blur(8px);
+            border-radius: 20px; box-shadow: var(--shadow); z-index: 1000;
+            overflow-y: auto; padding: 20px; box-sizing: border-box;
             border: 1px solid rgba(255,255,255,0.3);
-            transition: transform 0.3s ease;
         }
 
         .recurso-item { 
-            padding: 16px;
-            background: white;
-            border-radius: 14px;
-            margin-bottom: 12px;
-            cursor: pointer;
+            padding: 16px; background: white; border-radius: 14px;
+            margin-bottom: 12px; cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid #f1f5f9;
         }
 
         .recurso-item:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border-color: #cbd5e1;
         }
 
-        .recurso-item h3 { 
-            margin: 0 0 6px 0; 
-            font-size: 1rem; 
-            font-weight: 600; 
-            color: var(--text-main);
-        }
-
         .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            display: inline-flex; align-items: center; padding: 4px 10px;
+            border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+            margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em;
         }
 
-        .recurso-item p { 
-            margin: 0; 
-            font-size: 0.85rem; 
-            color: var(--text-muted); 
-            line-height: 1.5; 
-        }
-
-        /* Marcadores Custom */
         .custom-marker {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
-        /* Popups */
         .leaflet-popup-content-wrapper { border-radius: 16px; padding: 5px; }
-        .popup-info b { font-size: 1rem; display: block; margin-bottom: 4px; }
-        
-        /* Mobile */
+
         @media (max-width: 768px) {
-            header { top: 10px; left: 10px; right: 10px; padding: 10px 15px; border-radius: 12px; }
-            #sidebar { 
-                top: auto; bottom: 0; left: 0; right: 0; 
-                width: 100%; height: 35%; 
-                border-radius: 20px 20px 0 0;
-            }
-            h1 { font-size: 0.9rem; }
-            select { padding: 6px 10px; font-size: 0.8rem; min-width: 120px; }
+            header { top: 10px; left: 10px; right: 10px; padding: 10px 15px; }
+            #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 35%; border-radius: 20px 20px 0 0; }
         }
     </style>
 </head>
@@ -173,10 +102,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Estilo de mapa minimalista (CartoDB Positron)
     const map = L.map('map', { zoomControl: false }).setView([42.2328, -8.7226], 11);
-    
-    // Mover control de zoom a la derecha
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -204,19 +130,26 @@
             
             if (!data.values) return;
 
-            todosLosRecursos = data.values.slice(1).map((row, index) => ({
-                id: index,
-                nombre: row[0] || "Sin nombre",
-                area: row[1] || "Sin Área",
-                direccion: row[2] || "",
-                coords: row[5] || null,
-                categoria: row[6] || "General",
-                descripcion: row[7] || ""
-            })).filter(r => r.coords);
+            // ELIMINADO EL .slice(1) PARA NO PERDER LA FILA 2
+            todosLosRecursos = data.values.map((row, index) => {
+                // Verificamos si la fila es el encabezado (contiene la palabra "Nombre" en la primera columna)
+                if (row[0] === "Nombre" || !row[5]) return null;
+
+                return {
+                    id: index,
+                    nombre: row[0] || "Sin nombre",
+                    area: row[1] || "Sin Área",
+                    direccion: row[2] || "",
+                    coords: row[5] || null,
+                    categoria: row[6] || "General",
+                    descripcion: row[7] || ""
+                };
+            }).filter(r => r !== null); // Filtramos los nulos (encabezados y filas sin coordenadas)
 
             poblarSelector();
             actualizarVista('todas');
         } catch (e) {
+            console.error(e);
             sidebar.innerHTML = '<p style="text-align:center;">Error al cargar datos.</p>';
         }
     }
@@ -240,11 +173,15 @@
         const bounds = [];
 
         filtrados.forEach(r => {
-            const [lat, lon] = r.coords.split(',').map(c => parseFloat(c.trim()));
+            const coordsRaw = r.coords.split(',');
+            if(coordsRaw.length < 2) return;
+
+            const lat = parseFloat(coordsRaw[0].trim());
+            const lon = parseFloat(coordsRaw[1].trim());
+
             if (!isNaN(lat) && !isNaN(lon)) {
                 const color = getPastelColor(r.categoria);
 
-                // Marcador circular minimalista
                 const icon = L.divIcon({
                     className: 'custom-div-icon',
                     html: `<div class="custom-marker" style="background-color: ${color};"></div>`,
@@ -256,31 +193,32 @@
                 marker.bindPopup(`
                     <div class="popup-info">
                         <span class="badge" style="background:${color}; color:#1e293b">${r.categoria}</span>
-                        <b>${r.nombre}</b>
+                        <b style="display:block; margin-bottom:5px;">${r.nombre}</b>
                         <p style="margin:0; font-size:0.8rem; color:#64748b">${r.direccion}</p>
                     </div>
                 `);
 
                 bounds.push([lat, lon]);
 
-                // Item Sidebar
                 const item = document.createElement('div');
                 item.className = 'recurso-item';
                 item.innerHTML = `
                     <span class="badge" style="background:${color}; color:#1e293b">${r.categoria}</span>
-                    <h3>${r.nombre}</h3>
-                    <p>📍 ${r.direccion}</p>
+                    <h3 style="margin:0 0 5px 0; font-size:1rem;">${r.nombre}</h3>
+                    <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">📍 ${r.direccion}</p>
                 `;
                 item.onclick = () => {
                     map.flyTo([lat, lon], 15, { duration: 1.5 });
                     marker.openPopup();
-                    if (window.innerWidth <= 768) sidebar.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (window.innerWidth <= 768) {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                 };
                 sidebar.appendChild(item);
             }
         });
 
-        if (bounds.length > 0) map.fitBounds(bounds, { padding: [100, 100] });
+        if (bounds.length > 0) map.fitBounds(bounds, { padding: [80, 80] });
     }
 
     areaSelect.onchange = (e) => actualizarVista(e.target.value);
