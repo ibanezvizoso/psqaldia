@@ -214,11 +214,11 @@ window.generarCalendarioCloz = function() {
                 </div>
                 <div class="cloz-dose-grid">
                     <div class="dose-item">
-                        <span class="dose-lab">☀️ ${t.labels.morning}</span>
+                        <span class="dose-lab">${t.labels.morning}</span>
                         <span class="dose-val">${m} <small>mg</small></span>
                     </div>
                     <div class="dose-item">
-                        <span class="dose-lab">🌙 ${t.labels.night}</span>
+                        <span class="dose-lab">${t.labels.night}</span>
                         <span class="dose-val">${n} <small>mg</small></span>
                     </div>
                     <div class="dose-item highlight">
@@ -240,7 +240,7 @@ window.copiarCalendarioCloz = function() {
         const dia = c.querySelector('.cloz-day-badge').innerText;
         const fecha = c.querySelector('.cloz-date-label').innerText;
         const d = c.querySelectorAll('.dose-val');
-        txt += `${dia} (${fecha}): ☀️${d[0].innerText} | 🌙${d[1].innerText} | TOTAL: ${d[2].innerText}\n`;
+        txt += `${dia} (${fecha}): ${d[0].innerText} | ${d[1].innerText} | TOTAL: ${d[2].innerText}\n`;
     });
     navigator.clipboard.writeText(txt);
     alert(t.copied);
