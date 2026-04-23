@@ -6,33 +6,94 @@
     <title>Mapa de Recursos | PSQALDÍA</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --primary: #1a73e8; --text: #2c3e50; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
+        :root { 
+            --primary: #1a73e8; 
+            --text: #2c3e50; 
+            --bg: #f8f9fa; 
+        }
         
-        /* Cabecera y Selector */
-        header { background: white; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; display: flex; align-items: center; justify-content: center; gap: 20px; }
-        h1 { margin: 0; font-size: 1.2rem; color: var(--text); }
-        select { padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; min-width: 200px; outline: none; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            margin: 0; 
+            background: var(--bg); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        header { 
+            background: white; 
+            padding: 1rem; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            z-index: 1000; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 20px; 
+            flex-wrap: wrap;
+        }
 
-        /* Layout Principal */
+        h1 { margin: 0; font-size: 1.2rem; color: var(--text); }
+        
+        select { 
+            padding: 8px 15px; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+            font-size: 1rem; 
+            min-width: 200px; 
+            outline: none; 
+            cursor: pointer;
+        }
+
         main { display: flex; flex: 1; overflow: hidden; }
         
-        /* Sidebar Lateral */
-        #sidebar { width: 350px; background: white; border-right: 1px solid #eee; overflow-y: auto; padding: 10px; box-sizing: border-box; }
-        .recurso-item { padding: 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; border-radius: 6px; margin-bottom: 5px; }
-        .recurso-item:hover { background: #f0f7ff; border-color: var(--primary); }
-        .recurso-item h3 { margin: 0 0 5px 0; font-size: 1rem; color: var(--primary); }
-        .recurso-item p { margin: 0; font-size: 0.85rem; color: #666; }
+        #sidebar { 
+            width: 350px; 
+            background: white; 
+            border-right: 1px solid #eee; 
+            overflow-y: auto; 
+            padding: 15px; 
+            box-sizing: border-box; 
+        }
 
-        /* Mapa */
-        #map { flex: 1; }
+        .recurso-item { 
+            padding: 15px; 
+            border-bottom: 1px solid #f0f0f0; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            border-radius: 8px; 
+            margin-bottom: 10px;
+            border-left: 5px solid transparent;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
 
-        /* Popups */
+        .recurso-item:hover { 
+            background: #f8fbff; 
+            transform: translateX(5px);
+        }
+
+        .recurso-item h3 { margin: 0 0 5px 0; font-size: 0.95rem; color: var(--text); }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .recurso-item p { margin: 0; font-size: 0.85rem; color: #666; line-height: 1.4; }
+
+        #map { flex: 1; z-index: 1; }
+
         .popup-info b { color: var(--primary); font-size: 1.1rem; display: block; margin-bottom: 5px; }
         
         @media (max-width: 768px) {
             main { flex-direction: column; }
-            #sidebar { width: 100%; height: 30%; order: 2; }
+            #sidebar { width: 100%; height: 40%; order: 2; border-right: none; border-top: 1px solid #eee; }
             #map { order: 1; }
         }
     </style>
@@ -48,7 +109,7 @@
 
 <main>
     <div id="sidebar">
-        <p style="text-align:center; color:#999;">Selecciona un área para ver los centros</p>
+        <p style="text-align:center; color:#999; margin-top: 20px;">Cargando centros...</p>
     </div>
     <div id="map"></div>
 </main>
@@ -59,33 +120,56 @@
     const map = L.map('map').setView([42.2328, -8.7226], 11);
     const areaSelect = document.getElementById('areaSelect');
     const sidebar = document.getElementById('sidebar');
+    
     let todosLosRecursos = [];
-    let marcadores = []; // Para guardar referencias y poder abrirlos desde la lista
     let markersLayer = L.layerGroup().addTo(map);
+    
+    // Almacén de colores para las categorías
+    const coloresCategorias = {};
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // Función para generar colores pastel aleatorios
+    function getPastelColor(categoria) {
+        if (!categoria) return '#e0e0e0';
+        if (coloresCategorias[categoria]) return coloresCategorias[categoria];
+        
+        // Generar color HSL aleatorio (Saturación media, Luminosidad alta para efecto pastel)
+        const hue = Math.floor(Math.random() * 360);
+        const color = `hsl(${hue}, 70%, 85%)`;
+        coloresCategorias[categoria] = color;
+        return color;
+    }
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
     async function cargarDatos() {
         try {
             const res = await fetch('https://psqaldia.com/?sheet=Recursos');
             const data = await res.json();
             
-            if (!data.values) return;
+            if (!data.values || data.values.length <= 1) {
+                sidebar.innerHTML = '<p style="text-align:center;">No se encontraron datos.</p>';
+                return;
+            }
 
-            // Procesamos los datos (Tu Excel: A=0 Area, B=1 Nombre, C=2 Cat, D=3 Dir, E=4 Ciudad, I=8 Coords)
-            todosLosRecursos = data.values.map((row, index) => ({
+            // Mapeo corregido según tu Excel real (A=0, B=1, C=2, F=5, G=6, H=7)
+            // Filtramos la primera fila si contiene encabezados (usando index > 0)
+            todosLosRecursos = data.values.slice(1).map((row, index) => ({
                 id: index,
-                area: row[0] ? row[0].toString().trim() : "Sin Área",
-                nombre: row[1] ? row[1].toString().trim() : "",
-                categoria: row[2] || "",
-                direccion: `${row[3] || ''}, ${row[4] || ''}`,
-                coords: row[8] ? row[8].toString().trim() : null
-            })).filter(r => r.nombre && r.coords);
+                nombre: row[0] ? row[0].toString().trim() : "Sin nombre",
+                area: row[1] ? row[1].toString().trim() : "Sin Área",
+                direccion: row[2] || "Sin dirección",
+                coords: row[5] ? row[5].toString().trim() : null,
+                categoria: row[6] ? row[6].toString().trim() : "General",
+                descripcion: row[7] || ""
+            })).filter(r => r.nombre !== "Sin nombre" && r.coords);
 
             poblarSelector();
             actualizarVista('todas');
         } catch (e) {
             console.error("Error cargando datos:", e);
+            sidebar.innerHTML = '<p style="text-align:center; color:red;">Error al conectar con los datos.</p>';
         }
     }
 
@@ -102,40 +186,68 @@
     function actualizarVista(filtro) {
         markersLayer.clearLayers();
         sidebar.innerHTML = "";
-        marcadores = [];
         
         const filtrados = filtro === 'todas' ? todosLosRecursos : todosLosRecursos.filter(r => r.area === filtro);
         const bounds = [];
 
+        if (filtrados.length === 0) {
+            sidebar.innerHTML = '<p style="text-align:center; color:#999;">No hay centros en esta zona.</p>';
+            return;
+        }
+
         filtrados.forEach(r => {
-            const [lat, lon] = r.coords.split(',').map(c => parseFloat(c.trim()));
+            const coordParts = r.coords.split(',');
+            const lat = parseFloat(coordParts[0]);
+            const lon = parseFloat(coordParts[1]);
+
             if (!isNaN(lat) && !isNaN(lon)) {
-                // 1. Crear Marcador
+                const colorBase = getPastelColor(r.categoria);
+
+                // 1. Crear Marcador (puedes personalizar el icono aquí si quieres)
                 const marker = L.marker([lat, lon]);
-                const popupContent = `<div class="popup-info"><b>${r.nombre}</b><i>${r.categoria}</i><br>${r.direccion}</div>`;
+                const popupContent = `
+                    <div class="popup-info">
+                        <span class="badge" style="background:${colorBase}">${r.categoria}</span>
+                        <b>${r.nombre}</b>
+                        <p>${r.direccion}</p>
+                        ${r.descripcion ? `<small style="display:block; margin-top:5px; color:#666;">${r.descripcion}</small>` : ''}
+                    </div>`;
                 marker.bindPopup(popupContent);
                 markersLayer.addLayer(marker);
                 
-                // Guardar referencia
-                marcadores[r.id] = marker;
                 bounds.push([lat, lon]);
 
                 // 2. Crear Item en Sidebar
                 const item = document.createElement('div');
                 item.className = 'recurso-item';
-                item.innerHTML = `<h3>${r.nombre}</h3><p>${r.categoria}</p><p style="font-size:11px">${r.direccion}</p>`;
+                item.style.borderLeftColor = colorBase;
+                item.innerHTML = `
+                    <span class="badge" style="background:${colorBase}">${r.categoria}</span>
+                    <h3>${r.nombre}</h3>
+                    <p>${r.direccion}</p>
+                    <p style="font-size:11px; margin-top:4px; opacity:0.8;">📍 Área: ${r.area}</p>
+                `;
+                
                 item.onclick = () => {
-                    map.setView([lat, lon], 15);
+                    map.setView([lat, lon], 16);
                     marker.openPopup();
+                    // Scroll suave al mapa en móviles
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+                    }
                 };
                 sidebar.appendChild(item);
             }
         });
 
-        if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        }
     }
 
     areaSelect.onchange = (e) => actualizarVista(e.target.value);
+    
+    // Iniciar carga
     cargarDatos();
 </script>
 
