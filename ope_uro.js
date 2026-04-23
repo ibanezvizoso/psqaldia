@@ -1,7 +1,9 @@
 /**
  * ope_uro.js - Gestión unificada de exámenes OPE Urología
- * Basado en el estándar de PSQ al día.
+ * Soporta múltiples convocatorias (2022, 2020) y Modo Snack combinado.
+ * Estructura compatible con Worker v6.1 y CSS global de PSQ al día.
  */
+
 let preguntasUro = [];
 let respuestasUro = {};
 let preguntasVisiblesUro = 20;
@@ -19,7 +21,7 @@ function openUroSelector() {
     modalData.innerHTML = `
         <div style="padding: 2.5rem 1.5rem; text-align: center; max-width: 500px; margin: auto;">
             <div style="margin-bottom: 2.5rem;">
-                <i class="fas fa-microscope fa-3x" style="color: #0ea5e9; margin-bottom: 1rem; opacity: 0.8;"></i>
+                <i class="fas fa- hospital-user fa-3x" style="color: #0ea5e9; margin-bottom: 1rem; opacity: 0.8;"></i>
                 <h2 style="color: var(--text-main); font-weight: 900; margin: 0; font-size: 1.8rem;">OPE Urología</h2>
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Selecciona la convocatoria para comenzar</p>
             </div>
@@ -30,10 +32,15 @@ function openUroSelector() {
                     <i class="fas fa-chevron-right" style="color: #0ea5e9;"></i>
                 </button>
 
+                <button onclick="iniciarExamenUro('20')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
+                    <b style="color: var(--text-main); font-size: 1.1rem;">Convocatoria 2020</b>
+                    <i class="fas fa-chevron-right" style="color: #0ea5e9;"></i>
+                </button>
+
                 <button onclick="iniciarExamenUro('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid #0ea5e9; background: rgba(14, 165, 233, 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
                         <b style="color: #0ea5e9; font-size: 1.1rem;">Modo Snack</b>
-                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas aleatorias)</small>
+                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(Aleatorio 2020 + 2022)</small>
                     </div>
                     <i class="fas fa-bolt" style="color: #0ea5e9;"></i>
                 </button>
@@ -60,10 +67,9 @@ function guardarEstadoUro() {
 }
 
 /**
- * Carga de datos desde el Worker (Google Sheets)
+ * Carga de datos desde el Worker
  */
 async function iniciarExamenUro(año, esContinuacion = false) {
-    // Comprobar si hay sesión previa
     if (!esContinuacion && localStorage.getItem('psq_save_uro')) {
         const data = JSON.parse(localStorage.getItem('psq_save_uro'));
         if (confirm(`Tienes un examen de Urología a medias. ¿Quieres continuarlo?`)) {
@@ -83,11 +89,23 @@ async function iniciarExamenUro(año, esContinuacion = false) {
     modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:#0ea5e9;"></i><br><br><b>Cargando Urología...</b></div>`;
 
     try {
-        // Apuntamos específicamente a Ope_Uro22 según tu hoja de Sheets
-        const sheetTarget = (año === 'snack') ? 'Ope_Uro22' : `Ope_Uro${año}`;
-        const response = await fetch(`/?sheet=${sheetTarget}`);
-        const data = await response.json();
-        const rows = data.values || [];
+        let rows = [];
+
+        if (año === 'snack') {
+            // Carga paralela de ambas hojas para el Modo Snack
+            const [res22, res20] = await Promise.all([
+                fetch(`/?sheet=Ope_Uro22`),
+                fetch(`/?sheet=Ope_Uro20`)
+            ]);
+            const data22 = await res22.json();
+            const data20 = await res20.json();
+            rows = [...(data22.values || []), ...(data20.values || [])];
+        } else {
+            // Carga individual
+            const response = await fetch(`/?sheet=Ope_Uro${año}`);
+            const data = await response.json();
+            rows = data.values || [];
+        }
 
         preguntasUro = rows
             .filter(row => row[0] && row[0].trim() !== "")
@@ -112,7 +130,9 @@ async function iniciarExamenUro(año, esContinuacion = false) {
 
 function renderizarExamenUro() {
     const container = document.getElementById('modalData');
-    const titulo = añoUroActual === 'snack' ? 'Snack Urología' : `OPE UROLOGÍA 20${añoUroActual}`;
+    let titulo = "";
+    if (añoUroActual === 'snack') titulo = 'Snack Urología';
+    else titulo = `OPE UROLOGÍA 20${añoUroActual}`;
     
     let html = `
         <div style="padding:1.5rem; max-width:800px; margin:auto;">
@@ -206,8 +226,8 @@ function corregirExamenUro() {
 
     localStorage.removeItem('psq_save_uro');
 
+    const footer = document.getElementById('footer-uro');
     if (fallosIndices.length > 0) {
-        const footer = document.getElementById('footer-uro');
         footer.innerHTML = `
             <button onclick="repasarFallosUro([${fallosIndices}])" class="btn" style="flex:1; background:#ef4444; color:white; height:55px; border-radius:15px; font-weight:900; border:none; cursor:pointer;">
                 REPASAR ${fallosIndices.length} FALLOS
@@ -215,10 +235,17 @@ function corregirExamenUro() {
             <button onclick="openUroSelector()" class="btn" style="flex:1; background:var(--border); color:var(--text-main); height:55px; border-radius:15px; font-weight:900; border:none; cursor:pointer;">
                 SALIR
             </button>`;
+    } else {
+        footer.innerHTML = `
+            <button onclick="openUroSelector()" class="btn btn-primary" style="flex:1; height:55px; border-radius:15px; font-weight:900;">
+                ¡EXAMEN PERFECTO! VOLVER
+            </button>`;
     }
 
     alert(`Examen finalizado.\nAciertos: ${aciertos} de ${preguntasUro.length}`);
-    document.querySelector('.modal-content').scrollTo({top: 0, behavior: 'smooth'});
+    // Scroll al inicio del modal para ver resultados
+    const modalContent = document.querySelector('.modal-content');
+    if(modalContent) modalContent.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function repasarFallosUro(indices) {
