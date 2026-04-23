@@ -53,14 +53,13 @@
             box-sizing: border-box; border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* Contenedor de Filtros Ajustado a Varias Filas */
         #category-filters {
             padding: 15px;
             display: flex;
-            flex-wrap: wrap; /* Permite que los botones salten de fila */
+            flex-wrap: wrap;
             gap: 8px;
             border-bottom: 1px solid #f1f5f9;
-            max-height: 200px; /* Evita que los botones ocupen todo el sidebar si hay demasiados */
+            max-height: 200px;
             overflow-y: auto;
         }
 
@@ -79,10 +78,7 @@
             opacity: 0.7;
         }
 
-        .filter-btn:hover {
-            opacity: 1;
-            transform: translateY(-1px);
-        }
+        .filter-btn:hover { opacity: 1; transform: translateY(-1px); }
 
         .filter-btn.active {
             opacity: 1;
@@ -115,32 +111,33 @@
             margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em;
         }
 
+        .info-link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.8rem; }
+        .info-link:hover { text-decoration: underline; }
+
         .custom-marker {
             width: 14px; height: 14px; border-radius: 50%;
             border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
-        .leaflet-popup-content-wrapper { border-radius: 16px; padding: 5px; }
+        .leaflet-popup-content-wrapper { border-radius: 16px; padding: 8px; }
 
         @media (max-width: 768px) {
             header { top: 10px; left: 10px; right: 10px; padding: 10px 15px; }
             #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 50%; border-radius: 20px 20px 0 0; }
-            #category-filters { padding: 10px; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>📍 Localiza servicios de psiquiatría, adicciones, Salud Mental comunitaria, etc. </h1>
+    <h1>📍 Recursos PSQALDÍA</h1>
     <select id="areaSelect">
         <option value="todas">Cargando áreas...</option>
     </select>
 </header>
 
 <div id="sidebar">
-    <div id="category-filters">
-        </div>
+    <div id="category-filters"></div>
     <div id="resource-list">
         <p style="text-align:center; color:var(--text-muted); padding-top:20px;">Localizando recursos...</p>
     </div>
@@ -169,7 +166,6 @@
     function getPastelColor(categoria) {
         if (!categoria || categoria === 'todas') return '#f1f5f9';
         if (coloresCategorias[categoria]) return coloresCategorias[categoria];
-        // Colores pastel con saturación constante para armonía visual
         const hue = Math.floor(Math.random() * 360);
         const color = `hsl(${hue}, 80%, 88%)`;
         coloresCategorias[categoria] = color;
@@ -184,16 +180,17 @@
             if (!data.values) return;
 
             todosLosRecursos = data.values.map((row, index) => {
-                // Fila 1 es el header, fila 2 es el primer hospital
                 if (row[0] === "Nombre" || !row[5]) return null;
                 return {
                     id: index,
                     nombre: row[0] || "Sin nombre",
                     area: row[1] || "Sin Área",
                     direccion: row[2] || "",
-                    coords: row[5] || null,
-                    categoria: row[6] || "General",
-                    descripcion: row[7] || ""
+                    telefono: row[3] || "",    // Columna D
+                    web: row[4] || "",         // Columna E
+                    coords: row[5] || null,    // Columna F
+                    categoria: row[6] || "General", // Columna G
+                    descripcion: row[7] || ""  // Columna H
                 };
             }).filter(r => r !== null);
 
@@ -201,7 +198,7 @@
             poblarFiltrosCategoria();
             actualizarVista();
         } catch (e) {
-            resourceList.innerHTML = '<p style="text-align:center;">Error al conectar con la base de datos.</p>';
+            resourceList.innerHTML = '<p style="text-align:center;">Error al cargar datos.</p>';
         }
     }
 
@@ -219,7 +216,6 @@
         const categorias = [...new Set(todosLosRecursos.map(r => r.categoria))].sort();
         categoryContainer.innerHTML = '';
 
-        // Botón "Todas"
         const btnAll = document.createElement('div');
         btnAll.className = 'filter-btn active';
         btnAll.textContent = 'Ver Todo';
@@ -252,7 +248,6 @@
         resourceList.innerHTML = "";
         
         const areaFiltro = areaSelect.value;
-        
         const filtrados = todosLosRecursos.filter(r => {
             const cumpleArea = (areaFiltro === 'todas' || r.area === areaFiltro);
             const cumpleCat = (categoriaActiva === 'todas' || r.categoria === categoriaActiva);
@@ -262,7 +257,7 @@
         const bounds = [];
 
         if (filtrados.length === 0) {
-            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No hay recursos que coincidan con estos filtros.</p>';
+            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No hay resultados.</p>';
             return;
         }
 
@@ -282,29 +277,38 @@
                 });
 
                 const marker = L.marker([lat, lon], { icon }).addTo(markersLayer);
+                
+                // POPUP DEL MAPA ACTUALIZADO
                 marker.bindPopup(`
-                    <div class="popup-info">
+                    <div class="popup-info" style="min-width:150px">
                         <span class="badge" style="background:${color}">${r.categoria}</span>
-                        <b style="display:block; margin-bottom:5px;">${r.nombre}</b>
-                        <p style="margin:0; font-size:0.8rem; color:#64748b">${r.direccion}</p>
+                        <b style="display:block; margin-bottom:5px; font-size:1rem">${r.nombre}</b>
+                        <p style="margin:0 0 5px 0; font-size:0.8rem; color:var(--text-muted)">${r.direccion}</p>
+                        ${r.telefono ? `<p style="margin:0; font-size:0.8rem">📞 <a href="tel:${r.telefono}" class="info-link">${r.telefono}</a></p>` : ''}
+                        ${r.web ? `<p style="margin:5px 0 0 0; font-size:0.8rem">🌐 <a href="${r.web}" target="_blank" class="info-link">Visitar Web</a></p>` : ''}
                     </div>
                 `);
 
                 bounds.push([lat, lon]);
 
+                // ITEM DE LA LISTA ACTUALIZADO
                 const item = document.createElement('div');
                 item.className = 'recurso-item';
                 item.innerHTML = `
                     <span class="badge" style="background:${color}">${r.categoria}</span>
                     <h3 style="margin:0 0 5px 0; font-size:0.95rem;">${r.nombre}</h3>
-                    <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">📍 ${r.direccion}</p>
+                    ${r.descripcion ? `<p style="margin:0 0 8px 0; font-size:0.8rem; color:var(--text-main); font-style:italic">${r.descripcion}</p>` : ''}
+                    <p style="margin:0; font-size:0.8rem; color:var(--text-muted);">📍 ${r.direccion}</p>
+                    <div style="margin-top:8px; display:flex; gap:15px">
+                        ${r.telefono ? `<span style="font-size:0.8rem">📞 ${r.telefono}</span>` : ''}
+                        ${r.web ? `<a href="${r.web}" target="_blank" class="info-link">🌐 Web</a>` : ''}
+                    </div>
                 `;
-                item.onclick = () => {
+                item.onclick = (e) => {
+                    if(e.target.tagName === 'A') return; // Evitar que el click en el enlace mueva el mapa
                     map.flyTo([lat, lon], 16, { duration: 1.5 });
                     marker.openPopup();
-                    if (window.innerWidth <= 768) {
-                        resourceList.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
+                    if (window.innerWidth <= 768) resourceList.scrollTo({ top: 0, behavior: 'smooth' });
                 };
                 resourceList.appendChild(item);
             }
