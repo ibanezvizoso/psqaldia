@@ -4,160 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Recursos | PSQALDÍA</title>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; }
-        .container { max-width: 1100px; margin: 0 auto; }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 25px; }
+        :root { --primary: #1a73e8; --text: #2c3e50; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
         
-        /* Controles */
-        .controls { 
-            background: white; padding: 20px; border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            flex-wrap: wrap;
-        }
-        select { 
-            padding: 10px 15px; border-radius: 8px; border: 1px solid #dcdfe6; 
-            font-size: 16px; cursor: pointer; background: white; min-width: 250px;
-        }
+        /* Cabecera y Selector */
+        header { background: white; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; display: flex; align-items: center; justify-content: center; gap: 20px; }
+        h1 { margin: 0; font-size: 1.2rem; color: var(--text); }
+        select { padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; min-width: 200px; outline: none; }
+
+        /* Layout Principal */
+        main { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar Lateral */
+        #sidebar { width: 350px; background: white; border-right: 1px solid #eee; overflow-y: auto; padding: 10px; box-sizing: border-box; }
+        .recurso-item { padding: 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; border-radius: 6px; margin-bottom: 5px; }
+        .recurso-item:hover { background: #f0f7ff; border-color: var(--primary); }
+        .recurso-item h3 { margin: 0 0 5px 0; font-size: 1rem; color: var(--primary); }
+        .recurso-item p { margin: 0; font-size: 0.85rem; color: #666; }
 
         /* Mapa */
-        #map { 
-            height: 650px; width: 100%; border-radius: 15px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e4e7ed;
-        }
+        #map { flex: 1; }
 
         /* Popups */
-        .popup-content { min-width: 200px; padding: 5px; }
-        .popup-content b { font-size: 16px; color: #1a73e8; display: block; margin-bottom: 5px; }
-        .popup-content i { color: #5f6368; display: block; margin-bottom: 10px; }
-        .btn-web { 
-            display: block; text-align: center; margin-top: 10px; padding: 8px; 
-            background: #1a73e8; color: white !important; text-decoration: none; 
-            border-radius: 6px; font-weight: bold; font-size: 13px;
+        .popup-info b { color: var(--primary); font-size: 1.1rem; display: block; margin-bottom: 5px; }
+        
+        @media (max-width: 768px) {
+            main { flex-direction: column; }
+            #sidebar { width: 100%; height: 30%; order: 2; }
+            #map { order: 1; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>📍 Buscador de Recursos Comunitarios</h1>
-        
-        <div class="controls">
-            <label for="areaSelect"><b>Área Sanitaria:</b></label>
-            <select id="areaSelect">
-                <option value="todas">Cargando datos...</option>
-            </select>
-        </div>
+<header>
+    <h1>📍 Recursos PSQALDÍA</h1>
+    <select id="areaSelect">
+        <option value="todas">Cargando datos...</option>
+    </select>
+</header>
 
-        <div id="map"></div>
+<main>
+    <div id="sidebar">
+        <p style="text-align:center; color:#999;">Selecciona un área para ver los centros</p>
     </div>
+    <div id="map"></div>
+</main>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script>
-        // 1. Inicialización del Mapa
-        const map = L.map('map').setView([42.2328, -8.7226], 11); // Centrado en Vigo
-        const areaSelect = document.getElementById('areaSelect');
-        let todosLosRecursos = [];
-        let markersLayer = L.layerGroup().addTo(map);
+<script>
+    const map = L.map('map').setView([42.2328, -8.7226], 11);
+    const areaSelect = document.getElementById('areaSelect');
+    const sidebar = document.getElementById('sidebar');
+    let todosLosRecursos = [];
+    let marcadores = []; // Para guardar referencias y poder abrirlos desde la lista
+    let markersLayer = L.layerGroup().addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // 2. Carga de datos desde tu Worker
-        async function cargarDatos() {
-            try {
-                // Usamos la URL de tu Worker
-                const response = await fetch('https://psqaldia.com/?sheet=Recursos');
-                const data = await response.json();
-                
-                if (!data.values || data.values.length === 0) {
-                    areaSelect.innerHTML = '<option>No se encontraron datos</option>';
-                    return;
-                }
-
-                // MAPEADO SEGÚN TU EXCEL (Imagen de referencia)
-                // A=0(Área), B=1(Nombre), C=2(Categoría), D=3(Dirección), E=4(Ciudad), 
-                // F=5(CP), G=6(Teléfono), H=7(Web), I=8(Coordenadas)
-                todosLosRecursos = data.values.map(row => ({
-                    area: row[0],
-                    nombre: row[1],
-                    categoria: row[2],
-                    direccion: `${row[3] || ''}, ${row[4] || ''}`,
-                    tel: row[6],
-                    web: row[7],
-                    coords: row[8] // Columna I
-                })).filter(r => r.nombre && r.coords); // Solo recursos válidos
-
-                poblarSelector();
-                mostrarMarcadores('todas');
-            } catch (error) {
-                console.error("Error cargando el Sheet:", error);
-                areaSelect.innerHTML = '<option>Error al cargar áreas</option>';
-            }
-        }
-
-        // 3. Llenar el selector
-        function poblarSelector() {
-            const areas = [...new Set(todosLosRecursos.map(r => r.area))].filter(Boolean).sort();
-            areaSelect.innerHTML = '<option value="todas">🌍 Todas las Áreas</option>';
+    async function cargarDatos() {
+        try {
+            const res = await fetch('https://psqaldia.com/?sheet=Recursos');
+            const data = await res.json();
             
-            areas.forEach(area => {
-                const opt = document.createElement('option');
-                opt.value = area;
-                opt.textContent = area;
-                areaSelect.appendChild(opt);
-            });
+            if (!data.values) return;
+
+            // Procesamos los datos (Tu Excel: A=0 Area, B=1 Nombre, C=2 Cat, D=3 Dir, E=4 Ciudad, I=8 Coords)
+            todosLosRecursos = data.values.map((row, index) => ({
+                id: index,
+                area: row[0] ? row[0].toString().trim() : "Sin Área",
+                nombre: row[1] ? row[1].toString().trim() : "",
+                categoria: row[2] || "",
+                direccion: `${row[3] || ''}, ${row[4] || ''}`,
+                coords: row[8] ? row[8].toString().trim() : null
+            })).filter(r => r.nombre && r.coords);
+
+            poblarSelector();
+            actualizarVista('todas');
+        } catch (e) {
+            console.error("Error cargando datos:", e);
         }
+    }
 
-        // 4. Dibujar puntos
-        function mostrarMarcadores(filtro) {
-            markersLayer.clearLayers();
-            const filtrados = filtro === 'todas' ? todosLosRecursos : todosLosRecursos.filter(r => r.area === filtro);
-            const bounds = [];
+    function poblarSelector() {
+        const areas = [...new Set(todosLosRecursos.map(r => r.area))].sort();
+        areaSelect.innerHTML = '<option value="todas">🌍 Ver Todo</option>';
+        areas.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a; opt.textContent = a;
+            areaSelect.appendChild(opt);
+        });
+    }
 
-            filtrados.forEach(r => {
-                const partes = r.coords.split(',');
-                if (partes.length === 2) {
-                    const lat = parseFloat(partes[0].trim());
-                    const lon = parseFloat(partes[1].trim());
+    function actualizarVista(filtro) {
+        markersLayer.clearLayers();
+        sidebar.innerHTML = "";
+        marcadores = [];
+        
+        const filtrados = filtro === 'todas' ? todosLosRecursos : todosLosRecursos.filter(r => r.area === filtro);
+        const bounds = [];
 
-                    if (!isNaN(lat) && !isNaN(lon)) {
-                        const marker = L.marker([lat, lon]);
-                        
-                        let popupHtml = `<div class="popup-content">
-                            <b>${r.nombre}</b>
-                            <i>${r.categoria || ''}</i>
-                            ${r.direccion}<br>`;
-                        
-                        if (r.tel) popupHtml += `📞 <a href="tel:${r.tel}">${r.tel}</a><br>`;
-                        if (r.web && r.web.includes('http')) {
-                            popupHtml += `<a href="${r.web}" target="_blank" class="btn-web">Ver Web</a>`;
-                        }
-                        popupHtml += `</div>`;
+        filtrados.forEach(r => {
+            const [lat, lon] = r.coords.split(',').map(c => parseFloat(c.trim()));
+            if (!isNaN(lat) && !isNaN(lon)) {
+                // 1. Crear Marcador
+                const marker = L.marker([lat, lon]);
+                const popupContent = `<div class="popup-info"><b>${r.nombre}</b><i>${r.categoria}</i><br>${r.direccion}</div>`;
+                marker.bindPopup(popupContent);
+                markersLayer.addLayer(marker);
+                
+                // Guardar referencia
+                marcadores[r.id] = marker;
+                bounds.push([lat, lon]);
 
-                        marker.bindPopup(popupHtml);
-                        markersLayer.addLayer(marker);
-                        bounds.push([lat, lon]);
-                    }
-                }
-            });
-
-            if (bounds.length > 0) {
-                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+                // 2. Crear Item en Sidebar
+                const item = document.createElement('div');
+                item.className = 'recurso-item';
+                item.innerHTML = `<h3>${r.nombre}</h3><p>${r.categoria}</p><p style="font-size:11px">${r.direccion}</p>`;
+                item.onclick = () => {
+                    map.setView([lat, lon], 15);
+                    marker.openPopup();
+                };
+                sidebar.appendChild(item);
             }
-        }
+        });
 
-        // Escucha de cambios
-        areaSelect.addEventListener('change', (e) => mostrarMarcadores(e.target.value));
+        if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+    }
 
-        // Inicio
-        cargarDatos();
-    </script>
+    areaSelect.onchange = (e) => actualizarVista(e.target.value);
+    cargarDatos();
+</script>
+
 </body>
 </html>
