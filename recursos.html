@@ -29,24 +29,51 @@
         header { 
             position: absolute; top: 20px; left: 20px; right: 20px;
             background: var(--bg-glass); backdrop-filter: blur(8px);
-            padding: 12px 24px; border-radius: 16px;
+            padding: 12px 20px; border-radius: 16px;
             box-shadow: var(--shadow); z-index: 1000;
             display: flex; align-items: center; justify-content: space-between;
             max-width: 1200px; margin: 0 auto;
             border: 1px solid rgba(255,255,255,0.3);
+            gap: 15px;
         }
 
-        h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+        /* Estilos del buscador */
+        .search-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2px 12px;
+            transition: all 0.2s;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        #searchInput {
+            width: 100%;
+            border: none;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            background: transparent;
+        }
         
         select { 
             padding: 10px 16px; border-radius: 12px; border: 1px solid #e2e8f0;
             background: white; font-family: inherit; font-size: 0.9rem;
             font-weight: 600; color: var(--text-main); outline: none;
             transition: all 0.2s; cursor: pointer;
+            min-width: 180px;
         }
 
         #sidebar { 
-            position: absolute; top: 90px; left: 20px; bottom: 20px;
+            position: absolute; top: 100px; left: 20px; bottom: 20px;
             width: 380px; background: var(--bg-glass); backdrop-filter: blur(8px);
             border-radius: 20px; box-shadow: var(--shadow); z-index: 1000;
             display: flex; flex-direction: column;
@@ -122,7 +149,9 @@
         .leaflet-popup-content-wrapper { border-radius: 16px; padding: 8px; }
 
         @media (max-width: 768px) {
-            header { top: 10px; left: 10px; right: 10px; padding: 10px 15px; }
+            header { top: 10px; left: 10px; right: 10px; padding: 10px; flex-direction: column; }
+            .search-container { width: 100%; }
+            select { width: 100%; }
             #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 50%; border-radius: 20px 20px 0 0; }
         }
     </style>
@@ -130,7 +159,10 @@
 <body>
 
 <header>
-    <h1>📍 Localiza recursos de psiquiatría, adicciones, Salud Mental comunitaria...</h1>
+    <div class="search-container">
+        <span style="font-size: 1.1rem; margin-left: 5px;">🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar recurso, dirección, descripción...">
+    </div>
     <select id="areaSelect">
         <option value="todas">Cargando áreas...</option>
     </select>
@@ -156,6 +188,7 @@
     }).addTo(map);
 
     const areaSelect = document.getElementById('areaSelect');
+    const searchInput = document.getElementById('searchInput');
     const categoryContainer = document.getElementById('category-filters');
     const resourceList = document.getElementById('resource-list');
     
@@ -186,11 +219,11 @@
                     nombre: row[0] || "Sin nombre",
                     area: row[1] || "Sin Área",
                     direccion: row[2] || "",
-                    telefono: row[3] || "",    // Columna D
-                    web: row[4] || "",         // Columna E
-                    coords: row[5] || null,    // Columna F
-                    categoria: row[6] || "General", // Columna G
-                    descripcion: row[7] || ""  // Columna H
+                    telefono: row[3] || "",
+                    web: row[4] || "",
+                    coords: row[5] || null,
+                    categoria: row[6] || "General",
+                    descripcion: row[7] || ""
                 };
             }).filter(r => r !== null);
 
@@ -248,16 +281,23 @@
         resourceList.innerHTML = "";
         
         const areaFiltro = areaSelect.value;
+        const textoBusqueda = searchInput.value.toLowerCase();
+
         const filtrados = todosLosRecursos.filter(r => {
             const cumpleArea = (areaFiltro === 'todas' || r.area === areaFiltro);
             const cumpleCat = (categoriaActiva === 'todas' || r.categoria === categoriaActiva);
-            return cumpleArea && cumpleCat;
+            const cumpleBusqueda = 
+                r.nombre.toLowerCase().includes(textoBusqueda) || 
+                r.descripcion.toLowerCase().includes(textoBusqueda) ||
+                r.direccion.toLowerCase().includes(textoBusqueda);
+            
+            return cumpleArea && cumpleCat && cumpleBusqueda;
         });
 
         const bounds = [];
 
         if (filtrados.length === 0) {
-            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No hay resultados.</p>';
+            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No se encontraron resultados.</p>';
             return;
         }
 
@@ -278,7 +318,6 @@
 
                 const marker = L.marker([lat, lon], { icon }).addTo(markersLayer);
                 
-                // POPUP DEL MAPA ACTUALIZADO
                 marker.bindPopup(`
                     <div class="popup-info" style="min-width:150px">
                         <span class="badge" style="background:${color}">${r.categoria}</span>
@@ -291,7 +330,6 @@
 
                 bounds.push([lat, lon]);
 
-                // ITEM DE LA LISTA ACTUALIZADO
                 const item = document.createElement('div');
                 item.className = 'recurso-item';
                 item.innerHTML = `
@@ -305,7 +343,7 @@
                     </div>
                 `;
                 item.onclick = (e) => {
-                    if(e.target.tagName === 'A') return; // Evitar que el click en el enlace mueva el mapa
+                    if(e.target.tagName === 'A') return;
                     map.flyTo([lat, lon], 16, { duration: 1.5 });
                     marker.openPopup();
                     if (window.innerWidth <= 768) resourceList.scrollTo({ top: 0, behavior: 'smooth' });
@@ -317,7 +355,10 @@
         if (bounds.length > 0) map.fitBounds(bounds, { padding: [80, 80], maxZoom: 15 });
     }
 
+    // Eventos
     areaSelect.onchange = actualizarVista;
+    searchInput.oninput = actualizarVista; // Filtra mientras escribes
+    
     cargarDatos();
 </script>
 
