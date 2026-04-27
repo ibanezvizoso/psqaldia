@@ -106,22 +106,22 @@
 
         /* BARRA CORREDERA MEJORADA PARA PC Y MÓVIL */
         #category-filters {
-            padding: 12px 15px; 
+            padding: 12px 5px; 
             display: flex; 
-            flex-wrap: nowrap; /* Fuerza una sola línea */
+            flex-wrap: nowrap; 
             gap: 6px;
-            border-bottom: 1px solid #f1f5f9; 
-            overflow-x: auto; /* Permite scroll horizontal */
-            scrollbar-width: none; /* Oculta scroll en Firefox */
-            -ms-overflow-style: none; /* Oculta scroll en IE */
+            overflow-x: auto; 
+            scrollbar-width: none; 
+            -ms-overflow-style: none; 
+            flex: 1;
         }
 
-        #category-filters::-webkit-scrollbar { display: none; } /* Oculta scroll en Chrome/Safari */
+        #category-filters::-webkit-scrollbar { display: none; }
 
         .filter-btn {
-            padding: 5px 12px; /* Botones más pequeños */
+            padding: 5px 12px; 
             border-radius: 20px; 
-            font-size: 0.65rem; /* Fuente un pelín más pequeña */
+            font-size: 0.65rem; 
             font-weight: 700;
             cursor: pointer; 
             border: 2px solid transparent; 
@@ -130,11 +130,26 @@
             background: white; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
             opacity: 0.7;
-            flex: 0 0 auto; /* Evita que los botones se encojan */
+            flex: 0 0 auto; 
             white-space: nowrap;
         }
 
         .filter-btn.active { opacity: 1; border-color: var(--text-main); transform: scale(1.05); }
+
+        /* ESTILOS BOTONES SCROLL */
+        .scroll-btn {
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+            user-select: none;
+        }
+        .scroll-btn:hover { color: var(--primary); }
 
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -201,7 +216,12 @@
 <button class="geo-btn" onclick="geolocalizar()" title="Mi ubicación">🎯</button>
 
 <div id="sidebar">
-    <div id="category-filters"></div>
+    <div style="display: flex; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 0 5px;">
+        <button class="scroll-btn" onclick="document.getElementById('category-filters').scrollBy({left: -150, behavior: 'smooth'})">‹</button>
+        <div id="category-filters"></div>
+        <button class="scroll-btn" onclick="document.getElementById('category-filters').scrollBy({left: 150, behavior: 'smooth'})">›</button>
+    </div>
+    
     <div id="resource-list">
         <p style="text-align:center; color:var(--text-muted); padding-top:20px;">Localizando recursos...</p>
     </div>
@@ -219,7 +239,7 @@
             <a href="https://docs.google.com/spreadsheets/d/1-xNRrlzqAexXL3uwMi1kBqE4AyWR_CIuZKoLJL7yujA/edit?usp=sharing" 
                target="_blank" 
                style="background: var(--primary); color: white; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; display: inline-block;">
-               Abrir Google Sheets
+                Abrir Google Sheets
             </a>
         </div>
     </div>
