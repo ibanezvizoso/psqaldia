@@ -36,7 +36,59 @@
             border: 1px solid rgba(255,255,255,0.3);
             gap: 15px;
         }
+/* Botón de ayuda */
+.help-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 2000;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
 
+.help-fab:hover { transform: scale(1.1); background: #1d4ed8; }
+
+/* Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 450px;
+    width: 90%;
+    position: relative;
+    box-shadow: var(--shadow);
+}
+
+.modal-content h2 { margin-top: 0; color: var(--primary); font-size: 1.2rem; }
+.modal-content p { line-height: 1.6; font-size: 0.95rem; color: var(--text-main); }
+.close-modal {
+    position: absolute;
+    top: 15px; right: 15px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+}
         /* Estilos del buscador */
         .search-container {
             flex: 1;
@@ -211,7 +263,24 @@
 </div>
 
 <div id="map"></div>
+<div class="help-fab" onclick="toggleModal(true)" title="¿Cómo añadir recursos?">❓</div>
 
+<div id="helpModal" class="modal-overlay" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="toggleModal(false)">&times;</span>
+        <h2>¿Cómo añadir recursos?</h2>
+        <p>Este mapa de recursos de Salud Mental nace con un afán colaborativo.</p>
+        <p>Para añadir recursos de cualquier área puedes entrar en este enlace a un <b>Google Sheets colaborativo</b> y añadir nuevas filas. Periódicamente, las trasladaré a la hoja conectada con este mapa.</p>
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="https://docs.google.com/spreadsheets/d/1-xNRrlzqAexXL3uwMi1kBqE4AyWR_CIuZKoLJL7yujA/edit?usp=sharing" 
+               target="_blank" 
+               class="info-link" 
+               style="background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; display: inline-block;">
+               Abrir Google Sheets
+            </a>
+        </div>
+    </div>
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
