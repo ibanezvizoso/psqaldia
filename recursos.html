@@ -242,7 +242,7 @@
 
     async function cargarDatos() {
         try {
-            const res = await fetch('https://psqaldia.com/?sheet=Recursos');
+            const res = await fetch('https://psqaldia.com/?sheet=RecursosMapa');
             const data = await res.json();
             
             if (!data.values) return;
