@@ -263,24 +263,7 @@
 </div>
 
 <div id="map"></div>
-<div class="help-fab" onclick="toggleModal(true)" title="¿Cómo añadir recursos?">❓</div>
 
-<div id="helpModal" class="modal-overlay" onclick="toggleModal(false)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="toggleModal(false)">&times;</span>
-        <h2>¿Cómo añadir recursos?</h2>
-        <p>Este mapa de recursos de Salud Mental nace con un afán colaborativo.</p>
-        <p>Para añadir recursos de cualquier área puedes entrar en este enlace a un <b>Google Sheets colaborativo</b> y añadir nuevas filas. Periódicamente, las trasladaré a la hoja conectada con este mapa.</p>
-        <div style="margin-top: 20px; text-align: center;">
-            <a href="https://docs.google.com/spreadsheets/d/1-xNRrlzqAexXL3uwMi1kBqE4AyWR_CIuZKoLJL7yujA/edit?usp=sharing" 
-               target="_blank" 
-               class="info-link" 
-               style="background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; display: inline-block;">
-               Abrir Google Sheets
-            </a>
-        </div>
-    </div>
-</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
@@ -465,6 +448,23 @@
     
     cargarDatos();
 </script>
+<div class="help-fab" onclick="toggleModal(true)" title="¿Cómo añadir recursos?">❓</div>
 
+<div id="helpModal" class="modal-overlay" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="toggleModal(false)">&times;</span>
+        <h2>¿Cómo añadir recursos?</h2>
+        <p>Este mapa de recursos de Salud Mental nace con un afán colaborativo.</p>
+        <p>Para añadir recursos de cualquier área puedes entrar en este enlace a un <b>Google Sheets colaborativo</b> y añadir nuevas filas. Periódicamente, las trasladaré a la hoja conectada con este mapa.</p>
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="https://docs.google.com/spreadsheets/d/1-xNRrlzqAexXL3uwMi1kBqE4AyWR_CIuZKoLJL7yujA/edit?usp=sharing" 
+               target="_blank" 
+               class="info-link" 
+               style="background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; display: inline-block;">
+               Abrir Google Sheets
+            </a>
+        </div>
+    </div>
+</div>
 </body>
 </html>
