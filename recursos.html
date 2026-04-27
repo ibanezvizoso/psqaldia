@@ -34,18 +34,17 @@
             display: flex; align-items: center;
             max-width: 1200px; margin: 0 auto;
             border: 1px solid rgba(255,255,255,0.3);
-            gap: 10px; /* Espacio reducido entre elementos */
+            gap: 10px;
         }
 
-        /* Buscador compacto */
         .search-container {
-            flex: 2; /* Ocupa más que el select y el botón, pero el header es más bajo */
+            flex: 2;
             display: flex;
             align-items: center;
             background: white;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 2px 10px;
+            border-radius: 10px;
+            padding: 0 10px;
             transition: all 0.2s;
         }
 
@@ -57,45 +56,39 @@
         #searchInput {
             width: 100%;
             border: none;
-            padding: 8px;
+            padding: 8px 0;
             font-family: inherit;
             font-size: 0.9rem;
             outline: none;
             background: transparent;
         }
         
-        /* Selector de área compacto */
         select { 
             flex: 1;
-            padding: 8px 12px; border-radius: 12px; border: 1px solid #e2e8f0;
+            padding: 8px 12px; border-radius: 10px; border: 1px solid #e2e8f0;
             background: white; font-family: inherit; font-size: 0.85rem;
             font-weight: 600; color: var(--text-main); outline: none;
-            transition: all 0.2s; cursor: pointer;
-            min-width: 140px;
+            cursor: pointer;
+            min-width: 150px;
         }
 
-        /* Botón de ayuda integrado y pequeño */
         .help-trigger {
             flex: 0 0 auto;
             background: white;
-            padding: 8px 14px;
-            border-radius: 12px;
+            padding: 8px 12px;
+            border-radius: 10px;
             font-size: 0.7rem;
             font-weight: 700;
             color: var(--primary);
             text-transform: uppercase;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
             white-space: nowrap;
         }
 
-        .help-trigger:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            background: #f8fafc;
-        }
+        .help-trigger:hover { background: #f8fafc; transform: translateY(-1px); }
 
         /* Modal */
         .modal-overlay {
@@ -121,17 +114,10 @@
 
         .modal-content h2 { margin-top: 0; color: var(--primary); font-size: 1.2rem; }
         .modal-content p { line-height: 1.6; font-size: 0.95rem; color: var(--text-main); }
-        
-        .close-modal {
-            position: absolute;
-            top: 15px; right: 15px;
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: var(--text-muted);
-        }
+        .close-modal { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 1.5rem; color: var(--text-muted); }
 
         #sidebar { 
-            position: absolute; top: 100px; left: 20px; bottom: 20px;
+            position: absolute; top: 90px; left: 20px; bottom: 20px;
             width: 380px; background: var(--bg-glass); backdrop-filter: blur(8px);
             border-radius: 20px; box-shadow: var(--shadow); z-index: 1000;
             display: flex; flex-direction: column;
@@ -139,79 +125,70 @@
         }
 
         #category-filters {
-            padding: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            border-bottom: 1px solid #f1f5f9;
-            max-height: 200px;
-            overflow-y: auto;
+            padding: 15px; display: flex; flex-wrap: wrap; gap: 8px;
+            border-bottom: 1px solid #f1f5f9; max-height: 200px; overflow-y: auto;
         }
 
         .filter-btn {
-            padding: 7px 14px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            opacity: 0.7;
-            white-space: nowrap;
+            padding: 7px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+            cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease;
+            text-transform: uppercase; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); opacity: 0.7;
         }
 
-        .filter-btn:hover { opacity: 1; transform: translateY(-1px); }
-        .filter-btn.active {
-            opacity: 1;
-            border-color: var(--text-main);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transform: scale(1.05);
-        }
+        .filter-btn.active { opacity: 1; border-color: var(--text-main); transform: scale(1.05); }
 
-        #resource-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-        }
+        #resource-list { flex: 1; overflow-y: auto; padding: 15px; }
 
         .recurso-item { 
-            padding: 16px; background: white; border-radius: 14px;
-            margin-bottom: 12px; cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #f1f5f9;
+            padding: 16px; background: white; border-radius: 14px; margin-bottom: 12px; 
+            cursor: pointer; border: 1px solid #f1f5f9; transition: all 0.2s;
         }
 
-        .recurso-item:hover { 
-            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border-color: #cbd5e1;
-        }
+        .recurso-item:hover { border-color: #cbd5e1; }
 
         .badge {
             display: inline-flex; align-items: center; padding: 4px 10px;
             border-radius: 20px; font-size: 0.7rem; font-weight: 700;
-            margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em;
+            margin-bottom: 8px; text-transform: uppercase;
         }
 
         .info-link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.8rem; }
-        .info-link:hover { text-decoration: underline; }
 
-        .custom-marker {
-            width: 14px; height: 14px; border-radius: 50%;
-            border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
+        .custom-marker { width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-        .leaflet-popup-content-wrapper { border-radius: 16px; padding: 8px; }
-
+        /* MÓVIL: AJUSTE PARA UNA SOLA LÍNEA */
         @media (max-width: 768px) {
-            header { top: 10px; left: 10px; right: 10px; padding: 8px 12px; gap: 6px; flex-wrap: wrap; }
-            .search-container { flex: 1 1 100%; order: 1; }
-            select { flex: 1; min-width: 0; order: 2; font-size: 0.75rem; }
-            .help-trigger { flex: 1; order: 3; font-size: 0.6rem; text-align: center; }
+            header { 
+                top: 10px; left: 10px; right: 10px; 
+                padding: 6px 8px; 
+                gap: 5px; /* Espacio mínimo */
+            }
+            
+            .search-container { 
+                flex: 1.5; 
+                padding: 0 5px; 
+            }
+
+            .search-container span { display: none; } /* Quitamos la lupa para ganar espacio */
+
+            #searchInput { font-size: 0.75rem; padding: 6px 0; }
+
+            select { 
+                flex: 1; 
+                min-width: 0; /* Permite que se encoja totalmente */
+                padding: 6px 5px; 
+                font-size: 0.7rem; 
+            }
+
+            .help-trigger { 
+                padding: 6px 8px; 
+                font-size: 0.6rem; 
+                letter-spacing: -0.02em; /* Texto un poco más apretado */
+            }
+
             #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 45%; border-radius: 20px 20px 0 0; }
+            #category-filters { flex-wrap: nowrap; overflow-x: auto; padding: 10px; gap: 6px; }
+            .filter-btn { font-size: 0.6rem; padding: 6px 10px; white-space: nowrap; }
         }
     </style>
 </head>
@@ -219,13 +196,13 @@
 
 <header>
     <div class="search-container">
-        <span style="font-size: 1.1rem; margin-left: 5px;">🔍</span>
-        <input type="text" id="searchInput" placeholder="Buscar recurso...">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar...">
     </div>
     <select id="areaSelect">
         <option value="todas">Cargando...</option>
     </select>
-    <div class="help-trigger" onclick="toggleModal(true)">¿Cómo añadir recursos?</div>
+    <div class="help-trigger" onclick="toggleModal(true)">¿Cómo añadir?</div>
 </header>
 
 <div id="sidebar">
@@ -273,8 +250,7 @@
     const coloresCategorias = {};
 
     function toggleModal(show) {
-        const modal = document.getElementById('helpModal');
-        modal.style.display = show ? 'flex' : 'none';
+        document.getElementById('helpModal').style.display = show ? 'flex' : 'none';
     }
 
     function getPastelColor(categoria) {
@@ -290,7 +266,6 @@
         try {
             const res = await fetch('https://psqaldia.com/?sheet=Recursos');
             const data = await res.json();
-            
             if (!data.values) return;
 
             todosLosRecursos = data.values.map((row, index) => {
@@ -329,10 +304,9 @@
     function poblarFiltrosCategoria() {
         const categorias = [...new Set(todosLosRecursos.map(r => r.categoria))].sort();
         categoryContainer.innerHTML = '';
-
         const btnAll = document.createElement('div');
         btnAll.className = 'filter-btn active';
-        btnAll.textContent = 'Ver Todo';
+        btnAll.textContent = 'Todo';
         btnAll.style.backgroundColor = '#f1f5f9';
         btnAll.onclick = () => setCategoria('todas', btnAll);
         categoryContainer.appendChild(btnAll);
@@ -361,25 +335,21 @@
     function actualizarVista() {
         markersLayer.clearLayers();
         resourceList.innerHTML = "";
-        
         const areaFiltro = areaSelect.value;
         const textoBusqueda = searchInput.value.toLowerCase();
 
         const filtrados = todosLosRecursos.filter(r => {
             const cumpleArea = (areaFiltro === 'todas' || r.area === areaFiltro);
             const cumpleCat = (categoriaActiva === 'todas' || r.categoria === categoriaActiva);
-            const cumpleBusqueda = 
-                r.nombre.toLowerCase().includes(textoBusqueda) || 
-                r.descripcion.toLowerCase().includes(textoBusqueda) ||
-                r.direccion.toLowerCase().includes(textoBusqueda);
-            
+            const cumpleBusqueda = r.nombre.toLowerCase().includes(textoBusqueda) || 
+                                   r.descripcion.toLowerCase().includes(textoBusqueda) ||
+                                   r.direccion.toLowerCase().includes(textoBusqueda);
             return cumpleArea && cumpleCat && cumpleBusqueda;
         });
 
         const bounds = [];
-
         if (filtrados.length === 0) {
-            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">No se encontraron resultados.</p>';
+            resourceList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding-top:20px;">Sin resultados.</p>';
             return;
         }
 
@@ -390,57 +360,37 @@
 
             if (!isNaN(lat) && !isNaN(lon)) {
                 const color = getPastelColor(r.categoria);
-
                 const icon = L.divIcon({
                     className: 'custom-div-icon',
                     html: `<div class="custom-marker" style="background-color: ${color};"></div>`,
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10]
+                    iconSize: [20, 20], iconAnchor: [10, 10]
                 });
-
                 const marker = L.marker([lat, lon], { icon }).addTo(markersLayer);
-                
                 marker.bindPopup(`
-                    <div class="popup-info" style="min-width:150px">
+                    <div class="popup-info">
                         <span class="badge" style="background:${color}">${r.categoria}</span>
-                        <b style="display:block; margin-bottom:5px; font-size:1rem">${r.nombre}</b>
-                        <p style="margin:0 0 5px 0; font-size:0.8rem; color:var(--text-muted)">${r.direccion}</p>
-                        ${r.telefono ? `<p style="margin:0; font-size:0.8rem">📞 <a href="tel:${r.telefono}" class="info-link">${r.telefono}</a></p>` : ''}
-                        ${r.web ? `<p style="margin:5px 0 0 0; font-size:0.8rem">🌐 <a href="${r.web}" target="_blank" class="info-link">Visitar Web</a></p>` : ''}
+                        <b style="display:block; margin-bottom:5px;">${r.nombre}</b>
+                        <p style="margin:0; font-size:0.8rem; color:var(--text-muted)">${r.direccion}</p>
                     </div>
                 `);
-
                 bounds.push([lat, lon]);
-
                 const item = document.createElement('div');
                 item.className = 'recurso-item';
                 item.innerHTML = `
                     <span class="badge" style="background:${color}">${r.categoria}</span>
-                    <h3 style="margin:0 0 5px 0; font-size:0.95rem;">${r.nombre}</h3>
-                    ${r.descripcion ? `<p style="margin:0 0 8px 0; font-size:0.8rem; color:var(--text-main); font-style:italic">${r.descripcion}</p>` : ''}
-                    <p style="margin:0; font-size:0.8rem; color:var(--text-muted);">📍 ${r.direccion}</p>
-                    <div style="margin-top:8px; display:flex; gap:15px">
-                        ${r.telefono ? `<span style="font-size:0.8rem">📞 ${r.telefono}</span>` : ''}
-                        ${r.web ? `<a href="${r.web}" target="_blank" class="info-link">🌐 Web</a>` : ''}
-                    </div>
+                    <h3 style="margin:0; font-size:0.9rem;">${r.nombre}</h3>
+                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--text-muted);">📍 ${r.direccion}</p>
                 `;
-                item.onclick = (e) => {
-                    if(e.target.tagName === 'A') return;
-                    map.flyTo([lat, lon], 16, { duration: 1.5 });
-                    marker.openPopup();
-                };
+                item.onclick = () => { map.flyTo([lat, lon], 16); marker.openPopup(); };
                 resourceList.appendChild(item);
             }
         });
-
-        if (bounds.length > 0) map.fitBounds(bounds, { padding: [80, 80], maxZoom: 15 });
+        if (bounds.length > 0) map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
     }
 
     areaSelect.onchange = actualizarVista;
     searchInput.oninput = actualizarVista; 
-    
     cargarDatos();
 </script>
-
 </body>
 </html>
