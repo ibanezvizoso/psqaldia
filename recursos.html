@@ -272,7 +272,7 @@
 
     function poblarSelectorArea() {
         const areas = [...new Set(todosLosRecursos.map(r => r.area))].sort();
-        areaSelect.innerHTML = '<option value="todas">🌍 Áreas</option>';
+        areaSelect.innerHTML = '<option value="todas">🌍 Área</option>';
         areas.forEach(a => {
             const opt = document.createElement('option');
             opt.value = a; opt.textContent = a;
