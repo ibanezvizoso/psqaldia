@@ -68,7 +68,7 @@
             padding: 8px 12px; border-radius: 10px; border: 1px solid #e2e8f0;
             background: white; font-family: inherit; font-size: 0.85rem;
             font-weight: 600; color: var(--text-main); outline: none;
-            cursor: pointer;
+            transition: all 0.2s; cursor: pointer;
             min-width: 140px;
         }
 
@@ -87,6 +87,16 @@
             transition: all 0.2s ease;
             white-space: nowrap;
         }
+
+        /* Botón de geolocalización */
+        .geo-btn {
+            position: absolute; bottom: 85px; right: 10px; z-index: 1000;
+            background: white; width: 34px; height: 34px; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,0.4); border: none;
+            font-size: 1.1rem; transition: all 0.2s;
+        }
+        .geo-btn:hover { background: #f8fafc; }
 
         /* Modal y Sidebar */
         .modal-overlay {
@@ -146,7 +156,6 @@
 
         .leaflet-popup-content-wrapper { border-radius: 16px; padding: 8px; }
 
-        /* MÓVIL: AJUSTE PARA UNA SOLA LÍNEA */
         @media (max-width: 768px) {
             header { top: 10px; left: 10px; right: 10px; padding: 6px 8px; gap: 5px; }
             .search-container { flex: 1.2; padding: 0 5px; }
@@ -157,6 +166,7 @@
             #sidebar { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 45%; border-radius: 20px 20px 0 0; }
             #category-filters { flex-wrap: nowrap; overflow-x: auto; padding: 10px; gap: 6px; }
             .filter-btn { font-size: 0.6rem; padding: 6px 10px; white-space: nowrap; }
+            .geo-btn { bottom: 50%; } /* Ajuste móvil para que no tape el sidebar */
         }
     </style>
 </head>
@@ -172,6 +182,8 @@
     </select>
     <div class="help-trigger" onclick="toggleModal(true)">Añadir</div>
 </header>
+
+<button class="geo-btn" onclick="geolocalizar()" title="Mi ubicación">🎯</button>
 
 <div id="sidebar">
     <div id="category-filters"></div>
@@ -221,6 +233,20 @@
         document.getElementById('helpModal').style.display = show ? 'flex' : 'none';
     }
 
+    // Función de Geolocalización
+    function geolocalizar() {
+        map.locate({setView: true, maxZoom: 15});
+    }
+
+    map.on('locationfound', (e) => {
+        L.circle(e.latlng, e.accuracy).addTo(map);
+        L.marker(e.latlng).addTo(map).bindPopup("Estás aquí").openPopup();
+    });
+
+    map.on('locationerror', () => {
+        alert("No se pudo obtener tu ubicación. Revisa los permisos de tu navegador.");
+    });
+
     function getPastelColor(categoria) {
         if (!categoria || categoria === 'todas') return '#f1f5f9';
         if (coloresCategorias[categoria]) return coloresCategorias[categoria];
@@ -236,7 +262,6 @@
             const data = await res.json();
             if (!data.values) return;
 
-            // Mapeo completo de columnas: 0:Nombre, 1:Area, 2:Direccion, 3:Tel, 4:Web, 5:Coords, 6:Cat, 7:Desc
             todosLosRecursos = data.values.map((row, index) => {
                 if (row[0] === "Nombre" || !row[5]) return null;
                 return {
@@ -329,6 +354,8 @@
 
             if (!isNaN(lat) && !isNaN(lon)) {
                 const color = getPastelColor(r.categoria);
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+                
                 const icon = L.divIcon({
                     className: 'custom-div-icon',
                     html: `<div class="custom-marker" style="background-color: ${color};"></div>`,
@@ -336,7 +363,6 @@
                 });
                 const marker = L.marker([lat, lon], { icon }).addTo(markersLayer);
                 
-                // POPUP DEL MAPA REESTABLECIDO
                 marker.bindPopup(`
                     <div class="popup-info" style="min-width:160px">
                         <span class="badge" style="background:${color}">${r.categoria}</span>
@@ -344,12 +370,12 @@
                         <p style="margin:0 0 5px 0; font-size:0.8rem; color:var(--text-muted)">${r.direccion}</p>
                         ${r.telefono ? `<p style="margin:0; font-size:0.8rem">📞 <a href="tel:${r.telefono}" class="info-link">${r.telefono}</a></p>` : ''}
                         ${r.web ? `<p style="margin:5px 0 0 0; font-size:0.8rem">🌐 <a href="${r.web}" target="_blank" class="info-link">Web</a></p>` : ''}
+                        <p style="margin:8px 0 0 0; font-size:0.8rem">🚗 <a href="${mapsUrl}" target="_blank" class="info-link">Cómo llegar</a></p>
                     </div>
                 `);
 
                 bounds.push([lat, lon]);
 
-                // TARJETA DE LA LISTA REESTABLECIDA
                 const item = document.createElement('div');
                 item.className = 'recurso-item';
                 item.innerHTML = `
@@ -360,6 +386,7 @@
                     <div style="margin-top:8px; display:flex; gap:15px; flex-wrap:wrap">
                         ${r.telefono ? `<span style="font-size:0.8rem">📞 <a href="tel:${r.telefono}" class="info-link" style="color:inherit">${r.telefono}</a></span>` : ''}
                         ${r.web ? `<a href="${r.web}" target="_blank" class="info-link">🌐 Web</a>` : ''}
+                        <a href="${mapsUrl}" target="_blank" class="info-link">🚗 Cómo llegar</a>
                     </div>
                 `;
                 item.onclick = (e) => {
