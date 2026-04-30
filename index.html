@@ -43,53 +43,70 @@
     padding: 0; 
     transition: background 0.3s; 
 }
-       /* Modificamos el header para que alinee a la izquierda */
 header { 
-    background: var(--bg); 
-    padding: 0.8rem 1.2rem; 
+    background: var(--bg);
+    backdrop-filter: blur(12px); /* Efecto cristal moderno */
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.7rem 1.5rem; 
     position: sticky; 
     top: 0; 
     z-index: 100; 
-    transition: transform 0.4s ease; 
     display: flex; 
     align-items: center; 
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border); /* Un toque extra de definición */
+    justify-content: space-between; /* Distribuye: Menú | Marca | Spacer */
+    transition: transform 0.4s ease, background 0.3s;
+    border-bottom: 1px solid var(--border);
 }
 
-/* Contenedor de la izquierda */
-.header-content-left {
+/* El botón de menú ahora es independiente */
+.menu-toggle { 
+    background: none; 
+    border: none; 
+    color: var(--text-main); 
+    font-size: 1.3rem; 
+    cursor: pointer; 
+    width: 40px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-start;
+}
+
+/* Contenedor central de marca */
+.brand-central {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-}
-
-/* Área de marca (Logo + Texto) */
-.brand-area {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     cursor: pointer;
+    flex-grow: 1; /* Toma el espacio central */
 }
 
-/* REEMPLAZA tu .logo-img actual por este */
-.logo-img { 
-    max-height: 40px; /* Tamaño más contenido para ir junto al texto */
+.logo-img-modern { 
+    height: 42px; /* Tamaño equilibrado */
     width: auto; 
-    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
-/* Estilo para el texto PSQALDÍA en la cabecera */
-.brand-text {
-    font-size: 1.2rem;
+.brand-text-modern {
+    font-size: 1.4rem;
     font-weight: 900;
     color: var(--primary);
-    letter-spacing: 0.5px;
-    /* Opcional: ocultar texto en móviles muy pequeños si el logo ya lo dice todo */
+    letter-spacing: -0.5px; /* Look más moderno y compacto */
+    text-transform: uppercase;
 }
 
-@media (max-width: 400px) {
-    .brand-text { font-size: 1rem; }
+.header-right-spacer {
+    width: 40px; /* Exactamente el mismo ancho que el .menu-toggle para centrar perfecto */
+}
+
+/* Animación de entrada al hacer scroll */
+header.hide { 
+    transform: translateY(-100%); 
+}
+
+@media (max-width: 480px) {
+    .brand-text-modern { font-size: 1.1rem; }
+    .logo-img-modern { height: 35px; }
 }
         header.hide { transform: translateY(-100%); }
         .menu-toggle { background: none; border: none; color: var(--text-main); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; z-index: 110; width: 40px; display: flex; align-items: center; justify-content: center; }
@@ -137,17 +154,17 @@ header {
 </head>
 <body>
 <header id="mainHeader">
-    <div class="header-content-left">
-        <button class="menu-toggle" onclick="toggleMenu()" aria-label="Abrir Menú">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="brand-area" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-            <img src="Logo.png" alt="Logo PSQALDÍA" class="logo-img">
-            <span class="brand-text">PSQALDÍA</span>
-        </div>
+    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Abrir Menú">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="brand-central" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <img src="Logo.png" alt="Logo PSQALDÍA" class="logo-img-modern">
+        <span class="brand-text-modern">PSQALDÍA</span>
     </div>
-    <!-- Aquí podrías poner un botón de usuario o dejarlo vacío para mantener la limpieza -->
-    <div class="header-spacer"></div>
+
+    <!-- Espaciador para mantener el equilibrio visual con el botón de la izquierda -->
+    <div class="header-right-spacer"></div>
 </header>
 <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 <div id="sideMenu" class="side-menu">
