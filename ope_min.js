@@ -1,5 +1,6 @@
 /**
  * ope_min.js - Gestión unificada de exámenes OPE Medicina Interna
+ * Soporta múltiples convocatorias (2022, 2020) y Modo Snack combinado.
  * Estructura compatible con Worker v6.1 y CSS global de PSQ al día.
  */
 
@@ -9,7 +10,7 @@ let preguntasVisiblesMin = 20;
 let añoMinActual = "";
 
 /**
- * Pantalla inicial: Selector de convocatoria
+ * Pantalla inicial: Selector de convocatoria y modo Snack
  */
 function openMinSelector() {
     const modalData = document.getElementById('modalData');
@@ -31,12 +32,15 @@ function openMinSelector() {
                     <i class="fas fa-chevron-right" style="color: #0ea5e9;"></i>
                 </button>
 
-                <!-- Espacio para futuras convocatorias (ej. 2020) -->
-                
+                <button onclick="iniciarExamenMin('20')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
+                    <b style="color: var(--text-main); font-size: 1.1rem;">Convocatoria 2020</b>
+                    <i class="fas fa-chevron-right" style="color: #0ea5e9;"></i>
+                </button>
+
                 <button onclick="iniciarExamenMin('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid #0ea5e9; background: rgba(14, 165, 233, 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
                         <b style="color: #0ea5e9; font-size: 1.1rem;">Modo Snack</b>
-                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas aleatorias)</small>
+                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(Aleatorio 2020 + 2022)</small>
                     </div>
                     <i class="fas fa-bolt" style="color: #0ea5e9;"></i>
                 </button>
@@ -49,6 +53,9 @@ function openMinSelector() {
     `;
 }
 
+/**
+ * Persistencia: Guardar estado en LocalStorage
+ */
 function guardarEstadoMin() {
     const estado = {
         año: añoMinActual,
@@ -59,6 +66,9 @@ function guardarEstadoMin() {
     localStorage.setItem('psq_save_min', JSON.stringify(estado));
 }
 
+/**
+ * Carga de datos desde el Worker
+ */
 async function iniciarExamenMin(año, esContinuacion = false) {
     if (!esContinuacion && localStorage.getItem('psq_save_min')) {
         const data = JSON.parse(localStorage.getItem('psq_save_min'));
@@ -80,10 +90,22 @@ async function iniciarExamenMin(año, esContinuacion = false) {
 
     try {
         let rows = [];
-        // Apuntamos a la nueva hoja Ope_Min22 definida en tu Sheets
-        const response = await fetch(`/?sheet=Ope_Min${año === 'snack' ? '22' : año}`);
-        const data = await response.json();
-        rows = data.values || [];
+
+        if (año === 'snack') {
+            // Carga paralela de ambas hojas para el Modo Snack
+            const [res22, res20] = await Promise.all([
+                fetch(`/?sheet=Ope_Min22`),
+                fetch(`/?sheet=Ope_Min20`)
+            ]);
+            const data22 = await res22.json();
+            const data20 = await res20.json();
+            rows = [...(data22.values || []), ...(data20.values || [])];
+        } else {
+            // Carga individual de la convocatoria seleccionada
+            const response = await fetch(`/?sheet=Ope_Min${año}`);
+            const data = await response.json();
+            rows = data.values || [];
+        }
 
         preguntasMin = rows
             .filter(row => row[0] && row[0].trim() !== "")
@@ -95,6 +117,7 @@ async function iniciarExamenMin(año, esContinuacion = false) {
             }));
 
         if (año === 'snack') {
+            // Mezclar y coger 10 preguntas para el snack
             preguntasMin = preguntasMin.sort(() => Math.random() - 0.5).slice(0, 10);
             preguntasVisiblesMin = 10;
         }
@@ -108,7 +131,9 @@ async function iniciarExamenMin(año, esContinuacion = false) {
 
 function renderizarExamenMin() {
     const container = document.getElementById('modalData');
-    let titulo = añoMinActual === 'snack' ? 'Snack Med. Interna' : `OPE MED. INTERNA 20${añoMinActual}`;
+    let titulo = "";
+    if (añoMinActual === 'snack') titulo = 'Snack Medicina Interna';
+    else titulo = `OPE MED. INTERNA 20${añoMinActual}`;
     
     let html = `
         <div style="padding:1.5rem; max-width:800px; margin:auto;">
