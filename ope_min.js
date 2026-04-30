@@ -1,1 +1,231 @@
+/**
+ * ope_min.js - Gestión unificada de exámenes OPE Medicina Interna
+ * Estructura compatible con Worker v6.1 y CSS global de PSQ al día.
+ */
 
+let preguntasMin = [];
+let respuestasMin = {};
+let preguntasVisiblesMin = 20;
+let añoMinActual = "";
+
+/**
+ * Pantalla inicial: Selector de convocatoria
+ */
+function openMinSelector() {
+    const modalData = document.getElementById('modalData');
+    const modal = document.getElementById('modal');
+    
+    if (modal) modal.style.display = 'flex';
+
+    modalData.innerHTML = `
+        <div style="padding: 2.5rem 1.5rem; text-align: center; max-width: 500px; margin: auto;">
+            <div style="margin-bottom: 2.5rem;">
+                <i class="fas fa-notes-medical fa-3x" style="color: #0ea5e9; margin-bottom: 1rem; opacity: 0.8;"></i>
+                <h2 style="color: var(--text-main); font-weight: 900; margin: 0; font-size: 1.8rem;">OPE Med. Interna</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">Selecciona la convocatoria para comenzar</p>
+            </div>
+            
+            <div style="display: grid; gap: 12px; margin-bottom: 2rem;">
+                <button onclick="iniciarExamenMin('22')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
+                    <b style="color: var(--text-main); font-size: 1.1rem;">Convocatoria 2022</b>
+                    <i class="fas fa-chevron-right" style="color: #0ea5e9;"></i>
+                </button>
+
+                <!-- Espacio para futuras convocatorias (ej. 2020) -->
+                
+                <button onclick="iniciarExamenMin('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid #0ea5e9; background: rgba(14, 165, 233, 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
+                    <div>
+                        <b style="color: #0ea5e9; font-size: 1.1rem;">Modo Snack</b>
+                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(Preguntas aleatorias)</small>
+                    </div>
+                    <i class="fas fa-bolt" style="color: #0ea5e9;"></i>
+                </button>
+            </div>
+
+            <button onclick="abrirPortalExamenes()" style="background: none; border: none; color: var(--text-muted); font-weight: 800; cursor: pointer; font-size: 0.8rem; letter-spacing: 1px;">
+                <i class="fas fa-arrow-left"></i> VOLVER AL PORTAL
+            </button>
+        </div>
+    `;
+}
+
+function guardarEstadoMin() {
+    const estado = {
+        año: añoMinActual,
+        preguntas: preguntasMin,
+        respuestas: respuestasMin,
+        visibles: preguntasVisiblesMin
+    };
+    localStorage.setItem('psq_save_min', JSON.stringify(estado));
+}
+
+async function iniciarExamenMin(año, esContinuacion = false) {
+    if (!esContinuacion && localStorage.getItem('psq_save_min')) {
+        const data = JSON.parse(localStorage.getItem('psq_save_min'));
+        if (confirm(`Tienes un examen de Medicina Interna a medias. ¿Quieres continuarlo?`)) {
+            añoMinActual = data.año;
+            preguntasMin = data.preguntas;
+            respuestasMin = data.respuestas;
+            preguntasVisiblesMin = data.visibles;
+            renderizarExamenMin();
+            return;
+        }
+    }
+
+    añoMinActual = año;
+    preguntasVisiblesMin = 20;
+    respuestasMin = {};
+    const modalData = document.getElementById('modalData');
+    modalData.innerHTML = `<div style="padding:3rem; text-align:center;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color:#0ea5e9;"></i><br><br><b>Cargando Medicina Interna...</b></div>`;
+
+    try {
+        let rows = [];
+        // Apuntamos a la nueva hoja Ope_Min22 definida en tu Sheets
+        const response = await fetch(`/?sheet=Ope_Min${año === 'snack' ? '22' : año}`);
+        const data = await response.json();
+        rows = data.values || [];
+
+        preguntasMin = rows
+            .filter(row => row[0] && row[0].trim() !== "")
+            .map(row => ({
+                pregunta: (row[0] || "").trim(),
+                opciones: [(row[1] || "").trim(), (row[2] || "").trim(), (row[3] || "").trim(), (row[4] || "").trim()],
+                correcta: (row[5] || "").trim().toUpperCase(),
+                explicacion: (row[6] || "No hay explicación disponible.").trim()
+            }));
+
+        if (año === 'snack') {
+            preguntasMin = preguntasMin.sort(() => Math.random() - 0.5).slice(0, 10);
+            preguntasVisiblesMin = 10;
+        }
+
+        renderizarExamenMin();
+        guardarEstadoMin();
+    } catch (error) {
+        modalData.innerHTML = `<div style="padding:2rem; text-align:center;">Error al cargar datos de Interna: ${error.message}</div>`;
+    }
+}
+
+function renderizarExamenMin() {
+    const container = document.getElementById('modalData');
+    let titulo = añoMinActual === 'snack' ? 'Snack Med. Interna' : `OPE MED. INTERNA 20${añoMinActual}`;
+    
+    let html = `
+        <div style="padding:1.5rem; max-width:800px; margin:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; border-bottom: 2px solid var(--border); padding-bottom:1.5rem;">
+                <div>
+                    <h2 style="margin:0; font-weight:900; color:#0ea5e9; font-size:1.6rem;">${titulo}</h2>
+                    <p style="margin:5px 0 0; font-size:0.75rem; color:var(--text-muted);">
+                        Cargadas <span id="cont-preg-min">${Math.min(preguntasVisiblesMin, preguntasMin.length)}</span> de ${preguntasMin.length}
+                    </p>
+                </div>
+                <button onclick="openMinSelector()" style="background:var(--card); border:1px solid var(--border); color:var(--text-muted); padding:8px 12px; border-radius:10px; cursor:pointer; font-size:0.75rem; font-weight:800;">
+                    <i class="fas fa-undo"></i> SALIR
+                </button>
+            </div>
+
+            <div id="contenedor-preguntas-min">${generarBloqueMin(0, preguntasVisiblesMin)}</div>`;
+
+    if (preguntasVisiblesMin < preguntasMin.length) {
+        html += `<button id="btn-mas-min" onclick="cargarMasMin()" style="width:100%; padding:1rem; margin-bottom:2rem; border-radius:15px; border:2px dashed var(--border); background:none; color:var(--text-muted); font-weight:800; cursor:pointer;">CARGAR MÁS...</button>`;
+    }
+
+    html += `
+            <div id="footer-min" style="position:sticky; bottom:10px; z-index:100; display:flex; gap:10px;">
+                <button onclick="corregirExamenMin()" class="btn btn-primary" style="flex:1; height:55px; border-radius:15px; font-weight:900; background:#0ea5e9; border:none; color:white; cursor:pointer; box-shadow: 0 5px 15px rgba(14, 165, 233, 0.3);">
+                    FINALIZAR Y CORREGIR
+                </button>
+            </div>
+        </div>`;
+    
+    container.innerHTML = html;
+}
+
+function generarBloqueMin(inicio, fin) {
+    let bloqueHtml = '';
+    preguntasMin.slice(inicio, fin).forEach((p, i) => {
+        const realIndex = inicio + i;
+        const resPrevia = respuestasMin[realIndex] || "";
+        bloqueHtml += `
+            <div id="bloque-min-${realIndex}" style="margin-bottom:2.5rem; padding:1.5rem; background:var(--bg); border-radius:1.5rem; border:1px solid var(--border);">
+                <p style="font-weight:700; font-size:1.05rem; line-height:1.4; margin-bottom:1.5rem; color:var(--text-main);">${p.pregunta}</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    ${['A', 'B', 'C', 'D'].map((letra, idx) => `
+                        <label style="display:flex; align-items:center; gap:12px; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text-main);">
+                            <input type="radio" name="preg-min-${realIndex}" value="${letra}" ${resPrevia === letra ? 'checked' : ''} onclick="respuestasMin[${realIndex}] = '${letra}'; guardarEstadoMin();">
+                            <span style="font-size:0.95rem;">${p.opciones[idx]}</span>
+                        </label>
+                    `).join('')}
+                </div>
+                <button onclick="revelarIndividualMin(${realIndex})" style="margin-top:1.5rem; background:none; border:none; color:var(--text-muted); font-weight:800; font-size:0.7rem; cursor:pointer;"><i class="fas fa-lightbulb"></i> Ver explicación</button>
+                <div id="feedback-min-${realIndex}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid #0ea5e9; border-radius:12px;">
+                    <strong style="color:#0ea5e9; display:block; margin-bottom:8px;">CORRECTA: ${p.correcta}</strong>
+                    <div style="font-size:0.9rem; opacity:0.9;">${p.explicacion}</div>
+                </div>
+            </div>`;
+    });
+    return bloqueHtml;
+}
+
+function cargarMasMin() {
+    const inicio = preguntasVisiblesMin;
+    preguntasVisiblesMin = Math.min(preguntasVisiblesMin + 20, preguntasMin.length);
+    document.getElementById('contenedor-preguntas-min').insertAdjacentHTML('beforeend', generarBloqueMin(inicio, preguntasVisiblesMin));
+    document.getElementById('cont-preg-min').innerText = preguntasVisiblesMin;
+    if (preguntasVisiblesMin >= preguntasMin.length) document.getElementById('btn-mas-min').style.display = 'none';
+    guardarEstadoMin();
+}
+
+function revelarIndividualMin(idx) {
+    const fb = document.getElementById(`feedback-min-${idx}`);
+    if (fb) fb.style.display = (fb.style.display === 'none' || fb.style.display === '') ? 'block' : 'none';
+}
+
+function corregirExamenMin() {
+    let aciertos = 0;
+    let fallosIndices = [];
+
+    preguntasMin.forEach((p, idx) => {
+        const bloque = document.getElementById(`bloque-min-${idx}`);
+        const feedback = document.getElementById(`feedback-min-${idx}`);
+        if (bloque && feedback) {
+            feedback.style.display = 'block';
+            if (respuestasMin[idx] === p.correcta) {
+                aciertos++;
+                bloque.style.borderColor = '#22c55e';
+            } else {
+                fallosIndices.push(idx);
+                bloque.style.borderColor = '#ef4444';
+            }
+        }
+    });
+
+    localStorage.removeItem('psq_save_min');
+
+    const footer = document.getElementById('footer-min');
+    if (fallosIndices.length > 0) {
+        footer.innerHTML = `
+            <button onclick="repasarFallosMin([${fallosIndices}])" class="btn" style="flex:1; background:#ef4444; color:white; height:55px; border-radius:15px; font-weight:900; border:none; cursor:pointer;">
+                REPASAR ${fallosIndices.length} FALLOS
+            </button>
+            <button onclick="openMinSelector()" class="btn" style="flex:1; background:var(--border); color:var(--text-main); height:55px; border-radius:15px; font-weight:900; border:none; cursor:pointer;">
+                SALIR
+            </button>`;
+    } else {
+        footer.innerHTML = `
+            <button onclick="openMinSelector()" class="btn btn-primary" style="flex:1; height:55px; border-radius:15px; font-weight:900;">
+                ¡EXAMEN PERFECTO! VOLVER
+            </button>`;
+    }
+
+    alert(`Examen de Interna finalizado.\nAciertos: ${aciertos} de ${preguntasMin.length}`);
+    const modalContent = document.querySelector('.modal-content');
+    if(modalContent) modalContent.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function repasarFallosMin(indices) {
+    preguntasMin = indices.map(idx => preguntasMin[idx]);
+    respuestasMin = {};
+    preguntasVisiblesMin = preguntasMin.length;
+    renderizarExamenMin();
+}
