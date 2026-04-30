@@ -80,6 +80,15 @@ function abrirPortalExamenes() {
         <b style="color: var(--text-main); font-size: 1.1rem; display: block;">Urología</b>
     </div>
     <i class="fas fa-chevron-right" style="color: var(--border);"></i>
+    <button onclick="portal_irAMin()" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left;">
+                    <div style="background: rgba(139, 92, 246, 0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-stethoscope" style="color: #8b5cf6;"></i>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <b style="color: var(--text-main); font-size: 1.1rem; display: block;">Medicina Interna</b>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--border);"></i>
+                </button>
 </button>
                 <button onclick="portal_irAComun()" style="padding: 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left;">
                     <div style="background: rgba(245, 158, 11, 0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -129,6 +138,10 @@ async function portal_irAGine() {
 async function portal_irAUro() {
     await cargarScript('/ope_uro.js'); 
     openUroSelector();
+}
+async function portal_irAMin() {
+    await cargarScript('/ope_min.js'); 
+    openMinSelector(); 
 }
 async function portal_irAComun() {
     await cargarScript('/opes_comun.js'); 
