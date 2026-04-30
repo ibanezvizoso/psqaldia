@@ -36,7 +36,7 @@ function openMinSelector() {
                 <button onclick="iniciarExamenMin('snack')" style="padding: 1.2rem; border-radius: 20px; border: 2px solid #0ea5e9; background: rgba(14, 165, 233, 0.1); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; text-align: left; width: 100%;">
                     <div>
                         <b style="color: #0ea5e9; font-size: 1.1rem;">Modo Snack</b>
-                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(Preguntas aleatorias)</small>
+                        <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">(10 preguntas aleatorias)</small>
                     </div>
                     <i class="fas fa-bolt" style="color: #0ea5e9;"></i>
                 </button>
