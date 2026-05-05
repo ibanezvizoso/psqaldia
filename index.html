@@ -311,10 +311,11 @@ async function compartirRecurso(e, id) {
     });
 
     function getPasteColor(str) {
-        let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        const h = Math.abs(hash) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        return `background-color: hsl(${h}, 70%, ${isDark?25:92}%); color: hsl(${h}, 70%, ${isDark?90:25}%); border: 1px solid hsl(${h}, 70%, ${isDark?40:80}%);`;
-    }
+    let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    // Multiplicamos por 17 para dispersar los hashes y cambiar radicalmente la paleta
+    const h = (Math.abs(hash) * 17) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return `background-color: hsl(${h}, 70%, ${isDark?25:92}%); color: hsl(${h}, 70%, ${isDark?90:25}%); border: 1px solid hsl(${h}, 70%, ${isDark?40:80}%);`;
+}
 
     function parseDate(dateStr) {
         if (!dateStr) return new Date(0);
