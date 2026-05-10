@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Síntomas Básicos SPI | PSQALDÍA</title>
+    <meta name="description" content="Matriz interactiva de síntomas básicos para la exploración psicopatológica. Evaluación visual con radar por dominios.">
+    <link rel="canonical" href="https://psqaldia.com/spi">
+    <link rel="icon" type="image/png" href="/Logo.png">
+
+    <link rel="stylesheet" href="/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.5rem;
+        }
+
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1200px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
+
+        .main-content { padding: 0 1rem 5rem 1rem; max-width: 1100px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            margin-top: -1rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+        #modalData { 
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            min-height: 600px;
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .info-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .site-bottom-info {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: #f8fafc;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img {
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .features-grid { gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Síntomas Básicos</h1>
+        <p>Matriz interactiva para la exploración psicopatológica de síntomas básicos con visualización por dominios.</p>
+    </header>
+
+    <main class="main-content">
+
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-th"></i></div>
+                <h3>Matriz Visual</h3>
+                <p>Síntomas organizados por dominios psicopatológicos. Selección rápida con descripción técnica de cada ítem.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-radar"></i></div>
+                <h3>Perfil por Dominios</h3>
+                <p>Gráfico radar actualizado en tiempo real que muestra la distribución de los síntomas presentes por esfera.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                <h3>Redacción con IA</h3>
+                <p>Genera automáticamente una descripción clínica estructurada lista para incluir en la historia clínica.</p>
+            </div>
+        </section>
+
+        <div id="modalData">
+            <div style="padding:5rem; text-align:center;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i>
+                <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Cargando matriz de síntomas...</p>
+            </div>
+        </div>
+
+        <section class="info-panel">
+            <div>
+                <h3 style="margin-top:0; margin-bottom:1rem; color:var(--primary); font-size:1.1rem;">
+                    <i class="fas fa-info-circle"></i> Aplicación Clínica
+                </h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">
+                    Herramienta de apoyo a la exploración psicopatológica. Los síntomas incluidos son una adaptación clínica orientada a la práctica asistencial, no una reproducción de la escala SPI-A original.
+                </p>
+            </div>
+            <div>
+                <h3 style="margin-top:0; margin-bottom:1rem; color:var(--primary); font-size:1.1rem;">
+                    <i class="fas fa-book"></i> Referencias
+                </h3>
+                <ul style="list-style:none; padding:0; color:var(--text-muted); font-size:0.85rem; margin:0;">
+                    <li style="margin-bottom:8px;">• <strong>Klosterkötter et al.</strong> (Schizophr Bull, 2001)</li>
+                    <li style="margin-bottom:8px;">• <strong>Schultze-Lutter et al.</strong> (SPI-A, 2007)</li>
+
+                </ul>
+            </div>
+        </section>
+
+        <footer class="nav-footer">
+            <a href="https://psqaldia.com/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
+            </a>
+        </footer>
+    </main>
+
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA">
+        <span>&copy; 2026 PSQ AL DÍA - Herramientas clínicas</span>
+    </footer>
+
+    <script src="/spi.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof window.iniciarSPI === 'function') {
+                await window.iniciarSPI();
+            }
+        });
+    </script>
+</body>
+</html>
