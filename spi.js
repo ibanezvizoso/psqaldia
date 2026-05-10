@@ -1,6 +1,6 @@
 /**
  * spi.js - Herramienta de Síntomas Básicos SPI-A
- * Estructura simétrica a aes.js - VERSIÓN BLINDADA v6.2
+ * VERSIÓN CORREGIDA Y OPTIMIZADA v6.3
  */
 
 window.spiLang = 'es';
@@ -31,9 +31,9 @@ window.iniciarSPI = async function() {
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    // 1. Feedback inmediato (Como en tus mejores herramientas)
     container.innerHTML = `<div style="padding:2rem; text-align:center; font-weight:800; opacity:0.5;">${i18nSPI[window.spiLang].loading}</div>`;
 
+    // Inyectar estilos (Mantenemos tu lógica de blindaje)
     if (!document.getElementById('spi-styles')) {
         const style = document.createElement('style');
         style.id = 'spi-styles';
@@ -63,26 +63,25 @@ window.iniciarSPI = async function() {
         
         if (!json.values) throw new Error("No values");
 
-        // ENSEÑANZA LATERAL: Filtrar filas vacías para evitar que el map rompa el inicio
         window.dbSPI = json.values
-            .filter(row => row[0] && row[1]) // Solo filas que tengan Categoría y Nombre
+            .filter(row => row[0] && row[1]) 
             .map((row, index) => {
                 const cat = row[0] || 'Varios';
                 return {
                     id: index,
+                    // Prioridad al color de la fila, si no, pastel aleatorio
                     color: row[6] || generarColorPastel(cat),
                     es: { cat: cat, nombre: row[1] || '', desc: row[2] || '' },
                     en: { cat: row[3] || 'Misc', nombre: row[4] || '', desc: row[5] || '' }
                 };
             });
 
+        // 1. Cargar dependencia primero
+        await cargarChartJS();
+        // 2. Renderizar Interfaz
         renderInterfazSPI();
-        
-        // Cargar Chart y Radar (Solo si hay datos)
-        if (window.dbSPI.length > 0) {
-            await cargarChartJS();
-            initSpiChart();
-        }
+        // 3. Inicializar gráfico (con el canvas ya en el DOM)
+        initSpiChart();
 
     } catch (e) {
         console.error("SPI Error:", e);
@@ -90,7 +89,6 @@ window.iniciarSPI = async function() {
     }
 };
 
-// Blindamos la función de color contra strings vacíos/undefined
 function generarColorPastel(str) {
     if (!str) return 'hsl(0, 0%, 90%)';
     let hash = 0;
@@ -156,22 +154,15 @@ function renderInterfazSPI() {
     `;
 }
 
-window.toggleSPI = function(id) {
-    const el = document.getElementById(`spi-t-${id}`);
-    if (!el) return;
-    if (window.spiSelected.has(id)) {
-        window.spiSelected.delete(id);
-        el.classList.remove('active');
-    } else {
-        window.spiSelected.add(id);
-        el.classList.add('active');
-    }
-    actualizarRadarSPI();
-};
-
-function initSpiChart() {
+window.initSpiChart = function() {
     const ctx = document.getElementById('spiCanvas');
     if (!ctx) return;
+
+    // --- CORRECCIÓN CLAVE: Destruir gráfico previo si existe ---
+    if (window.spiChart) {
+        window.spiChart.destroy();
+    }
+
     const cats = [...new Set(window.dbSPI.map(i => i[window.spiLang].cat))];
     window.spiChart = new Chart(ctx, {
         type: 'radar',
@@ -187,11 +178,34 @@ function initSpiChart() {
         },
         options: {
             maintainAspectRatio: false,
-            scales: { r: { min: 0, max: 100, ticks: { display: false }, pointLabels: { font: { size: 8, weight: '700' } } } },
+            scales: { 
+                r: { 
+                    min: 0, 
+                    max: 100, 
+                    ticks: { display: false }, 
+                    pointLabels: { font: { size: 8, weight: '700' } } 
+                } 
+            },
             plugins: { legend: { display: false } }
         }
     });
-}
+    // Actualizar por si ya había algo seleccionado
+    actualizarRadarSPI();
+};
+
+window.toggleSPI = function(id) {
+    const el = document.getElementById(`spi-t-${id}`);
+    if (!el) return;
+    
+    if (window.spiSelected.has(id)) {
+        window.spiSelected.delete(id);
+        el.classList.remove('active');
+    } else {
+        window.spiSelected.add(id);
+        el.classList.add('active');
+    }
+    actualizarRadarSPI();
+};
 
 function actualizarRadarSPI() {
     if (!window.spiChart) return;
@@ -205,14 +219,26 @@ function actualizarRadarSPI() {
     window.spiChart.update();
 }
 
-window.setLangSPI = function(l) { window.spiLang = l; renderInterfazSPI(); if(window.dbSPI.length > 0) { initSpiChart(); actualizarRadarSPI(); } };
-window.resetSPI = function() { window.spiSelected.clear(); renderInterfazSPI(); if(window.dbSPI.length > 0) initSpiChart(); };
+window.setLangSPI = function(l) { 
+    window.spiLang = l; 
+    renderInterfazSPI(); 
+    initSpiChart(); // Esto ahora destruye y recrea correctamente
+};
+
+window.resetSPI = function() { 
+    window.spiSelected.clear(); 
+    renderInterfazSPI(); 
+    initSpiChart(); 
+};
+
 window.copiarPerfilSPI = function() {
     const sel = window.dbSPI.filter(i => window.spiSelected.has(i.id));
     if (sel.length === 0) return;
     const txt = "SPI-A EVALUATION:\n" + sel.map(i => `• [${i[window.spiLang].cat}] ${i[window.spiLang].nombre}`).join('\n');
     navigator.clipboard.writeText(txt);
+    
     const btn = document.querySelector('.fa-copy').parentElement;
+    const original = btn.innerHTML;
     btn.innerHTML = 'OK';
-    setTimeout(() => { btn.innerHTML = '<i class="far fa-copy"></i>'; }, 1000);
+    setTimeout(() => { btn.innerHTML = original; }, 1000);
 };
