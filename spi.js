@@ -1,25 +1,35 @@
 /**
  * spi.js - Herramienta de Síntomas Básicos SPI-A
- * VERSIÓN v8.2.1 - ANTI-CONFLICT & DUAL-ZONE UX (SHEET: spi)
+ * VERSIÓN v9.0 - IA + UX MEJORADO
  */
 
-// Encapsulamiento total para evitar conflictos con aes.js u otros scripts
 window.ToolSPI = {
     lang: 'es',
     db: [],
     selected: new Set(),
     chart: null,
+    iaActiva: false,
     i18n: {
         es: { 
-            title: "MATRIZ SÍNTOMAS BÁSICOS", 
-            reset: "REINICIAR", 
-            info: "Pulsa el nombre para marcar, o el icono (i) para leer descripción",
+            title: "SÍNTOMAS BÁSICOS", 
+            reset: "REINICIAR",
+            copy: "COPIAR",
+            copied: "✓ COPIADO",
+            ia: "✦ IA",
+            iaGenerando: "Generando...",
+            iaVacio: "Selecciona al menos un síntoma",
+            info: "Pulsa el nombre para marcar · (i) para descripción",
             error: "Error al cargar la hoja 'spi'"
         },
         en: { 
-            title: "BASIC SYMPTOMS MATRIX", 
-            reset: "RESET", 
-            info: "Tap name to select, or (i) icon just to read description",
+            title: "BASIC SYMPTOMS", 
+            reset: "RESET",
+            copy: "COPY",
+            copied: "✓ COPIED",
+            ia: "✦ AI",
+            iaGenerando: "Generating...",
+            iaVacio: "Select at least one symptom",
+            info: "Tap name to select · (i) for description",
             error: "Error loading 'spi' sheet"
         }
     }
@@ -29,61 +39,137 @@ window.iniciarSPI = async function() {
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    // Estilos únicos para evitar colisiones CSS
     if (!document.getElementById('spi-unique-styles')) {
         const style = document.createElement('style');
         style.id = 'spi-unique-styles';
         style.innerHTML = `
-            .spi-container { display: flex; flex-direction: column; height: 85vh; font-family: inherit; background: var(--bg); color: var(--text-main); }
-            .spi-nav-ui { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--card); border-bottom: 1px solid var(--border); }
-            .spi-scroll { flex: 1; overflow-y: auto; padding: 12px; }
-            .spi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 20px; }
-            
-            /* TILE DUAL-ZONE: Mejora para móvil */
+            .spi-container { 
+                display: flex; flex-direction: column; height: 85vh; 
+                font-family: inherit; background: var(--bg); color: var(--text-main); 
+                overflow: hidden;
+            }
+
+            /* NAV */
+            .spi-nav-ui { 
+                display: flex; justify-content: space-between; align-items: center; 
+                padding: 10px 15px; background: var(--card); 
+                border-bottom: 1px solid var(--border);
+                flex-shrink: 0;
+            }
+            .spi-nav-right { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+            /* SCROLL AREA */
+            .spi-scroll { flex: 1; overflow-y: auto; padding: 12px 12px 0 12px; }
+
+            /* GRID */
+            .spi-grid { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
+                gap: 8px; margin-bottom: 20px; 
+            }
+
+            /* TILES */
             .spi-tile { 
-                position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 8px; 
-                transition: 0.2s; border-left: 4px solid var(--c); min-height: 50px;
+                position: relative; background: var(--card); border: 1px solid var(--border); 
+                border-radius: 10px; transition: transform 0.15s, box-shadow 0.15s; 
+                border-left: 4px solid var(--c); min-height: 52px;
                 display: flex; align-items: center; justify-content: center; overflow: hidden;
             }
+            .spi-tile:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
             .spi-tile-btn { 
                 flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; 
-                padding: 6px 22px 6px 8px; cursor: pointer; text-align: center;
+                padding: 7px 26px 7px 10px; cursor: pointer; text-align: center;
             }
             .spi-tile-info { 
-                position: absolute; right: 0; top: 0; bottom: 0; width: 24px; 
+                position: absolute; right: 0; top: 0; bottom: 0; width: 26px; 
                 display: flex; align-items: center; justify-content: center;
-                background: rgba(0,0,0,0.03); color: var(--text-muted); font-size: 0.75rem; cursor: help;
-                border-left: 1px solid var(--border);
+                background: rgba(0,0,0,0.02); color: var(--text-muted); font-size: 0.7rem; cursor: help;
+                border-left: 1px solid var(--border); transition: background 0.15s;
             }
             .spi-tile-info:hover { background: var(--border); color: var(--primary); }
-
             .spi-tile.active { 
                 background: var(--c) !important; color: #111 !important;
-                border-color: rgba(0,0,0,0.2); font-weight: bold;
+                border-color: rgba(0,0,0,0.15); font-weight: bold;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.12);
             }
-            .spi-tile h4 { margin: 0; font-size: 0.65rem; font-weight: 700; line-height: 1.1; pointer-events: none; }
+            .spi-tile h4 { margin: 0; font-size: 0.68rem; font-weight: 700; line-height: 1.2; pointer-events: none; }
 
+            /* SECTION TITLES */
+            .spi-section-title { 
+                font-size: 0.6rem; font-weight: 800; text-transform: uppercase; 
+                color: var(--text-muted); margin: 15px 0 6px 0; 
+                display: flex; align-items: center; gap: 8px; letter-spacing: 0.05em;
+            }
+            .spi-section-title::after { content:''; flex:1; height:1px; background: var(--border); }
+
+            /* BOTTOM PANEL */
+            .spi-bottom { flex-shrink: 0; border-top: 1px solid var(--border); }
+
+            /* INFO BOX */
             .spi-info-display {
-                background: var(--card); border-top: 1px solid var(--border);
-                padding: 10px 15px; min-height: 55px; font-size: 0.78rem;
+                background: var(--card);
+                padding: 10px 15px; min-height: 52px; font-size: 0.78rem;
                 display: flex; align-items: center; color: var(--text-muted);
                 font-style: italic; border-left: 5px solid var(--primary);
+                transition: border-left-color 0.3s, color 0.2s;
+                line-height: 1.4;
             }
-            .spi-radar-box { height: 230px; background: var(--card); padding: 10px; border-top: 1px solid var(--border); }
-            .spi-section-title { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin: 15px 0 6px 0; display: flex; align-items: center; gap: 8px; }
-            .spi-section-title::after { content:''; flex:1; height:1px; background: var(--border); }
-            .btn-mini { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.7rem; }
+
+            /* IA OUTPUT */
+            .spi-ia-output {
+                display: none;
+                background: var(--bg);
+                border-top: 1px solid var(--border);
+                padding: 10px 15px;
+                font-size: 0.78rem;
+                line-height: 1.6;
+                color: var(--text-main);
+                font-style: normal;
+                max-height: 120px;
+                overflow-y: auto;
+                border-left: 5px solid var(--primary);
+            }
+            .spi-ia-output.visible { display: block; }
+            .spi-ia-output.loading { color: var(--text-muted); font-style: italic; }
+
+            /* IA FOOTER */
+            .spi-ia-footer {
+                display: none;
+                padding: 6px 15px;
+                background: var(--card);
+                border-top: 1px solid var(--border);
+                justify-content: flex-end;
+            }
+            .spi-ia-footer.visible { display: flex; }
+
+            /* RADAR */
+            .spi-radar-box { 
+                height: 200px; background: var(--card); padding: 8px; 
+                border-top: 1px solid var(--border); 
+            }
+
+            /* BUTTONS */
+            .btn-mini { 
+                padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); 
+                background: var(--card); cursor: pointer; font-size: 0.7rem; font-weight: 700;
+                transition: all 0.15s; color: var(--text-main);
+            }
+            .btn-mini:hover { background: var(--border); }
             .btn-mini.active { background: var(--primary); color: white; border-color: var(--primary); }
+            .btn-mini.ia { border-color: var(--primary); color: var(--primary); }
+            .btn-mini.ia:hover { background: var(--primary); color: white; }
+            .btn-mini.copy-sm { font-size: 0.65rem; padding: 3px 8px; }
+
+            @media (max-width: 400px) {
+                .spi-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            }
         `;
         document.head.appendChild(style);
     }
 
     try {
-        // CAMBIO: Ahora llama a la hoja "spi"
         const response = await fetch(`/?sheet=spi`);
         const json = await response.json();
-        
-        // Manejo robusto del JSON (por si viene en .values o directo)
         const rows = json.values ? json.values : json;
 
         window.ToolSPI.db = rows.slice(1).filter(row => row[0] && row[1]).map((row, index) => ({
@@ -102,7 +188,6 @@ window.iniciarSPI = async function() {
     }
 };
 
-// Carga asíncrona de Chart.js específica para esta herramienta
 async function spi_cargarChartJS() {
     if (window.Chart) return;
     return new Promise(res => {
@@ -117,7 +202,6 @@ function renderInterfazSPI() {
     const t = window.ToolSPI.i18n[window.ToolSPI.lang];
     const container = document.getElementById('modalData');
     
-    // Agrupación por categorías para los títulos de sección
     const grouped = window.ToolSPI.db.reduce((acc, item) => {
         const c = item[window.ToolSPI.lang].cat;
         if (!acc[c]) acc[c] = [];
@@ -127,21 +211,27 @@ function renderInterfazSPI() {
 
     container.innerHTML = `
         <div class="spi-container">
+
             <div class="spi-nav-ui">
-                <h2 style="margin:0; font-size:0.9rem; font-weight:900;">${t.title}</h2>
-                <div style="display:flex; gap:6px;">
+                <h2 style="margin:0; font-size:0.88rem; font-weight:900; letter-spacing:0.02em;">
+                    ${t.title}
+                </h2>
+                <div class="spi-nav-right">
                     <button class="btn-mini ${window.ToolSPI.lang==='es'?'active':''}" onclick="setLangSPI('es')">ES</button>
                     <button class="btn-mini ${window.ToolSPI.lang==='en'?'active':''}" onclick="setLangSPI('en')">EN</button>
+                    <button class="btn-mini ia" onclick="generarNarrativaSPI()">${t.ia}</button>
                     <button class="btn-mini" onclick="resetSPI()">${t.reset}</button>
                 </div>
             </div>
-            
+
             <div class="spi-scroll">
                 ${Object.keys(grouped).map(cat => `
                     <div class="spi-section-title">${cat}</div>
                     <div class="spi-grid">
                         ${grouped[cat].map(item => `
-                            <div id="spi-t-${item.id}" class="spi-tile ${window.ToolSPI.selected.has(item.id)?'active':''}" style="--c: ${item.color}">
+                            <div id="spi-t-${item.id}" 
+                                 class="spi-tile ${window.ToolSPI.selected.has(item.id)?'active':''}" 
+                                 style="--c: ${item.color}">
                                 <div class="spi-tile-btn" onclick="toggleSPI(${item.id})">
                                     <h4>${item[window.ToolSPI.lang].nombre}</h4>
                                 </div>
@@ -154,27 +244,33 @@ function renderInterfazSPI() {
                 `).join('')}
             </div>
 
-            <div class="spi-info-display" id="spiInfoBox">${t.info}</div>
-            
-            <div class="spi-radar-box">
-                <canvas id="spiCanvas"></canvas>
+            <div class="spi-bottom">
+                <div class="spi-info-display" id="spiInfoBox">${t.info}</div>
+                <div class="spi-ia-output" id="spiIaOutput"></div>
+                <div class="spi-ia-footer" id="spiIaFooter">
+                    <button class="btn-mini copy-sm" onclick="copiarNarrativaSPI()">${t.copy}</button>
+                </div>
+                <div class="spi-radar-box">
+                    <canvas id="spiCanvas"></canvas>
+                </div>
             </div>
+
         </div>
     `;
 }
 
-// Muestra la descripción en la barra inferior sin seleccionar el síntoma
+// Descripción en barra inferior
 window.showSpiDesc = function(id) {
     const item = window.ToolSPI.db.find(i => i.id === id);
     const box = document.getElementById('spiInfoBox');
-    if (item && box) {
-        box.innerHTML = `<strong>${item[window.ToolSPI.lang].nombre}:</strong> &nbsp; ${item[window.ToolSPI.lang].desc}`;
-        box.style.color = "var(--text-main)";
-        box.style.borderLeftColor = item.color;
-    }
+    if (!item || !box) return;
+    box.innerHTML = `<strong>${item[window.ToolSPI.lang].nombre}:</strong>&nbsp;${item[window.ToolSPI.lang].desc}`;
+    box.style.color = "var(--text-main)";
+    box.style.borderLeftColor = item.color;
+    box.style.fontStyle = "normal";
 };
 
-// Lógica del Radar Chart
+// Radar Chart
 window.initSpiChart = function() {
     const ctx = document.getElementById('spiCanvas');
     if (!ctx) return;
@@ -189,20 +285,23 @@ window.initSpiChart = function() {
             labels: cats,
             datasets: [{
                 data: cats.map(() => 0),
-                backgroundColor: 'rgba(67, 56, 202, 0.2)',
+                backgroundColor: 'rgba(67, 56, 202, 0.15)',
                 borderColor: 'var(--primary)',
+                borderWidth: 2,
                 pointBackgroundColor: pointColors,
-                pointRadius: 4
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
             maintainAspectRatio: false,
+            animation: { duration: 300 },
             scales: { 
                 r: { 
-                    min: 0, 
-                    max: 100, 
-                    ticks: { display: false }, 
-                    pointLabels: { font: { size: 8, weight: '700' } } 
+                    min: 0, max: 100, 
+                    ticks: { display: false },
+                    grid: { color: 'rgba(0,0,0,0.06)' },
+                    pointLabels: { font: { size: 8, weight: '700' } }
                 } 
             },
             plugins: { legend: { display: false } }
@@ -211,7 +310,7 @@ window.initSpiChart = function() {
     actualizarRadarSPI();
 };
 
-// Seleccionar/Deseleccionar síntoma
+// Toggle síntoma
 window.toggleSPI = function(id) {
     const el = document.getElementById(`spi-t-${id}`);
     if (window.ToolSPI.selected.has(id)) {
@@ -221,11 +320,10 @@ window.toggleSPI = function(id) {
         window.ToolSPI.selected.add(id);
         el.classList.add('active');
     }
-    showSpiDesc(id); // Actualiza info al marcar
+    showSpiDesc(id);
     actualizarRadarSPI();
 };
 
-// Calcula porcentajes por categoría para el radar
 function actualizarRadarSPI() {
     if (!window.ToolSPI.chart) return;
     const cats = [...new Set(window.ToolSPI.db.map(i => i[window.ToolSPI.lang].cat))];
@@ -238,6 +336,75 @@ function actualizarRadarSPI() {
     window.ToolSPI.chart.update();
 }
 
-// Funciones de control de interfaz
-window.setLangSPI = function(l) { window.ToolSPI.lang = l; renderInterfazSPI(); initSpiChart(); };
-window.resetSPI = function() { window.ToolSPI.selected.clear(); renderInterfazSPI(); initSpiChart(); };
+// Generación narrativa con IA
+window.generarNarrativaSPI = async function() {
+    const t = window.ToolSPI.i18n[window.ToolSPI.lang];
+    const iaOutput = document.getElementById('spiIaOutput');
+    const iaFooter = document.getElementById('spiIaFooter');
+
+    if (window.ToolSPI.selected.size === 0) {
+        iaOutput.textContent = t.iaVacio;
+        iaOutput.className = 'spi-ia-output visible loading';
+        iaFooter.className = 'spi-ia-footer';
+        return;
+    }
+
+    const seleccionados = window.ToolSPI.db
+        .filter(i => window.ToolSPI.selected.has(i.id))
+        .map(i => `[${i[window.ToolSPI.lang].cat}] ${i[window.ToolSPI.lang].nombre}`)
+        .join('\n');
+
+    iaOutput.textContent = t.iaGenerando;
+    iaOutput.className = 'spi-ia-output visible loading';
+    iaFooter.className = 'spi-ia-footer';
+
+    try {
+        const res = await fetch('/api/ia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                toolId: 'spi', 
+                context: seleccionados 
+            })
+        });
+
+        const data = await res.json();
+        const texto = (data.response || '')
+            .replace(/\*\*|###|##|\*/g, '')
+            .trim();
+
+        iaOutput.textContent = texto;
+        iaOutput.className = 'spi-ia-output visible';
+        iaFooter.className = 'spi-ia-footer visible';
+
+    } catch (e) {
+        iaOutput.textContent = 'Error al conectar con la IA.';
+        iaOutput.className = 'spi-ia-output visible loading';
+    }
+};
+
+// Copiar narrativa
+window.copiarNarrativaSPI = function() {
+    const t = window.ToolSPI.i18n[window.ToolSPI.lang];
+    const texto = document.getElementById('spiIaOutput').textContent;
+    if (!texto) return;
+    navigator.clipboard.writeText(texto);
+    const btn = document.querySelector('.spi-ia-footer .btn-mini');
+    if (!btn) return;
+    btn.textContent = t.copied;
+    setTimeout(() => btn.textContent = t.copy, 2000);
+};
+
+// Control de idioma y reset
+window.setLangSPI = function(l) { 
+    window.ToolSPI.lang = l; 
+    renderInterfazSPI(); 
+    initSpiChart(); 
+};
+
+window.resetSPI = function() { 
+    window.ToolSPI.selected.clear(); 
+    renderInterfazSPI(); 
+    initSpiChart(); 
+};
+            
