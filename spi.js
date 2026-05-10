@@ -1,6 +1,6 @@
 /**
- * SPI-A: Schizophrenia Proneness Instrument (Adult)
- * PSQ al día - Versión 5.0 (Estética SaaS Clínica)
+ * SPI-A: Herramienta de Síntomas Básicos - PSQ al día
+ * Versión 5.0: Pro-UI, Fix de Inicialización y Colores Pastel
  */
 
 window.SpiTool = {
@@ -8,45 +8,59 @@ window.SpiTool = {
     selected: new Set(),
     chart: null,
     lang: 'es',
+    categoryColors: {},
 
     async init() {
-        const target = document.getElementById('modalData');
-        if (!target) {
-            // Reintento silencioso sin contaminar consola
-            requestAnimationFrame(() => this.init());
+        // Aseguramos que el DOM esté listo antes de buscar el contenedor
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", () => this.init());
             return;
         }
 
+        const target = document.getElementById('modalData');
+        if (!target) return; // Salida silenciosa si no es la página correcta
+
         this.container = target;
         this.injectStyles();
-        this.container.innerHTML = '<div class="spi-loader"></div>';
+        
+        this.container.innerHTML = `<div class="spi-loader-bar"></div>`;
 
         try {
             await this.loadChartLib();
             const response = await fetch('/?sheet=SPI_A');
             const json = await response.json();
             
-            if (!json.values || json.values.length <= 1) throw new Error("No data");
+            if (!json.values || json.values.length === 0) throw new Error("No data");
 
-            // Mapeo preciso según la tabla bilingüe:
-            // 0:Ítem | 1:Cat ES | 2:Sym ES | 3:Desc ES | 4:Cat EN | 5:Sym EN | 6:Desc EN | 7:Color
-            this.data = json.values.slice(1).map((row, index) => ({
-                id: index,
-                code: row[0] || '?',
-                es: { cat: row[1], nombre: row[2], desc: row[3] },
-                en: { cat: row[4], nombre: row[5], desc: row[6] },
-                color: row[7] || '#cbd5e1'
-            }));
+            this.data = json.values.map((row, index) => {
+                const catES = row[0] || 'Varios';
+                return {
+                    id: index,
+                    es: { cat: catES, nombre: row[1] || '', desc: row[2] || '' },
+                    en: { cat: row[3] || 'Misc', nombre: row[4] || '', desc: row[5] || '' },
+                    color: row[6] ? row[6].trim() : this.genColor(catES)
+                };
+            });
 
             this.render();
-            // Aseguramos que el canvas exista antes de iniciar el chart
-            requestAnimationFrame(() => this.initChart());
+            // Eliminamos el setTimeout arbitrario y usamos una comprobación real
+            this.waitForChartThenInit();
 
         } catch (err) {
-            console.error("SPI-A Boot Error:", err);
-            this.container.innerHTML = `<div style="padding:20px; text-align:center; color:#64748b; font-size:0.8rem;">
-                Error de conexión con SPI_A. Reintenta en unos segundos.</div>`;
+            console.error("SPI-A Initialization Error:", err);
+            this.container.innerHTML = `<p style="padding:20px;text-align:center;color:#64748b;">Error cargando matriz SPI-A. Reintente en unos instantes.</p>`;
         }
+    },
+
+    genColor(cat) {
+        if (!this.categoryColors[cat]) {
+            // Generación de colores pastel basada en el nombre de la categoría
+            let hash = 0;
+            for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+            const h = Math.abs(hash % 360);
+            this.categoryColors[cat] = `hsl(${h}, 70%, 90%)`; 
+        }
+        return this.categoryColors[cat];
     },
 
     loadChartLib() {
@@ -54,12 +68,18 @@ window.SpiTool = {
             if (window.Chart) return res();
             const s = document.createElement('script');
             s.src = "https://cdn.jsdelivr.net/npm/chart.js";
-            s.onload = () => {
-                // Pequeño delay para asegurar registro en window
-                setTimeout(res, 50);
-            };
+            s.async = true;
+            s.onload = res;
             document.head.appendChild(s);
         });
+    },
+
+    waitForChartThenInit() {
+        if (window.Chart) {
+            this.initChart();
+        } else {
+            setTimeout(() => this.waitForChartThenInit(), 50);
+        }
     },
 
     injectStyles() {
@@ -67,69 +87,84 @@ window.SpiTool = {
         const style = document.createElement('style');
         style.id = 'spi-css-v5';
         style.innerHTML = `
-            :root { --spi-bg: #f8fafc; --spi-card: #ffffff; --spi-accent: #3b82f6; }
-            .spi-v5 { display: grid; grid-template-rows: auto 1fr auto; height: 85vh; background: var(--spi-bg); font-family: 'Inter', system-ui, sans-serif; color: #1e293b; overflow: hidden; }
-            
-            /* Header Estilo Moderno */
-            .spi-header { padding: 16px 24px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-            .spi-header h2 { margin:0; font-size: 1rem; font-weight: 800; letter-spacing: -0.025em; color: #0f172a; }
-            
-            .spi-main { display: grid; grid-template-columns: 1fr 280px; overflow: hidden; }
-            .spi-scroll { overflow-y: auto; padding: 24px; scroll-behavior: smooth; }
-            
-            /* Radar Sidebar */
-            .spi-sidebar { background: white; border-left: 1px solid #e2e8f0; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-            .spi-radar-cont { flex: 1; min-height: 200px; position: relative; }
-
-            /* Grid y Secciones */
-            .spi-section { margin-bottom: 32px; }
-            .spi-section-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-            .spi-section-title::after { content:''; flex:1; height:1px; background:#f1f5f9; }
-
-            .spi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-            
-            /* Tarjeta de Síntoma Mejorada */
-            .spi-card { 
-                background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; cursor: pointer;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
-                display: flex; flex-direction: column; gap: 4px;
+            .spi-v5 { 
+                display: flex; flex-direction: column; height: 85vh; 
+                background: #fdfdfe; font-family: 'Inter', system-ui, sans-serif; 
+                position: relative; color: #1e293b;
             }
-            .spi-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:4px; background: var(--item-color); opacity: 0.6; }
-            .spi-card:hover { border-color: var(--item-color); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
             
-            .spi-card.active { border-color: var(--spi-accent); background: #eff6ff; box-shadow: 0 0 0 2px var(--spi-accent); }
-            .spi-card .code { font-size: 0.6rem; font-weight: 700; color: #64748b; margin-bottom: 2px; }
-            .spi-card h4 { margin: 0; font-size: 0.85rem; font-weight: 700; line-height: 1.3; }
-            .spi-card p { margin: 4px 0 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.4; display: none; }
-            .spi-card.active p { display: block; animation: slideIn 0.2s ease-out; }
+            .spi-nav { 
+                padding: 16px 20px; background: white; 
+                border-bottom: 1px solid #f1f5f9;
+                display: flex; justify-content: space-between; align-items: center;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 20;
+            }
+            .spi-nav h2 { margin:0; font-size: 1rem; font-weight: 800; letter-spacing: -0.025em; color: #0f172a; }
 
-            /* Botonera */
-            .spi-actions { display: flex; gap: 8px; }
-            .btn-spi { padding: 8px 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.75rem; font-weight: 600; cursor: pointer; background: white; transition: 0.2s; }
-            .btn-spi:hover { background: #f8fafc; border-color: #cbd5e1; }
-            .btn-spi.primary { background: var(--spi-accent); color: white; border: none; }
-            .btn-spi.active { background: #0f172a; color: white; }
+            .spi-scroll { flex: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
+            
+            .spi-section { margin-bottom: 24px; }
+            .spi-section-title { 
+                font-size: 0.7rem; font-weight: 700; text-transform: uppercase; 
+                color: #94a3b8; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+            }
+            .spi-section-title::after { content:''; flex:1; height:1px; background: #f1f5f9; }
 
-            @keyframes slideIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-            .spi-loader { height: 4px; width: 100%; background: #3b82f6; position: absolute; top:0; animation: spi-p 1.5s infinite; }
-            @keyframes spi-p { 0% { left:-100%; width:30%; } 100% { left:100%; width:30%; } }
+            .spi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+            
+            .spi-tile {
+                background: white; border: 1px solid #f1f5f9; border-radius: 12px;
+                padding: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex; flex-direction: column; min-height: 60px; position: relative;
+            }
+            .spi-tile::before { 
+                content:''; position:absolute; left:8px; top:12px; bottom:12px; 
+                width:4px; border-radius: 4px; background: var(--c); opacity: 0.6;
+            }
+            .spi-tile:hover { transform: translateY(-3px); border-color: #cbd5e1; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+            .spi-tile.active { background: #f8fafc; border-color: #3b82f6; border-left: 4px solid #3b82f6; }
+            .spi-tile.active::before { display: none; }
+            
+            .spi-tile h4 { margin: 0 0 0 12px; font-size: 0.75rem; font-weight: 600; line-height: 1.3; color: #334155; }
+            .spi-tile p { display: none; margin: 8px 0 0 12px; font-size: 0.68rem; color: #64748b; line-height: 1.4; }
+            .spi-tile.active p { display: block; animation: fadeIn 0.3s ease; }
 
-            @media (max-width: 768px) {
-                .spi-main { grid-template-columns: 1fr; }
-                .spi-sidebar { display: none; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+            .spi-radar-box { 
+                height: 220px; background: white; border-top: 1px solid #f1f5f9; 
+                padding: 15px; display: flex; justify-content: center;
+                box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.02);
+            }
+
+            .spi-btn-group { display: flex; gap: 6px; }
+            .btn-mini { 
+                padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; 
+                font-size: 0.7rem; font-weight: 600; cursor: pointer; background: white; transition: 0.2s;
+            }
+            .btn-mini:hover { background: #f8fafc; }
+            .btn-mini.active { background: #0f172a; color: white; border-color: #0f172a; }
+            .btn-copy { background: #3b82f6; color: white; border: none; }
+            .btn-copy:hover { background: #2563eb; }
+
+            .spi-loader-bar { height: 3px; width: 100%; background: #3b82f6; position: absolute; top:0; left:0; animation: spi-load 2s infinite; }
+            @keyframes spi-load { 0% { width: 0%; left: 0; } 50% { width: 100%; left: 0; } 100% { width: 0%; left: 100%; } }
+            
+            @media (max-width: 600px) {
+                .spi-grid { grid-template-columns: 1fr 1fr; }
+                .spi-radar-box { height: 180px; }
             }
         `;
         document.head.appendChild(style);
     },
 
     render() {
-        const lang = this.lang;
-        const t = lang === 'es' ? 
-            { title: "Exploración SPI-A", copy: "Copiar Perfil", reset: "Reiniciar", resume: "RESUMEN" } : 
-            { title: "SPI-A Assessment", copy: "Copy Profile", reset: "Reset", resume: "SUMMARY" };
+        const t = this.lang === 'es' ? 
+            { title: "Matriz SPI-A", copy: "Copiar", reset: "Reiniciar" } : 
+            { title: "SPI-A Matrix", copy: "Copy", reset: "Reset" };
 
         const grouped = this.data.reduce((acc, s) => {
-            const cat = s[lang].cat;
+            const cat = s[this.lang].cat;
             if (!acc[cat]) acc[cat] = [];
             acc[cat].push(s);
             return acc;
@@ -137,58 +172,51 @@ window.SpiTool = {
 
         this.container.innerHTML = `
             <div class="spi-v5">
-                <header class="spi-header">
+                <nav class="spi-nav">
                     <h2>${t.title}</h2>
-                    <div class="spi-actions">
-                        <button onclick="SpiTool.toggleLang()" class="btn-spi">${lang === 'es' ? 'EN' : 'ES'}</button>
-                        <button onclick="SpiTool.reset()" class="btn-spi">${t.reset}</button>
-                        <button onclick="SpiTool.copy()" class="btn-spi primary">${t.copy}</button>
+                    <div class="spi-btn-group">
+                        <button onclick="SpiTool.setLang('es')" class="btn-mini ${this.lang==='es'?'active':''}">ES</button>
+                        <button onclick="SpiTool.setLang('en')" class="btn-mini ${this.lang==='en'?'active':''}">EN</button>
+                        <button onclick="SpiTool.copy()" class="btn-mini btn-copy"><i class="far fa-copy"></i> ${t.copy}</button>
+                        <button onclick="SpiTool.reset()" class="btn-mini">${t.reset}</button>
                     </div>
-                </header>
+                </nav>
                 
-                <main class="spi-main">
-                    <div class="spi-scroll">
-                        ${Object.keys(grouped).map(cat => `
-                            <div class="spi-section">
-                                <div class="spi-section-title">${cat}</div>
-                                <div class="spi-grid">
-                                    ${grouped[cat].map(s => `
-                                        <div id="tile-${s.id}" class="spi-card ${this.selected.has(s.id)?'active':''}" 
-                                             onclick="SpiTool.toggle(${s.id})" style="--item-color: ${s.color}">
-                                            <span class="code">${s.code}</span>
-                                            <h4>${s[lang].nombre}</h4>
-                                            <p>${s[lang].desc}</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
+                <div class="spi-scroll" id="spiScrollBody">
+                    ${Object.keys(grouped).map(cat => `
+                        <div class="spi-section">
+                            <div class="spi-section-title">${cat}</div>
+                            <div class="spi-grid">
+                                ${grouped[cat].map(s => `
+                                    <div id="tile-${s.id}" class="spi-tile ${this.selected.has(s.id)?'active':''}" 
+                                         onclick="SpiTool.toggle(${s.id})" style="--c: ${s.color}">
+                                        <h4>${s[this.lang].nombre}</h4>
+                                        <p>${s[this.lang].desc}</p>
+                                    </div>
+                                `).join('')}
                             </div>
-                        `).join('')}
-                    </div>
-                    
-                    <aside class="spi-sidebar">
-                        <div style="font-size: 0.65rem; font-weight: 800; color: #94a3b8;">${t.resume}</div>
-                        <div class="spi-radar-cont">
-                            <canvas id="spiRadarCanvas"></canvas>
                         </div>
-                        <div id="spi-counter" style="font-size: 0.75rem; color: #64748b; text-align: center;">
-                            0 síntomas seleccionados
-                        </div>
-                    </aside>
-                </main>
+                    `).join('')}
+                </div>
+
+                <div class="spi-radar-box">
+                    <canvas id="spiChartV5"></canvas>
+                </div>
             </div>
         `;
     },
 
     initChart() {
-        const canvas = document.getElementById('spiRadarCanvas');
-        if (!canvas || !window.Chart) return;
-
+        const ctx = document.getElementById('spiChartV5');
+        if (!ctx) return;
         const cats = [...new Set(this.data.map(s => s[this.lang].cat))];
         
-        this.chart = new Chart(canvas, {
+        if (this.chart) this.chart.destroy();
+
+        this.chart = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: cats.map(c => c.length > 12 ? c.substring(0, 10)+'..' : c),
+                labels: cats,
                 datasets: [{
                     data: cats.map(() => 0),
                     backgroundColor: 'rgba(59, 130, 246, 0.15)',
@@ -199,79 +227,70 @@ window.SpiTool = {
                 }]
             },
             options: {
-                responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: { display: false, stepSize: 25 },
-                        grid: { color: '#e2e8f0' },
-                        pointLabels: { font: { size: 9, weight: '600' }, color: '#64748b' }
-                    }
+                scales: { 
+                    r: { 
+                        min: 0, max: 100, 
+                        ticks: { display: false }, 
+                        grid: { color: '#f1f5f9' },
+                        angleLines: { color: '#f1f5f9' },
+                        pointLabels: { font: { size: 10, weight: '600', family: 'Inter' }, color: '#64748b' } 
+                    } 
                 },
                 plugins: { legend: { display: false } }
             }
         });
-        this.updateUI();
+        this.updateChart();
     },
 
     toggle(id) {
-        const tile = document.getElementById(`tile-${id}`);
         if (this.selected.has(id)) {
             this.selected.delete(id);
-            tile.classList.remove('active');
         } else {
             this.selected.add(id);
-            tile.classList.add('active');
         }
-        this.updateUI();
+        this.renderContentOnly(); // Renderizado parcial para no perder el foco
+        this.updateChart();
     },
 
-    updateUI() {
+    // Nueva función para no refrescar TODO el HTML y evitar saltos de scroll
+    renderContentOnly() {
+        this.data.forEach(s => {
+            const el = document.getElementById(`tile-${s.id}`);
+            if (el) {
+                if (this.selected.has(s.id)) el.classList.add('active');
+                else el.classList.remove('active');
+            }
+        });
+    },
+
+    updateChart() {
+        if (!this.chart) return;
         const cats = [...new Set(this.data.map(s => s[this.lang].cat))];
         const values = cats.map(cat => {
             const pool = this.data.filter(s => s[this.lang].cat === cat);
             const sel = pool.filter(s => this.selected.has(s.id)).length;
             return (sel / pool.length) * 100;
         });
-
-        if (this.chart) {
-            this.chart.data.datasets[0].data = values;
-            this.chart.update();
-        }
-
-        const counter = document.getElementById('spi-counter');
-        if (counter) {
-            counter.innerText = `${this.selected.size} ${this.lang === 'es' ? 'síntomas detectados' : 'symptoms detected'}`;
-        }
+        this.chart.data.datasets[0].data = values;
+        this.chart.update();
     },
 
-    toggleLang() {
-        this.lang = this.lang === 'es' ? 'en' : 'es';
-        this.render();
-        requestAnimationFrame(() => this.initChart());
-    },
+    setLang(l) { this.lang = l; this.render(); this.initChart(); },
 
     copy() {
-        if (!this.selected.size) return;
         const sel = this.data.filter(s => this.selected.has(s.id));
-        const date = new Date().toLocaleDateString();
-        let report = `SPI-A EVALUATION (${date})\n----------------------\n`;
-        report += sel.map(s => `• [${s[this.lang].cat}] ${s.code}: ${s[this.lang].nombre}`).join('\n');
-        
+        if (!sel.length) return;
+        const report = "SPI-A EVALUATION:\n" + sel.map(s => `• [${s[this.lang].cat}] ${s[this.lang].nombre}`).join('\n');
         navigator.clipboard.writeText(report);
-        const btn = document.querySelector('.btn-spi.primary');
-        const originalText = btn.innerText;
-        btn.innerText = "¡Copiado!";
-        setTimeout(() => btn.innerText = originalText, 2000);
+        // Toast minimalista en lugar de alert
+        const btn = document.querySelector('.btn-copy');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "¡Copiado!";
+        setTimeout(() => btn.innerHTML = originalText, 2000);
     },
 
-    reset() {
-        this.selected.clear();
-        this.render();
-        requestAnimationFrame(() => this.initChart());
-    }
+    reset() { this.selected.clear(); this.render(); this.initChart(); }
 };
 
 // Disparo seguro
