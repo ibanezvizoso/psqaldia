@@ -1,6 +1,6 @@
 /**
  * spi.js - Herramienta de Síntomas Básicos SPI-A
- * VERSIÓN v8.1 - AI INTEGRATED + UX OPTIMIZED
+ * VERSIÓN v8.1 - UX OPTIMIZED
  */
 
 window.spiLang = 'es';
@@ -11,16 +11,12 @@ window.spiChart = null;
 const i18nSPI = {
     es: {
         title: "MATRIZ SÍNTOMAS BÁSICOS",
-        copy: "COPIAR PERFIL",
         reset: "REINICIAR",
-        ia: "SÍNTESIS IA",
         info: "Pasa el cursor o pulsa un síntoma para ver detalles"
     },
     en: {
         title: "BASIC SYMPTOMS MATRIX",
-        copy: "COPY PROFILE",
         reset: "RESET",
-        ia: "AI SYNTHESIS",
         info: "Hover or click a symptom for details"
     }
 };
@@ -73,7 +69,6 @@ window.iniciarSPI = async function() {
             .spi-section-title::after { content:''; flex:1; height:1px; background: var(--border); }
             .btn-mini { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; gap: 4px; }
             .btn-mini.active { background: var(--primary); color: white; border-color: var(--primary); }
-            .btn-ia { border-color: var(--primary); color: var(--primary); }
         `;
         document.head.appendChild(style);
     }
@@ -81,7 +76,6 @@ window.iniciarSPI = async function() {
     try {
         const response = await fetch(`/?sheet=SPI_A`);
         const json = await response.json();
-        // Saltamos fila 0 y mapeamos según tu captura
         window.dbSPI = json.values.slice(1).filter(row => row[0] && row[1]).map((row, index) => ({
             id: index,
             color: row[6] || '#e0e0e0',
@@ -124,8 +118,6 @@ function renderInterfazSPI() {
                 <div style="display:flex; gap:6px;">
                     <button class="btn-mini ${window.spiLang==='es'?'active':''}" onclick="setLangSPI('es')">ES</button>
                     <button class="btn-mini ${window.spiLang==='en'?'active':''}" onclick="setLangSPI('en')">EN</button>
-                    <button class="btn-mini btn-ia" onclick="generarSintesisIA()"><i class="fas fa-robot"></i> ${t.ia}</button>
-                    <button class="btn-mini" onclick="copiarPerfilSPI()"><i class="far fa-copy"></i></button>
                     <button class="btn-mini" onclick="resetSPI()">${t.reset}</button>
                 </div>
             </div>
@@ -181,7 +173,7 @@ window.initSpiChart = function() {
             labels: cats,
             datasets: [{
                 data: cats.map(() => 0),
-                backgroundColor: 'rgba(67, 56, 202, 0.2)', // Más visible
+                backgroundColor: 'rgba(67, 56, 202, 0.2)',
                 borderColor: 'var(--primary)',
                 pointBackgroundColor: pointColors,
                 pointRadius: 4
@@ -204,31 +196,9 @@ window.toggleSPI = function(id) {
     } else {
         window.spiSelected.add(id);
         el.classList.add('active');
-        showSpiDesc(id); // UX: Mostrar descripción al pulsar (para táctiles)
+        showSpiDesc(id);
     }
     actualizarRadarSPI();
-};
-
-window.generarSintesisIA = async function() {
-    const sel = window.dbSPI.filter(i => window.spiSelected.has(i.id));
-    if (!sel.length) return alert("Selecciona síntomas primero");
-
-    const box = document.getElementById('spiInfoBox');
-    box.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generando síntesis clínica...`;
-
-    const prompt = `Síntomas detectados: ${sel.map(i => i[window.spiLang].nombre).join(', ')}`;
-
-    try {
-        const res = await fetch(`/?id=spi-interpret`, { 
-            method: 'POST', 
-            body: JSON.stringify({ prompt: prompt }) 
-        });
-        const texto = await res.text();
-        box.innerHTML = `<strong>SÍNTESIS IA:</strong> ${texto}`;
-        box.style.fontStyle = "normal";
-    } catch (e) {
-        box.innerHTML = "Error al conectar con la IA.";
-    }
 };
 
 function actualizarRadarSPI() {
@@ -245,11 +215,3 @@ function actualizarRadarSPI() {
 
 window.setLangSPI = function(l) { window.spiLang = l; renderInterfazSPI(); initSpiChart(); };
 window.resetSPI = function() { window.spiSelected.clear(); renderInterfazSPI(); initSpiChart(); };
-
-window.copiarPerfilSPI = function() {
-    const sel = window.dbSPI.filter(i => window.spiSelected.has(i.id));
-    if (!sel.length) return;
-    const txt = "MATRIZ SÍNTOMAS SPI-A:\n" + sel.map(i => `• [${i[window.spiLang].cat}] ${i[window.spiLang].nombre}`).join('\n');
-    navigator.clipboard.writeText(txt);
-    alert("Perfil copiado al portapapeles");
-};
