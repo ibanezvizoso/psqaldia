@@ -1,23 +1,17 @@
 /**
  * spi.js - Herramienta de Síntomas Básicos SPI-A
- * VERSIÓN v8.1 - UX OPTIMIZED
+ * VERSIÓN v8.2 - ANTI-CONFLICT & DUAL-ZONE UX
  */
 
-window.spiLang = 'es';
-window.dbSPI = [];
-window.spiSelected = new Set();
-window.spiChart = null;
-
-const i18nSPI = {
-    es: {
-        title: "MATRIZ SÍNTOMAS BÁSICOS",
-        reset: "REINICIAR",
-        info: "Pasa el cursor o pulsa un síntoma para ver detalles"
-    },
-    en: {
-        title: "BASIC SYMPTOMS MATRIX",
-        reset: "RESET",
-        info: "Hover or click a symptom for details"
+// Encapsulamos todo en un objeto único para evitar conflictos con aes.js
+window.ToolSPI = {
+    lang: 'es',
+    db: [],
+    selected: new Set(),
+    chart: null,
+    i18n: {
+        es: { title: "MATRIZ SÍNTOMAS BÁSICOS", reset: "REINICIAR", info: "Pulsa el nombre para marcar, o el icono (i) para leer" },
+        en: { title: "BASIC SYMPTOMS MATRIX", reset: "RESET", info: "Tap name to select, or (i) icon just to read" }
     }
 };
 
@@ -25,49 +19,48 @@ window.iniciarSPI = async function() {
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    if (!document.getElementById('spi-styles')) {
+    if (!document.getElementById('spi-unique-styles')) {
         const style = document.createElement('style');
-        style.id = 'spi-styles';
+        style.id = 'spi-unique-styles';
         style.innerHTML = `
             .spi-container { display: flex; flex-direction: column; height: 85vh; font-family: inherit; background: var(--bg); color: var(--text-main); }
-            .spi-nav-ui { 
-                display: flex; justify-content: space-between; align-items: center; 
-                padding: 10px 15px; background: var(--card); border-bottom: 1px solid var(--border);
-            }
+            .spi-nav-ui { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--card); border-bottom: 1px solid var(--border); }
             .spi-scroll { flex: 1; overflow-y: auto; padding: 12px; }
-            .spi-grid { 
-                display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); 
-                gap: 6px; 
-                margin-bottom: 20px; 
-            }
+            .spi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 20px; }
+            
+            /* TILE DUAL-ZONE */
             .spi-tile { 
-                background: var(--card); border: 1px solid var(--border); border-radius: 6px; 
-                padding: 6px 8px; cursor: pointer; transition: 0.2s;
-                border-left: 4px solid var(--c); min-height: 42px;
-                display: flex; align-items: center; justify-content: center; text-align: center;
+                position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 8px; 
+                transition: 0.2s; border-left: 4px solid var(--c); min-height: 50px;
+                display: flex; align-items: center; justify-content: center; overflow: hidden;
             }
-            .spi-tile:hover { background: var(--border); }
+            .spi-tile-btn { 
+                flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; 
+                padding: 6px 20px 6px 8px; cursor: pointer; text-align: center;
+            }
+            .spi-tile-info { 
+                position: absolute; right: 0; top: 0; bottom: 0; width: 22px; 
+                display: flex; align-items: center; justify-content: center;
+                background: rgba(0,0,0,0.03); color: var(--text-muted); font-size: 0.7rem; cursor: help;
+            }
+            .spi-tile-info:hover { background: var(--border); color: var(--primary); }
+
             .spi-tile.active { 
                 background: var(--c) !important; color: #111 !important;
-                border-color: rgba(0,0,0,0.2);
-                box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
-                font-weight: bold;
+                border-color: rgba(0,0,0,0.2); font-weight: bold;
             }
             .spi-tile h4 { margin: 0; font-size: 0.65rem; font-weight: 700; line-height: 1.1; pointer-events: none; }
+
             .spi-info-display {
                 background: var(--card); border-top: 1px solid var(--border);
-                padding: 8px 15px; min-height: 45px; font-size: 0.75rem;
+                padding: 10px 15px; min-height: 50px; font-size: 0.78rem;
                 display: flex; align-items: center; color: var(--text-muted);
                 font-style: italic; border-left: 5px solid var(--primary);
             }
             .spi-radar-box { height: 230px; background: var(--card); padding: 10px; border-top: 1px solid var(--border); }
-            .spi-section-title { 
-                font-size: 0.6rem; font-weight: 800; text-transform: uppercase; 
-                color: var(--text-muted); margin: 15px 0 6px 0; display: flex; align-items: center; gap: 8px; 
-            }
+            .spi-section-title { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin: 15px 0 6px 0; display: flex; align-items: center; gap: 8px; }
             .spi-section-title::after { content:''; flex:1; height:1px; background: var(--border); }
-            .btn-mini { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; gap: 4px; }
+            .btn-mini { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.7rem; }
             .btn-mini.active { background: var(--primary); color: white; border-color: var(--primary); }
         `;
         document.head.appendChild(style);
@@ -76,22 +69,22 @@ window.iniciarSPI = async function() {
     try {
         const response = await fetch(`/?sheet=SPI_A`);
         const json = await response.json();
-        window.dbSPI = json.values.slice(1).filter(row => row[0] && row[1]).map((row, index) => ({
+        window.ToolSPI.db = json.values.slice(1).filter(row => row[0] && row[1]).map((row, index) => ({
             id: index,
             color: row[6] || '#e0e0e0',
             es: { cat: row[0], nombre: row[1], desc: row[2] },
             en: { cat: row[3] || 'Misc', nombre: row[4], desc: row[5] }
         }));
 
-        await cargarChartJS();
+        await spi_cargarChartJS();
         renderInterfazSPI();
         initSpiChart();
     } catch (e) {
-        container.innerHTML = `<div style="padding:2rem; text-align:center; color:red;">Error cargando datos del SPI-A</div>`;
+        container.innerHTML = `<div style="padding:2rem; text-align:center; color:red;">Error SPI-A</div>`;
     }
 };
 
-async function cargarChartJS() {
+async function spi_cargarChartJS() {
     if (window.Chart) return;
     return new Promise(res => {
         const s = document.createElement('script');
@@ -102,10 +95,10 @@ async function cargarChartJS() {
 }
 
 function renderInterfazSPI() {
-    const t = i18nSPI[window.spiLang];
+    const t = window.ToolSPI.i18n[window.ToolSPI.lang];
     const container = document.getElementById('modalData');
-    const grouped = window.dbSPI.reduce((acc, item) => {
-        const c = item[window.spiLang].cat;
+    const grouped = window.ToolSPI.db.reduce((acc, item) => {
+        const c = item[window.ToolSPI.lang].cat;
         if (!acc[c]) acc[c] = [];
         acc[c].push(item);
         return acc;
@@ -116,8 +109,8 @@ function renderInterfazSPI() {
             <div class="spi-nav-ui">
                 <h2 style="margin:0; font-size:0.9rem; font-weight:900;">${t.title}</h2>
                 <div style="display:flex; gap:6px;">
-                    <button class="btn-mini ${window.spiLang==='es'?'active':''}" onclick="setLangSPI('es')">ES</button>
-                    <button class="btn-mini ${window.spiLang==='en'?'active':''}" onclick="setLangSPI('en')">EN</button>
+                    <button class="btn-mini ${window.ToolSPI.lang==='es'?'active':''}" onclick="setLangSPI('es')">ES</button>
+                    <button class="btn-mini ${window.ToolSPI.lang==='en'?'active':''}" onclick="setLangSPI('en')">EN</button>
                     <button class="btn-mini" onclick="resetSPI()">${t.reset}</button>
                 </div>
             </div>
@@ -127,33 +120,30 @@ function renderInterfazSPI() {
                     <div class="spi-section-title">${cat}</div>
                     <div class="spi-grid">
                         ${grouped[cat].map(item => `
-                            <div id="spi-t-${item.id}" class="spi-tile ${window.spiSelected.has(item.id)?'active':''}" 
-                                 onclick="toggleSPI(${item.id})" 
-                                 onmouseover="showSpiDesc(${item.id})"
-                                 style="--c: ${item.color}">
-                                <h4>${item[window.spiLang].nombre}</h4>
+                            <div id="spi-t-${item.id}" class="spi-tile ${window.ToolSPI.selected.has(item.id)?'active':''}" style="--c: ${item.color}">
+                                <div class="spi-tile-btn" onclick="toggleSPI(${item.id})">
+                                    <h4>${item[window.ToolSPI.lang].nombre}</h4>
+                                </div>
+                                <div class="spi-tile-info" onclick="showSpiDesc(${item.id})">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
                 `).join('')}
             </div>
 
-            <div class="spi-info-display" id="spiInfoBox">
-                ${t.info}
-            </div>
-
-            <div class="spi-radar-box">
-                <canvas id="spiCanvas"></canvas>
-            </div>
+            <div class="spi-info-display" id="spiInfoBox">${t.info}</div>
+            <div class="spi-radar-box"><canvas id="spiCanvas"></canvas></div>
         </div>
     `;
 }
 
 window.showSpiDesc = function(id) {
-    const item = window.dbSPI.find(i => i.id === id);
+    const item = window.ToolSPI.db.find(i => i.id === id);
     const box = document.getElementById('spiInfoBox');
     if (item && box) {
-        box.innerHTML = `<strong>${item[window.spiLang].nombre}:</strong> &nbsp; ${item[window.spiLang].desc}`;
+        box.innerHTML = `<strong>${item[window.ToolSPI.lang].nombre}:</strong> &nbsp; ${item[window.ToolSPI.lang].desc}`;
         box.style.color = "var(--text-main)";
         box.style.borderLeftColor = item.color;
     }
@@ -162,12 +152,12 @@ window.showSpiDesc = function(id) {
 window.initSpiChart = function() {
     const ctx = document.getElementById('spiCanvas');
     if (!ctx) return;
-    if (window.spiChart) window.spiChart.destroy();
+    if (window.ToolSPI.chart) window.ToolSPI.chart.destroy();
 
-    const cats = [...new Set(window.dbSPI.map(i => i[window.spiLang].cat))];
-    const pointColors = cats.map(cat => window.dbSPI.find(i => i[window.spiLang].cat === cat).color);
+    const cats = [...new Set(window.ToolSPI.db.map(i => i[window.ToolSPI.lang].cat))];
+    const pointColors = cats.map(cat => window.ToolSPI.db.find(i => i[window.ToolSPI.lang].cat === cat).color);
 
-    window.spiChart = new Chart(ctx, {
+    window.ToolSPI.chart = new Chart(ctx, {
         type: 'radar',
         data: {
             labels: cats,
@@ -190,28 +180,28 @@ window.initSpiChart = function() {
 
 window.toggleSPI = function(id) {
     const el = document.getElementById(`spi-t-${id}`);
-    if (window.spiSelected.has(id)) {
-        window.spiSelected.delete(id);
+    if (window.ToolSPI.selected.has(id)) {
+        window.ToolSPI.selected.delete(id);
         el.classList.remove('active');
     } else {
-        window.spiSelected.add(id);
+        window.ToolSPI.selected.add(id);
         el.classList.add('active');
-        showSpiDesc(id);
     }
+    showSpiDesc(id); // Siempre mostramos info al interactuar
     actualizarRadarSPI();
 };
 
 function actualizarRadarSPI() {
-    if (!window.spiChart) return;
-    const cats = [...new Set(window.dbSPI.map(i => i[window.spiLang].cat))];
+    if (!window.ToolSPI.chart) return;
+    const cats = [...new Set(window.ToolSPI.db.map(i => i[window.ToolSPI.lang].cat))];
     const values = cats.map(cat => {
-        const items = window.dbSPI.filter(i => i[window.spiLang].cat === cat);
-        const sel = items.filter(i => window.spiSelected.has(i.id)).length;
+        const items = window.ToolSPI.db.filter(i => i[window.ToolSPI.lang].cat === cat);
+        const sel = items.filter(i => window.ToolSPI.selected.has(i.id)).length;
         return (sel / items.length) * 100;
     });
-    window.spiChart.data.datasets[0].data = values;
-    window.spiChart.update();
+    window.ToolSPI.chart.data.datasets[0].data = values;
+    window.ToolSPI.chart.update();
 }
 
-window.setLangSPI = function(l) { window.spiLang = l; renderInterfazSPI(); initSpiChart(); };
-window.resetSPI = function() { window.spiSelected.clear(); renderInterfazSPI(); initSpiChart(); };
+window.setLangSPI = function(l) { window.ToolSPI.lang = l; renderInterfazSPI(); initSpiChart(); };
+window.resetSPI = function() { window.ToolSPI.selected.clear(); renderInterfazSPI(); initSpiChart(); };
