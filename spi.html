@@ -8,7 +8,9 @@
     <link rel="canonical" href="https://psqaldia.com/spi">
     <link rel="icon" type="image/png" href="/Logo.png">
 
-    <link rel="stylesheet" href="/css/all.min.css">
+    <!-- CDN de Font Awesome para asegurar que los iconos se vean siempre -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --primary: #2563eb;
@@ -31,106 +33,92 @@
             flex-direction: column;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            /* Aumento general de tamaño de fuente */
-            font-size: 1.05rem; 
+            font-size: 0.95rem; /* Reducido un poco el tamaño global del HTML */
         }
 
-        .nav-header { padding: 2rem; max-width: 1200px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-header { padding: 1rem 2rem; max-width: 1300px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
 
-        .hero { text-align: center; padding: 5rem 1.5rem 4rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        
-        /* Símbolo del Hero */
-        .hero-symbol {
-            font-size: 3.5rem;
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            display: inline-block;
-            filter: drop-shadow(0 10px 15px rgba(37, 99, 235, 0.2));
-        }
+        .hero { text-align: center; padding: 2rem 1.5rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 650px; margin: auto; }
 
-        .hero h1 { font-size: 3.5rem; font-weight: 900; letter-spacing: -0.05em; margin-bottom: 1rem; margin-top: 0; line-height: 1.1; }
-        .hero p { color: var(--text-muted); font-size: 1.25rem; max-width: 700px; margin: auto; line-height: 1.5; }
-
-        .main-content { padding: 0 1.5rem 6rem 1.5rem; max-width: 1200px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+        /* Aumentamos el ancho máximo para que la herramienta respire */
+        .main-content { padding: 0 1rem 4rem 1rem; max-width: 1300px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-            margin-top: -1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
         }
 
         .feature-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 2.5rem 2rem;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         }
-
-        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
 
         .feature-icon {
-            font-size: 2.2rem;
+            font-size: 1.5rem;
             color: var(--primary);
             background: var(--primary-light);
-            width: 70px; height: 70px;
-            border-radius: 18px;
+            width: 45px; height: 45px;
+            border-radius: 12px;
             display: inline-flex; align-items: center; justify-content: center;
-            margin-bottom: 1.8rem;
+            margin-bottom: 1rem;
         }
 
-        .feature-card h3 { font-size: 1.4rem; font-weight: 800; margin: 0 0 1rem 0; letter-spacing: -0.02em; }
-        .feature-card p { font-size: 1.05rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+        .feature-card h3 { font-size: 1.1rem; font-weight: 800; margin: 0 0 0.5rem 0; }
+        .feature-card p { font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
 
+        /* HERRAMIENTA: Aumentamos su importancia visual */
         #modalData { 
             background: var(--card-bg);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
-            min-height: 650px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            min-height: 750px; /* Más grande para que la matriz no se corte */
             overflow: hidden;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
         }
 
         .info-panel {
             background: white;
-            padding: 3rem 2.5rem;
+            padding: 2.5rem;
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            margin-top: 4rem;
+            margin-top: 2rem;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 3rem;
+            gap: 2rem;
         }
 
-        .nav-footer { margin-top: 5rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
-        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.8px; }
+        .nav-footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .site-bottom-info {
             text-align: center;
-            padding: 3rem 1rem;
+            padding: 2rem 1rem;
             background: #f8fafc;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
             border-top: 1px solid var(--border);
         }
         .site-bottom-info img {
-            height: 22px;
+            height: 18px;
             vertical-align: middle;
-            margin-right: 10px;
-            opacity: 0.5;
+            margin-right: 8px;
+            opacity: 0.4;
             filter: grayscale(100%);
         }
 
         @media (max-width: 600px) {
-            .hero h1 { font-size: 2.2rem; }
-            .hero-symbol { font-size: 2.8rem; }
-            .features-grid { gap: 1.5rem; }
+            .hero h1 { font-size: 1.8rem; }
+            #modalData { min-height: 600px; }
         }
     </style>
 </head>
@@ -141,10 +129,6 @@
     </nav>
 
     <header class="hero">
-        <!-- Icono central del Hero restaurado -->
-        <div class="hero-symbol">
-            <i class="fas fa-wave-square"></i>
-        </div>
         <h1>Síntomas Básicos</h1>
         <p>Matriz interactiva para la exploración de experiencias subjetivas anómalas y detección precoz mediante visualización por dominios.</p>
     </header>
@@ -174,26 +158,26 @@
         <div id="modalData">
             <div style="padding:7rem 2rem; text-align:center;">
                 <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--primary); opacity: 0.6;"></i>
-                <p style="margin-top:1.5rem; font-weight:700; color:var(--text-muted); font-size: 1.2rem;">Cargando matriz de síntomas...</p>
+                <p style="margin-top:1.5rem; font-weight:700; color:var(--text-muted); font-size: 1.1rem;">Cargando matriz de síntomas...</p>
             </div>
         </div>
 
         <section class="info-panel">
             <div>
-                <h3 style="margin-top:0; margin-bottom:1.2rem; color:var(--primary); font-size:1.3rem;">
+                <h3 style="margin-top:0; margin-bottom:1.2rem; color:var(--primary); font-size:1.1rem;">
                     <i class="fas fa-info-circle"></i> Aplicación Clínica
                 </h3>
-                <p style="color:var(--text-muted); font-size:1rem; margin:0; line-height: 1.7;">
+                <p style="color:var(--text-muted); font-size:0.95rem; margin:0; line-height: 1.6;">
                     Los <strong>síntomas básicos</strong> son vivencias subjetivas anómalas que el paciente experimenta como interferencias en sus propios procesos mentales. 
                     <br><br>
                     A diferencia de los síntomas psicóticos "positivos", estos son reconocidos por el sujeto como algo molesto, pero aún dentro de su realidad. Su identificación es crucial para la detección de estados de riesgo y la comprensión de la vulnerabilidad personal antes de que aparezca una sintomatologia psicótica franca.
                 </p>
             </div>
             <div>
-                <h3 style="margin-top:0; margin-bottom:1.2rem; color:var(--primary); font-size:1.3rem;">
+                <h3 style="margin-top:0; margin-bottom:1.2rem; color:var(--primary); font-size:1.1rem;">
                     <i class="fas fa-book"></i> Referencias
                 </h3>
-                <ul style="list-style:none; padding:0; color:var(--text-muted); font-size:0.95rem; margin:0;">
+                <ul style="list-style:none; padding:0; color:var(--text-muted); font-size:0.9rem; margin:0;">
                     <li style="margin-bottom:12px;">• <strong>Schultze-Lutter et al.</strong>: SPI-A.</li>
                 </ul>
             </div>
