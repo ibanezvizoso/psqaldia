@@ -1,6 +1,6 @@
 /**
  * spi.js - Herramienta de Síntomas Básicos SPI-A
- * VERSIÓN v9.0 - IA + UX MEJORADO
+ * VERSIÓN v9.1 - UI Reorganizada
  */
 
 window.ToolSPI = {
@@ -52,11 +52,15 @@ window.iniciarSPI = async function() {
             /* NAV */
             .spi-nav-ui { 
                 display: flex; justify-content: space-between; align-items: center; 
-                padding: 10px 15px; background: var(--card); 
+                padding: 8px 15px; background: var(--card); 
                 border-bottom: 1px solid var(--border);
                 flex-shrink: 0;
             }
-            .spi-nav-right { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+            .spi-nav-right { display: flex; gap: 12px; align-items: center; }
+            
+            /* Grupo de controles (Idiomas + Reset) */
+            .spi-ctrl-group { display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
+            .spi-lang-row { display: flex; gap: 4px; }
 
             /* SCROLL AREA */
             .spi-scroll { flex: 1; overflow-y: auto; padding: 12px 12px 0 12px; }
@@ -153,12 +157,14 @@ window.iniciarSPI = async function() {
                 padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); 
                 background: var(--card); cursor: pointer; font-size: 0.7rem; font-weight: 700;
                 transition: all 0.15s; color: var(--text-main);
+                display: flex; align-items: center; justify-content: center;
             }
             .btn-mini:hover { background: var(--border); }
             .btn-mini.active { background: var(--primary); color: white; border-color: var(--primary); }
-            .btn-mini.ia { border-color: var(--primary); color: var(--primary); }
+            .btn-mini.ia { border-color: var(--primary); color: var(--primary); height: 100%; min-height: 44px; }
             .btn-mini.ia:hover { background: var(--primary); color: white; }
             .btn-mini.copy-sm { font-size: 0.65rem; padding: 3px 8px; }
+            .btn-reset-ui { font-size: 0.6rem; padding: 2px 6px; opacity: 0.8; }
 
             @media (max-width: 400px) {
                 .spi-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
@@ -217,10 +223,15 @@ function renderInterfazSPI() {
                     ${t.title}
                 </h2>
                 <div class="spi-nav-right">
-                    <button class="btn-mini ${window.ToolSPI.lang==='es'?'active':''}" onclick="setLangSPI('es')">ES</button>
-                    <button class="btn-mini ${window.ToolSPI.lang==='en'?'active':''}" onclick="setLangSPI('en')">EN</button>
                     <button class="btn-mini ia" onclick="generarNarrativaSPI()">${t.ia}</button>
-                    <button class="btn-mini" onclick="resetSPI()">${t.reset}</button>
+                    
+                    <div class="spi-ctrl-group">
+                        <div class="spi-lang-row">
+                            <button class="btn-mini ${window.ToolSPI.lang==='es'?'active':''}" onclick="setLangSPI('es')">ES</button>
+                            <button class="btn-mini ${window.ToolSPI.lang==='en'?'active':''}" onclick="setLangSPI('en')">EN</button>
+                        </div>
+                        <button class="btn-mini btn-reset-ui" onclick="resetSPI()">${t.reset}</button>
+                    </div>
                 </div>
             </div>
 
@@ -259,7 +270,9 @@ function renderInterfazSPI() {
     `;
 }
 
-// Descripción en barra inferior
+// ... (Resto de funciones: showSpiDesc, initSpiChart, toggleSPI, actualizarRadarSPI, generarNarrativaSPI, copiarNarrativaSPI, setLangSPI, resetSPI)
+// Mantén el resto del código igual a tu versión original.
+
 window.showSpiDesc = function(id) {
     const item = window.ToolSPI.db.find(i => i.id === id);
     const box = document.getElementById('spiInfoBox');
@@ -270,7 +283,6 @@ window.showSpiDesc = function(id) {
     box.style.fontStyle = "normal";
 };
 
-// Radar Chart
 window.initSpiChart = function() {
     const ctx = document.getElementById('spiCanvas');
     if (!ctx) return;
@@ -310,7 +322,6 @@ window.initSpiChart = function() {
     actualizarRadarSPI();
 };
 
-// Toggle síntoma
 window.toggleSPI = function(id) {
     const el = document.getElementById(`spi-t-${id}`);
     if (window.ToolSPI.selected.has(id)) {
@@ -336,7 +347,6 @@ function actualizarRadarSPI() {
     window.ToolSPI.chart.update();
 }
 
-// Generación narrativa con IA
 window.generarNarrativaSPI = async function() {
     const t = window.ToolSPI.i18n[window.ToolSPI.lang];
     const iaOutput = document.getElementById('spiIaOutput');
@@ -383,7 +393,6 @@ window.generarNarrativaSPI = async function() {
     }
 };
 
-// Copiar narrativa
 window.copiarNarrativaSPI = function() {
     const t = window.ToolSPI.i18n[window.ToolSPI.lang];
     const texto = document.getElementById('spiIaOutput').textContent;
@@ -395,7 +404,6 @@ window.copiarNarrativaSPI = function() {
     setTimeout(() => btn.textContent = t.copy, 2000);
 };
 
-// Control de idioma y reset
 window.setLangSPI = function(l) { 
     window.ToolSPI.lang = l; 
     renderInterfazSPI(); 
@@ -407,4 +415,3 @@ window.resetSPI = function() {
     renderInterfazSPI(); 
     initSpiChart(); 
 };
-            
