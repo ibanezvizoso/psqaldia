@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://psqaldia.com/spi">
     <link rel="icon" type="image/png" href="/Logo.png">
 
-    <!-- CDN de Font Awesome para asegurar que los iconos se vean siempre -->
+    <!-- CDN de Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -33,22 +33,32 @@
             flex-direction: column;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            font-size: 0.95rem; /* Reducido un poco el tamaño global del HTML */
+            font-size: 0.95rem;
         }
 
-        .nav-header { padding: 1rem 2rem; max-width: 1300px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        /* Reducción de ancho máximo para que no se vea "raro" en pantallas grandes */
+        .nav-header { padding: 1rem 2rem; max-width: 1100px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
 
-        .hero { text-align: center; padding: 2rem 1.5rem 1.5rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
-        .hero h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
-        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 650px; margin: auto; }
+        .hero { text-align: center; padding: 2.5rem 1.5rem 2rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        
+        /* Icono del Hero corregido */
+        .hero-symbol {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: block;
+        }
 
-        /* Aumentamos el ancho máximo para que la herramienta respire */
-        .main-content { padding: 0 1rem 4rem 1rem; max-width: 1300px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+        .hero h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 0.8rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1rem; max-width: 750px; margin: auto; line-height: 1.5; }
+
+        /* Contenedor principal ajustado */
+        .main-content { padding: 0 1rem 4rem 1rem; max-width: 1100px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
             margin-bottom: 2.5rem;
         }
@@ -57,33 +67,52 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 1.5rem;
+            padding: 1.2rem;
             text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         }
 
         .feature-icon {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--primary);
             background: var(--primary-light);
-            width: 45px; height: 45px;
-            border-radius: 12px;
+            width: 40px; height: 40px;
+            border-radius: 10px;
             display: inline-flex; align-items: center; justify-content: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
-        .feature-card h3 { font-size: 1.1rem; font-weight: 800; margin: 0 0 0.5rem 0; }
-        .feature-card p { font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+        .feature-card h3 { font-size: 1rem; font-weight: 800; margin: 0 0 0.4rem 0; }
+        .feature-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
 
-        /* HERRAMIENTA: Aumentamos su importancia visual */
+        /* AJUSTES DE LA HERRAMIENTA (Aumentamos tamaño de contenido interno) */
         #modalData { 
             background: var(--card-bg);
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-            min-height: 750px; /* Más grande para que la matriz no se corte */
+            min-height: 800px; 
             overflow: hidden;
             margin-bottom: 3rem;
+        }
+
+        /* 
+           OVERRIDES PARA LA HERRAMIENTA EXTERNA (CSS INYECTADO)
+           Esto hará que los botones/tiles de spi.js se vean más grandes aquí
+        */
+        #modalData .spi-tile { 
+            min-height: 75px !important; 
+        }
+        #modalData .spi-tile h4 { 
+            font-size: 0.85rem !important; 
+            font-weight: 800 !important;
+        }
+        #modalData .spi-grid { 
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important; 
+            gap: 12px !important;
+        }
+        #modalData .spi-section-title {
+            font-size: 0.75rem !important;
+            margin: 20px 0 10px 0 !important;
         }
 
         .info-panel {
@@ -94,7 +123,7 @@
             margin-top: 2rem;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            gap: 2.5rem;
         }
 
         .nav-footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
@@ -118,7 +147,8 @@
 
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.8rem; }
-            #modalData { min-height: 600px; }
+            #modalData { min-height: 650px; }
+            #modalData .spi-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; }
         }
     </style>
 </head>
@@ -129,8 +159,11 @@
     </nav>
 
     <header class="hero">
+        <div class="hero-symbol">
+            <i class="fas fa-notes-medical"></i>
+        </div>
         <h1>Síntomas Básicos</h1>
-        <p>Matriz interactiva para la exploración de experiencias subjetivas anómalas y detección precoz mediante visualización por dominios.</p>
+        <p>Esta herramienta toma como referencia el <strong>SPI-A</strong> (Schizophrenia Proneness Instrument - Adult version), un instrumento diseñado para evaluar experiencias subjetivas anómalas. Se presenta aquí una versión simplificada y adaptada para agilizar la exploración psicopatológica estructurada en la práctica clínica diaria.</p>
     </header>
 
     <main class="main-content">
@@ -155,8 +188,9 @@
             </div>
         </section>
 
+        <!-- Contenedor de la herramienta -->
         <div id="modalData">
-            <div style="padding:7rem 2rem; text-align:center;">
+            <div style="padding:8rem 2rem; text-align:center;">
                 <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--primary); opacity: 0.6;"></i>
                 <p style="margin-top:1.5rem; font-weight:700; color:var(--text-muted); font-size: 1.1rem;">Cargando matriz de síntomas...</p>
             </div>
@@ -170,7 +204,7 @@
                 <p style="color:var(--text-muted); font-size:0.95rem; margin:0; line-height: 1.6;">
                     Los <strong>síntomas básicos</strong> son vivencias subjetivas anómalas que el paciente experimenta como interferencias en sus propios procesos mentales. 
                     <br><br>
-                    A diferencia de los síntomas psicóticos "positivos", estos son reconocidos por el sujeto como algo molesto, pero aún dentro de su realidad. Su identificación es crucial para la detección de estados de riesgo y la comprensión de la vulnerabilidad personal antes de que aparezca una sintomatologia psicótica franca.
+                    A diferencia de los síntomas psicóticos positivos, estos son reconocidos por el sujeto como algo molesto, pero aún dentro de su realidad. Su identificación es crucial para la detección de estados de riesgo y la comprensión de la vulnerabilidad personal antes de que aparezca una sintomatologia psicótica franca.
                 </p>
             </div>
             <div>
@@ -195,6 +229,7 @@
         <span>&copy; 2026 PSQ AL DÍA - Herramientas clínicas</span>
     </footer>
 
+    <!-- Lógica de carga -->
     <script src="/spi.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
