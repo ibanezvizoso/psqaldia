@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Síntomas Básicos SPI | PSQALDÍA</title>
-    <meta name="description" content="Matriz interactiva de síntomas básicos para la exploración psicopatológica. Evaluación visual con radar por dominios.">
+    <meta name="description" content="Matriz interactiva de síntomas básicos para la exploración psicopatológica. Toma como referencia el SPI-A (Schizophrenia Proness Instrument, Adult version), simplificado para su uso en la práctica clínica. Evaluación visual con radar por dominios.">
     <link rel="canonical" href="https://psqaldia.com/spi">
     <link rel="icon" type="image/png" href="/Logo.png">
 
@@ -36,24 +36,23 @@
             font-size: 0.95rem;
         }
 
-        /* Reducción de ancho máximo para que no se vea "raro" en pantallas grandes */
         .nav-header { padding: 1rem 2rem; max-width: 1100px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
 
         .hero { text-align: center; padding: 2.5rem 1.5rem 2rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
         
-        /* Icono del Hero corregido */
+        /* Restaurado el Símbolo del Hero */
         .hero-symbol {
             font-size: 2.5rem;
             color: var(--primary);
             margin-bottom: 1rem;
             display: block;
+            filter: drop-shadow(0 10px 15px rgba(37, 99, 235, 0.1));
         }
 
         .hero h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 0.8rem; margin-top: 0; }
         .hero p { color: var(--text-muted); font-size: 1rem; max-width: 750px; margin: auto; line-height: 1.5; }
 
-        /* Contenedor principal ajustado */
         .main-content { padding: 0 1rem 4rem 1rem; max-width: 1100px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
         .features-grid {
@@ -84,35 +83,49 @@
         .feature-card h3 { font-size: 1rem; font-weight: 800; margin: 0 0 0.4rem 0; }
         .feature-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
 
-        /* AJUSTES DE LA HERRAMIENTA (Aumentamos tamaño de contenido interno) */
+        /* --- MAXIMIZACIÓN DE LA HERRAMIENTA --- */
         #modalData { 
             background: var(--card-bg);
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-            min-height: 800px; 
+            min-height: 950px; /* Aumentado para dar espacio al radar grande */
             overflow: hidden;
             margin-bottom: 3rem;
         }
 
-        /* 
-           OVERRIDES PARA LA HERRAMIENTA EXTERNA (CSS INYECTADO)
-           Esto hará que los botones/tiles de spi.js se vean más grandes aquí
-        */
-        #modalData .spi-tile { 
-            min-height: 75px !important; 
+        /* Overrides agresivos para redimensionar el interior del JS */
+        #modalData .spi-container {
+            height: 950px !important; /* Forzamos altura total de la herramienta */
         }
+        
+        #modalData .spi-scroll {
+            flex: 1.5 !important; /* Damos más peso al área de tarjetas */
+        }
+
+        #modalData .spi-tile { 
+            min-height: 70px !important; 
+        }
+
         #modalData .spi-tile h4 { 
             font-size: 0.85rem !important; 
             font-weight: 800 !important;
         }
+
         #modalData .spi-grid { 
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important; 
-            gap: 12px !important;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; 
+            gap: 10px !important;
         }
-        #modalData .spi-section-title {
-            font-size: 0.75rem !important;
-            margin: 20px 0 10px 0 !important;
+
+        /* RADAR GRANDE: Expandimos el área del gráfico */
+        #modalData .spi-radar-box {
+            height: 380px !important; /* Casi duplicamos el tamaño del radar */
+            padding: 15px !important;
+            background: #fff;
+        }
+
+        #modalData .spi-bottom {
+            background: #fff;
         }
 
         .info-panel {
@@ -147,8 +160,9 @@
 
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.8rem; }
-            #modalData { min-height: 650px; }
-            #modalData .spi-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; }
+            #modalData { min-height: 850px; }
+            #modalData .spi-container { height: 850px !important; }
+            #modalData .spi-radar-box { height: 280px !important; }
         }
     </style>
 </head>
@@ -159,8 +173,9 @@
     </nav>
 
     <header class="hero">
+        <!-- Símbolo restaurado -->
         <div class="hero-symbol">
-            <i class="fas fa-notes-medical"></i>
+            <i class="fas fa-wave-square"></i>
         </div>
         <h1>Síntomas Básicos</h1>
         <p>Esta herramienta toma como referencia el <strong>SPI-A</strong> (Schizophrenia Proneness Instrument - Adult version), un instrumento diseñado para evaluar experiencias subjetivas anómalas. Se presenta aquí una versión simplificada y adaptada para agilizar la exploración psicopatológica estructurada en la práctica clínica diaria.</p>
@@ -190,7 +205,7 @@
 
         <!-- Contenedor de la herramienta -->
         <div id="modalData">
-            <div style="padding:8rem 2rem; text-align:center;">
+            <div style="padding:10rem 2rem; text-align:center;">
                 <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--primary); opacity: 0.6;"></i>
                 <p style="margin-top:1.5rem; font-weight:700; color:var(--text-muted); font-size: 1.1rem;">Cargando matriz de síntomas...</p>
             </div>
@@ -229,7 +244,6 @@
         <span>&copy; 2026 PSQ AL DÍA - Herramientas clínicas</span>
     </footer>
 
-    <!-- Lógica de carga -->
     <script src="/spi.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
