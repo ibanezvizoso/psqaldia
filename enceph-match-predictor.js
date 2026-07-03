@@ -2,7 +2,7 @@
  * Herramienta: Enceph-Match Predictor (Calculadora de Probabilidad Pre-test de Encefalitis)
  * Plataforma: PSQ al día (psqaldia.com)
  * Fuente de datos: Lancet Seminar (2026)
- * * INTEGRACIÓN DIRECTA: Conexión automatizada con la pestaña "encefalitisDD"
+ * INTEGRACIÓN ENCAPSULADA: Conexión automatizada mediante Cloudflare Worker
  */
 
 // Estructura de metadatos para la renderización automática de la interfaz
@@ -45,28 +45,37 @@ const COL_INDEX = {
     HIPONATREMIA: 19, RMN_PATOLOGICA: 20, LCR_PATOLOGICO: 21, EEG_PATOLOGICO: 22
 };
 
-// Memoria global del script para las filas de "encefalitisDD"
-let currentSheetRows = [];
+// Memoria global asignada a la ventana para las filas de "encefalitisDD"
+window.currentSheetRows = [];
 
 /**
- * FUNCIÓN INICIALIZADORA: Llama a tu Cloudflare Worker pidiendo específicamente "encefalitisDD"
+ * FUNCIÓN INICIALIZADORA: Llama al Cloudflare Worker de forma relativa garantizando compatibilidad
  */
-async function iniciarEncephMatch() {
-    const WORKER_URL = 'https://tu-worker.psqaldia.workers.dev/?sheet=encefalitisDD';
-    
+window.iniciarEncephMatch = async function() {
     try {
-        document.getElementById('modal').style.display = 'flex';
-        document.getElementById('modalData').innerHTML = `
+        const modal = document.getElementById('modal');
+        if (modal) modal.style.display = 'flex';
+        
+        const container = document.getElementById('modalData');
+        if (!container) return;
+
+        container.innerHTML = `
             <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:200px; font-family:system-ui, sans-serif; font-size:0.85rem; color:var(--text-muted);">
                 <i class="fas fa-spinner fa-spin" style="margin-bottom:12px; font-size:1.5rem; color:var(--primary);"></i>
                 <span>Conectando con la base de datos encefalitisDD...</span>
             </div>
         `;
 
-        const response = await fetch(WORKER_URL);
-        const filasDeLaHoja = await response.json();
+        // Petición al endpoint relativo administrado por tu Worker
+        const response = await fetch('/?sheet=encefalitisDD');
+        const data = await response.json();
         
-        openEncephalitisUI(filasDeLaHoja);
+        // Validación estricta del payload de Google Sheets obtenido
+        if (data && data.values) {
+            window.openEncephalitisUI(data.values);
+        } else {
+            throw new Error("Estructura de datos 'values' no encontrada.");
+        }
 
     } catch (error) {
         console.error("Error al conectar con la hoja encefalitisDD:", error);
@@ -77,13 +86,13 @@ async function iniciarEncephMatch() {
             </div>
         `;
     }
-}
+};
 
 /**
  * Construye la interfaz gráfica dentro del modal de la plataforma
  */
-function openEncephalitisUI(sheetRows) {
-    currentSheetRows = sheetRows; 
+window.openEncephalitisUI = function(sheetRows) {
+    window.currentSheetRows = sheetRows; 
     const modalData = document.getElementById('modalData');
 
     modalData.innerHTML = `
@@ -94,7 +103,7 @@ function openEncephalitisUI(sheetRows) {
                 <p style="font-size:0.7rem; color:var(--text-muted); margin:0 0 0.8rem 0;">Probabilidad diferencial pre-test (Pestaña: encefalitisDD)</p>
                 
                 <div style="display: flex; justify-content: center;">
-                    <button onclick="openPostHsvFlags()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 5px 14px; border-radius: 50px; font-size: 0.65rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                    <button onclick="window.openPostHsvFlags()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 5px 14px; border-radius: 50px; font-size: 0.65rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
                         <i class="fas fa-history"></i> NOTA SOBRE AUTOINMUNIDAD POST-HSV
                     </button>
                 </div>
@@ -112,42 +121,42 @@ function openEncephalitisUI(sheetRows) {
             <div style="margin-top: 1rem; display: flex; gap: 12px; background: #f0fdf4; padding: 0.8rem; border-radius: 12px; border: 1px solid #bbf7d0; align-items: center;">
                 <div style="flex: 1;">
                     <span style="font-size: 0.65rem; font-weight: 800; color: #166534; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px;">Edad</span>
-                    <input type="number" id="p-edad" oninput="updateEncephalitis()" placeholder="Años" style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid #22c55e; font-size: 0.85rem; box-sizing: border-box; outline: none;">
+                    <input type="number" id="p-edad" oninput="window.updateEncephalitis()" placeholder="Años" style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid #22c55e; font-size: 0.85rem; box-sizing: border-box; outline: none;">
                 </div>
                 <div style="flex: 1; display: flex; align-items: center; height: 100%; margin-top: 14px;">
                     <label style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #166534; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="p-sexo" onchange="updateEncephalitis()" style="width:16px; height:16px; accent-color: #22c55e;"> Varón Biológico
+                        <input type="checkbox" id="p-sexo" onchange="window.updateEncephalitis()" style="width:16px; height:16px; accent-color: #22c55e;"> Varón Biológico
                     </label>
                 </div>
             </div>
 
             <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 1.2rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Manifestaciones Clínicas Presentes</p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                ${CAMPOS_ENCEPHALITIS.clinicos.map(s => renderEncephCheck(s, 'enceph-sintoma')).join('')}
+                ${CAMPOS_ENCEPHALITIS.clinicos.map(s => window.renderEncephCheck(s, 'enceph-sintoma')).join('')}
             </div>
             
             <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted); margin: 1.2rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;">Resultados de Exploración Inicial</p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                ${CAMPOS_ENCEPHALITIS.paraclinicos.map(s => renderEncephCheck(s, 'enceph-paraclinico')).join('')}
+                ${CAMPOS_ENCEPHALITIS.paraclinicos.map(s => window.renderEncephCheck(s, 'enceph-paraclinico')).join('')}
             </div>
 
         </div>
     `;
-}
+};
 
-function renderEncephCheck(s, className) {
+window.renderEncephCheck = function(s, className) {
     return `
         <label style="display: flex; align-items: center; gap: 6px; background: var(--bg, #fdfdfd); padding: 0.5rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--border, #e2e8f0); font-size: 0.7rem; color: var(--text-main); height: 100%; box-sizing: border-box; min-height: 40px; user-select:none; transition: background 0.15s;">
-            <input type="checkbox" class="${className}" value="${s.id}" onchange="updateEncephalitis()" style="width:14px; height:14px; min-width:14px; accent-color: var(--primary);">
+            <input type="checkbox" class="${className}" value="${s.id}" onchange="window.updateEncephalitis()" style="width:14px; height:14px; min-width:14px; accent-color: var(--primary);">
             <span style="line-height:1.2; font-weight: 500;">${s.label}</span>
         </label>
     `;
-}
+};
 
 /**
  * Motor Algorítmico Central: Ejecuta Coseno + Gauss + Filtros Críticos + Overrides de Patognomonicidad
  */
-function updateEncephalitis() {
+window.updateEncephalitis = function() {
     const edadInput = document.getElementById('p-edad').value;
     if (!edadInput || isNaN(edadInput) || parseFloat(edadInput) < 0) {
         document.getElementById('results-bars-container').innerHTML = `<div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:0.5rem;">Introduce la edad del paciente para activar el motor clínico.</div>`;
@@ -164,16 +173,19 @@ function updateEncephalitis() {
     let rawScores = [];
     let totalSumScores = 0;
 
-    // Iteramos a partir de i = 1 para saltar estrictamente la fila de cabeceras de "encefalitisDD"
-    for (let i = 1; i < currentSheetRows.length; i++) {
-        const row = currentSheetRows[i];
+    // Evaluamos desde i = 0. Saltamos de forma inteligente solo si el texto contiene términos de cabecera.
+    for (let i = 0; i < window.currentSheetRows.length; i++) {
+        const row = window.currentSheetRows[i];
         if (!row || row.length === 0 || !row[COL_INDEX.ETIOLOGIA]) continue;
 
-        const etiologia = row[COL_INDEX.ETIOLOGIA];
-        const tipo = row[COL_INDEX.TIPO];
+        // Protección anti-cabeceras dinámica por si viene texto descriptivo en la primera fila devuelta
+        if (row[COL_INDEX.ETIOLOGIA].toLowerCase().includes('etiolog') || row[COL_INDEX.ETIOLOGIA].toLowerCase().includes('fármaco')) continue;
 
-        // 1. ANÁLISIS EXHAUSTIVO DE EDAD (Campana Gaussiana)
-        const medianaEdad = parseFloat(row[COL_INDEX.MEDIANA_EDAD]);
+        const etiologia = row[COL_INDEX.ETIOLOGIA];
+        const tipo = row[COL_INDEX.TIPO] || 'Desconocido';
+
+        // 1. ANÁLISIS EXHAUSTIVO DE EDAD (Campana Gaussiana) con salvaguarda para vacíos
+        const medianaEdad = parseFloat(row[COL_INDEX.MEDIANA_EDAD]) || 0;
         const sigma = (medianaEdad <= 5) ? 6 : 15; // Cohorte marcadamente pediátrica vs adulta
         const factorEdad = Math.exp(-Math.pow(pacienteEdad - medianaEdad, 2) / (2 * Math.pow(sigma, 2)));
 
@@ -185,7 +197,10 @@ function updateEncephalitis() {
         for (const [key, colIdx] of Object.entries(COL_INDEX)) {
             if (colIdx >= 4) {
                 const pacienteTieneSintoma = totalInputsActivos.includes(key) ? 1 : 0;
-                const porcentajeMatriz = parseFloat(row[colIdx]) / 100;
+                
+                // Resiliencia contra celdas vacías o caracteres no numéricos en la sábana de datos
+                const celdaRaw = row[colIdx];
+                const porcentajeMatriz = (celdaRaw && !isNaN(parseFloat(celdaRaw))) ? parseFloat(celdaRaw) / 100 : 0;
 
                 vectorPaciente.push(pacienteTieneSintoma);
                 vectorEnfermedad.push(porcentajeMatriz);
@@ -238,6 +253,13 @@ function updateEncephalitis() {
     }).sort((a, b) => b.probabilidad - a.probabilidad);
 
     const barsContainer = document.getElementById('results-bars-container');
+    
+    if (listadoFinal.length === 0 || totalSumScores === 0) {
+        barsContainer.innerHTML = `<div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:0.5rem;">Introduce manifestaciones clínicas para calcular afinidades diferenciales.</div>`;
+        document.getElementById('alerts-container').style.display = 'none';
+        return;
+    }
+
     barsContainer.innerHTML = listadoFinal.map(res => {
         const colorBarra = res.tipo === 'Infeccioso' ? '#ef4444' : '#3b82f6';
         const colorFondoBarra = res.tipo === 'Infeccioso' ? '#fee2e2' : '#dbeafe';
@@ -282,7 +304,7 @@ function updateEncephalitis() {
             } else if (pacienteEdad > 50) {
                 alertasHTML.push(`
                     <div style="background: #fff1f2; border-left: 4px solid #f43f5e; padding: 0.6rem; border-radius: 6px; font-size: 0.7rem; color: #9f1239; line-height:1.3; font-family:system-ui, sans-serif;">
-                        🚨 <b>Debut Geriátrico (Anti-NMDAR):</b> En pacientes mayores de 50 años la incidencia de teratomas ováricos es baja, pero cursa con un riesgo marcadamente elevado de otras neoplasias malignas sistémicas concomitantes y un peor pronóstico evolutivo global[cite: 521].
+                        🚨 <b>Debut Geriátrico (Anti-NMDAR):</b> En pacientes mayores de 50 años la incidencia de teratomas ováricos es baja, pero cursa con un riesgo marcadamente elevado de otras neoplasias malignas sistémicas concomitantes y un peor pronóstico evolutivo global.
                     </div>
                 `);
             }
@@ -291,7 +313,7 @@ function updateEncephalitis() {
         if (maxEtiologia.etiologia === 'Anti-CASPR2' && totalInputsActivos.includes('SIST_NERV_PERIFERICO')) {
             alertasHTML.push(`
                 <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 0.6rem; border-radius: 6px; font-size: 0.7rem; color: #1e40af; line-height:1.3; font-family:system-ui, sans-serif;">
-                    🫁 <b>Asociación Paraneoplásica (Timoma):</b> Ante la presencia documentada de manifestaciones de hiperexcitabilidad axonal periférica o clínica compatible con Síndrome de Morvan, resulta indispensable realizar un TC de tórax para excluir un timoma occulto[cite: 514, 515].
+                    🫁 <b>Asociación Paraneoplásica (Timoma):</b> Ante la presencia documentada de manifestaciones de hiperexcitabilidad axonal periférica o clínica compatible con Síndrome de Morvan, resulta indispensable realizar un TC de tórax para excluir un timoma oculto.
                 </div>
             `);
         }
@@ -303,12 +325,12 @@ function updateEncephalitis() {
     } else {
         alertsContainer.style.display = 'none';
     }
-}
+};
 
 /**
  * Despliega información sobre el fenómeno post-infeccioso de mimetismo inmunológico
  */
-function openPostHsvFlags() {
+window.openPostHsvFlags = function() {
     const rfModal = document.createElement('div');
     rfModal.id = "enceph-rf-modal";
     rfModal.style = "position:fixed; inset:0; background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); z-index:3000; display:flex; align-items:center; justify-content:center; padding:1.2rem;";
@@ -329,4 +351,4 @@ function openPostHsvFlags() {
         </div>
     `;
     document.body.appendChild(rfModal);
-}
+};
