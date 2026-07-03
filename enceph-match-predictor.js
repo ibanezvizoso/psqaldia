@@ -288,7 +288,7 @@ window.updateEncephalitis = function() {
         if ((maxEtiologia.etiologia === 'Anti-NMDAR' || maxEtiologia.etiologia === 'Anti-LGI1' || maxEtiologia.etiologia === 'Anti-CASPR2') && rmnNormal) {
             alertasHTML.push(`
                 <div style="background: #fef3c7; border-left: 4px solid #d97706; padding: 0.6rem; border-radius: 6px; font-size: 0.7rem; color: #92400e; line-height:1.3; font-family:system-ui, sans-serif;">
-                    ⚠️ <b>Firma de Rigor (RMN Normal):</b> Una neuroimagen estructural normal NO excluye el origen autoinmune. Más del 50% de los debuts clínicos por anticuerpos comunes (NMDAR, LGI1, CASPR2) cursan con resonancias magnéticas cerebrales completamente anodinas.
+                    ⚠️ <b>RMN Normal:</b> Una neuroimagen estructural normal NO excluye el origen autoinmune. Más del 50% de los debuts clínicos por anticuerpos comunes (NMDAR, LGI1, CASPR2) cursan con resonancias magnéticas cerebrales completamente anodinas.
                 </div>
             `);
         }
