@@ -149,7 +149,7 @@ window.openEncephalitisUI = function(sheetRows) {
                 <h2 style="font-weight:800; font-size: 1.1rem; margin:0 0 0.2rem 0; color: var(--text-main); display:flex; align-items:center; justify-content:center; gap:6px;">
                     <i class="fas fa-brain" style="color:#7c3aed;"></i> Enceph-Match Predictor
                 </h2>
-                <p style="font-size:0.7rem; color:var(--text-muted); margin:0 0 0.6rem 0;">Afinidad clínica diferencial (Pestaña: encefalitisDD)</p>
+                <p style="font-size:0.7rem; color:var(--text-muted); margin:0 0 0.6rem 0;">Afinidad clínica diferencial</p>
 
                 <div style="display: flex; justify-content: center; gap:8px; flex-wrap:wrap;">
                     <button onclick="window.openPostHsvFlags()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 5px 14px; border-radius: 50px; font-size: 0.65rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
