@@ -209,21 +209,48 @@
         <span>&copy; 2026 PSQ AL DÍA - Herramientas Clínicas</span>
     </footer>
 
-    <script>
-        window.WORKER_URL = "https://psqaldia.com/"; 
+    <script data-cfasync="false">
+        // Se elimina la barra final para evitar URLs rotas del tipo 'https://psqaldia.com//api'
+        window.WORKER_URL = "https://psqaldia.com"; 
     </script>
 
-    <script src="/encefalitis.js"></script>
+    <script data-cfasync="false" src="/encefalitis.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (typeof window.iniciarEncephMatch === 'function') {
-                await window.iniciarEncephMatch();
-                document.body.style.overflow = 'auto'; // Asegurar scroll correcto de la interfaz inyectada
-            } else {
-                console.error("Error: window.iniciarEncephMatch no está definido. Revisa si /encefalitis.js cargó correctamente.");
+    <script data-cfasync="false">
+        (function() {
+            // Función encargada de intentar arrancar la aplicación de manera segura
+            async function ejecutarInicializacion() {
+                if (typeof window.iniciarEncephMatch === 'function') {
+                    try {
+                        await window.iniciarEncephMatch();
+                        document.body.style.overflow = 'auto';
+                        return true; // Éxito
+                    } catch (error) {
+                        console.error("Error crítico interno dentro de iniciarEncephMatch:", error);
+                        return true; // Detenemos los intentos porque la función existe pero ha fallado internamente
+                    }
+                }
+                return false; // Todavía no está mapeada en el objeto window
             }
-        });
+
+            // Bucle reactivo: Intentar de inmediato, en DOMContentLoaded, en Load y mediante Polling activo
+            if (!ejecutarInicializacion()) {
+                document.addEventListener('DOMContentLoaded', ejecutarInicializacion);
+                window.addEventListener('load', ejecutarInicializacion);
+
+                // Polling de seguridad: comprueba cada 50ms durante un máximo de 3 segundos
+                let intentos = 0;
+                const intervalo = setInterval(() => {
+                    intentos++;
+                    if (ejecutarInicializacion() || intentos > 60) {
+                        clearInterval(intervalo);
+                        if (intentos > 60 && typeof window.iniciarEncephMatch !== 'function') {
+                            console.error("Error: No se detectó el script /encefalitis.js tras 3 segundos.");
+                        }
+                    }
+                }, 50);
+            }
+        })();
     </script>
 </body>
 </html>
