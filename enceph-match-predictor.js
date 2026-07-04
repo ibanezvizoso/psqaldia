@@ -68,7 +68,7 @@ const DESCRIPCIONES_BREVES = {
 window.currentSheetRows = [];
 
 /**
- * FUNCIÓN INICIALIZADORA: Establece el canal con el Cloudflare Worker de forma relativa
+ * FUNCIÓN INICIALIZADORA: Establece el canal con el Cloudflare Worker mediante URL absoluta
  */
 window.iniciarEncephMatch = async function() {
     try {
@@ -86,7 +86,8 @@ window.iniciarEncephMatch = async function() {
             <style>@keyframes enceph-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }</style>
         `;
 
-        const response = await fetch('/?sheet=encefalitisDD');
+        // CORRECCIÓN DE RUTA: Uso de URL absoluta para saltar barreras externas mediante CORS (*)
+        const response = await fetch('https://psqaldia.com/?sheet=encefalitisDD');
         const data = await response.json();
 
         if (data && data.values) {
@@ -100,7 +101,7 @@ window.iniciarEncephMatch = async function() {
         document.getElementById('modalData').innerHTML = `
             <div style="padding:2.5rem; text-align:center; font-family:system-ui, sans-serif; font-size:0.85rem; color:#dc2626; line-height:1.4;">
                 <i class="fas fa-exclamation-triangle" style="margin-bottom:10px; font-size:1.8rem;"></i><br>
-                <b>Error de comunicación</b><br>No se pudieron precargar los datos fenotípicos necesarios para la ejecución.
+                <b>Error de comunicación</b><br>No se pudieron precargar los datos fenotípicos necesarios para la ejecución desde el nodo remoto.
             </div>
         `;
     }
@@ -175,7 +176,7 @@ window.openEncephalitisUI = function(sheetRows) {
             <div id="alerts-container" style="display:none; flex-direction: column; gap: 6px;"></div>
 
             <div style="margin-top:0.8rem; border-top:1px dashed var(--border, #e2e8f0); padding-top:0.8rem; font-size:0.65rem; color:var(--text-muted, #64748b); text-align:justify; line-height:1.5; font-style: italic;">
-                <b>Nota científica y metodológica:</b> Esta herramienta implementa un modelo matemático, ideado por IA, estructurado mediante análisis multidimensional de subespacios vectoriales (Similitud de Coseno). Los coeficientes se nutren directamente de las tablas recopiladas por Binks et al. en el seminario de revisión para <i>The Lancet</i> (2026; 407: 1968-83). El índice resultante cuantifica el grado de afinidad fenotípica pretest del paciente con los patrones epidemiológicos y clínico-paraclínicos descritos en la literatura indexada, sirviendo como soporte docente para el diagnóstico diferencial. No sustituye el criterio clínico ni la confirmación mediante PPCC. 
+                <b>Nota científica y metodológica:</b> Esta herramienta implementa un modelo matemático estructurado mediante análisis multidimensional de subespacios vectoriales (Similitud de Coseno). Los coeficientes se nutren directamente de las tablas recopiladas por Binks et al. en el seminario de revisión para <i>The Lancet</i> (2026; 407: 1968-83). El índice resultante cuantifica el grado de afinidad fenotípica pretest del paciente con los patrones epidemiológicos y clínico-paraclínicos descritos en la literatura indexada, sirviendo como soporte docente para el diagnóstico diferencial. No sustituye el criterio clínico ni la confirmación mediante PPCC. 
             </div>
         </div>
     `;
@@ -251,4 +252,174 @@ window.updateEncephalitis = function() {
     const razaPaciente = window.encephRazaPaciente || 'blanca';
 
     if (!edadInput || isNaN(edadInput) || parseFloat(edadInput) < 0) {
-        alert("Por favor, introduce una edad válida para realizar
+        alert("Por favor, introduce una edad válida para realizar la evaluación.");
+        return;
+    }
+    const edadPaciente = parseFloat(edadInput);
+
+    // 1. Recopilar estados de los checks clínicos y paraclínicos
+    const sintomasSeleccionados = {};
+    document.querySelectorAll('.enceph-sintoma').forEach(cb => {
+        sintomasSeleccionados[cb.value] = cb.checked ? 1 : 0;
+    });
+    document.querySelectorAll('.enceph-paraclinico').forEach(cb => {
+        sintomasSeleccionados[cb.value] = cb.checked ? 1 : 0;
+    });
+
+    const todosLosCampos = [...CAMPOS_ENCEPHALITIS.clinicos, ...CAMPOS_ENCEPHALITIS.paraclinicos];
+    
+    let sumaUserCuadrado = 0;
+    todosLosCampos.forEach(f => {
+        sumaUserCuadrado += Math.pow(sintomasSeleccionados[f.id], 2);
+    });
+
+    if (!window.currentSheetRows || window.currentSheetRows.length === 0) {
+        alert("Base de datos no disponible temporalmente.");
+        return;
+    }
+
+    const resultados = [];
+    // Control defensivo de filas: Evitar errores si la primera fila son las cabeceras
+    const primeraCelda = String(window.currentSheetRows[0]?.[0]).toUpperCase().trim();
+    const inicioFila = (primeraCelda === 'ETIOLOGIA' || primeraCelda === 'ETIOLOGÍA') ? 1 : 0;
+
+    // 2. Iterar sobre las filas fenotípicas de la hoja
+    for (let i = inicioFila; i < window.currentSheetRows.length; i++) {
+        const row = window.currentSheetRows[i];
+        if (!row || row.length === 0 || !row[COL_INDEX.ETIOLOGIA]) continue;
+
+        const etiologia = row[COL_INDEX.ETIOLOGIA].trim();
+        const tipo = row[COL_INDEX.TIPO] || 'Desconocido';
+        const medianaEdadFila = parseFloat(row[COL_INDEX.MEDIANA_EDAD]) || 0;
+        const pctVaronFila = parseFloat(row[COL_INDEX.PCT_VARON]) || null;
+        const pctBlancoFila = parseFloat(row[COL_INDEX.BLANCO]) || null;
+
+        // Factores epidemiológicos complementarios
+        const fEdad = window.calcularFactorEdad(etiologia, medianaEdadFila, edadPaciente);
+        const fSexo = window.calcularFactorSexo(pctVaronFila, sexoPaciente);
+        const fRaza = window.calcularFactorRaza(pctBlancoFila, razaPaciente);
+        const multDemografico = fEdad * fSexo * fRaza;
+
+        // Similitud de Coseno en subespacios vectoriales
+        let dotProduct = 0;
+        let sumaEtiolCuadrado = 0;
+
+        todosLosCampos.forEach(f => {
+            const idx = COL_INDEX[f.id];
+            let valCelda = parseFloat(row[idx]);
+            
+            // Mitigación robusta de celdas vacías o lógicas booleanas de Sheets
+            if (isNaN(valCelda)) {
+                const celdaStr = String(row[idx] || '').toUpperCase().trim();
+                valCelda = (celdaStr === 'TRUE' || celdaStr === '1') ? 100 : 0;
+            }
+            
+            const valEtiol = valCelda / 100; // Normalización normal a [0, 1]
+            const valUser = sintomasSeleccionados[f.id];
+
+            dotProduct += valUser * valEtiol;
+            sumaEtiolCuadrado += Math.pow(valEtiol, 2);
+        });
+
+        let similitudCoseno = 0;
+        if (sumaUserCuadrado > 0 && sumaEtiolCuadrado > 0) {
+            similitudCoseno = dotProduct / (Math.sqrt(sumaUserCuadrado) * Math.sqrt(sumaEtiolCuadrado));
+        }
+
+        // Ponderación integrada final
+        const afinidadRelativa = similitudCoseno * multDemografico * 100;
+
+        resultados.push({
+            etiologia: etiologia,
+            tipo: tipo,
+            afinidad: afinidadRelativa,
+            descripcion: DESCRIPCIONES_BREVES[etiologia] || ''
+        });
+    }
+
+    // 3. Ordenación descendente por afinidad
+    resultados.sort((a, b) => b.afinidad - a.afinidad);
+
+    // 4. Renderización dinámica en los paneles
+    const resultsPanel = document.getElementById('results-panel');
+    const containerBars = document.getElementById('results-bars-container');
+    const warningBox = document.getElementById('discriminacion-warning');
+    const alertsContainer = document.getElementById('alerts-container');
+
+    resultsPanel.style.display = 'flex';
+    containerBars.innerHTML = '';
+    alertsContainer.innerHTML = '';
+    alertsContainer.style.display = 'none';
+
+    if (resultados.length === 0 || (sumaUserCuadrado === 0 && resultados[0].afinidad === 0)) {
+        containerBars.innerHTML = '<div style="font-size:0.72rem; color:var(--text-muted); text-align:center; padding:10px;">Selecciona al menos una manifestación clínica para iniciar la alineación estructural.</div>';
+        return;
+    }
+
+    resultados.forEach(res => {
+        let barColor = '#a78bfa'; // Violeta corporativo
+        if (res.tipo.toLowerCase().includes('inmune') || res.tipo.toLowerCase().includes('auto')) {
+            barColor = '#3b82f6'; // Azul autoinmune
+        } else if (res.tipo.toLowerCase().includes('viral') || res.tipo.toLowerCase().includes('infec')) {
+            barColor = '#ef4444'; // Rojo infeccioso
+        }
+
+        const barHtml = `
+            <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 2px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; font-weight: 700; color: var(--text-main, #1e293b);">
+                    <span>${res.etiologia} <span style="font-size:0.58rem; color:var(--text-muted, #64748b); font-weight:500;">(${res.tipo})</span></span>
+                    <span style="color:${barColor}; font-weight:800;">${res.afinidad.toFixed(1)}%</span>
+                </div>
+                <div style="width: 100%; height: 7px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${Math.min(res.afinidad, 100)}%; height: 100%; background: ${barColor}; transition: width 0.3s ease-in-out;"></div>
+                </div>
+                ${res.descripcion ? `<div style="font-size: 0.62rem; color: #64748b; line-height: 1.2; font-style: italic; margin-top: 1px;">${res.descripcion}</div>` : ''}
+            </div>
+        `;
+        containerBars.insertAdjacentHTML('beforeend', barHtml);
+    });
+
+    // 5. Alertas críticas dirigidas según Lancet Seminar
+    let alertasHtml = '';
+    const topResult = resultados[0];
+
+    if (topResult && topResult.afinidad > 15) {
+        if (topResult.etiologia === 'Anti-NMDAR' && edadPaciente >= 18 && edadPaciente <= 40 && sexoPaciente === 'mujer') {
+            alertasHtml += `
+                <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:0.7rem 0.9rem; font-size:0.7rem; color:#991b1b; line-height:1.45;">
+                    <span style="font-weight:800; text-transform:uppercase; display:block; margin-bottom: 2px;"><i class="fas fa-exclamation-circle"></i> Alerta de Cribado Oncológico</span>
+                    Alta afinidad fenotípica por <b>Anti-NMDAR</b> en mujer joven. Es prioritario realizar cribado dirigido para <b>teratoma ovárico</b> mediante ecografía transvaginal y/o RM pélvica.
+                </div>
+            `;
+        }
+        if (topResult.etiologia === 'Anti-LGI1' && sintomasSeleccionados['HIPONATREMIA']) {
+            alertasHtml += `
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:0.7rem 0.9rem; font-size:0.7rem; color:#1e40af; line-height:1.45;">
+                    <span style="font-weight:800; text-transform:uppercase; display:block; margin-bottom: 2px;"><i class="fas fa-info-circle"></i> Correlación Clinico-Analítica</span>
+                    La combinación de alta afinidad por <b>Anti-LGI1</b> e <b>Hiponatremia</b> es patognomónica. Monitorizar estrictamente el sodio sérico y evaluar crisis faciobraquiales discretas.
+                </div>
+            `;
+        }
+        if (topResult.etiologia === 'HSV-1' && !sintomasSeleccionados['LCR_PATOLOGICO']) {
+            alertasHtml += `
+                <div style="background:#fff5f5; border:1px solid #feb2b2; border-radius:12px; padding:0.7rem 0.9rem; font-size:0.7rem; color:#c53030; line-height:1.45;">
+                    <span style="font-weight:800; text-transform:uppercase; display:block; margin-bottom: 2px;"><i class="fas fa-clock"></i> Urgencia Terapéutica</span>
+                    Ante sospecha clínica de <b>HSV-1</b> con alta sospecha clínica inicial, el inicio de <b>Aciclovir intravenoso empírico</b> no debe condicionarse al retraso de la punción lumbar o RM.
+                </div>
+            `;
+        }
+    }
+
+    if (alertasHtml) {
+        alertsContainer.innerHTML = alertasHtml;
+        alertsContainer.style.display = 'flex';
+    }
+
+    // 6. Mensaje dinámico inteligente de discriminación diagnóstica
+    if (resultados.length > 1 && (resultados[0].afinidad - resultados[1].afinidad) < 10 && resultados[0].afinidad > 5) {
+        warningBox.innerHTML = `<i class="fas fa-random"></i> <b>Solapamiento fenotípico estrecho</b> entre ${resultados[0].etiologia} y ${resultados[1].etiologia} (diferencia < 10%). Se aconseja priorizar el estudio extendido del LCR mediante PCR multiplex viral y paneles específicos de autoanticuerpos en suero/LCR para consolidar el diagnóstico diferencial.`;
+        warningBox.style.style.display = 'block';
+    } else {
+        warningBox.style.style.display = 'none';
+    }
+};
