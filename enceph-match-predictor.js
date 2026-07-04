@@ -68,7 +68,7 @@ const DESCRIPCIONES_BREVES = {
 window.currentSheetRows = [];
 
 /**
- * FUNCIÓN INICIALIZADORA: Establece el canal con el Cloudflare Worker de forma relativa
+ * FUNCIÓN INICIALIZADORA: Establece el canal con el Cloudflare Worker usando la URL global configurada
  */
 window.iniciarEncephMatch = async function() {
     try {
@@ -86,7 +86,9 @@ window.iniciarEncephMatch = async function() {
             <style>@keyframes enceph-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }</style>
         `;
 
-        const response = await fetch('/?sheet=encefalitisDD');
+        // CORREGIDO: Se utiliza la variable global window.WORKER_URL para asegurar la llamada correcta al backend de la plataforma
+        const baseEndpoint = window.WORKER_URL || "/";
+        const response = await fetch(`${baseEndpoint}?sheet=encefalitisDD`);
         const data = await response.json();
 
         if (data && data.values) {
@@ -179,8 +181,9 @@ window.openEncephalitisUI = function(sheetRows) {
 
             <div style="margin-top:0.8rem; border-top:1px dashed var(--border, #e2e8f0); padding-top:0.8rem; font-size:0.65rem; color:var(--text-muted, #64748b); text-align:justify; line-height:1.5; font-style: italic;">
                 <b>Nota científica y metodológica:</b> Esta herramienta implementa un modelo matemático, ideado por IA, estructurado mediante análisis multidimensional de subespacios vectoriales (Similitud de Coseno). Los coeficientes se nutren directamente de las tablas recopiladas por Binks et al. en el seminario de revisión para <i>The Lancet</i> (2026; 407: 1968-83). El índice resultante cuantifica el grado de afinidad fenotípica pretest del paciente con los patrones epidemiológicos y clínico-paraclínicos descritos en la literatura indexada, sirviendo como soporte docente para el diagnóstico diferencial. No sustituye el criterio clínico ni la confirmación mediante PPCC. 
-        </div>
-    `;
+            </div>
+        </div> 
+    `; // CORREGIDO: Añadido el cierre del contenedor </div> para .calc-ui al final del template string
 
     // Inicializar variables globales de estado con la selección binaria por defecto
     window.encephSexoPaciente = 'varon';
@@ -280,12 +283,12 @@ window.updateEncephalitis = function() {
 
         if (row[COL_INDEX.ETIOLOGIA].toLowerCase().includes('etiolog') || row[COL_INDEX.ETIOLOGIA].toLowerCase().includes('fármaco')) continue;
 
-        const etiologia = row[COL_INDEX.ETIOLOGIA];
+        const ietiologia = row[COL_INDEX.ETIOLOGIA];
         const tipo = row[COL_INDEX.TIPO] || 'Desconocido';
 
         // 1. AJUSTES MODULADORES DEMOGRÁFICOS
         const medianaEdad = parseFloat(row[COL_INDEX.MEDIANA_EDAD]) || 0;
-        const factorEdad = window.calcularFactorEdad(etiologia, medianaEdad, pacienteEdad);
+        const factorEdad = window.calcularFactorEdad(ietiologia, medianaEdad, pacienteEdad);
 
         const pctVaronFila = (row[COL_INDEX.PCT_VARON] !== undefined && row[COL_INDEX.PCT_VARON] !== '') ? parseFloat(row[COL_INDEX.PCT_VARON]) : null;
         const factorSexo = window.calcularFactorSexo(pctVaronFila, sexoPaciente);
@@ -334,14 +337,14 @@ window.updateEncephalitis = function() {
         let scoreAjustado = similitudCoseno * factorEdad * factorSexo * factorRaza * penalizacionAusenciaCritica;
 
         // 3. INDEXACIÓN DE SIGNOS EXCLUSIVOS (OVERRIDES)
-        if (totalInputsActivos.includes('CRISIS_FBDS') && etiologia === 'Anti-LGI1') {
+        if (totalInputsActivos.includes('CRISIS_FBDS') && ietiologia === 'Anti-LGI1') {
             scoreAjustado *= 2.5; 
         }
-        if (totalInputsActivos.includes('SIST_NERV_PERIFERICO') && etiologia === 'Anti-CASPR2') {
+        if (totalInputsActivos.includes('SIST_NERV_PERIFERICO') && ietiologia === 'Anti-CASPR2') {
             scoreAjustado *= 2.0; 
         }
 
-        rawScores.push({ etiologia, tipo, score: scoreAjustado });
+        rawScores.push({ etiologia: ietiologia, tipo, score: scoreAjustado });
         totalSumScores += scoreAjustado;
     }
 
@@ -441,7 +444,7 @@ window.updateEncephalitis = function() {
         if (maxEtiologia.etiologia === 'Anti-CASPR2' && totalInputsActivos.includes('SIST_NERV_PERIFERICO')) {
             alertasHTML.push(`
                 <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 0.65rem 0.8rem; border-radius: 8px; font-size: 0.68rem; color: #1e40af; line-height:1.45;">
-                    🫁 <b>Asociación Paraneoplásica (Timoma):</b> Ante la presencia documentada de manifestaciones de hiperexcitabilidad axonal periférica o clínica compatible con Síndrome de Morvan, resulta indispensable realizar un TC de tórax para excluir un timoma oculto.
+                    🫁 <b>Asociación Paraneoplásica (Timoma):</b> Ante la presencia documentada de manifestations de hiperexcitabilidad axonal periférica o clínica compatible con Síndrome de Morvan, resulta indispensable realizar un TC de tórax para excluir un timoma oculto.
                 </div>
             `);
         }
