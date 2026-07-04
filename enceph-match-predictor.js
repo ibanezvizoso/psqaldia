@@ -1,5 +1,5 @@
 /**
- * Herramienta: Enceph-Match Predictor v3.0 (Calculadora de Afinidad Clínica Diferencial)
+ * Herramienta: Enceph-Match v3.0 (Calculadora de Afinidad Clínica de Encefalitis)
  * Plataforma: PSQ al día (psqaldia.com)
  * Fuente de datos: Binks SNM, Saylor D, Easton A, Thakur KT, Irani SR.
  * Encephalitis. Lancet 2026; 407: 1968-83 (Seminar, Fig. 1-3)
@@ -118,9 +118,9 @@ window.openEncephalitisUI = function(sheetRows) {
 
             <div style="text-align:center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border, #e2e8f0);">
                 <h2 style="font-weight:800; font-size: 1.15rem; margin:0 0 0.15rem 0; color: var(--text-main, #1e293b); display:flex; align-items:center; justify-content:center; gap:6px;">
-                    <i class="fas fa-brain" style="color:#7c3aed;"></i> Enceph-Match Predictor
+                    <i class="fas fa-brain" style="color:#7c3aed;"></i> Enceph-Match 
                 </h2>
-                <p style="font-size:0.7rem; color:var(--text-muted, #64748b); font-weight: 500; margin:0;">Calculadora de Afinidad Clínica Diferencial</p>
+                <p style="font-size:0.7rem; color:var(--text-muted, #64748b); font-weight: 500; margin:0;">Calculadora de Afinidad Clínica de Encefalitis</p>
             </div>
 
             <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:0.7rem 0.9rem; font-size:0.7rem; color:#92400e; line-height:1.45;">
