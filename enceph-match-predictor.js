@@ -13,7 +13,7 @@ const CAMPOS_ENCEPHALITIS = {
         { id: 'CEFALEA', label: 'Cefalea' },
         { id: 'SINT_MENINGEOS', label: 'Síntomas meníngeos (rigidez de nuca...)' },
         { id: 'RESPIRATORIO', label: 'Pródromo respiratorio / viral' },
-        { id: 'ALT_MENTAL_PSQ', label: 'Alt. estado mental / Manifestaciones psicóticas' },
+        { id: 'ALT_MENTAL_PSQ', label: 'Alt. estado mental / Manifestaciones psiquiátricas' },
         { id: 'CRISIS_COMICIALES', label: 'Crisis comiciales (focales o generalizadas)' },
         { id: 'FOCALIDAD', label: 'Focalidad neurológica / Paresias' },
         { id: 'VOMITOS', label: 'Vómitos' },
