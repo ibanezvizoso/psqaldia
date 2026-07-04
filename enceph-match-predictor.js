@@ -1,5 +1,5 @@
 /**
- * Herramienta: Enceph-Match Predictor v2.5 (Calculadora de Afinidad Clínica Diferencial)
+ * Herramienta: Enceph-Match Predictor v3.0 (Calculadora de Afinidad Clínica Diferencial)
  * Plataforma: PSQ al día (psqaldia.com)
  * Fuente de datos: Binks SNM, Saylor D, Easton A, Thakur KT, Irani SR.
  * Encephalitis. Lancet 2026; 407: 1968-83 (Seminar, Fig. 1-3)
@@ -34,14 +34,14 @@ const CAMPOS_ENCEPHALITIS = {
     ]
 };
 
-// Mapeo riguroso de índices de columnas adaptado a la nueva estructura de la hoja "encefalitisDD"
+// Mapeo riguroso de índices de columnas de la hoja "encefalitisDD"
 const COL_INDEX = {
-    ETIOLOGIA: 0, TIPO: 1, MEDIANA_EDAD: 2, PCT_VARON: 3, BLANCO: 4, // Bloque demográfico/epidemiológico (0-4)
+    ETIOLOGIA: 0, TIPO: 1, MEDIANA_EDAD: 2, PCT_VARON: 3, BLANCO: 4, 
     FIEBRE: 5, CEFALEA: 6, SINT_MENINGEOS: 7, RESPIRATORIO: 8, ALT_MENTAL_PSQ: 9,
     CRISIS_COMICIALES: 10, FOCALIDAD: 11, VOMITOS: 12, RASH: 13, CRISIS_FBDS: 14,
     COGNITIVO_AMNESIA: 15, SIST_NERV_PERIFERICO: 16, DISAUTONOMIA: 17, NIVEL_CON: 18,
     TRAST_MOVIMIENTO: 19, ALT_SUENO: 20, HIPONATREMIA: 21, RMN_PATOLOGICA: 22,
-    LCR_PATOLOGICO: 23, EEG_PATOLOGICO: 24 // Bloque clínico y paraclínico desplazado (5-24)
+    LCR_PATOLOGICO: 23, EEG_PATOLOGICO: 24 
 };
 
 // Distribución de edad no-unimodales mapeadas de la evidencia de series del Seminar
@@ -68,7 +68,7 @@ const DESCRIPCIONES_BREVES = {
 window.currentSheetRows = [];
 
 /**
- * FUNCIÓN INICIALIZADORA: Llama de forma asíncrona y reactiva al Worker de Cloudflare
+ * FUNCIÓN INICIALIZADORA: Establece el canal con el Cloudflare Worker de forma relativa
  */
 window.iniciarEncephMatch = async function() {
     try {
@@ -80,8 +80,8 @@ window.iniciarEncephMatch = async function() {
 
         container.innerHTML = `
             <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:220px; font-family:system-ui, sans-serif; font-size:0.85rem; color:var(--text-muted);">
-                <div style="width:180px; height:8px; border-radius:5px; background:linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%); background-size:400% 100%; animation: enceph-shimmer 1.2s ease-in-out infinite; margin-bottom:14px;"></div>
-                <span style="font-weight: 500; letter-spacing: 0.2px;">Sincronizando matriz encefalitisDD...</span>
+                <div style="width:160px; height:6px; border-radius:5px; background:linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%); background-size:400% 100%; animation: enceph-shimmer 1.2s ease-in-out infinite; margin-bottom:14px;"></div>
+                <span style="font-weight: 500; letter-spacing:0.2px;">Sincronizando base de datos clínica...</span>
             </div>
             <style>@keyframes enceph-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }</style>
         `;
@@ -90,131 +90,141 @@ window.iniciarEncephMatch = async function() {
         const data = await response.json();
 
         if (data && data.values) {
+            window.currentSheetRows = data.values;
             window.openEncephalitisUI(data.values);
         } else {
-            throw new Error("Payload 'values' no encontrado en el origen.");
+            throw new Error("Payload 'values' no detectado.");
         }
 
     } catch (error) {
-        console.error("Error en la conexión con la hoja encefalitisDD:", error);
+        console.error("Error en la conexión asíncrona:", error);
         document.getElementById('modalData').innerHTML = `
-            <div style="padding:2.5rem; text-align:center; font-family:system-ui, sans-serif; font-size:0.85rem; color:#dc2626; line-height: 1.4;">
-                <i class="fas fa-exclamation-triangle" style="margin-bottom:12px; font-size:2rem;"></i><br>
-                <b style="font-size: 0.95rem;">Error de sincronización de datos</b><br>
-                No se pudo establecer el canal con la hoja <i>encefalitisDD</i>. Comprueba la configuración de tu Worker.
+            <div style="padding:2.5rem; text-align:center; font-family:system-ui, sans-serif; font-size:0.85rem; color:#dc2626; line-height:1.4;">
+                <i class="fas fa-exclamation-triangle" style="margin-bottom:10px; font-size:1.8rem;"></i><br>
+                <b>Error de comunicación</b><br>No se pudieron precargar los datos fenotípicos necesarios para la ejecución.
             </div>
         `;
     }
 };
 
 /**
- * Renderiza la interfaz encapsulada siguiendo la línea estética de PSQ al día
+ * Renderiza la interfaz limpia y simplificada dentro del modal común
  */
 window.openEncephalitisUI = function(sheetRows) {
-    window.currentSheetRows = sheetRows;
     const modalData = document.getElementById('modalData');
 
     modalData.innerHTML = `
-        <div class="calc-ui" style="padding: 1.2rem; display: flex; flex-direction: column; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-height: 90vh; overflow-y: auto; box-sizing: border-box; background: var(--bg-main, #ffffff);">
+        <div class="calc-ui" style="padding: 1.2rem; display: flex; flex-direction: column; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-height: 90vh; overflow-y: auto; box-sizing: border-box; background: var(--bg-main, #ffffff); gap: 12px;">
 
-            <div style="position: sticky; top: 0; background: var(--card, var(--card-bg, #ffffff)); z-index: 10; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border, #e2e8f0); text-align:center;">
+            <div style="text-align:center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border, #e2e8f0);">
                 <h2 style="font-weight:800; font-size: 1.15rem; margin:0 0 0.15rem 0; color: var(--text-main, #1e293b); display:flex; align-items:center; justify-content:center; gap:6px;">
                     <i class="fas fa-brain" style="color:#7c3aed;"></i> Enceph-Match Predictor
                 </h2>
-                <p style="font-size:0.7rem; color:var(--text-muted, #64748b); font-weight: 500; margin:0;">Calculadora de Afinidad Clínica Diferencial (Matriz: encefalitisDD)</p>
+                <p style="font-size:0.7rem; color:var(--text-muted, #64748b); font-weight: 500; margin:0;">Calculadora de Afinidad Clínica Diferencial</p>
             </div>
 
-            <div style="margin-top:0.8rem; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:0.7rem 0.9rem; font-size:0.7rem; color:#92400e; line-height:1.45; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+            <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:0.7rem 0.9rem; font-size:0.7rem; color:#92400e; line-height:1.45;">
                 <span style="font-weight:800; text-transform:uppercase; display:block; margin-bottom: 2px; font-size:0.62rem; letter-spacing:0.5px;"><i class="fas fa-stethoscope"></i> Paso 0: Excluir Encefalopatías Puras</span>
-                Antes de interpretar el índice de afinidad, confirma que el paciente no se encuentra en un cuadro de <b>Encefalopatía</b> (séptica, metabólica, tóxica): típicamente cursan <i>sin</i> focalidad neurológica, con RM y LCR normales, y un EEG con enlentecimiento difuso inespecífico.
+                Antes de evaluar el ranking, confirma que el paciente no se encuentra en un cuadro de <b>Encefalopatía</b> (séptica, metabólica, tóxica): típicamente cursan <i>sin</i> focalidad neurológica, con RM y LCR normales, y un EEG con enlentecimiento difuso inespecífico.
             </div>
 
-            <div id="results-panel" style="margin-top: 0.8rem; padding: 0.9rem; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border, #e2e8f0);">
-                <div style="font-size:0.65rem; font-weight:800; color:#475569; text-transform:uppercase; margin-bottom:0.65rem; text-align:center; letter-spacing: 0.6px;">Afinidad Clínica Relativa con Patrones Lancet</div>
-                <div id="results-bars-container" style="display: flex; flex-direction: column; gap: 7px;">
-                    <div style="text-align:center; font-size:0.75rem; color:var(--text-muted, #64748b); padding:0.5rem; font-weight:500;">Introduce la edad del paciente para iniciar el análisis adaptativo.</div>
-                </div>
-                <div id="discriminacion-warning" style="display:none; margin-top:0.75rem; font-size:0.68rem; color:#334155; background:#f1f5f9; border-left:3px solid #94a3b8; padding:0.6rem; border-radius:4px; line-height:1.4;"></div>
-            </div>
-
-            <div id="alerts-container" style="margin-top: 0.8rem; display:none; flex-direction: column; gap: 6px;"></div>
-
-            <div style="margin-top: 1rem; display: flex; gap: 12px; background: #f0fdf4; padding: 0.85rem; border-radius: 12px; border: 1px solid #bbf7d0; align-items: flex-end; flex-wrap:wrap; box-shadow: 0 1px 2px rgba(0,0,0,0.01);">
+            <div style="display: flex; gap: 12px; background: #f0fdf4; padding: 0.85rem; border-radius: 12px; border: 1px solid #bbf7d0; align-items: flex-end; flex-wrap:wrap;">
                 <div style="flex: 1; min-width:80px;">
                     <span style="font-size: 0.65rem; font-weight: 800; color: #166534; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Edad</span>
-                    <input type="number" id="p-edad" oninput="window.updateEncephalitis()" placeholder="Años" style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid #22c55e; font-size: 0.85rem; box-sizing: border-box; outline: none; background: #ffffff; font-weight: 600; color: #14532d;">
+                    <input type="number" id="p-edad" placeholder="Años" style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid #22c55e; font-size: 0.85rem; box-sizing: border-box; outline: none; background: #ffffff; font-weight: 600; color: #14532d;">
                 </div>
-                <div style="flex: 1.5; min-width:180px;">
+                <div style="flex: 1.4; min-width:140px;">
                     <span style="font-size: 0.65rem; font-weight: 800; color: #166534; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Sexo biológico</span>
-                    <div id="sexo-toggle" style="display:flex; gap:4px;">
-                        <button type="button" data-sexo="varon" onclick="window.setSexoPaciente('varon')" class="enceph-sexo-btn" style="flex:1; padding:6px 4px; border-radius:6px; border:1px solid #22c55e; background:#fff; font-size:0.7rem; font-weight:700; color:#166534; cursor:pointer; transition: 0.15s; outline:none;">Varón</button>
-                        <button type="button" data-sexo="mujer" onclick="window.setSexoPaciente('mujer')" class="enceph-sexo-btn" style="flex:1; padding:6px 4px; border-radius:6px; border:1px solid #22c55e; background:#fff; font-size:0.7rem; font-weight:700; color:#166534; cursor:pointer; transition: 0.15s; outline:none;">Mujer</button>
-                        <button type="button" data-sexo="no_especificado" onclick="window.setSexoPaciente('no_especificado')" class="enceph-sexo-btn" style="flex:1; padding:6px 4px; border-radius:6px; border:1px solid #22c55e; background:#166534; font-size:0.7rem; font-weight:700; color:#fff; cursor:pointer; transition: 0.15s; outline:none;">No consta</button>
+                    <div id="sexo-toggle" style="display:flex; gap:4px; background:#ffffff; padding:2px; border-radius:8px; border:1px solid #22c55e;">
+                        <button type="button" id="btn-sexo-varon" onclick="window.setSexoPaciente('varon')" style="flex:1; padding:5px; border-radius:6px; border:none; background:#166534; font-size:0.7rem; font-weight:700; color:#fff; cursor:pointer; outline:none; transition:0.1s;">Hombre</button>
+                        <button type="button" id="btn-sexo-mujer" onclick="window.setSexoPaciente('mujer')" style="flex:1; padding:5px; border-radius:6px; border:none; background:transparent; font-size:0.7rem; font-weight:700; color:#166534; cursor:pointer; outline:none; transition:0.1s;">Mujer</button>
                     </div>
                 </div>
-                <div style="flex: 1.2; min-width:140px;">
+                <div style="flex: 1.2; min-width:130px;">
                     <span style="font-size: 0.65rem; font-weight: 800; color: #166534; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Etnia cohorte</span>
-                    <div id="raza-toggle" style="display:flex; gap:4px;">
-                        <button type="button" data-raza="blanca" onclick="window.setRazaPaciente('blanca')" class="enceph-raza-btn" style="flex:1; padding:6px 4px; border-radius:6px; border:1px solid #22c55e; background:#fff; font-size:0.7rem; font-weight:700; color:#166534; cursor:pointer; transition: 0.15s; outline:none;">Blanca</button>
-                        <button type="button" data-raza="no_consta" onclick="window.setRazaPaciente('no_consta')" class="enceph-raza-btn" style="flex:1; padding:6px 4px; border-radius:6px; border:1px solid #22c55e; background:#166534; font-size:0.7rem; font-weight:700; color:#fff; cursor:pointer; transition: 0.15s; outline:none;">No consta</button>
+                    <div id="raza-toggle" style="display:flex; gap:4px; background:#ffffff; padding:2px; border-radius:8px; border:1px solid #22c55e;">
+                        <button type="button" id="btn-raza-blanca" onclick="window.setRazaPaciente('blanca')" style="flex:1; padding:5px; border-radius:6px; border:none; background:#166534; font-size:0.7rem; font-weight:700; color:#fff; cursor:pointer; outline:none; transition:0.1s;">Blanca</button>
+                        <button type="button" id="btn-raza-otro" onclick="window.setRazaPaciente('otro')" style="flex:1; padding:5px; border-radius:6px; border:none; background:transparent; font-size:0.7rem; font-weight:700; color:#166534; cursor:pointer; outline:none; transition:0.1s;">Otro</button>
                     </div>
                 </div>
             </div>
 
-            <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted, #64748b); margin: 1.2rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.6px;">Manifestaciones Clínicas Presentes</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                ${CAMPOS_ENCEPHALITIS.clinicos.map(s => window.renderEncephCheck(s, 'enceph-sintoma')).join('')}
+            <div>
+                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted, #64748b); margin: 0 0 0.4rem 0; text-transform: uppercase; letter-spacing: 0.6px;">Manifestaciones Clínicas Presentes</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    ${CAMPOS_ENCEPHALITIS.clinicos.map(s => window.renderEncephCheck(s, 'enceph-sintoma')).join('')}
+                </div>
             </div>
 
-            <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted, #64748b); margin: 1.2rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.6px;">Resultados de Exploración Inicial</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                ${CAMPOS_ENCEPHALITIS.paraclinicos.map(s => window.renderEncephCheck(s, 'enceph-paraclinico')).join('')}
+            <div>
+                <p style="font-size:0.65rem; font-weight:800; color:var(--text-muted, #64748b); margin: 0 0 0.4rem 0; text-transform: uppercase; letter-spacing: 0.6px;">Resultados de Exploración Inicial</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    ${CAMPOS_ENCEPHALITIS.paraclinicos.map(s => window.renderEncephCheck(s, 'enceph-paraclinico')).join('')}
+                </div>
             </div>
 
-            <div style="margin-top:1.4rem; border-top:1px dashed var(--border, #e2e8f0); padding-top:0.8rem; font-size:0.62rem; color:var(--text-muted, #64748b); text-align:center; line-height:1.45;">
-                Ajuste matemático: Similitud de Coseno vectorial sobre subespacios dinámicos con exclusión de celdas nulas.<br>
-                Descargo: Este módulo evalúa similitud fenotípica relativa frente a literatura indexada; no provee un cálculo bayesiano calibrado de probabilidad diagnóstica absoluta.
+            <div style="margin-top: 0.4rem;">
+                <button type="button" onclick="window.updateEncephalitis()" style="width:100%; background: #7c3aed; color: #ffffff; border: none; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.2); transition: background 0.15s; outline:none;">
+                    <i class="fas fa-calculator" style="margin-right:4px;"></i> CALCULAR AFINIDAD CLÍNICA
+                </button>
+            </div>
+
+            <div id="results-panel" style="display: none; padding: 0.9rem; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border, #e2e8f0); flex-direction: column; gap: 8px;">
+                <div style="font-size:0.65rem; font-weight:800; color:#475569; text-transform:uppercase; margin-bottom:0.3rem; text-align:center; letter-spacing: 0.6px;">Índice de Afinidad Clínica Relativa</div>
+                <div id="results-bars-container" style="display: flex; flex-direction: column; gap: 7px;"></div>
+                <div id="discriminacion-warning" style="display:none; margin-top:0.5rem; font-size:0.68rem; color:#334155; background:#f1f5f9; border-left:3px solid #94a3b8; padding:0.6rem; border-radius:4px; line-height:1.4;"></div>
+            </div>
+
+            <div id="alerts-container" style="display:none; flex-direction: column; gap: 6px;"></div>
+
+            <div style="margin-top:0.8rem; border-top:1px dashed var(--border, #e2e8f0); padding-top:0.8rem; font-size:0.65rem; color:var(--text-muted, #64748b); text-align:justify; line-height:1.5; font-style: italic;">
+                <b>Nota científica y metodológica:</b> Esta herramienta implementa un modelo matemático estructurado mediante análisis multidimensional de subespacios vectoriales (Similitud de Coseno). Los coeficientes se nutren directamente de las series de casos internacionales recopiladas por Binks et al. en el seminario de revisión para <i>The Lancet</i> (2026; 407: 1968-83). El índice resultante cuantifica de forma estricta el grado de afinidad fenotípica pretest del paciente con los patrones epidemiológicos y clínico-paraclínicos descritos en la literatura indexada, sirviendo como soporte docente para la orientación diferencial. No sustituye la confirmación molecular obligatoria (LCR, neuroimagen y títulos de autoanticuerpos).
             </div>
         </div>
     `;
 
-    // Estados por defecto de los selectores triestatales
-    window.encephSexoPaciente = 'no_especificado';
-    window.encephRazaPaciente = 'no_consta';
+    // Inicializar variables globales de estado con la selección binaria por defecto
+    window.encephSexoPaciente = 'varon';
+    window.encephRazaPaciente = 'blanca';
 };
 
 window.setSexoPaciente = function(valor) {
     window.encephSexoPaciente = valor;
-    document.querySelectorAll('.enceph-sexo-btn').forEach(btn => {
-        const activo = btn.getAttribute('data-sexo') === valor;
-        btn.style.background = activo ? '#166534' : '#fff';
-        btn.style.color = activo ? '#fff' : '#166534';
-    });
-    window.updateEncephalitis();
+    const btnVaron = document.getElementById('btn-sexo-varon');
+    const btnMujer = document.getElementById('btn-sexo-mujer');
+    
+    if (valor === 'varon') {
+        btnVaron.style.background = '#166534'; btnVaron.style.color = '#fff';
+        btnMujer.style.background = 'transparent'; btnMujer.style.color = '#166534';
+    } else {
+        btnMujer.style.background = '#166534'; btnMujer.style.color = '#fff';
+        btnVaron.style.background = 'transparent'; btnVaron.style.color = '#166534';
+    }
 };
 
 window.setRazaPaciente = function(valor) {
     window.encephRazaPaciente = valor;
-    document.querySelectorAll('.enceph-raza-btn').forEach(btn => {
-        const activo = btn.getAttribute('data-raza') === valor;
-        btn.style.background = activo ? '#166534' : '#fff';
-        btn.style.color = activo ? '#fff' : '#166534';
-    });
-    window.updateEncephalitis();
+    const btnBlanca = document.getElementById('btn-raza-blanca');
+    const btnOtro = document.getElementById('btn-raza-otro');
+    
+    if (valor === 'blanca') {
+        btnBlanca.style.background = '#166534'; btnBlanca.style.color = '#fff';
+        btnOtro.style.background = 'transparent'; btnOtro.style.color = '#166534';
+    } else {
+        btnOtro.style.background = '#166534'; btnOtro.style.color = '#fff';
+        btnBlanca.style.background = 'transparent'; btnBlanca.style.color = '#166534';
+    }
 };
 
 window.renderEncephCheck = function(s, className) {
     return `
-        <label style="display: flex; align-items: center; gap: 6px; background: var(--bg, #fdfdfd); padding: 0.5rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--border, #e2e8f0); font-size: 0.7rem; color: var(--text-main, #334155); height: 100%; box-sizing: border-box; min-height: 40px; user-select:none; transition: background 0.1s;">
-            <input type="checkbox" class="${className}" value="${s.id}" onchange="window.updateEncephalitis()" style="width:14px; height:14px; min-width:14px; accent-color: #7c3aed;">
+        <label style="display: flex; align-items: center; gap: 6px; background: var(--bg, #fdfdfd); padding: 0.5rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--border, #e2e8f0); font-size: 0.7rem; color: var(--text-main, #334155); height: 100%; box-sizing: border-box; min-height: 40px; user-select:none;">
+            <input type="checkbox" class="${className}" value="${s.id}" style="width:14px; height:14px; min-width:14px; accent-color: #7c3aed;">
             <span style="line-height:1.2; font-weight: 500;">${s.label}</span>
         </label>
     `;
 };
 
-/**
- * Modela el factor de ajuste por edad (curvas gaussianas simples o bimodales complejas)
- */
 window.calcularFactorEdad = function(etiologia, medianaEdadFila, edadPaciente) {
     if (PERFILES_EDAD_BIMODAL[etiologia]) {
         const picos = PERFILES_EDAD_BIMODAL[etiologia];
@@ -227,35 +237,33 @@ window.calcularFactorEdad = function(etiologia, medianaEdadFila, edadPaciente) {
 };
 
 /**
- * Modela el factor amortiguado de sexo biológico
+ * Ponderación modulada de Sexo: Evaluación estricta Hombre vs Mujer (Afinidad 0.4 - 1.0)
  */
 window.calcularFactorSexo = function(pctVaronFila, sexoPaciente) {
-    if (sexoPaciente === 'no_especificado' || pctVaronFila === null || isNaN(pctVaronFila)) return 1;
+    if (pctVaronFila === null || isNaN(pctVaronFila)) return 1;
     const afinidad = (sexoPaciente === 'varon') ? (pctVaronFila / 100) : (1 - pctVaronFila / 100);
     return 0.4 + 0.6 * afinidad;
 };
 
 /**
- * Modela el factor amortiguado de distribución por raza de la cohorte
+ * Ponderación modulada de Etnia: Evaluación estricta Blanco vs Otro (Afinidad 0.5 - 1.0)
  */
 window.calcularFactorRaza = function(pctRazaFila, razaPaciente) {
-    if (razaPaciente === 'no_consta' || pctRazaFila === null || isNaN(pctRazaFila)) return 1;
+    if (pctRazaFila === null || isNaN(pctRazaFila)) return 1;
     const afinidad = (razaPaciente === 'blanca') ? (pctRazaFila / 100) : (1 - pctRazaFila / 100);
     return 0.5 + 0.5 * afinidad;
 };
 
 /**
- * Motor Algorítmico Central de PSQ al día: Cruce matricial dinámico sobre subespacios continuos
+ * Motor Algorítmico Central de PSQ al día: Ejecución por demanda
  */
 window.updateEncephalitis = function() {
     const edadInput = document.getElementById('p-edad').value;
-    const sexoPaciente = window.encephSexoPaciente || 'no_especificado';
-    const razaPaciente = window.encephRazaPaciente || 'no_consta';
+    const sexoPaciente = window.encephSexoPaciente || 'varon';
+    const razaPaciente = window.encephRazaPaciente || 'blanca';
 
     if (!edadInput || isNaN(edadInput) || parseFloat(edadInput) < 0) {
-        document.getElementById('results-bars-container').innerHTML = `<div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:0.5rem; font-weight:500;">Introduce la edad del paciente para activar el motor clínico.</div>`;
-        document.getElementById('alerts-container').style.display = 'none';
-        document.getElementById('discriminacion-warning').style.display = 'none';
+        alert("Por favor, introduce una edad válida para realizar el cálculo.");
         return;
     }
 
@@ -271,13 +279,12 @@ window.updateEncephalitis = function() {
         const row = window.currentSheetRows[i];
         if (!row || row.length === 0 || !row[COL_INDEX.ETIOLOGIA]) continue;
 
-        // Limpieza pasiva de cabeceras de tabla
         if (row[COL_INDEX.ETIOLOGIA].toLowerCase().includes('etiolog') || row[COL_INDEX.ETIOLOGIA].toLowerCase().includes('fármaco')) continue;
 
         const etiologia = row[COL_INDEX.ETIOLOGIA];
         const tipo = row[COL_INDEX.TIPO] || 'Desconocido';
 
-        // 1. AJUSTES DEMOGRÁFICOS / EPIDEMIOLÓGICOS (FACTORES MODULADORES)
+        // 1. AJUSTES MODULADORES DEMOGRÁFICOS
         const medianaEdad = parseFloat(row[COL_INDEX.MEDIANA_EDAD]) || 0;
         const factorEdad = window.calcularFactorEdad(etiologia, medianaEdad, pacienteEdad);
 
@@ -287,18 +294,16 @@ window.updateEncephalitis = function() {
         const pctRazaFila = (row[COL_INDEX.BLANCO] !== undefined && row[COL_INDEX.BLANCO] !== '') ? parseFloat(row[COL_INDEX.BLANCO]) : null;
         const factorRaza = window.calcularFactorRaza(pctRazaFila, razaPaciente);
 
-        // 2. CONSTRUCCIÓN DE SUBESPACIOS VECTORIALES DE COSENO (SOLO SÍNTOMAS / EXTRAS DE EXAMEN)
+        // 2. SIMILITUD DE COSENO VECTORIAL (SUBESPACIO CLÍNICO, DESDE ÍNDICE 5)
         let vectorPaciente = [];
         let vectorEnfermedad = [];
         let penalizacionAusenciaCritica = 1.0;
 
         for (const [key, colIdx] of Object.entries(COL_INDEX)) {
-            // Evaluamos desde la columna 5 (FIEBRE) en adelante para ignorar los datos demográficos en el vector clínico
             if (colIdx >= 5) {
                 const celdaRaw = row[colIdx];
 
-                // RIGOR TÉCNICO: Si la celda está vacía en la hoja "encefalitisDD" (porque es un dato desconocido),
-                // aplicamos un 'continue' para excluir esta dimensión sintomática del cálculo de ESTA fila.
+                // Principio de exclusión vectorial de celdas vacías (datos no conocidos por Lancet)
                 if (celdaRaw === undefined || celdaRaw === null || celdaRaw.toString().trim() === '') {
                     continue; 
                 }
@@ -309,14 +314,12 @@ window.updateEncephalitis = function() {
                 vectorPaciente.push(pacienteTieneSintoma);
                 vectorEnfermedad.push(porcentajeMatriz);
 
-                // Filtro clínico estricto: Penalización por valor predictivo negativo (Prevalencia >80%)
                 if (porcentajeMatriz > 0.80 && pacienteTieneSintoma === 0) {
                     penalizacionAusenciaCritica *= 0.2;
                 }
             }
         }
 
-        // Producto escalar y magnitudes de subespacio
         let dotProduct = 0, magPaciente = 0, magEnfermedad = 0;
         for (let j = 0; j < vectorPaciente.length; j++) {
             dotProduct += vectorPaciente[j] * vectorEnfermedad[j];
@@ -329,38 +332,39 @@ window.updateEncephalitis = function() {
             similitudCoseno = dotProduct / (Math.sqrt(magPaciente) * Math.sqrt(magEnfermedad));
         }
 
-        // Combinación lineal de puntuación multiplicativa
         let scoreAjustado = similitudCoseno * factorEdad * factorSexo * factorRaza * penalizacionAusenciaCritica;
 
-        // 3. OVERRIDES INDEPENDIENTES DE SIGNOS EXCLUSIVOS
+        // 3. INDEXACIÓN DE SIGNOS EXCLUSIVOS (OVERRIDES)
         if (totalInputsActivos.includes('CRISIS_FBDS') && etiologia === 'Anti-LGI1') {
-            scoreAjustado *= 2.5; // Multiplicador crítico por crisis faciobraquiales patognomónicas
+            scoreAjustado *= 2.5; 
         }
         if (totalInputsActivos.includes('SIST_NERV_PERIFERICO') && etiologia === 'Anti-CASPR2') {
-            scoreAjustado *= 2.0; // Multiplicador por afectación nerviosa periférica (Morvan)
+            scoreAjustado *= 2.0; 
         }
 
         rawScores.push({ etiologia, tipo, score: scoreAjustado });
         totalSumScores += scoreAjustado;
     }
 
-    // 4. NORMALIZACIÓN RELATIVA DE LOS MARCADORES
+    // 4. NORMALIZACIÓN Y APERTURA DINÁMICA DEL PANEL DE RESULTADOS
     let listadoFinal = rawScores.map(item => {
         const porcentajeFinal = totalSumScores > 0 ? (item.score / totalSumScores) * 100 : 0;
         return { etiologia: item.etiologia, tipo: item.tipo, probabilidad: parseFloat(porcentajeFinal.toFixed(1)) };
     }).sort((a, b) => b.probabilidad - a.probabilidad);
 
+    const resultsPanel = document.getElementById('results-panel');
     const barsContainer = document.getElementById('results-bars-container');
     const discrimWarning = document.getElementById('discriminacion-warning');
 
+    resultsPanel.style.display = 'flex'; // Hacemos visible el recuadro de afinidad al calcular
+
     if (listadoFinal.length === 0 || totalSumScores === 0) {
-        barsContainer.innerHTML = `<div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:0.5rem; font-weight:500;">Introduce manifestaciones clínicas para calcular afinidades diferenciales.</div>`;
+        barsContainer.innerHTML = `<div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:0.5rem;">Introduce manifestaciones clínicas para realizar la proyección.</div>`;
         document.getElementById('alerts-container').style.display = 'none';
         discrimWarning.style.display = 'none';
         return;
     }
 
-    // Renderizar listado de afinidad clínica
     barsContainer.innerHTML = listadoFinal.map(res => {
         const esInfeccioso = res.tipo === 'Infeccioso';
         const colorBarra = esInfeccioso ? '#ef4444' : '#3b82f6';
@@ -372,19 +376,19 @@ window.updateEncephalitis = function() {
         const descripcion = (DESCRIPCIONES_BREVES[res.etiologia] || '').replace(/"/g, '&quot;');
 
         return `
-            <div style="display: flex; flex-direction: column; font-size: 0.75rem; margin-bottom: 3px;" title="${descripcion}">
+            <div style="display: flex; flex-direction: column; font-size: 0.75rem; margin-bottom: 2px;" title="${descripcion}">
                 <div style="display: flex; justify-content: space-between; align-items:center; font-weight: 700; color: var(--text-main, #1e293b); margin-bottom: 2px;">
                     <span style="display:flex; align-items:center; gap:6px; font-weight:600;"><i class="fas ${icono}" style="color:${colorBarra}; font-size:0.7rem;"></i>${res.etiologia} ${chip}</span>
                     <span style="font-variant-numeric: tabular-nums;">${res.probabilidad}%</span>
                 </div>
                 <div style="width: 100%; background: ${colorFondoBarra}; height: 8px; border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${res.probabilidad}%; background: linear-gradient(90deg, ${colorBarra}, ${colorBarra}cc); height: 100%; transition: width 0.4s ease-out; border-radius: 4px;"></div>
+                    <div style="width: ${res.probabilidad}%; background: linear-gradient(90deg, ${colorBarra}, ${colorBarra}cc); height: 100%; border-radius: 4px;"></div>
                 </div>
             </div>
         `;
     }).join('');
 
-    // 5. EVALUACIÓN DE DISCRIMINACIÓN DE PERFIL SINDROMÁTICO
+    // 5. EVALUACIÓN DE DISCRIMINACIÓN DIAGNÓSTICA
     if (listadoFinal.length >= 2) {
         const gap = listadoFinal[0].probabilidad - listadoFinal[1].probabilidad;
         if (listadoFinal[0].probabilidad > 0 && gap < 8) {
@@ -395,12 +399,12 @@ window.updateEncephalitis = function() {
         }
     }
 
-    // 6. GESTOR DE ADVERTENCIAS Y RECOMENDACIONES DE RIGOR CIENTÍFICO (ALERTA POST-HERPES FIJA)
+    // 6. GESTOR DE ALERTAS DE ALTO RIGOR (INLINE INYECTADO)
     const alertsContainer = document.getElementById('alerts-container');
     let alertasHTML = [];
     const maxEtiologia = listadoFinal[0];
 
-    // INYECCIÓN VISUAL Y PERMANENTE DE LA PERLA DE MIMETISMO POST-HSV-1
+    // Recordatorio de Mimetismo Secundario (Fijo tras presionar calcular)
     alertasHTML.push(`
         <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-left: 4px solid #6366f1; padding: 0.65rem 0.8rem; border-radius: 8px; font-size: 0.68rem; color: #334155; line-height:1.45;">
             <span style="font-weight:700; color:#4f46e5; display:block; margin-bottom:1px; font-size:0.62rem; text-transform:uppercase; letter-spacing:0.3px;"><i class="fas fa-arrows-spin"></i> Recordatorio de Mimetismo Post-HSV-1</span>
@@ -454,4 +458,7 @@ window.updateEncephalitis = function() {
 
     alertsContainer.style.display = 'flex';
     alertsContainer.innerHTML = alertasHTML.join('');
+    
+    // Auto-scroll suave para enfocar los resultados generados en pantallas compactas
+    resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 };
