@@ -178,8 +178,7 @@ window.openEncephalitisUI = function(sheetRows) {
             <div id="alerts-container" style="display:none; flex-direction: column; gap: 6px;"></div>
 
             <div style="margin-top:0.8rem; border-top:1px dashed var(--border, #e2e8f0); padding-top:0.8rem; font-size:0.65rem; color:var(--text-muted, #64748b); text-align:justify; line-height:1.5; font-style: italic;">
-                <b>Nota científica y metodológica:</b> Esta herramienta implementa un modelo matemático estructurado mediante análisis multidimensional de subespacios vectoriales (Similitud de Coseno). Los coeficientes se nutren directamente de las series de casos internacionales recopiladas por Binks et al. en el seminario de revisión para <i>The Lancet</i> (2026; 407: 1968-83). El índice resultante cuantifica de forma estricta el grado de afinidad fenotípica pretest del paciente con los patrones epidemiológicos y clínico-paraclínicos descritos en la literatura indexada, sirviendo como soporte docente para la orientación diferencial. No sustituye la confirmación molecular obligatoria (LCR, neuroimagen y títulos de autoanticuerpos).
-            </div>
+                <b>Nota científica y metodológica:</b> Esta herramienta implementa un modelo matemático, ideado por IA, estructurado mediante análisis multidimensional de subespacios vectoriales (Similitud de Coseno). Los coeficientes se nutren directamente de las tablas recopiladas por Binks et al. en el seminario de revisión para <i>The Lancet</i> (2026; 407: 1968-83). El índice resultante cuantifica el grado de afinidad fenotípica pretest del paciente con los patrones epidemiológicos y clínico-paraclínicos descritos en la literatura indexada, sirviendo como soporte docente para el diagnóstico diferencial. No sustituye el criterio clínico ni la confirmación mediante PPCC. 
         </div>
     `;
 
