@@ -141,7 +141,7 @@ window.openEncephalitisUI = function(sheetRows) {
                     </div>
                 </div>
                 <div style="flex: 1.2; min-width:130px;">
-                    <span style="font-size: 0.65rem; font-weight: 800; color: #166534; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Etnia cohorte</span>
+                    <span style="font-size: 0.65rem; font-weight: 800; color: #166534; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Etnia</span>
                     <div id="raza-toggle" style="display:flex; gap:4px; background:#ffffff; padding:2px; border-radius:8px; border:1px solid #22c55e;">
                         <button type="button" id="btn-raza-blanca" onclick="window.setRazaPaciente('blanca')" style="flex:1; padding:5px; border-radius:6px; border:none; background:#166534; font-size:0.7rem; font-weight:700; color:#fff; cursor:pointer; outline:none; transition:0.1s;">Blanca</button>
                         <button type="button" id="btn-raza-otro" onclick="window.setRazaPaciente('otro')" style="flex:1; padding:5px; border-radius:6px; border:none; background:transparent; font-size:0.7rem; font-weight:700; color:#166534; cursor:pointer; outline:none; transition:0.1s;">Otro</button>
