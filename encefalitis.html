@@ -209,37 +209,21 @@
         <span>&copy; 2026 PSQ AL DÍA - Herramientas Clínicas</span>
     </footer>
 
-    <script src="/encefalitis.js"></script>
     <script>
         window.WORKER_URL = "https://psqaldia.com/"; 
+    </script>
 
-        async function intentarInicializarEnceph() {
-            // Evitamos ejecuciones duplicadas
-            if (window.__encephMatchIniciado) return;
+    <script src="/encefalitis.js"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
             if (typeof window.iniciarEncephMatch === 'function') {
-                window.__encephMatchIniciado = true;
                 await window.iniciarEncephMatch();
                 document.body.style.overflow = 'auto'; // Asegurar scroll correcto de la interfaz inyectada
-            }
-        }
-
-        // 1. Escuchar el evento de carga del DOM por seguridad estándar
-        document.addEventListener('DOMContentLoaded', intentarInicializarEnceph);
-
-        // 2. Ejecución inmediata por si el DOM y el script ya están listos en caché agresiva
-        intentarInicializarEnceph();
-
-        // 3. Sistema de ráfaga defensiva (polling de 100ms) por si el script tarda en parsear
-        let intentosCarga = 0;
-        const intervaloCarga = setInterval(() => {
-            intentosCarga++;
-            if (window.__encephMatchIniciado || intentosCarga > 50) {
-                clearInterval(intervaloCarga);
             } else {
-                intentarInicializarEnceph();
+                console.error("Error: window.iniciarEncephMatch no está definido. Revisa si /encefalitis.js cargó correctamente.");
             }
-        }, 100);
+        });
     </script>
 </body>
 </html>
