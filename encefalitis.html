@@ -193,7 +193,6 @@
                 <h3 style="margin-top:0; margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem;"><i class="fas fa-book"></i> Evidencia Científica</h3>
                 <ul style="list-style: none; padding: 0; color: var(--text-muted); font-size: 0.85rem; margin: 0;">
                     <li style="margin-bottom: 8px;">• <strong>Binks SNM, Saylor D, Easton A, Thakur KT, Irani SR.</strong> Encephalitis. <em>The Lancet</em> 2026; 407: 1968-83.</li>
-
                 </ul>
             </div>
         </section>
@@ -214,12 +213,33 @@
     <script>
         window.WORKER_URL = "https://psqaldia.com/"; 
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        async function intentarInicializarEnceph() {
+            // Evitamos ejecuciones duplicadas
+            if (window.__encephMatchIniciado) return;
+
             if (typeof window.iniciarEncephMatch === 'function') {
+                window.__encephMatchIniciado = true;
                 await window.iniciarEncephMatch();
                 document.body.style.overflow = 'auto'; // Asegurar scroll correcto de la interfaz inyectada
             }
-        });
+        }
+
+        // 1. Escuchar el evento de carga del DOM por seguridad estándar
+        document.addEventListener('DOMContentLoaded', intentarInicializarEnceph);
+
+        // 2. Ejecución inmediata por si el DOM y el script ya están listos en caché agresiva
+        intentarInicializarEnceph();
+
+        // 3. Sistema de ráfaga defensiva (polling de 100ms) por si el script tarda en parsear
+        let intentosCarga = 0;
+        const intervaloCarga = setInterval(() => {
+            intentosCarga++;
+            if (window.__encephMatchIniciado || intentosCarga > 50) {
+                clearInterval(intervaloCarga);
+            } else {
+                intentarInicializarEnceph();
+            }
+        }, 100);
     </script>
 </body>
 </html>
