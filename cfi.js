@@ -1,56 +1,76 @@
 /**
  * cfi.js - Guía Clínica de Formulación Cultural (CFI - DSM-5-TR)
- * PSQALDÍA v4.0 - Herramienta de Consulta Rápida en Consulta
- * Sin formularios de entrada. Enfoque: navegación rápida, scripting verbal y sondas clínicas.
+ * PSQALDÍA v4.5 - Minimalist Hub Edition
  */
 
 window.ToolCFI = {
     lang: 'es',
-    activeDomain: 0, // 0: Vista general de los 4 dominios; 1-4: Dominio individual ampliado
+    activeDomain: null, // null: Vista Hub de 4 tarjetas; 1-4: Vista de dominio específico
+    expandedItems: {}, // Guarda los acordeones abiertos { '01-target': true, '01-probe': false }
+
+    colors: {
+        1: { name: 'rose', bg: '#fff1f2', border: '#fecdd3', accent: '#e11d48', badge: '#ffe4e6', text: '#9f1239' },
+        2: { name: 'amber', bg: '#fffbeb', border: '#fde68a', accent: '#d97706', badge: '#fef3c7', text: '#92400e' },
+        3: { name: 'emerald', bg: '#f0fdf4', border: '#bbf7d0', accent: '#059669', badge: '#dcfce7', text: '#065f46' },
+        4: { name: 'indigo', bg: '#eef2ff', border: '#c7d2fe', accent: '#4f46e5', badge: '#e0e7ff', text: '#3730a3' }
+    },
+
+    icons: {
+        1: 'fa-comment-dots',
+        2: 'fa-project-diagram',
+        3: 'fa-compass',
+        4: 'fa-handshake'
+    },
+
     i18n: {
         es: {
             title: "FORMULACIÓN CULTURAL (CFI)",
             badge: "DSM-5-TR",
-            viewAll: "TODOS LOS DOMINIOS",
-            introTitle: "ENCUADRE INICIAL SUGERIDO (LITERAL)",
+            introTitle: "Encuadre sugerido",
             introText: "«Me gustaría entender el problema que le trae hoy aquí para poder ayudarle mejor. Quiero conocer su propia experiencia y sus ideas sobre lo que le sucede. Le haré unas preguntas sobre su situación y cómo la está afrontando. Recuerde que no hay respuestas correctas ni incorrectas».",
-            keyLabel: "OBJETIVO CLÍNICO",
-            probeLabel: "REPREGUNTA / SONDA DE RESCATE",
+            keyLabel: "Objetivo",
+            probeLabel: "Sonda de rescate",
+            backHub: "Todos los dominios",
+            itemsCount: "preguntas",
+            copySuccess: "¡Copiado!",
             dNames: [
-                "1. Definición cultural",
-                "2. Causas y contexto",
-                "3. Afrontamiento previo",
-                "4. Relación asistencial"
+                "Definición cultural",
+                "Causas y contexto",
+                "Afrontamiento previo",
+                "Relación asistencial"
             ],
             dSubtitles: [
-                "Vivencia subjetiva, significado personal e impacto social (CFI 01-03)",
-                "Modelos explicativos, estresores, apoyos e identidad (CFI 04-10)",
-                "Recursos propios, itinerario asistencial y barreras (CFI 11-13)",
-                "Expectativas terapéuticas y prevención de distancias (CFI 14-16)"
+                "Vivencia subjetiva, significado personal e impacto social.",
+                "Modelos explicativos, estresores, identidad y red de apoyo.",
+                "Recursos autónomos, itinerario previo y barreras asistenciales.",
+                "Expectativas del paciente y prevención de distancias con el profesional."
             ]
         },
         en: {
             title: "CULTURAL FORMULATION (CFI)",
             badge: "DSM-5-TR",
-            viewAll: "ALL DOMAINS",
-            introTitle: "SUGGESTED OPENING SCRIPT",
+            introTitle: "Opening script",
             introText: "“I would like to understand the problems that bring you here today so that I can help you more effectively. I want to know about your own experience and ideas. I will ask some questions about what is going on and how you deal with it. Please remember there are no right or wrong answers.”",
-            keyLabel: "CLINICAL TARGET",
-            probeLabel: "PROBE / CLINICAL FOLLOW-UP",
+            keyLabel: "Clinical Target",
+            probeLabel: "Clinical Probe",
+            backHub: "All domains",
+            itemsCount: "questions",
+            copySuccess: "Copied!",
             dNames: [
-                "1. Cultural Definition",
-                "2. Causes & Context",
-                "3. Past Coping & Help",
-                "4. Care & Alliance"
+                "Cultural Definition",
+                "Causes & Context",
+                "Past Coping & Care",
+                "Care & Alliance"
             ],
             dSubtitles: [
-                "Subjective experience, personal meaning & social impact (CFI 01-03)",
-                "Explanatory models, stressors, support & identity (CFI 04-10)",
-                "Self-management, treatment pathway & barriers (CFI 11-13)",
-                "Care expectations & alliance barriers (CFI 14-16)"
+                "Subjective experience, personal meaning, and social impact.",
+                "Explanatory models, stressors, identity, and social networks.",
+                "Self-management, prior care pathway, and systemic barriers.",
+                "Patient expectations and therapeutic alliance barriers."
             ]
         }
     },
+
     data: {
         es: [
             {
@@ -151,7 +171,7 @@ window.ToolCFI = {
             },
             {
                 id: 4,
-                title: "4. Ayuda actual y relación médico-paciente",
+                title: "4. Ayuda actual y relación asistencial",
                 items: [
                     {
                         num: "14",
@@ -261,7 +281,7 @@ window.ToolCFI = {
                         num: "12",
                         question: "What kinds of care, advice, or healing have you sought in the past? What was useful?",
                         target: "Prior care pathways and perceived utility across health models.",
-                        probe: "Include physicians, psychotherapy, traditional/indigenous healers, and spiritual counselors."
+                        probe: "Include physicians, psychotherapy, traditional healers, and spiritual counselors."
                     },
                     {
                         num: "13",
@@ -303,230 +323,349 @@ window.iniciarCFI = function() {
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    if (!document.getElementById('cfi-guide-styles')) {
+    if (!document.getElementById('cfi-styles-v45')) {
         const style = document.createElement('style');
-        style.id = 'cfi-guide-styles';
+        style.id = 'cfi-styles-v45';
         style.innerHTML = `
-            .cfi-desk {
-                display: flex; flex-direction: column; height: 86vh; max-height: 940px;
-                background: var(--bg, #f8fafc); color: var(--text-main, #0f172a);
-                font-family: inherit; overflow: hidden; border-radius: 1rem;
+            .cfi-app {
+                display: flex; flex-direction: column; height: 86vh; max-height: 880px;
+                background: #f8fafc; color: #0f172a; font-family: inherit;
+                border-radius: 16px; overflow: hidden;
             }
-
-            /* NAV SUPERIOR ESTILO SPI */
-            .cfi-bar {
+            .cfi-header {
                 display: flex; justify-content: space-between; align-items: center;
-                padding: 10px 16px; background: var(--card, #ffffff);
-                border-bottom: 1px solid var(--border, #e2e8f0); flex-shrink: 0;
+                padding: 12px 20px; background: #ffffff; border-bottom: 1px solid #f1f5f9;
+                flex-shrink: 0;
             }
-            .cfi-title {
-                display: flex; align-items: center; gap: 8px; font-size: 0.88rem;
-                font-weight: 900; letter-spacing: 0.02em; margin: 0;
+            .cfi-brand {
+                display: flex; align-items: center; gap: 8px; font-weight: 800;
+                font-size: 0.85rem; letter-spacing: -0.01em; color: #1e293b;
             }
             .cfi-badge {
-                font-size: 0.65rem; background: rgba(37, 99, 235, 0.1);
-                color: var(--primary, #2563eb); padding: 2px 7px; border-radius: 5px; font-weight: 800;
+                font-size: 0.65rem; background: #f1f5f9; color: #475569;
+                padding: 2px 7px; border-radius: 6px; font-weight: 700;
             }
-            .cfi-actions {
-                display: flex; gap: 6px; align-items: center; margin-right: 35px;
+            .cfi-lang-btn {
+                background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+                padding: 3px 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+                color: #64748b; transition: all 0.15s ease;
+            }
+            .cfi-lang-btn.active {
+                background: #0f172a; color: #ffffff; border-color: #0f172a;
             }
 
-            /* SCRIPTING VERBAL DE ENCUADRE */
-            .cfi-intro-strip {
-                background: #eff6ff; border-left: 4px solid var(--primary, #2563eb);
-                padding: 10px 16px; flex-shrink: 0; border-bottom: 1px solid var(--border, #e2e8f0);
+            /* Encuadre sugerido colapsable/minimal */
+            .cfi-quote-bar {
+                background: #ffffff; border-bottom: 1px solid #f1f5f9;
+                padding: 10px 20px; font-size: 0.78rem; line-height: 1.45;
+                color: #475569; display: flex; gap: 10px; align-items: flex-start;
+                flex-shrink: 0;
             }
-            .cfi-intro-label {
-                font-size: 0.65rem; font-weight: 900; text-transform: uppercase;
-                letter-spacing: 0.05em; color: var(--primary, #2563eb); margin-bottom: 3px;
+            .cfi-quote-tag {
+                background: #eff6ff; color: #2563eb; font-size: 0.65rem;
+                font-weight: 800; text-transform: uppercase; padding: 2px 6px;
+                border-radius: 4px; white-space: nowrap; margin-top: 1px;
+            }
+            .cfi-quote-text {
+                margin: 0; font-style: italic; color: #334155;
+            }
+
+            /* Contenedor principal */
+            .cfi-body {
+                flex: 1; overflow-y: auto; padding: 20px;
+            }
+
+            /* HUB DE 4 ETIQUETAS/TARJETAS */
+            .cfi-hub-grid {
+                display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 16px; align-items: stretch;
+            }
+            .cfi-hub-card {
+                background: #ffffff; border-radius: 14px; padding: 20px;
+                border: 1px solid #f1f5f9; cursor: pointer;
+                display: flex; flex-direction: column; justify-content: space-between;
+                gap: 16px; transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+                position: relative; overflow: hidden;
+            }
+            .cfi-hub-card::before {
+                content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+                width: 5px; background: var(--card-accent);
+            }
+            .cfi-hub-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+                border-color: var(--card-border);
+            }
+            .cfi-hub-top {
+                display: flex; justify-content: space-between; align-items: flex-start;
+            }
+            .cfi-hub-icon-pill {
+                width: 40px; height: 40px; border-radius: 10px;
+                display: flex; align-items: center; justify-content: center;
+                background: var(--card-bg); color: var(--card-accent);
+                font-size: 1.1rem;
+            }
+            .cfi-hub-count {
+                font-size: 0.68rem; font-weight: 700; color: #64748b;
+                background: #f8fafc; padding: 4px 8px; border-radius: 20px;
+            }
+            .cfi-hub-title {
+                font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;
+            }
+            .cfi-hub-desc {
+                font-size: 0.77rem; color: #64748b; line-height: 1.4; margin: 0;
+            }
+            .cfi-hub-cta {
+                font-size: 0.72rem; font-weight: 700; color: var(--card-accent);
                 display: flex; align-items: center; gap: 5px;
             }
-            .cfi-intro-quote {
-                font-size: 0.8rem; line-height: 1.45; color: #1e3a8a; font-style: italic; margin: 0;
+
+            /* VISTA DETALLE DOMINIO */
+            .cfi-nav-strip {
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+            }
+            .cfi-btn-back {
+                background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px;
+                padding: 6px 12px; font-size: 0.75rem; font-weight: 700; color: #334155;
+                cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+                transition: background 0.15s ease;
+            }
+            .cfi-btn-back:hover { background: #f1f5f9; }
+            .cfi-domain-pills {
+                display: flex; gap: 6px;
+            }
+            .cfi-domain-pill {
+                border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.72rem;
+                font-weight: 700; cursor: pointer; transition: all 0.15s ease;
+                background: #ffffff; color: #64748b; border: 1px solid #e2e8f0;
+            }
+            .cfi-domain-pill.active {
+                background: var(--active-accent); color: #ffffff; border-color: var(--active-accent);
             }
 
-            /* BARRA DE NAVEGACIÓN POR DOMINIOS */
-            .cfi-tabs {
-                display: flex; background: var(--card, #ffffff); border-bottom: 1px solid var(--border, #e2e8f0);
-                padding: 0 16px; overflow-x: auto; gap: 6px; flex-shrink: 0;
+            /* LISTA DE PREGUNTAS */
+            .cfi-item-card {
+                background: #ffffff; border-radius: 12px; padding: 16px;
+                border: 1px solid #f1f5f9; margin-bottom: 12px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.02);
             }
-            .cfi-tab-btn {
-                background: none; border: none; padding: 10px 14px; font-size: 0.74rem;
-                font-weight: 700; color: var(--text-muted, #64748b); cursor: pointer;
-                border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap;
-                display: flex; align-items: center; gap: 6px;
+            .cfi-item-header {
+                display: flex; justify-content: space-between; align-items: flex-start;
+                gap: 12px; margin-bottom: 12px;
             }
-            .cfi-tab-btn:hover { color: var(--primary, #2563eb); }
-            .cfi-tab-btn.active {
-                color: var(--primary, #2563eb); border-bottom-color: var(--primary, #2563eb); font-weight: 800;
+            .cfi-item-id {
+                font-size: 0.65rem; font-weight: 900; background: #f8fafc;
+                color: #64748b; border: 1px solid #e2e8f0; padding: 2px 6px;
+                border-radius: 6px; flex-shrink: 0;
+            }
+            .cfi-item-q {
+                font-size: 0.95rem; font-weight: 800; color: #0f172a;
+                line-height: 1.45; margin: 0; flex: 1;
+            }
+            .cfi-copy-btn {
+                background: none; border: none; color: #94a3b8; cursor: pointer;
+                font-size: 0.85rem; padding: 4px; transition: color 0.15s ease;
+            }
+            .cfi-copy-btn:hover { color: #0f172a; }
+
+            /* MICRO-BOTONES COLAPSABLES */
+            .cfi-chip-row {
+                display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;
+            }
+            .cfi-chip {
+                background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
+                padding: 4px 9px; font-size: 0.68rem; font-weight: 700; color: #475569;
+                cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+                transition: all 0.15s ease;
+            }
+            .cfi-chip:hover { background: #f1f5f9; }
+            .cfi-chip.active {
+                background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8;
             }
 
-            /* CONTENEDOR CON SCROLL DE LECTURA */
-            .cfi-scroll-area {
-                flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px;
+            .cfi-drawer {
+                margin-top: 10px; padding: 10px 12px; border-radius: 8px;
+                font-size: 0.75rem; line-height: 1.4; animation: fadeIn 0.15s ease;
+            }
+            .cfi-drawer-target {
+                background: #f8fafc; border-left: 3px solid #94a3b8; color: #334155;
+            }
+            .cfi-drawer-probe {
+                background: #f0fdf4; border-left: 3px solid #10b981; color: #065f46;
             }
 
-            /* SECCIONES Y TARJETAS DE PREGUNTAS */
-            .cfi-domain-header {
-                font-size: 0.8rem; font-weight: 900; text-transform: uppercase;
-                letter-spacing: 0.04em; color: var(--text-muted, #64748b);
-                display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-3px); }
+                to { opacity: 1; transform: translateY(0); }
             }
-            .cfi-domain-header::after { content: ''; flex: 1; height: 1px; background: var(--border, #e2e8f0); }
-
-            .cfi-grid {
-                display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-                gap: 12px;
-            }
-
-            .cfi-card {
-                background: var(--card, #ffffff); border: 1px solid var(--border, #e2e8f0);
-                border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-                border-left: 4px solid var(--primary, #2563eb);
-                display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
-            }
-
-            .cfi-q-top {
-                display: flex; gap: 10px; align-items: flex-start;
-            }
-            .cfi-num-pill {
-                font-size: 0.65rem; font-weight: 900; background: rgba(37, 99, 235, 0.1);
-                color: var(--primary, #2563eb); padding: 3px 6px; border-radius: 6px; flex-shrink: 0;
-            }
-            .cfi-q-text {
-                font-size: 0.9rem; font-weight: 800; line-height: 1.4; color: var(--text-main, #0f172a);
-                margin: 0;
-            }
-
-            /* META-INFORMACIÓN CLÍNICA Y REPREGUNTAS */
-            .cfi-box-target {
-                font-size: 0.73rem; color: var(--text-muted, #475569); line-height: 1.35;
-                background: var(--bg, #f8fafc); padding: 6px 10px; border-radius: 6px;
-                border: 1px solid var(--border, #e2e8f0);
-            }
-            .cfi-box-probe {
-                font-size: 0.74rem; color: #0369a1; line-height: 1.4;
-                background: #f0f9ff; padding: 8px 10px; border-radius: 6px;
-                border-left: 3px solid #0284c7;
-            }
-            .cfi-label-micro {
-                font-size: 0.6rem; font-weight: 900; text-transform: uppercase;
-                letter-spacing: 0.04em; display: block; margin-bottom: 2px;
-            }
-
-            /* FOOTER DE APOYO AL EXPLORADOR */
-            .cfi-footer-hint {
-                background: var(--card, #ffffff); border-top: 1px solid var(--border, #e2e8f0);
-                padding: 10px 16px; font-size: 0.72rem; color: var(--text-muted, #64748b);
-                flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
-            }
-
-            .btn-mini {
-                padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border, #cbd5e1);
-                background: var(--card, #ffffff); cursor: pointer; font-size: 0.7rem; font-weight: 700;
-                transition: all 0.15s; color: var(--text-main, #0f172a); display: inline-flex;
-                align-items: center; justify-content: center; gap: 4px;
-            }
-            .btn-mini:hover { background: var(--border, #e2e8f0); }
-            .btn-mini.active { background: var(--primary, #2563eb); color: #ffffff; border-color: var(--primary, #2563eb); }
         `;
         document.head.appendChild(style);
     }
 
-    renderGuiaCFI();
+    renderCFI();
 };
 
-function renderGuiaCFI() {
+function renderCFI() {
     const t = window.ToolCFI.i18n[window.ToolCFI.lang];
     const domains = window.ToolCFI.data[window.ToolCFI.lang];
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    // Filtrar dominios según pestaña activa (0 = todos)
-    const displayedDomains = window.ToolCFI.activeDomain === 0 
-        ? domains 
-        : domains.filter(d => d.id === window.ToolCFI.activeDomain);
-
-    container.innerHTML = `
-        <div class="cfi-desk">
-
-            <!-- NAV SUPERIOR -->
-            <div class="cfi-bar">
-                <div class="cfi-title">
+    // Header y Encuadre se mantienen siempre limpios
+    let html = `
+        <div class="cfi-app">
+            <div class="cfi-header">
+                <div class="cfi-brand">
+                    <i class="fas fa-comments text-slate-400"></i>
                     <span>${t.title}</span>
                     <span class="cfi-badge">${t.badge}</span>
                 </div>
-                <div class="cfi-actions">
-                    <button class="btn-mini ${window.ToolCFI.lang === 'es' ? 'active' : ''}" onclick="setLangCFI('es')">ES</button>
-                    <button class="btn-mini ${window.ToolCFI.lang === 'en' ? 'active' : ''}" onclick="setLangCFI('en')">EN</button>
+                <div style="display:flex; gap:5px; margin-right:35px;">
+                    <button class="cfi-lang-btn ${window.ToolCFI.lang === 'es' ? 'active' : ''}" onclick="setLangCFI('es')">ES</button>
+                    <button class="cfi-lang-btn ${window.ToolCFI.lang === 'en' ? 'active' : ''}" onclick="setLangCFI('en')">EN</button>
                 </div>
             </div>
 
-            <!-- ENCUADRE VERBAL INICIAL -->
-            <div class="cfi-intro-strip">
-                <div class="cfi-intro-label">
-                    <i class="fas fa-comment-medical"></i> ${t.introTitle}
-                </div>
-                <p class="cfi-intro-quote">${t.introText}</p>
+            <div class="cfi-quote-bar">
+                <span class="cfi-quote-tag">${t.introTitle}</span>
+                <p class="cfi-quote-text">${t.introText}</p>
             </div>
 
-            <!-- NAVEGADOR DE PESTAÑAS -->
-            <div class="cfi-tabs">
-                <button class="cfi-tab-btn ${window.ToolCFI.activeDomain === 0 ? 'active' : ''}" onclick="setDomainCFI(0)">
-                    <i class="fas fa-th-large"></i> ${t.viewAll}
-                </button>
-                ${domains.map(d => `
-                    <button class="cfi-tab-btn ${window.ToolCFI.activeDomain === d.id ? 'active' : ''}" onclick="setDomainCFI(${d.id})">
-                        ${d.title}
-                    </button>
-                `).join('')}
-            </div>
+            <div class="cfi-body">
+    `;
 
-            <!-- ÁREA SCROLL CON LAS PREGUNTAS Y SONDAS -->
-            <div class="cfi-scroll-area">
-                ${displayedDomains.map(d => `
-                    <div>
-                        <div class="cfi-domain-header">${d.title}</div>
-                        <div class="cfi-grid">
-                            ${d.items.map(item => `
-                                <div class="cfi-card">
-                                    <div class="cfi-q-top">
-                                        <span class="cfi-num-pill">CFI ${item.num}</span>
-                                        <p class="cfi-q-text">${item.question}</p>
-                                    </div>
-                                    
-                                    <div class="cfi-box-target">
-                                        <span class="cfi-label-micro" style="color:var(--text-muted);">${t.keyLabel}</span>
-                                        ${item.target}
-                                    </div>
+    // VISTA 1: EL HUB DE 4 ETIQUETAS PASTEL (PANTALLA DE INICIO)
+    if (window.ToolCFI.activeDomain === null) {
+        html += `<div class="cfi-hub-grid">`;
+        domains.forEach((d, i) => {
+            const color = window.ToolCFI.colors[d.id];
+            const icon = window.ToolCFI.icons[d.id];
+            const subtitle = t.dSubtitles[i];
 
-                                    <div class="cfi-box-probe">
-                                        <span class="cfi-label-micro" style="color:#0284c7;">${t.probeLabel}</span>
-                                        ${item.probe}
-                                    </div>
-                                </div>
-                            `).join('')}
+            html += `
+                <div class="cfi-hub-card" 
+                     style="--card-bg:${color.bg}; --card-border:${color.border}; --card-accent:${color.accent};"
+                     onclick="openDomainCFI(${d.id})">
+                    <div class="cfi-hub-top">
+                        <div class="cfi-hub-icon-pill">
+                            <i class="fas ${icon}"></i>
                         </div>
+                        <span class="cfi-hub-count">${d.items.length} ${t.itemsCount}</span>
                     </div>
-                `).join('')}
+                    <div>
+                        <h4 class="cfi-hub-title">${d.title}</h4>
+                        <p class="cfi-hub-desc">${subtitle}</p>
+                    </div>
+                    <div class="cfi-hub-cta">
+                        <span>Explorar preguntas</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    } 
+    // VISTA 2: NAVEGACIÓN Y PREGUNTAS DEL DOMINIO SELECCIONADO
+    else {
+        const activeDom = domains.find(d => d.id === window.ToolCFI.activeDomain);
+        const activeColor = window.ToolCFI.colors[activeDom.id];
+
+        html += `
+            <div class="cfi-nav-strip">
+                <button class="cfi-btn-back" onclick="openDomainCFI(null)">
+                    <i class="fas fa-th-large"></i> ${t.backHub}
+                </button>
+                <div class="cfi-domain-pills" style="--active-accent:${activeColor.accent};">
+                    ${domains.map(d => `
+                        <button class="cfi-domain-pill ${d.id === activeDom.id ? 'active' : ''}" 
+                                onclick="openDomainCFI(${d.id})">
+                            ${d.id}. ${t.dNames[d.id - 1]}
+                        </button>
+                    `).join('')}
+                </div>
             </div>
 
-            <!-- FOOTER INFORMATIVO -->
-            <div class="cfi-footer-hint">
-                <span><i class="fas fa-info-circle"></i> Las instrucciones del DSM-5-TR recomiendan adaptar el lenguaje y explorar metáforas propias sin imponer el modelo biomédico.</span>
-                <span>16 ítems diagnósticos</span>
-            </div>
+            <div>
+                ${activeDom.items.map(item => {
+                    const targetOpen = !!window.ToolCFI.expandedItems[`${item.num}-target`];
+                    const probeOpen = !!window.ToolCFI.expandedItems[`${item.num}-probe`];
 
+                    return `
+                        <div class="cfi-item-card">
+                            <div class="cfi-item-header">
+                                <span class="cfi-item-id">CFI ${item.num}</span>
+                                <p class="cfi-item-q">${item.question}</p>
+                                <button class="cfi-copy-btn" title="Copiar pregunta" onclick="copyPromptCFI('${item.num}', this)">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <div class="cfi-chip-row">
+                                <button class="cfi-chip ${targetOpen ? 'active' : ''}" onclick="toggleDrawerCFI('${item.num}-target')">
+                                    <i class="fas fa-bullseye"></i> ${t.keyLabel}
+                                    <i class="fas ${targetOpen ? 'fa-chevron-up' : 'fa-chevron-down'}" style="font-size:0.6rem;"></i>
+                                </button>
+                                <button class="cfi-chip ${probeOpen ? 'active' : ''}" onclick="toggleDrawerCFI('${item.num}-probe')">
+                                    <i class="fas fa-life-ring"></i> ${t.probeLabel}
+                                    <i class="fas ${probeOpen ? 'fa-chevron-up' : 'fa-chevron-down'}" style="font-size:0.6rem;"></i>
+                                </button>
+                            </div>
+
+                            ${targetOpen ? `
+                                <div class="cfi-drawer cfi-drawer-target">
+                                    <strong>${t.keyLabel}:</strong> ${item.target}
+                                </div>
+                            ` : ''}
+
+                            ${probeOpen ? `
+                                <div class="cfi-drawer cfi-drawer-probe">
+                                    <strong>${t.probeLabel}:</strong> ${item.probe}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    html += `
+            </div>
         </div>
     `;
+
+    container.innerHTML = html;
 }
 
-window.setDomainCFI = function(id) {
+window.openDomainCFI = function(id) {
     window.ToolCFI.activeDomain = id;
-    renderGuiaCFI();
+    renderCFI();
+};
+
+window.toggleDrawerCFI = function(key) {
+    window.ToolCFI.expandedItems[key] = !window.ToolCFI.expandedItems[key];
+    renderCFI();
 };
 
 window.setLangCFI = function(l) {
     window.ToolCFI.lang = l;
-    renderGuiaCFI();
+    renderCFI();
+};
+
+window.copyPromptCFI = function(num, btn) {
+    const d = window.ToolCFI.data[window.ToolCFI.lang];
+    let foundText = "";
+    d.forEach(dom => {
+        const item = dom.items.find(i => i.num === num);
+        if (item) foundText = item.question;
+    });
+
+    if (foundText && navigator.clipboard) {
+        navigator.clipboard.writeText(foundText).then(() => {
+            const original = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-check" style="color:#10b981;"></i>`;
+            setTimeout(() => { btn.innerHTML = original; }, 1200);
+        });
+    }
 };
