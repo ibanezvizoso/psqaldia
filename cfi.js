@@ -1,213 +1,484 @@
 /**
  * cfi.js - Entrevista de Formulación Cultural (CFI - DSM-5-TR)
- * PSQALDÍA v1.0
- * Estructura simétrica a aes.js / clozapina.js - Sin emojis, texto profesional.
+ * PSQALDÍA v2.0 - Arquitectura pro con layout simétrico a spi.js
+ * DSM-5-TR American Psychiatric Association
  */
 
-window.cfiLang = 'es';
-
-const i18nCFI = {
-    es: {
-        title: "Formulación Cultural (CFI)",
-        subtitle: "Guía de entrevista clínica estructurada DSM-5-TR",
-        patientTermLabel: "Término o descripción del problema según el paciente",
-        patientTermPh: "Ej. Nervios, decaimiento, ataque, presión en la cabeza...",
-        toggleGuide: "Ver preguntas guía",
-        d1Title: "Dominio 1: Definición cultural del problema",
-        d1Subtitle: "Significado personal y social del motivo de consulta",
-        d1NotesPh: "Anotar cómo define el paciente su malestar, términos propios y aspectos más preocupantes...",
-        d2Title: "Dominio 2: Causas, contexto y apoyos",
-        d2Subtitle: "Modelos explicativos, estresores, redes y rol de la identidad",
-        d2NotesPh: "Anotar causas atribuidas por el paciente/familia, apoyos, estresores psicosociales e identidad...",
-        d3Title: "Dominio 3: Afrontamiento y ayuda previa",
-        d3Subtitle: "Recursos propios, itinerario asistencial y barreras",
-        d3NotesPh: "Anotar qué ha hecho por su cuenta, tratamientos o curadores previos, utilidad y barreras...",
-        d4Title: "Dominio 4: Ayuda actual y relación médico-paciente",
-        d4Subtitle: "Expectativas asistenciales y prevención de malentendidos",
-        d4NotesPh: "Anotar qué tipo de ayuda espera, opiniones de allegados y posibles dudas o recelos terapéuticos...",
-        btnCopy: "COPIAR INFORME CLÍNICO",
-        btnAI: "SINTETIZAR CON IA",
-        btnReset: "REINICIAR",
-        copied: "Informe copiado al portapapeles",
-        aiLoading: "Sintetizando formulación cultural...",
-        aiError: "No se pudo conectar con el servicio de IA.",
-        aiTitle: "Síntesis Narrativa (DSM-5-TR):",
-        disclaimer: "Basado en la Entrevista de Formulación Cultural (CFI) del DSM-5-TR (American Psychiatric Association). Instrumento de apoyo clínico."
+window.ToolCFI = {
+    lang: 'es',
+    activeDomain: 1,
+    term: '',
+    notes: { 1: '', 2: '', 3: '', 4: '' },
+    i18n: {
+        es: {
+            title: "FORMULACIÓN CULTURAL (CFI)",
+            termLabel: "Término / metáfora del paciente",
+            termPh: "Ej. «nervios», «ataque», «presión en el pecho»...",
+            termDefault: "este problema",
+            reset: "Reiniciar",
+            copyFull: "COPIAR INFORME",
+            copyAi: "COPIAR SÍNTESIS",
+            copied: "✓ COPIADO",
+            ia: "✦ IA SÍNTESIS",
+            iaGenerando: "Sintetizando formulación clínica con IA...",
+            iaVacio: "Introduce notas en al menos un dominio para sintetizar.",
+            iaError: "Error al conectar con el servicio de IA.",
+            btnInsert: "Insertar guía",
+            dNames: [
+                "1. Definición cultural",
+                "2. Causas y contexto",
+                "3. Afrontamiento",
+                "4. Alianza asistencial"
+            ],
+            dSubtitles: [
+                "Significado personal y contextualización social del motivo de consulta",
+                "Modelos explicativos, estresores psicosociales, red de apoyo e identidad",
+                "Mecanismos propios de resolución, tratamientos previos y barreras de acceso",
+                "Expectativas terapéuticas y prevención de malentendidos médico-paciente"
+            ],
+            placeholders: [
+                "Consigne el motivo expresado, términos coloquiales y aspectos que más angustian al paciente...",
+                "Anote causas según paciente/familia, recursos de apoyo, factores de estrés e impacto identitario...",
+                "Registre qué ha hecho por su cuenta, recursos tradicionales o médicos previos y barreras encontradas...",
+                "Describa qué tipo de intervención espera recibir y posibles discrepancias o desconfianza con el equipo asistencial..."
+            ],
+            guideTitle: "Preguntas clínicas DSM-5-TR",
+            guideTip: "Haga clic en una pregunta para pegarla en el bloc de notas."
+        },
+        en: {
+            title: "CULTURAL FORMULATION (CFI)",
+            termLabel: "Patient's term / description",
+            termPh: "E.g., «nerves», «distress», «chest tightness»...",
+            termDefault: "this problem",
+            reset: "Reset",
+            copyFull: "COPY REPORT",
+            copyAi: "COPY SYNTHESIS",
+            copied: "✓ COPIED",
+            ia: "✦ AI SYNTHESIS",
+            iaGenerando: "Synthesizing cultural formulation with AI...",
+            iaVacio: "Please enter notes in at least one domain to synthesize.",
+            iaError: "Error connecting to AI service.",
+            btnInsert: "Insert prompt",
+            dNames: [
+                "1. Cultural Definition",
+                "2. Causes & Context",
+                "3. Coping & Past Help",
+                "4. Current Care & Alliance"
+            ],
+            dSubtitles: [
+                "Personal meaning and social framing of the presenting concern",
+                "Explanatory models, psychosocial stressors, support networks, and identity",
+                "Self-coping mechanisms, previous treatment history, and access barriers",
+                "Care expectations and preventing clinician-patient misunderstandings"
+            ],
+            placeholders: [
+                "Record patient phrasing, personal idioms of distress, and primary worries...",
+                "Record attributed causes, community views, social stressors, and role of cultural identity...",
+                "Record autonomous coping, previous healing sought, usefulness, and structural barriers...",
+                "Record perceived needs, family recommendations, and potential clinician-patient misalignment..."
+            ],
+            guideTitle: "DSM-5-TR Clinical Questions",
+            guideTip: "Click any question to paste it into the domain notebook."
+        }
     },
-    en: {
-        title: "Cultural Formulation Interview (CFI)",
-        subtitle: "DSM-5-TR Structured Clinical Interview Guide",
-        patientTermLabel: "Patient's term or description for the problem",
-        patientTermPh: "E.g., Nerves, low spirits, distress, pressure in head...",
-        toggleGuide: "Show guiding questions",
-        d1Title: "Domain 1: Cultural Definition of the Problem",
-        d1Subtitle: "Personal and social meaning of the clinical issue",
-        d1NotesPh: "Record patient's phrasing, personal explanatory terms, and main concerns...",
-        d2Title: "Domain 2: Causes, Context, and Support",
-        d2Subtitle: "Explanatory models, stressors, support network, and identity",
-        d2NotesPh: "Record attributed causes, family views, psychosocial stressors, and cultural identity...",
-        d3Title: "Domain 3: Coping and Past Help Seeking",
-        d3Subtitle: "Self-coping resources, treatment history, and barriers",
-        d3NotesPh: "Record autonomous coping, previous treatments or healers, usefulness, and barriers...",
-        d4Title: "Domain 4: Current Help Seeking & Therapeutic Relationship",
-        d4Subtitle: "Care expectations and preventing misunderstanding",
-        d4NotesPh: "Record perceived needs, network advice, and concerns regarding the clinician-patient bond...",
-        btnCopy: "COPY CLINICAL REPORT",
-        btnAI: "SYNTHESIZE WITH AI",
-        btnReset: "RESET",
-        copied: "Report copied to clipboard",
-        aiLoading: "Synthesizing cultural formulation...",
-        aiError: "Could not connect to AI service.",
-        aiTitle: "Narrative Synthesis (DSM-5-TR):",
-        disclaimer: "Based on the Cultural Formulation Interview (CFI), DSM-5-TR (American Psychiatric Association). Clinical support tool."
+    questions: {
+        es: {
+            1: [
+                { num: "01", q: "¿Qué le trae hoy aquí?", probe: "Si solo cita un diagnóstico médico: La gente suele entender sus problemas a su manera. ¿Cómo describiría usted su problema?" },
+                { num: "02", q: "¿Cómo le describiría [problema] a su familia, amigos o personas de su comunidad?", probe: "Explora la formulación frente a la red social y el lenguaje cotidiano." },
+                { num: "03", q: "¿Qué es lo que más le preocupa o le inquieta de [problema]?", probe: "Indaga el aspecto de mayor impacto personal o funcional." }
+            ],
+            2: [
+                { num: "04", q: "¿Por qué cree que le ocurre esto? ¿Cuáles cree que son las causas de [problema]?", probe: "Sondear: sucesos vitales, conflictos personales, factores físicos, emocionales o espirituales." },
+                { num: "05", q: "¿Qué piensan sus familiares o allegados sobre la causa de [problema]?", probe: "Identifica discrepancias entre el paciente y su entorno directo." },
+                { num: "06", q: "¿Hay apoyos que mejoren [problema] (familia, amigos, comunidad, espiritualidad)?", probe: "Identifica recursos de resiliencia y factores protectores." },
+                { num: "07", q: "¿Hay factores de estrés que empeoren [problema] (dinero, empleo, discriminación)?", probe: "Contextualiza los determinantes socioambientales adversos." },
+                { num: "08", q: "¿Cuáles son los aspectos más importantes de su origen o identidad (cultura, lengua, procedencia, género, fe)?", probe: "Autodefinición cultural relevante para el caso." },
+                { num: "09", q: "¿Hay aspectos de su origen o identidad que marquen una diferencia en [problema]?", probe: "Impacto específico de la identidad en la vivencia del cuadro." },
+                { num: "10", q: "¿Hay aspectos de su identidad que le causen otras dificultades (migración, roles, choque generacional)?", probe: "Vulnerabilidades estructurales ligadas al estatus sociocultural." }
+            ],
+            3: [
+                { num: "11", q: "¿Qué ha hecho usted por su cuenta para sobrellevar o manejar [problema]?", probe: "Estrategias autónomas de afrontamiento adaptativas o desadaptativas." },
+                { num: "12", q: "¿Qué tipo de ayuda, tratamiento o curación ha buscado en el pasado? ¿Qué le resultó útil y qué no?", probe: "Incluye médicos, salud mental, guías espirituales o medicina tradicional." },
+                { num: "13", q: "¿Ha habido algo que le haya impedido recibir la ayuda necesaria?", probe: "Sondear: recursos económicos, trabajo, estigma social, barreras de idioma o culturales." }
+            ],
+            4: [
+                { num: "14", q: "¿Qué tipo de ayuda cree que le resultaría más útil en este momento para [problema]?", probe: "Expectativas asistenciales directas del paciente." },
+                { num: "15", q: "¿Hay otros tipos de ayuda que sus familiares o allegados le hayan sugerido?", probe: "Presiones o expectativas divergentes de la red de apoyo." },
+                { num: "16", q: "A veces médicos y pacientes no se entienden por tener orígenes o expectativas distintas. ¿Le ha preocupado esto? ¿Qué podemos hacer para darle la atención que necesita?", probe: "Prevención de desavenencias y refuerzo de la alianza terapéutica." }
+            ]
+        },
+        en: {
+            1: [
+                { num: "01", q: "What brings you here today?", probe: "If medical diagnosis given: People often understand problems in their own way. How would you describe your problem?" },
+                { num: "02", q: "How would you describe [problema] to your family, friends, or community?", probe: "Explores communication within the social network." },
+                { num: "03", q: "What troubles you most about [problema]?", probe: "Focuses on the most distressing or disabling facets." }
+            ],
+            2: [
+                { num: "04", q: "Why do you think this is happening? What do you think are the causes of [problema]?", probe: "Probe: life events, conflicts, somatic, psychological, or spiritual causes." },
+                { num: "05", q: "What do others in your family or community think is causing [problema]?", probe: "Identifies divergence between individual and network models." },
+                { num: "06", q: "Are there supports that make [problema] better (family, friends, spirituality)?", probe: "Assesses resilience, protective factors, and coping capital." },
+                { num: "07", q: "Are there stresses that make [problema] worse (finances, work, discrimination)?", probe: "Evaluates environmental and systemic psychosocial stressors." },
+                { num: "08", q: "What are the most important aspects of your background or identity?", probe: "Self-defined cultural, ethnic, linguistic, gender, or religious elements." },
+                { num: "09", q: "Do any aspects of your background or identity make a difference to [problema]?", probe: "Salience of cultural identity in illness expression." },
+                { num: "10", q: "Do any aspects of your identity cause difficulties (migration, gender roles, generational gap)?", probe: "Structural difficulties or discrimination related to identity." }
+            ],
+            3: [
+                { num: "11", q: "What have you done on your own to cope with [problema]?", probe: "Evaluates autonomous coping and self-management strategies." },
+                { num: "12", q: "In the past, what kinds of care, advice, or healing have you sought? What was helpful and what wasn't?", probe: "Includes medical, psychological, folk healers, and spiritual counselors." },
+                { num: "13", q: "Has anything prevented you from getting the help you need?", probe: "Probes financial, systemic, stigma, linguistic, or cultural barriers." }
+            ],
+            4: [
+                { num: "14", q: "What kinds of help do you think would be most useful to you at this time for [problema]?", probe: "Clarifies direct patient preferences and treatment goals." },
+                { num: "15", q: "Are there other kinds of help suggested by family, friends, or others?", probe: "Uncovers network suggestions and potential conflicting loyalties." },
+                { num: "16", q: "Clinicians and patients sometimes misunderstand each other due to differing backgrounds. Have you been concerned about this? What can we do to provide the care you need?", probe: "Elicits concerns regarding therapeutic rapport and cultural distance." }
+            ]
+        }
     }
 };
 
-const cfiQuestions = {
-    es: {
-        d1: [
-            "1. ¿Qué le trae hoy aquí? (Si solo cita un diagnóstico médico: La gente suele entender sus problemas a su propia manera. ¿Cómo describiría usted su problema?)",
-            "2. A veces la gente describe su problema de forma distinta a su familia, amigos o comunidad. ¿Cómo se lo describiría a ellos?",
-            "3. ¿Qué es lo que más le preocupa o le inquieta de su problema?"
-        ],
-        d2: [
-            "4. ¿Por qué cree que le ocurre esto? ¿Cuáles cree que son las causas? (Sondear: sucesos vitales, conflictos, causa física, espiritual...)",
-            "5. ¿Qué piensan sus familiares, amigos o allegados sobre la causa de su problema?",
-            "6. ¿Hay apoyos que mejoren su situación? (Familia, amigos, comunidad, religión/espiritualidad).",
-            "7. ¿Hay factores de estrés que la empeoren? (Económicos, laborales, familiares, discriminación).",
-            "8. Para usted, ¿cuáles son los aspectos más importantes de su origen o identidad (comunidad, idioma, procedencia, género, orientación, fe)?",
-            "9. ¿Hay aspectos de su origen o identidad que marquen una diferencia en su problema?",
-            "10. ¿Hay aspectos de su identidad que le causen otras dificultades (migración, choque generacional, roles de género)?"
-        ],
-        d3: [
-            "11. ¿Qué ha hecho usted por su cuenta para sobrellevar o manejar este problema?",
-            "12. En el pasado, ¿qué tipo de ayuda, tratamiento, consejo o curación ha buscado (médicos, salud mental, medicina tradicional, guías espirituales)? ¿Qué le fue útil y qué no?",
-            "13. ¿Ha habido algo que le haya impedido recibir la ayuda necesaria (dinero, trabajo, estigma, barrera idiomática o cultural)?"
-        ],
-        d4: [
-            "14. ¿Qué tipo de ayuda cree que le resultaría más útil en este momento?",
-            "15. ¿Hay otros tipos de ayuda que sus familiares, amigos u otras personas le hayan sugerido?",
-            "16. A veces médicos y pacientes no se entienden por tener orígenes o expectativas distintas. ¿Le ha preocupado esto? ¿Hay algo que podamos hacer para brindarle la atención que necesita?"
-        ]
-    },
-    en: {
-        d1: [
-            "1. What brings you here today? (If medical diagnosis given: People often understand problems in their own way. How would you describe your problem?)",
-            "2. How would you describe your problem to family, friends, or your community?",
-            "3. What troubles you most about your problem?"
-        ],
-        d2: [
-            "4. Why do you think this is happening to you? What do you think are the causes?",
-            "5. What do others in your family, friends, or community think is causing it?",
-            "6. Are there supports that make it better (family, friends, spirituality)?",
-            "7. Are there stresses that make it worse (money, work, family, discrimination)?",
-            "8. What are the most important aspects of your background or identity?",
-            "9. Do any aspects of your background or identity make a difference to your problem?",
-            "10. Do any aspects of your identity cause other concerns or difficulties?"
-        ],
-        d3: [
-            "11. What have you done on your own to cope with your problem?",
-            "12. What kinds of treatment, advice, or healing have you sought in the past? What was most and least useful?",
-            "13. Has anything prevented you from getting the help you need (financial, stigma, language, culture)?"
-        ],
-        d4: [
-            "14. What kinds of help do you think would be most useful to you at this time?",
-            "15. Are there other kinds of help suggested by family, friends, or others?",
-            "16. Doctors and patients sometimes misunderstand each other due to background or expectations. Have you been concerned about this? What can we do to provide the care you need?"
-        ]
-    }
-};
-
-window.iniciarCFI = async function() {
+window.iniciarCFI = function() {
     const container = document.getElementById('modalData');
     if (!container) return;
 
-    if (!document.getElementById('cfi-styles')) {
+    if (!document.getElementById('cfi-pro-styles')) {
         const style = document.createElement('style');
-        style.id = 'cfi-styles';
+        style.id = 'cfi-pro-styles';
         style.innerHTML = `
-            .cfi-container { padding: 1.2rem; font-family: inherit; color: var(--text-main); }
-            .cfi-header-ui {
-                background: var(--card);
-                padding: 1.2rem;
-                border-radius: 1.2rem;
-                border: 1px solid var(--border);
-                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
-                margin-bottom: 1.2rem;
+            .cfi-container {
+                display: flex;
+                flex-direction: column;
+                height: 85vh;
+                min-height: 600px;
+                max-height: 920px;
+                background: var(--bg, #f8fafc);
+                color: var(--text-main, #0f172a);
+                font-family: inherit;
+                overflow: hidden;
             }
-            .cfi-label {
-                display: block; font-size: 0.7rem; font-weight: 800;
-                color: var(--text-muted); text-transform: uppercase;
-                letter-spacing: 0.05em; margin-bottom: 0.4rem;
+
+            /* NAV SUPERIOR ESTILO SPI */
+            .cfi-nav-ui {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 16px;
+                background: var(--card, #ffffff);
+                border-bottom: 1px solid var(--border, #e2e8f0);
+                flex-shrink: 0;
             }
-            .cfi-input {
-                width: 100%; padding: 0.75rem 0.9rem; border-radius: 0.8rem;
-                border: 2px solid var(--border); background: var(--bg);
-                color: var(--text-main); font-size: 0.95rem; font-weight: 600;
-                outline: none; transition: all 0.2s; box-sizing: border-box;
+            .cfi-nav-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 0.88rem;
+                font-weight: 900;
+                letter-spacing: 0.02em;
+                margin: 0;
             }
-            .cfi-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1); }
-            .cfi-card {
-                background: var(--card); border: 1px solid var(--border); border-radius: 1rem;
-                padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            .cfi-nav-title span {
+                font-size: 0.65rem;
+                background: rgba(37, 99, 235, 0.1);
+                color: var(--primary, #2563eb);
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 800;
             }
-            .cfi-card-header { margin-bottom: 0.6rem; }
-            .cfi-badge {
-                font-weight: 800; font-size: 0.65rem; color: var(--primary);
-                background: rgba(67, 56, 202, 0.08); padding: 3px 8px; border-radius: 6px;
-                display: inline-block; margin-bottom: 0.3rem; text-transform: uppercase;
+            .cfi-nav-right {
+                display: flex;
+                gap: 6px;
+                align-items: center;
+                margin-right: 35px; /* Margen para botón de cierre del modal */
             }
-            .cfi-domain-title { font-size: 0.95rem; font-weight: 800; margin: 0; color: var(--text-main); }
-            .cfi-domain-sub { font-size: 0.75rem; color: var(--text-muted); margin: 0.2rem 0 0.5rem 0; }
-            
-            .cfi-guide-toggle {
-                font-size: 0.72rem; font-weight: 700; color: var(--primary);
-                background: none; border: none; padding: 0; cursor: pointer;
-                display: inline-flex; align-items: center; gap: 4px; margin-bottom: 0.6rem;
+
+            /* BARRA DEL TÉRMINO DEL PACIENTE */
+            .cfi-term-bar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 16px;
+                background: var(--card, #ffffff);
+                border-bottom: 1px solid var(--border, #e2e8f0);
+                flex-shrink: 0;
             }
-            .cfi-guide-box {
-                background: var(--bg); border-left: 3px solid var(--primary);
-                padding: 0.6rem 0.8rem; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 0.7rem;
-                font-size: 0.78rem; line-height: 1.45; color: var(--text-main); display: none;
+            .cfi-term-label {
+                font-size: 0.7rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--text-muted, #64748b);
+                white-space: nowrap;
             }
-            .cfi-guide-box ul { margin: 0; padding-left: 1.1rem; }
-            .cfi-guide-box li { margin-bottom: 0.35rem; }
-            
+            .cfi-term-input {
+                flex: 1;
+                border: 1px solid var(--border, #cbd5e1);
+                background: var(--bg, #f8fafc);
+                color: var(--text-main, #0f172a);
+                font-size: 0.82rem;
+                font-weight: 600;
+                padding: 5px 10px;
+                border-radius: 6px;
+                outline: none;
+                transition: border-color 0.15s;
+            }
+            .cfi-term-input:focus {
+                border-color: var(--primary, #2563eb);
+                background: #fff;
+            }
+
+            /* SELECTOR DE PESTAÑAS / DOMINIOS */
+            .cfi-tabs {
+                display: flex;
+                background: var(--card, #ffffff);
+                border-bottom: 1px solid var(--border, #e2e8f0);
+                padding: 0 16px;
+                overflow-x: auto;
+                gap: 4px;
+                flex-shrink: 0;
+            }
+            .cfi-tab-btn {
+                position: relative;
+                background: none;
+                border: none;
+                padding: 10px 14px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                color: var(--text-muted, #64748b);
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                transition: all 0.15s;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .cfi-tab-btn:hover { color: var(--primary, #2563eb); }
+            .cfi-tab-btn.active {
+                color: var(--primary, #2563eb);
+                border-bottom-color: var(--primary, #2563eb);
+                font-weight: 800;
+            }
+            .cfi-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: var(--primary, #2563eb);
+                display: none;
+            }
+            .cfi-dot.has-content { display: inline-block; }
+
+            /* ÁREA DE TRABAJO EN 2 PANELES */
+            .cfi-workspace {
+                flex: 1;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                padding: 12px 16px;
+                overflow: hidden;
+            }
+            @media (max-width: 768px) {
+                .cfi-workspace {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: auto 1fr;
+                    overflow-y: auto;
+                }
+            }
+
+            /* COLUMNA GUÍA DE PREGUNTAS */
+            .cfi-guide-col {
+                display: flex;
+                flex-direction: column;
+                background: var(--card, #ffffff);
+                border: 1px solid var(--border, #e2e8f0);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+            .cfi-guide-header {
+                padding: 8px 12px;
+                background: rgba(0,0,0,0.02);
+                border-bottom: 1px solid var(--border, #e2e8f0);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .cfi-guide-title {
+                font-size: 0.72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--text-muted, #64748b);
+                margin: 0;
+            }
+            .cfi-guide-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .cfi-q-card {
+                background: var(--bg, #f8fafc);
+                border: 1px solid var(--border, #e2e8f0);
+                border-left: 3px solid var(--primary, #2563eb);
+                border-radius: 6px;
+                padding: 8px 10px;
+                cursor: pointer;
+                transition: transform 0.1s, background 0.15s;
+            }
+            .cfi-q-card:hover {
+                transform: translateX(2px);
+                background: #fff;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            }
+            .cfi-q-meta {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 4px;
+            }
+            .cfi-q-badge {
+                font-size: 0.6rem;
+                font-weight: 900;
+                background: rgba(37, 99, 235, 0.12);
+                color: var(--primary, #2563eb);
+                padding: 1px 5px;
+                border-radius: 4px;
+            }
+            .cfi-q-text {
+                font-size: 0.78rem;
+                font-weight: 700;
+                color: var(--text-main, #0f172a);
+                line-height: 1.35;
+                margin: 0 0 3px 0;
+            }
+            .cfi-q-text .term-hl {
+                color: var(--primary, #2563eb);
+                text-decoration: underline dotted;
+            }
+            .cfi-q-probe {
+                font-size: 0.7rem;
+                color: var(--text-muted, #64748b);
+                line-height: 1.3;
+                margin: 0;
+                font-style: italic;
+            }
+
+            /* COLUMNA BLOC DE NOTAS */
+            .cfi-editor-col {
+                display: flex;
+                flex-direction: column;
+                background: var(--card, #ffffff);
+                border: 1px solid var(--border, #e2e8f0);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+            .cfi-editor-header {
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--border, #e2e8f0);
+                background: rgba(0,0,0,0.02);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .cfi-editor-title {
+                font-size: 0.74rem;
+                font-weight: 800;
+                color: var(--text-main, #0f172a);
+                margin: 0;
+            }
+            .cfi-editor-sub {
+                font-size: 0.68rem;
+                color: var(--text-muted, #64748b);
+                padding: 6px 12px;
+                background: #fff;
+                border-bottom: 1px dashed var(--border, #e2e8f0);
+                line-height: 1.3;
+            }
             .cfi-textarea {
-                width: 100%; min-height: 75px; padding: 0.7rem; border-radius: 0.7rem;
-                border: 1px solid var(--border); background: var(--bg);
-                color: var(--text-main); font-size: 0.85rem; font-family: inherit;
-                resize: vertical; outline: none; box-sizing: border-box;
+                flex: 1;
+                width: 100%;
+                box-sizing: border-box;
+                border: none;
+                padding: 12px;
+                font-family: inherit;
+                font-size: 0.84rem;
+                line-height: 1.5;
+                color: var(--text-main, #0f172a);
+                background: #fff;
+                resize: none;
+                outline: none;
             }
-            .cfi-textarea:focus { border-color: var(--primary); }
-            
-            .cfi-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.2rem; }
-            .btn-cfi-primary {
-                background: var(--primary); color: white; border: none; padding: 0.85rem;
-                border-radius: 0.8rem; font-weight: 800; font-size: 0.82rem; cursor: pointer;
-                transition: transform 0.15s, opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+
+            /* PANEL INFERIOR RETRÁCTIL (ESTILO SPI) */
+            .cfi-bottom {
+                flex-shrink: 0;
+                border-top: 1px solid var(--border, #e2e8f0);
+                background: var(--card, #ffffff);
             }
-            .btn-cfi-secondary {
-                background: var(--card); color: var(--text-main); border: 2px solid var(--border);
-                padding: 0.85rem; border-radius: 0.8rem; font-weight: 800; font-size: 0.82rem; cursor: pointer;
-                transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+            .cfi-info-bar {
+                padding: 8px 16px;
+                font-size: 0.72rem;
+                color: var(--text-muted, #64748b);
+                border-left: 4px solid var(--primary, #2563eb);
+                background: #fff;
+                line-height: 1.3;
             }
-            .btn-cfi-primary:active, .btn-cfi-secondary:active { transform: scale(0.98); }
-            .btn-cfi-reset {
-                width: 100%; background: none; border: none; color: var(--text-muted);
-                font-size: 0.72rem; font-weight: 700; padding: 0.8rem; cursor: pointer; text-align: center;
-                margin-top: 0.4rem; text-decoration: underline;
+            .cfi-ia-output {
+                display: none;
+                background: var(--bg, #f8fafc);
+                border-top: 1px solid var(--border, #e2e8f0);
+                padding: 12px 16px;
+                font-size: 0.8rem;
+                line-height: 1.55;
+                color: var(--text-main, #0f172a);
+                max-height: 150px;
+                overflow-y: auto;
+                border-left: 4px solid var(--primary, #2563eb);
+                white-space: pre-wrap;
             }
-            
-            .cfi-ai-box {
-                margin-top: 1.2rem; background: var(--card); border: 1px solid var(--primary);
-                border-radius: 1rem; padding: 1.1rem; display: none;
+            .cfi-ia-output.visible { display: block; }
+            .cfi-ia-output.loading { color: var(--text-muted, #64748b); font-style: italic; }
+            .cfi-ia-footer {
+                display: none;
+                padding: 6px 16px;
+                background: var(--card, #ffffff);
+                border-top: 1px solid var(--border, #e2e8f0);
+                justify-content: flex-end;
+                gap: 8px;
             }
-            .cfi-ai-box-title { font-size: 0.82rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem; }
-            .cfi-ai-content { font-size: 0.85rem; line-height: 1.5; color: var(--text-main); white-space: pre-wrap; margin-bottom: 0.8rem; }
-            .cfi-disclaimer {
-                font-size: 0.68rem; color: var(--text-muted); text-align: center;
-                margin-top: 1.5rem; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 0.8rem;
+            .cfi-ia-footer.visible { display: flex; }
+
+            /* BOTONES MINI IDÉNTICOS A SPI */
+            .btn-mini {
+                padding: 4px 10px;
+                border-radius: 6px;
+                border: 1px solid var(--border, #cbd5e1);
+                background: var(--card, #ffffff);
+                cursor: pointer;
+                font-size: 0.7rem;
+                font-weight: 700;
+                transition: all 0.15s;
+                color: var(--text-main, #0f172a);
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+            }
+            .btn-mini:hover { background: var(--border, #e2e8f0); }
+            .btn-mini.active {
+                background: var(--primary, #2563eb);
+                color: #ffffff;
+                border-color: var(--primary, #2563eb);
+            }
+            .btn-mini.ia {
+                border-color: var(--primary, #2563eb);
+                color: var(--primary, #2563eb);
+                font-weight: 800;
+            }
+            .btn-mini.ia:hover {
+                background: var(--primary, #2563eb);
+                color: #ffffff;
             }
         `;
         document.head.appendChild(style);
@@ -216,233 +487,298 @@ window.iniciarCFI = async function() {
     renderInterfazCFI();
 };
 
-window.setLanguageCFI = function(lang) {
-    window.cfiLang = lang;
-    renderInterfazCFI();
-};
-
-window.toggleCFIEstadoGuia = function(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
-};
-
 function renderInterfazCFI() {
-    const t = i18nCFI[window.cfiLang];
-    const q = cfiQuestions[window.cfiLang];
+    const t = window.ToolCFI.i18n[window.ToolCFI.lang];
+    const dIdx = window.ToolCFI.activeDomain;
     const container = document.getElementById('modalData');
     if (!container) return;
 
+    const termUser = window.ToolCFI.term.trim();
+    const termDisplay = termUser || t.termDefault;
+    const questionsList = window.ToolCFI.questions[window.ToolCFI.lang][dIdx] || [];
+
     container.innerHTML = `
         <div class="cfi-container">
-            <div class="calc-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; padding-right: 45px;">
-                <div>
-                    <h2 style="font-weight:900; margin:0; font-size:1.25rem;">${t.title}</h2>
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">${t.subtitle}</span>
-                </div>
-                <div class="lang-toggle">
-                    <button class="lang-btn ${window.cfiLang === 'es' ? 'active' : ''}" onclick="setLanguageCFI('es')">ES</button>
-                    <button class="lang-btn ${window.cfiLang === 'en' ? 'active' : ''}" onclick="setLanguageCFI('en')">EN</button>
+
+            <!-- CABECERA DE CONTROL (ESTILO SPI) -->
+            <div class="cfi-nav-ui">
+                <h2 class="cfi-nav-title">
+                    ${t.title} <span>DSM-5-TR</span>
+                </h2>
+                <div class="cfi-nav-right">
+                    <button class="btn-mini ${window.ToolCFI.lang === 'es' ? 'active' : ''}" onclick="setLangCFI('es')">ES</button>
+                    <button class="btn-mini ${window.ToolCFI.lang === 'en' ? 'active' : ''}" onclick="setLangCFI('en')">EN</button>
+                    <button class="btn-mini ia" onclick="sintetizarIACFI()">${t.ia}</button>
+                    <button class="btn-mini" onclick="copiarInformeCFI()" title="${t.copyFull}">
+                        <i class="far fa-copy"></i> ${t.copyFull}
+                    </button>
+                    <button class="btn-mini" onclick="resetCFI()" title="${t.reset}">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="cfi-header-ui">
-                <label class="cfi-label">${t.patientTermLabel}</label>
-                <input type="text" id="cfi_term" class="cfi-input" placeholder="${t.patientTermPh}">
+            <!-- ENCABEZADO: TÉRMINO DEL PACIENTE (DINÁMICO EN PREGUNTAS) -->
+            <div class="cfi-term-bar">
+                <span class="cfi-term-label">${t.termLabel}:</span>
+                <input type="text" id="cfiTermInput" class="cfi-term-input" 
+                       placeholder="${t.termPh}" 
+                       value="${escapeHTML(window.ToolCFI.term)}" 
+                       oninput="onTermChangeCFI(this.value)">
             </div>
 
-            <!-- DOMINIO 1 -->
-            <div class="cfi-card">
-                <div class="cfi-card-header">
-                    <span class="cfi-badge">CFI 01 - 03</span>
-                    <h3 class="cfi-domain-title">${t.d1Title}</h3>
-                    <p class="cfi-domain-sub">${t.d1Subtitle}</p>
-                </div>
-                <button class="cfi-guide-toggle" onclick="toggleCFIEstadoGuia('cfi_guide_d1')">
-                    <i class="fas fa-chevron-down"></i> ${t.toggleGuide}
-                </button>
-                <div id="cfi_guide_d1" class="cfi-guide-box">
-                    <ul>
-                        ${q.d1.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                </div>
-                <textarea id="cfi_d1" class="cfi-textarea" placeholder="${t.d1NotesPh}"></textarea>
+            <!-- TABS POR DOMINIO -->
+            <div class="cfi-tabs">
+                ${[1, 2, 3, 4].map(num => `
+                    <button class="cfi-tab-btn ${window.ToolCFI.activeDomain === num ? 'active' : ''}" 
+                            onclick="selectDomainCFI(${num})">
+                        <span>${t.dNames[num - 1]}</span>
+                        <span class="cfi-dot ${window.ToolCFI.notes[num]?.trim() ? 'has-content' : ''}"></span>
+                    </button>
+                `).join('')}
             </div>
 
-            <!-- DOMINIO 2 -->
-            <div class="cfi-card">
-                <div class="cfi-card-header">
-                    <span class="cfi-badge">CFI 04 - 10</span>
-                    <h3 class="cfi-domain-title">${t.d2Title}</h3>
-                    <p class="cfi-domain-sub">${t.d2Subtitle}</p>
+            <!-- ÁREA DE TRABAJO (GUÍA CLÍNICA + EDITOR) -->
+            <div class="cfi-workspace">
+                
+                <!-- COLUMNA IZQUIERDA: PREGUNTAS GUÍA DSM-5-TR -->
+                <div class="cfi-guide-col">
+                    <div class="cfi-guide-header">
+                        <span class="cfi-guide-title">${t.guideTitle}</span>
+                        <span style="font-size:0.65rem; color:var(--text-muted);">${t.guideTip}</span>
+                    </div>
+                    <div class="cfi-guide-scroll">
+                        ${questionsList.map(item => {
+                            const parsedQ = item.q.replace(/\[problema\]/gi, `<span class="term-hl">${escapeHTML(termDisplay)}</span>`);
+                            return `
+                                <div class="cfi-q-card" onclick="insertQuestionToNotesCFI('${item.num}')">
+                                    <div class="cfi-q-meta">
+                                        <span class="cfi-q-badge">CFI ${item.num}</span>
+                                    </div>
+                                    <p class="cfi-q-text">${parsedQ}</p>
+                                    <p class="cfi-q-probe">${item.probe}</p>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
-                <button class="cfi-guide-toggle" onclick="toggleCFIEstadoGuia('cfi_guide_d2')">
-                    <i class="fas fa-chevron-down"></i> ${t.toggleGuide}
-                </button>
-                <div id="cfi_guide_d2" class="cfi-guide-box">
-                    <ul>
-                        ${q.d2.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
+
+                <!-- COLUMNA DERECHA: APUNTES CLÍNICOS DEL DOMINIO -->
+                <div class="cfi-editor-col">
+                    <div class="cfi-editor-header">
+                        <span class="cfi-editor-title">${t.dNames[dIdx - 1]}</span>
+                        <span id="cfiCharCount" style="font-size:0.65rem; color:var(--text-muted);">
+                            ${(window.ToolCFI.notes[dIdx] || '').length} caracteres
+                        </span>
+                    </div>
+                    <div class="cfi-editor-sub">
+                        ${t.dSubtitles[dIdx - 1]}
+                    </div>
+                    <textarea id="cfiDomainNotes" class="cfi-textarea" 
+                              placeholder="${t.placeholders[dIdx - 1]}" 
+                              oninput="onNotesChangeCFI(${dIdx}, this.value)">${escapeHTML(window.ToolCFI.notes[dIdx] || '')}</textarea>
                 </div>
-                <textarea id="cfi_d2" class="cfi-textarea" placeholder="${t.d2NotesPh}"></textarea>
+
             </div>
 
-            <!-- DOMINIO 3 -->
-            <div class="cfi-card">
-                <div class="cfi-card-header">
-                    <span class="cfi-badge">CFI 11 - 13</span>
-                    <h3 class="cfi-domain-title">${t.d3Title}</h3>
-                    <p class="cfi-domain-sub">${t.d3Subtitle}</p>
+            <!-- PANEL INFERIOR RETRÁCTIL: CONSEJO E INTELIGENCIA ARTIFICIAL -->
+            <div class="cfi-bottom">
+                <div class="cfi-info-bar" id="cfiInfoBar">
+                    <strong>DSM-5-TR:</strong> Registre términos literales del paciente y evite interpretar prematureces diagnósticas en la formulación cultural.
                 </div>
-                <button class="cfi-guide-toggle" onclick="toggleCFIEstadoGuia('cfi_guide_d3')">
-                    <i class="fas fa-chevron-down"></i> ${t.toggleGuide}
-                </button>
-                <div id="cfi_guide_d3" class="cfi-guide-box">
-                    <ul>
-                        ${q.d3.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
+                <div class="cfi-ia-output" id="cfiIaOutput"></div>
+                <div class="cfi-ia-footer" id="cfiIaFooter">
+                    <button class="btn-mini" onclick="copiarNarrativaCFI()">
+                        <i class="far fa-copy"></i> <span id="cfiBtnCopyText">${t.copyAi}</span>
+                    </button>
                 </div>
-                <textarea id="cfi_d3" class="cfi-textarea" placeholder="${t.d3NotesPh}"></textarea>
             </div>
 
-            <!-- DOMINIO 4 -->
-            <div class="cfi-card">
-                <div class="cfi-card-header">
-                    <span class="cfi-badge">CFI 14 - 16</span>
-                    <h3 class="cfi-domain-title">${t.d4Title}</h3>
-                    <p class="cfi-domain-sub">${t.d4Subtitle}</p>
-                </div>
-                <button class="cfi-guide-toggle" onclick="toggleCFIEstadoGuia('cfi_guide_d4')">
-                    <i class="fas fa-chevron-down"></i> ${t.toggleGuide}
-                </button>
-                <div id="cfi_guide_d4" class="cfi-guide-box">
-                    <ul>
-                        ${q.d4.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                </div>
-                <textarea id="cfi_d4" class="cfi-textarea" placeholder="${t.d4NotesPh}"></textarea>
-            </div>
-
-            <div class="cfi-actions">
-                <button class="btn-cfi-secondary" onclick="copiarInformeCFI()">
-                    <i class="far fa-copy"></i> ${t.btnCopy}
-                </button>
-                <button id="btn-cfi-ai" class="btn-cfi-primary" onclick="sintetizarIACFI()">
-                    <i class="fas fa-robot"></i> ${t.btnAI}
-                </button>
-            </div>
-
-            <button class="btn-cfi-reset" onclick="reiniciarCFI()">${t.btnReset}</button>
-
-            <!-- CAJA DE RESULTADO IA -->
-            <div id="cfi-ai-box" class="cfi-ai-box">
-                <div class="cfi-ai-box-title">
-                    <i class="fas fa-brain"></i> ${t.aiTitle}
-                </div>
-                <div id="cfi-ai-content" class="cfi-ai-content"></div>
-                <button class="btn-cfi-primary" style="width:100%;" onclick="copiarSintesisIACFI()">
-                    <i class="far fa-copy"></i> ${t.btnCopy}
-                </button>
-            </div>
-
-            <div class="cfi-disclaimer">${t.disclaimer}</div>
         </div>
     `;
 }
 
-window.copiarInformeCFI = function() {
-    const t = i18nCFI[window.cfiLang];
-    const term = (document.getElementById('cfi_term')?.value || '').trim();
-    const d1 = (document.getElementById('cfi_d1')?.value || '').trim();
-    const d2 = (document.getElementById('cfi_d2')?.value || '').trim();
-    const d3 = (document.getElementById('cfi_d3')?.value || '').trim();
-    const d4 = (document.getElementById('cfi_d4')?.value || '').trim();
+window.onTermChangeCFI = function(val) {
+    window.ToolCFI.term = val;
+    // Actualización reactiva de los resaltados en las preguntas sin perder foco
+    const t = window.ToolCFI.i18n[window.ToolCFI.lang];
+    const display = val.trim() || t.termDefault;
+    const cards = document.querySelectorAll('.cfi-q-card');
+    const questionsList = window.ToolCFI.questions[window.ToolCFI.lang][window.ToolCFI.activeDomain] || [];
 
+    cards.forEach((card, idx) => {
+        if (questionsList[idx]) {
+            const parsed = questionsList[idx].q.replace(/\[problema\]/gi, `<span class="term-hl">${escapeHTML(display)}</span>`);
+            const p = card.querySelector('.cfi-q-text');
+            if (p) p.innerHTML = parsed;
+        }
+    });
+};
+
+window.onNotesChangeCFI = function(domain, val) {
+    window.ToolCFI.notes[domain] = val;
+    const countEl = document.getElementById('cfiCharCount');
+    if (countEl) countEl.innerText = `${val.length} caracteres`;
+
+    // Actualizar indicador de punto en pestaña activa
+    const tabs = document.querySelectorAll('.cfi-tab-btn');
+    if (tabs[domain - 1]) {
+        const dot = tabs[domain - 1].querySelector('.cfi-dot');
+        if (dot) {
+            if (val.trim()) dot.classList.add('has-content');
+            else dot.classList.remove('has-content');
+        }
+    }
+};
+
+window.selectDomainCFI = function(num) {
+    window.ToolCFI.activeDomain = num;
+    renderInterfazCFI();
+    const textarea = document.getElementById('cfiDomainNotes');
+    if (textarea) textarea.focus();
+};
+
+window.insertQuestionToNotesCFI = function(num) {
+    const dIdx = window.ToolCFI.activeDomain;
+    const qItem = (window.ToolCFI.questions[window.ToolCFI.lang][dIdx] || []).find(x => x.num === num);
+    if (!qItem) return;
+
+    const textarea = document.getElementById('cfiDomainNotes');
+    if (!textarea) return;
+
+    const t = window.ToolCFI.i18n[window.ToolCFI.lang];
+    const term = window.ToolCFI.term.trim() || t.termDefault;
+    const cleanQ = qItem.q.replace(/\[problema\]/gi, `"${term}"`);
+    const insertion = `[CFI ${num}: ${cleanQ}]\n- `;
+
+    const currentVal = textarea.value;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    const newVal = currentVal.substring(0, start) + (start > 0 && !currentVal.endsWith('\n') ? '\n' : '') + insertion + currentVal.substring(end);
+    textarea.value = newVal;
+    window.onNotesChangeCFI(dIdx, newVal);
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = start + insertion.length;
+};
+
+window.sintetizarIACFI = async function() {
+    const t = window.ToolCFI.i18n[window.ToolCFI.lang];
+    const iaOutput = document.getElementById('cfiIaOutput');
+    const iaFooter = document.getElementById('cfiIaFooter');
+    if (!iaOutput || !iaFooter) return;
+
+    const hasContent = Object.values(window.ToolCFI.notes).some(txt => txt.trim().length > 0) || window.ToolCFI.term.trim().length > 0;
+    if (!hasContent) {
+        iaOutput.textContent = t.iaVacio;
+        iaOutput.className = 'cfi-ia-output visible loading';
+        iaFooter.className = 'cfi-ia-footer';
+        return;
+    }
+
+    // Contexto en string limpio, simétrico a spi.js (evita el bug de doble serialización)
+    const contextLines = [
+        `ENTREVISTA DE FORMULACIÓN CULTURAL (DSM-5-TR)`,
+        `IDIOMA: ${window.ToolCFI.lang.toUpperCase()}`,
+        `TÉRMINO O METÁFORA DEL PACIENTE: ${window.ToolCFI.term.trim() || 'No especificado'}`,
+        ``,
+        `[DOMINIO 1: DEFINICIÓN CULTURAL DEL PROBLEMA]`,
+        window.ToolCFI.notes[1]?.trim() || 'Sin notas registradas.',
+        ``,
+        `[DOMINIO 2: CAUSAS, CONTEXTO PSICOSOCIAL Y APOYOS]`,
+        window.ToolCFI.notes[2]?.trim() || 'Sin notas registradas.',
+        ``,
+        `[DOMINIO 3: AFRONTAMIENTO Y BÚSQUEDA PREVIA DE AYUDA]`,
+        window.ToolCFI.notes[3]?.trim() || 'Sin notas registradas.',
+        ``,
+        `[DOMINIO 4: AYUDA ACTUAL Y ALIANZA ASISTENCIAL]`,
+        window.ToolCFI.notes[4]?.trim() || 'Sin notas registradas.'
+    ];
+    const contextString = contextLines.join('\n');
+
+    iaOutput.textContent = t.iaGenerando;
+    iaOutput.className = 'cfi-ia-output visible loading';
+    iaFooter.className = 'cfi-ia-footer';
+
+    try {
+        const res = await fetch('/api/ia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                toolId: 'cfi', // Conexión estándar idéntica a 'spi'
+                context: contextString 
+            })
+        });
+
+        if (!res.ok) throw new Error("Status " + res.status);
+        const data = await res.json();
+        
+        const texto = (data.response || data.content || (typeof data === 'string' ? data : '')).replace(/\*\*|###|##|\*/g, '').trim();
+
+        if (!texto) throw new Error("Respuesta vacía");
+
+        iaOutput.textContent = texto;
+        iaOutput.className = 'cfi-ia-output visible';
+        iaFooter.className = 'cfi-ia-footer visible';
+    } catch (e) {
+        console.error("CFI IA Connection Error:", e);
+        iaOutput.textContent = t.iaError;
+        iaOutput.className = 'cfi-ia-output visible loading';
+        iaFooter.className = 'cfi-ia-footer';
+    }
+};
+
+window.copiarNarrativaCFI = function() {
+    const t = window.ToolCFI.i18n[window.ToolCFI.lang];
+    const texto = document.getElementById('cfiIaOutput')?.textContent;
+    if (!texto) return;
+    navigator.clipboard.writeText(texto);
+    const btnSpan = document.getElementById('cfiBtnCopyText');
+    if (!btnSpan) return;
+    const orig = btnSpan.textContent;
+    btnSpan.textContent = t.copied;
+    setTimeout(() => { btnSpan.textContent = orig; }, 2000);
+};
+
+window.copiarInformeCFI = function() {
+    const t = window.ToolCFI.i18n[window.ToolCFI.lang];
+    const term = window.ToolCFI.term.trim();
+    
     let txt = `FORMULACIÓN CULTURAL (DSM-5-TR / CFI)\n`;
-    txt += `--------------------------------------------------\n`;
-    if (term) txt += `Descripción del paciente: ${term}\n\n`;
-    txt += `1. DEFINICIÓN CULTURAL DEL PROBLEMA:\n${d1 || 'Sin hallazgos consignados.'}\n\n`;
-    txt += `2. CAUSAS, CONTEXTO PSICOSOCIAL Y APOYOS:\n${d2 || 'Sin hallazgos consignados.'}\n\n`;
-    txt += `3. AFRONTAMIENTO Y BÚSQUEDA PREVIA DE AYUDA:\n${d3 || 'Sin hallazgos consignados.'}\n\n`;
-    txt += `4. AYUDA ACTUAL Y RELACIÓN MÉDICO-PACIENTE:\n${d4 || 'Sin hallazgos consignados.'}\n`;
+    txt += `==================================================\n`;
+    if (term) txt += `TÉRMINO O DESCRIPCIÓN DEL PACIENTE: ${term}\n\n`;
+    txt += `1. DEFINICIÓN CULTURAL DEL PROBLEMA:\n${window.ToolCFI.notes[1]?.trim() || 'Sin hallazgos consignados.'}\n\n`;
+    txt += `2. CAUSAS, CONTEXTO PSICOSOCIAL Y APOYOS:\n${window.ToolCFI.notes[2]?.trim() || 'Sin hallazgos consignados.'}\n\n`;
+    txt += `3. AFRONTAMIENTO Y BÚSQUEDA PREVIA DE AYUDA:\n${window.ToolCFI.notes[3]?.trim() || 'Sin hallazgos consignados.'}\n\n`;
+    txt += `4. AYUDA ACTUAL Y RELACIÓN ASISTENCIAL:\n${window.ToolCFI.notes[4]?.trim() || 'Sin hallazgos consignados.'}\n`;
+    txt += `==================================================\n`;
 
     navigator.clipboard.writeText(txt);
     alert(t.copied);
 };
 
-window.sintetizarIACFI = async function() {
-    const t = i18nCFI[window.cfiLang];
-    const btn = document.getElementById('btn-cfi-ai');
-    const aiBox = document.getElementById('cfi-ai-box');
-    const aiContent = document.getElementById('cfi-ai-content');
-
-    const term = (document.getElementById('cfi_term')?.value || '').trim();
-    const d1 = (document.getElementById('cfi_d1')?.value || '').trim();
-    const d2 = (document.getElementById('cfi_d2')?.value || '').trim();
-    const d3 = (document.getElementById('cfi_d3')?.value || '').trim();
-    const d4 = (document.getElementById('cfi_d4')?.value || '').trim();
-
-    if (!term && !d1 && !d2 && !d3 && !d4) {
-        alert(window.cfiLang === 'es' ? 'Introduce notas en al menos un dominio.' : 'Please enter notes in at least one domain.');
-        return;
-    }
-
-    const payloadContext = {
-        idioma: window.cfiLang,
-        termino_paciente: term || "No especificado",
-        dominio_1_definicion: d1 || "Sin notas",
-        dominio_2_causas_contexto: d2 || "Sin notas",
-        dominio_3_afrontamiento_previo: d3 || "Sin notas",
-        dominio_4_ayuda_actual_relacion: d4 || "Sin notas"
-    };
-
-    const originalBtnHTML = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t.aiLoading}`;
-    btn.disabled = true;
-
-    try {
-        const response = await fetch('/api/ia', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                toolId: 'cfi_summary',
-                context: JSON.stringify(payloadContext)
-            })
-        });
-
-        if (!response.ok) throw new Error("Error en respuesta del Worker");
-
-        const resData = await response.json();
-        const textoSintesis = resData.response || resData.content || (typeof resData === 'string' ? resData : JSON.stringify(resData));
-
-        aiContent.innerText = textoSintesis;
-        aiBox.style.display = 'block';
-        aiBox.scrollIntoView({ behavior: 'smooth' });
-    } catch (err) {
-        console.error("CFI IA Error:", err);
-        alert(t.aiError);
-    } finally {
-        btn.innerHTML = originalBtnHTML;
-        btn.disabled = false;
-    }
+window.setLangCFI = function(l) {
+    window.ToolCFI.lang = l;
+    renderInterfazCFI();
 };
 
-window.copiarSintesisIACFI = function() {
-    const t = i18nCFI[window.cfiLang];
-    const aiContent = document.getElementById('cfi-ai-content');
-    if (!aiContent || !aiContent.innerText) return;
-    navigator.clipboard.writeText(aiContent.innerText);
-    alert(t.copied);
-};
-
-window.reiniciarCFI = function() {
-    const confirmMsg = window.cfiLang === 'es' ? '¿Deseas reiniciar los campos?' : 'Do you want to reset all fields?';
+window.resetCFI = function() {
+    const confirmMsg = window.ToolCFI.lang === 'es' ? '¿Desea reiniciar todos los campos de la entrevista?' : 'Reset all interview fields?';
     if (confirm(confirmMsg)) {
-        ['cfi_term', 'cfi_d1', 'cfi_d2', 'cfi_d3', 'cfi_d4'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-        const aiBox = document.getElementById('cfi-ai-box');
-        if (aiBox) aiBox.style.display = 'none';
+        window.ToolCFI.term = '';
+        window.ToolCFI.notes = { 1: '', 2: '', 3: '', 4: '' };
+        window.ToolCFI.activeDomain = 1;
+        renderInterfazCFI();
     }
 };
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag] || tag));
+}
