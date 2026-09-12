@@ -49,8 +49,8 @@
                         title: "Toxíndrome Opioide",
                         tag: "Puntiformes",
                         signs: "Miosis bilateral hiporreactiva + Depresión respiratoria + Estupor / coma",
-                        drugs: "Fentanilo · Heroína · Metadona · Morfina · Tramadol",
-                        action: "➔ Soporte ventilatorio + Naloxona iv titulada (0.04 - 0.4 mg inicial)"
+                        drugs: "Fentanilo · Heroína · Metadona · Morfina · Tramadol (sobredosis)",
+                        action: "➔ Soporte ventilatorio + Naloxona iv"
                     },
                     chol: {
                         title: "Toxíndrome Colinérgico",
@@ -125,7 +125,7 @@
                     opioidW: {
                         title: "Opioid Withdrawal",
                         tag: "Rebound",
-                        signs: "Yawning · Lacrimation / rhinorrhea · Piloerection · Diarrhea · Dilated pupils"
+                        signs: "Yawning · Lacrimation / rhinorrhea · Piloerection · Diarrhea · Reactive mydriasis"
                     },
                     diffNote: "⚡ <strong>Diaphoresis differentiator:</strong> With clonus → <strong>Serotonergic</strong> | Without clonus → <strong>Sympathomimetic</strong>.",
                     polyNote: "⚠️ <strong>Polysubstance use:</strong> Alcohol or benzodiazepines can blunt stimulant mydriasis."
@@ -135,8 +135,8 @@
                         title: "Opioid Toxidrome",
                         tag: "Pinpoint",
                         signs: "Bilateral pinpoint pupils + Respiratory depression + Stupor / coma",
-                        drugs: "Fentanyl · Heroin · Methadone · Morphine · Tramadol",
-                        action: "➔ Airway / respiratory support + titrated Naloxone (0.04 - 0.4 mg IV initial)"
+                        drugs: "Fentanyl · Heroin · Methadone · Morphine · Tramadol (overdose)",
+                        action: "➔ Airway / respiratory support + Naloxone"
                     },
                     chol: {
                         title: "Cholinergic Toxidrome",
