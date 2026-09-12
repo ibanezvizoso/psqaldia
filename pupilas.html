@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pupilas en Psiquiatría | PSQ AL DÍA</title>
-    <meta name="description" content="Semiología pupilar de urgencias en psiquiatría.">
+    <meta name="description" content="Semiología pupilar de urgencias en psiquiatría: diferenciación rápida de toxíndromes y asimetrías.">
     <link rel="canonical" href="https://psqaldia.com/pupilas">
     <link rel="icon" type="image/png" href="/Logo.png">
     
@@ -20,7 +20,7 @@
             --text: #0f172a;
             --text-main: #0f172a;
             --text-muted: #475569;
-            --border: #e2e8f0;
+            --border: #f1f5f9;
             --radius: 1.5rem;
         }
 
@@ -38,12 +38,51 @@
 
         .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
 
-        .main-content { padding: 1rem 1.5rem 3rem; max-width: 800px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+        .main-content { padding: 0 1.5rem 5rem; max-width: 1000px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
-        #modal { display: flex !important; position: relative !important; width: 100% !important; z-index: 1 !important; }
+        /* --- GRID DE BENEFICIOS / CLAVES CLÍNICAS --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            margin-top: -1rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+        /* Contenedor de la herramienta (Adaptación del Modal a flujo en página) */
+        #modal { display: flex !important; position: relative !important; width: 100% !important; z-index: 1 !important; margin-bottom: 2rem; }
         #modalData { 
-            width: 100%; max-width: 600px; margin: auto;
+            width: 100%; max-width: 800px; margin: auto;
             background: var(--card-bg);
             border-radius: var(--radius);
             border: 1px solid var(--border);
@@ -51,12 +90,28 @@
             overflow: hidden;
         }
 
-        .nav-footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        /* Panel de Referencias */
+        .info-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin: 3rem auto 0;
+            max-width: 800px;
+        }
+        .info-panel h2 { font-size: 1.1rem; margin-top: 0; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-panel i { color: var(--primary); }
+        .ref-list { list-style: none; padding: 0; color: var(--text-muted); font-size: 0.9rem; }
+        .ref-list li { margin-bottom: 0.6rem; display: flex; align-items: center; gap: 10px; }
+        .ref-list li::before { content: "•"; color: var(--primary); font-weight: bold; }
+
+        /* Navegación y Footer */
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
         .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .site-bottom-info {
             text-align: center;
-            padding: 1.5rem 1rem;
+            padding: 2rem 1rem;
             background: #f8fafc;
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -71,8 +126,9 @@
         }
 
         @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
             .nav-header { padding: 1rem; }
-            .main-content { padding: 0.5rem 1rem 2rem; }
+            .features-grid { gap: 1rem; }
         }
     </style>
 </head>
@@ -82,7 +138,33 @@
         <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
     </nav>
 
+    <header class="hero">
+        <h1>Pupilas en Psiquiatría</h1>
+        <p>Guía de orientación rápida para la semiología pupilar en intoxicaciones y urgencias psiquiátricas.</p>
+    </header>
+
     <main class="main-content">
+        
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-eye"></i></div>
+                <h3>Midriasis</h3>
+                <p>Sospecha de toxíndromes anticolinérgico, serotoninérgico, adrenérgico o abstinencia de opiáceos.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-compress-arrows-alt"></i></div>
+                <h3>Miosis</h3>
+                <p>Alarma por sobredosis de opioides, toxíndrome colinérgico o agonistas centrales alfa-2.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3>Asimetría</h3>
+                <p>Descarte de exposición tópica a fármacos frente a focalidad neurológica urgente.</p>
+            </div>
+        </section>
+
         <!-- Contenedor único donde monta pupilas.js -->
         <div id="modal">
             <div id="modalData">
@@ -111,6 +193,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (window.PupilasApp && typeof window.PupilasApp.init === 'function') {
                 window.PupilasApp.init();
+                // Asegura el scroll libre cuando se incrusta en página completa
+                document.body.style.overflow = 'auto';
             }
         });
     </script>
