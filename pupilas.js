@@ -42,7 +42,7 @@
                     },
                     diffNote: "⚡ <strong>Diferenciador con diaforesis:</strong> Con clonus → <strong>Serotoninérgico</strong> | Sin clonus → <strong>Simpaticomimético</strong>.",
                     polyNote: "⚠️ <strong>Policonsumo:</strong> Alcohol o benzodiacepinas pueden atenuar o enmascarar la midriasis en estimulantes.",
-                    nmsWarning: "🧠 <strong>Ojo al diagnóstico diferencial (SNM vs SS):</strong> En el <strong>Síndrome Serotoninérgico</strong> la midriasis es la norma (+ clonus / hiperreflexia). Por contra, en el <strong>Síndrome Neuroléptico Maligno (SNM)</strong> las pupilas suelen ser <strong>normales o intermedias</strong> (+ rigidez en tubo de plomo / bradicinesia)."
+                    nmsWarning: "🧠 <strong>Ojo al diagnóstico diferencial (SNM vs SS):</strong> En el <strong>Síndrome Serotoninérgico</strong> la midriasis es la norma (+ clonus / hiperreflexia). Por contra, en el <strong>Síndrome Neuroléptico Maligno (SNM)</strong> las pupilas suelen ser <strong>normales o intermedias</strong> (+ rigidez en tubo de plomo)."
                 },
                 miosis: {
                     opioids: {
@@ -116,7 +116,7 @@
                     },
                     diffNote: "⚡ <strong>Diaphoresis differentiator:</strong> With clonus → <strong>Serotonergic</strong> | Without clonus → <strong>Sympathomimetic</strong>.",
                     polyNote: "⚠️ <strong>Polysubstance use:</strong> Alcohol or benzodiazepines can blunt stimulant mydriasis.",
-                    nmsWarning: "🧠 <strong>Differential caveat (NMS vs SS):</strong> <strong>Serotonin Syndrome</strong> typically presents with mydriasis (+ clonus / hyperreflexia). Conversely, in <strong>Neuroleptic Malignant Syndrome (NMS)</strong>, pupils are characteristically <strong>normal or intermediate</strong> (+ lead-pipe rigidity / bradykinesia)."
+                    nmsWarning: "🧠 <strong>Differential caveat (NMS vs SS):</strong> <strong>Serotonin Syndrome</strong> typically presents with mydriasis (+ clonus / hyperreflexia). Conversely, in <strong>Neuroleptic Malignant Syndrome (NMS)</strong>, pupils are characteristically <strong>normal or intermediate</strong> (+ lead-pipe rigidity)."
                 },
                 miosis: {
                     opioids: {
