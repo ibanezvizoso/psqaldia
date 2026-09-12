@@ -329,10 +329,10 @@
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.68rem; padding:8px; border-bottom:1px solid var(--border); text-align:center; align-items:center;">
                                 <div>${d.row1[0]}</div>
-                                <div style="font-weight:700; background:rgba(245,158,11,0.15); border-radius:4px; padding:2px 4px;">${d.row1[1]}</div>
+                                <div>${d.row1[1]}</div>
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.68rem; padding:8px; border-bottom:1px solid var(--border); text-align:center; align-items:center;">
-                                <div style="font-weight:700; background:rgba(239,68,68,0.15); border-radius:4px; padding:2px 4px;">${d.row2[0]}</div>
+                                <div>${d.row2[0]}</div>
                                 <div style="font-weight:700;">${d.row2[1]}</div>
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.68rem; padding:8px; border-bottom:1px solid var(--border); text-align:center; align-items:center;">
