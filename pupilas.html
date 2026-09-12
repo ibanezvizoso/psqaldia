@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pupilas en Psiquiatría | PSQ AL DÍA</title>
+    <meta name="description" content="Semiología pupilar de urgencias en psiquiatría.">
+    <link rel="canonical" href="https://psqaldia.com/pupilas">
+    <link rel="icon" type="image/png" href="/Logo.png">
+    
+    <link rel="stylesheet" href="/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card: #ffffff;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --radius: 1.5rem;
+        }
+
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+
+        .main-content { padding: 1rem 1.5rem 3rem; max-width: 800px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+
+        #modal { display: flex !important; position: relative !important; width: 100% !important; z-index: 1 !important; }
+        #modalData { 
+            width: 100%; max-width: 600px; margin: auto;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .nav-footer { margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .site-bottom-info {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: #f8fafc;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img {
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        @media (max-width: 600px) {
+            .nav-header { padding: 1rem; }
+            .main-content { padding: 0.5rem 1rem 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+    </nav>
+
+    <main class="main-content">
+        <!-- Contenedor único donde monta pupilas.js -->
+        <div id="modal">
+            <div id="modalData">
+                <div style="padding:4rem 2rem; text-align:center;">
+                    <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
+                    <p style="margin-top:1rem; font-weight:700; color:var(--text-muted); font-size:0.9rem;">Cargando semiología pupilar...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="nav-footer">
+            <a href="https://psqaldia.com/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
+            </a>
+        </footer>
+    </main>
+
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Herramientas clínicas</span>
+    </footer>
+
+    <!-- Lógica encapsulada externa -->
+    <script src="/pupilas.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.PupilasApp && typeof window.PupilasApp.init === 'function') {
+                window.PupilasApp.init();
+            }
+        });
+    </script>
+</body>
+</html>
