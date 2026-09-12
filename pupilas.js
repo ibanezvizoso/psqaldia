@@ -14,7 +14,6 @@
                 tabs: {
                     midriasis: "Midriasis",
                     miosis: "Miosis",
-                    normales: "Normales",
                     asimetria: "Asimetría"
                 },
                 midriasis: {
@@ -42,7 +41,8 @@
                         signs: "Bostezos · Rinorrea / lagrimeo · Piloerección · Diarrea · Midriasis reactiva"
                     },
                     diffNote: "⚡ <strong>Diferenciador con diaforesis:</strong> Con clonus → <strong>Serotoninérgico</strong> | Sin clonus → <strong>Simpaticomimético</strong>.",
-                    polyNote: "⚠️ <strong>Policonsumo:</strong> Alcohol o benzodiacepinas pueden atenuar o enmascarar la midriasis en estimulantes."
+                    polyNote: "⚠️ <strong>Policonsumo:</strong> Alcohol o benzodiacepinas pueden atenuar o enmascarar la midriasis en estimulantes.",
+                    nmsWarning: "🧠 <strong>Ojo al diagnóstico diferencial (SNM vs SS):</strong> En el <strong>Síndrome Serotoninérgico</strong> la midriasis es la norma (+ clonus / hiperreflexia). Por contra, en el <strong>Síndrome Neuroléptico Maligno (SNM)</strong> las pupilas suelen ser <strong>normales o intermedias</strong> (+ rigidez en tubo de plomo / bradicinesia)."
                 },
                 miosis: {
                     opioids: {
@@ -64,18 +64,6 @@
                         signs: "Sedación profunda / estupor · Bradicardia · Hipotensión arterial",
                         drugs: "Clonidina · Guanfacina"
                     }
-                },
-                normales: {
-                    header: "Diagnóstico diferencial (Agitación / Rigidez / Fiebre):",
-                    colSS: "S. Serotoninérgico",
-                    colSNM: "S. Neuroléptico Maligno",
-                    row1: ["Midriasis habitual", "Normales / Intermedias"],
-                    row2: ["Clonus / Hiperreflexia", "Rigidez 'en tubo de plomo'"],
-                    row3: ["Hiperquinesia, temblor", "Bradicinesia, acinesia"],
-                    row4: ["Instauración: <strong>Horas</strong>", "Instauración: <strong>Días</strong>"],
-                    row5: ["Agentes serotoninérgicos", "Bloqueo D₂ / retirada dopamina"],
-                    bannerTitle: "CLONUS → Serotoninérgico &nbsp;|&nbsp; RIGIDEZ → SNM",
-                    bannerAction: "Manejo SNM: Retirada de antipsicótico + hidratación/soporte + analítica urgente (CPK, iones, función renal)."
                 },
                 asimetria: {
                     local: {
@@ -100,7 +88,6 @@
                 tabs: {
                     midriasis: "Mydriasis",
                     miosis: "Miosis",
-                    normales: "Normal",
                     asimetria: "Asymmetry"
                 },
                 midriasis: {
@@ -128,7 +115,8 @@
                         signs: "Yawning · Lacrimation / rhinorrhea · Piloerection · Diarrhea · Reactive mydriasis"
                     },
                     diffNote: "⚡ <strong>Diaphoresis differentiator:</strong> With clonus → <strong>Serotonergic</strong> | Without clonus → <strong>Sympathomimetic</strong>.",
-                    polyNote: "⚠️ <strong>Polysubstance use:</strong> Alcohol or benzodiazepines can blunt stimulant mydriasis."
+                    polyNote: "⚠️ <strong>Polysubstance use:</strong> Alcohol or benzodiazepines can blunt stimulant mydriasis.",
+                    nmsWarning: "🧠 <strong>Differential caveat (NMS vs SS):</strong> <strong>Serotonin Syndrome</strong> typically presents with mydriasis (+ clonus / hyperreflexia). Conversely, in <strong>Neuroleptic Malignant Syndrome (NMS)</strong>, pupils are characteristically <strong>normal or intermediate</strong> (+ lead-pipe rigidity / bradykinesia)."
                 },
                 miosis: {
                     opioids: {
@@ -150,18 +138,6 @@
                         signs: "Deep sedation · Bradycardia · Significant hypotension",
                         drugs: "Clonidine · Guanfacine"
                     }
-                },
-                normales: {
-                    header: "Differential Diagnosis (Agitation / Rigidity / Fever):",
-                    colSS: "Serotonin Syndrome",
-                    colSNM: "Neuroleptic Malignant S.",
-                    row1: ["Usual mydriasis", "Normal / Intermediate"],
-                    row2: ["Clonus / Hyperreflexia", "Lead-pipe generalized rigidity"],
-                    row3: ["Hyperkinesia, tremor", "Bradykinesia, stupor"],
-                    row4: ["Onset: <strong>Hours</strong>", "Onset: <strong>Days</strong>"],
-                    row5: ["Serotonergic agents", "D₂ blockade / dopamine withdrawal"],
-                    bannerTitle: "CLONUS → Serotonergic &nbsp;|&nbsp; RIGIDITY → NMS",
-                    bannerAction: "NMS Management: Discontinue antipsychotics + supportive care + urgent labs (CK, renal panel, electrolytes)."
                 },
                 asimetria: {
                     local: {
@@ -202,7 +178,6 @@
             const tabs = [
                 { id: 'midriasis', label: t.tabs.midriasis, icon: 'fa-eye' },
                 { id: 'miosis', label: t.tabs.miosis, icon: 'fa-compress-arrows-alt' },
-                { id: 'normales', label: t.tabs.normales, icon: 'fa-balance-scale' },
                 { id: 'asimetria', label: t.tabs.asimetria, icon: 'fa-exclamation-triangle' }
             ];
 
@@ -261,6 +236,10 @@
                             </div>
                         </div>
 
+                        <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:0.65rem 0.75rem; font-size:0.68rem; line-height:1.35; color:var(--text);">
+                            ${d.nmsWarning}
+                        </div>
+
                         <div style="background:rgba(125,125,125,0.05); border:1px dashed var(--border); border-radius:8px; padding:0.6rem 0.75rem; font-size:0.68rem; line-height:1.35; color:var(--text);">
                             <div>${d.diffNote}</div>
                             <div style="margin-top:3px; color:var(--text-muted);">${d.polyNote}</div>
@@ -310,51 +289,6 @@
                             </div>
                             <div style="font-size:0.68rem; color:var(--text-muted); line-height:1.25;">
                                 ${d.alpha2.drugs}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (currentTab === 'normales') {
-                const d = t.normales;
-                contentHtml = `
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
-                            ${d.header}
-                        </div>
-
-                        <div style="border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--card);">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; background:rgba(125,125,125,0.08); font-weight:800; font-size:0.72rem; text-align:center; padding:8px; border-bottom:1px solid var(--border);">
-                                <div style="color:#dc2626;">${d.colSS}</div>
-                                <div style="color:#d97706;">${d.colSNM}</div>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.68rem; padding:8px; border-bottom:1px solid var(--border); text-align:center; align-items:center;">
-                                <div>${d.row1[0]}</div>
-                                <div>${d.row1[1]}</div>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.68rem; padding:8px; border-bottom:1px solid var(--border); text-align:center; align-items:center;">
-                                <div>${d.row2[0]}</div>
-                                <div style="font-weight:700;">${d.row2[1]}</div>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.68rem; padding:8px; border-bottom:1px solid var(--border); text-align:center; align-items:center;">
-                                <div>${d.row3[0]}</div>
-                                <div>${d.row3[1]}</div>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.68rem; padding:8px; border-bottom:1px solid var(--border); text-align:center; align-items:center;">
-                                <div>${d.row4[0]}</div>
-                                <div>${d.row4[1]}</div>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.65rem; color:var(--text-muted); padding:8px; text-align:center; align-items:center;">
-                                <div>${d.row5[0]}</div>
-                                <div>${d.row5[1]}</div>
-                            </div>
-                        </div>
-
-                        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:0.65rem; text-align:center;">
-                            <div style="font-size:0.75rem; font-weight:800; color:#dc2626;">
-                                ${d.bannerTitle}
-                            </div>
-                            <div style="font-size:0.66rem; color:var(--text); margin-top:3px; line-height:1.25;">
-                                ${d.bannerAction}
                             </div>
                         </div>
                     </div>
@@ -433,7 +367,7 @@
                             </div>
                         </div>
 
-                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
+                        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
                             ${tabs.map(item => {
                                 const isActive = currentTab === item.id;
                                 return `
