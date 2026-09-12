@@ -46,14 +46,14 @@
                 },
                 miosis: {
                     opioids: {
-                        title: "Toxíndrome Opioide",
+                        title: "Opioide",
                         tag: "Puntiformes",
                         signs: "Miosis bilateral hiporreactiva + Depresión respiratoria + Estupor / coma",
                         drugs: "Fentanilo · Heroína · Metadona · Morfina · Tramadol (sobredosis)",
                         action: "➔ Soporte ventilatorio + Naloxona iv"
                     },
                     chol: {
-                        title: "Toxíndrome Colinérgico",
+                        title: "Colinérgico",
                         tag: "Secreciones",
                         signs: "Salivación · Lagrimeo · Broncorrea · Diarrea · Fasciculaciones",
                         drugs: "Organofosforados · Intoxicación por IACE (Donepezilo, Rivastigmina)"
@@ -120,14 +120,14 @@
                 },
                 miosis: {
                     opioids: {
-                        title: "Opioid Toxidrome",
+                        title: "Opioid",
                         tag: "Pinpoint",
                         signs: "Bilateral pinpoint pupils + Respiratory depression + Stupor / coma",
                         drugs: "Fentanyl · Heroin · Methadone · Morphine · Tramadol (overdose)",
                         action: "➔ Airway / respiratory support + Naloxone"
                     },
                     chol: {
-                        title: "Cholinergic Toxidrome",
+                        title: "Cholinergic",
                         tag: "Secretions",
                         signs: "Salivation · Lacrimation · Bronchorrhea · Diarrhea · Fasciculations",
                         drugs: "Organophosphates · AChEIs (Donepezil, Rivastigmine toxicity)"
