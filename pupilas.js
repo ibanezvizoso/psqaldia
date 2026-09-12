@@ -27,13 +27,13 @@
                     serot: {
                         title: "Serotoninérgico",
                         tag: "Clonus + Sudor",
-                        signs: "Agitación · Diaforesis · Clonus (ocular / aquíleo) · Temblor · Hipertermia",
+                        signs: "Agitación · Diaforesis · Clonus (ocular / aquíleo) · Hiperreflexia · Hipertermia",
                         drugs: "ISRS / IRSN · Tramadol · MDMA · IMAO"
                     },
                     sympath: {
                         title: "Simpaticomimético",
                         tag: "Adrenérgico",
-                        signs: "Agitación · Diaforesis · Taquicardia / HTA · Bruxismo (sin clonus franco)",
+                        signs: "Agitación · Diaforesis · Taquicardia / HTA · Bruxismo",
                         drugs: "Cocaína · Anfetaminas · Metilfenidato · Speed"
                     },
                     opioidW: {
@@ -70,7 +70,7 @@
                     colSS: "S. Serotoninérgico",
                     colSNM: "S. Neuroléptico Maligno",
                     row1: ["Midriasis habitual", "Normales / Intermedias"],
-                    row2: ["Clonus / Hiperreflexia", "Rigidez 'en caño de plomo'"],
+                    row2: ["Clonus / Hiperreflexia", "Rigidez 'en tubo de plomo'"],
                     row3: ["Hiperquinesia, temblor", "Bradicinesia, acinesia"],
                     row4: ["Instauración: <strong>Horas</strong>", "Instauración: <strong>Días</strong>"],
                     row5: ["Agentes serotoninérgicos", "Bloqueo D₂ / retirada dopamina"],
@@ -83,13 +83,13 @@
                         tag: "Descarte Frecuente",
                         lead: "<strong>¿Aerosol o colirios recientes?</strong> Fuga de mascarilla de nebulizador con <strong>bromuro de ipratropio</strong> o manipulación accidental de colirio midriático.",
                         signs: "Midriasis unilateral aislada con pares craneales y conciencia estrictamente normales.",
-                        action: "➔ Observación clínica (suele revertir en 4-12 horas tras cesar contacto)."
+                        action: "➔ Observación clínica."
                     },
                     neuro: {
                         title: "2. Alarma Neurológica",
                         tag: "Urgencia Médica",
-                        lead: "Sospechar urgencia neuroquirúrgica si es de <strong>inicio agudo no farmacológico</strong> con:",
-                        signs: "Ptosis palpebral · Diplopía / paresia III par · Focalidad motora · TCE reciente",
+                        lead: "Sospechar urgencia neurológica si es de <strong>inicio agudo no farmacológico</strong> con:",
+                        signs: "Ptosis palpebral · Diplopía · Focalidad motora · TCE reciente",
                         action: "➔ TC craneal urgente + valoración por Neurología / Neurocirugía."
                     }
                 }
@@ -113,13 +113,13 @@
                     serot: {
                         title: "Serotonergic",
                         tag: "Clonus + Sweat",
-                        signs: "Agitation · Diaphoresis · Clonus (ocular/ankle) · Tremor · Hyperthermia",
+                        signs: "Agitation · Diaphoresis · Clonus (ocular/ankle) · Hyperreflexia · Hyperthermia",
                         drugs: "SSRIs / SNRIs · Tramadol · MDMA · MAOIs"
                     },
                     sympath: {
                         title: "Sympathomimetic",
                         tag: "Adrenergic",
-                        signs: "Agitation · Diaphoresis · Tachycardia / HTN · Bruxism (no overt clonus)",
+                        signs: "Agitation · Diaphoresis · Tachycardia / HTN · Bruxism",
                         drugs: "Cocaine · Amphetamines · Methylphenidate · Speed"
                     },
                     opioidW: {
@@ -169,13 +169,13 @@
                         tag: "Local Rule-Out",
                         lead: "<strong>Recent nebulizer or eye drops?</strong> Mask leak with <strong>ipratropium bromide</strong> or accidental ocular contact.",
                         signs: "Presentation: Isolated unilateral mydriasis with completely normal cranial nerves and mental status.",
-                        action: "➔ Clinical observation (typically resolves in 4-12 hours after stopping exposure)."
+                        action: "➔ Clinical observation"
                     },
                     neuro: {
                         title: "2. Neurological Emergency",
                         tag: "Medical Urgency",
                         lead: "Suspect an acute non-pharmacological neurological cause if accompanied by:",
-                        signs: "Ptosis · Diplopia / III nerve palsy · Focal motor deficit · Recent head trauma",
+                        signs: "Ptosis · Diplopia · Focal motor deficit · Recent head trauma",
                         action: "➔ Urgent head CT + immediate Neurology / Neurosurgery consultation."
                     }
                 }
