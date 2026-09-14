@@ -3,102 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Vietnam 2026 · Cuaderno de Ruta y Bitácora</title>
+  <title>Việt Nam 2026 · Cuaderno de Ruta</title>
   <meta name="robots" content="noindex, nofollow">
 
-  <!-- Iconografía FontAwesome local del repositorio PSQALDÍA con CDN de respaldo -->
   <link rel="stylesheet" href="/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,450;0,600;0,700;0,900;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --primary: #c2410c;
-      --primary-hover: #9a3412;
-      --primary-subtle: #ffedd5;
-      --accent: #0f766e;
-      --accent-subtle: #ccfbf1;
-      --gold: #b45309;
-      --gold-subtle: #fef3c7;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
+      /* Sơn mài (lacquerware) + rice-paper palette */
+      --ink: #23201a;
+      --paper: #faf6ec;
+      --paper-2: #f2ead4;
+      --paper-3: #ece1c4;
+      --muted: #7a7160;
+
+      --lacquer: #a32c1e;
+      --lacquer-hover: #832219;
+      --lacquer-subtle: #f6ddd6;
+
+      --indigo: #233f6b;
+      --indigo-subtle: #dde4f0;
+
+      --jade: #3f6b52;
+      --jade-subtle: #dceade;
+
+      --gold: #a97418;
+      --gold-subtle: #f3e3bd;
+
+      --border: #e2d8bc;
       --radius-sm: 8px;
       --radius-md: 14px;
-      --radius-lg: 20px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-      --shadow-md: 0 8px 20px -3px rgba(0,0,0,0.08);
+      --radius-lg: 22px;
+      --shadow-sm: 0 1px 2px rgba(35,32,26,0.08);
+      --shadow-md: 0 10px 24px -8px rgba(35,32,26,0.18);
+
+      --chip-hanoi-bg: #fbe0da; --chip-hanoi-fg: #8c2c1c;
+      --chip-halong-bg: #d9eef1; --chip-halong-fg: #14616f;
+      --chip-ninhbinh-bg: #f3e3bd; --chip-ninhbinh-fg: #8a5c0c;
+      --chip-sapa-bg: #dceade; --chip-sapa-fg: #2f5c40;
+      --chip-danang-bg: #e2e9f5; --chip-danang-fg: #2c4675;
+      --chip-hoian-bg: #ece1d6; --chip-hoian-fg: #6b4a26;
+      --chip-hue-bg: #f2dfe8; --chip-hue-fg: #8a3862;
+      --chip-hcm-bg: #ece0f2; --chip-hcm-fg: #63357f;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #090d16;
-        --card-bg: #131a29;
-        --text: #f1f5f9;
-        --text-muted: #94a3b8;
-        --border: #1e293b;
-        --primary-subtle: rgba(194, 65, 12, 0.18);
-        --accent-subtle: rgba(15, 118, 110, 0.18);
-        --gold-subtle: rgba(180, 83, 9, 0.20);
+        --ink: #f1ece0;
+        --paper: #17140f;
+        --paper-2: #201c15;
+        --paper-3: #2a251b;
+        --muted: #a89b82;
+
+        --lacquer: #e2745f;
+        --lacquer-hover: #ea8b78;
+        --lacquer-subtle: rgba(226,116,95,0.16);
+
+        --indigo: #93aede;
+        --indigo-subtle: rgba(147,174,222,0.14);
+
+        --jade: #86c19f;
+        --jade-subtle: rgba(134,193,159,0.14);
+
+        --gold: #e3b45a;
+        --gold-subtle: rgba(227,180,90,0.15);
+
+        --border: #342c1f;
+
+        --chip-hanoi-bg: rgba(226,116,95,0.16); --chip-hanoi-fg: #f0a493;
+        --chip-halong-bg: rgba(94,196,214,0.16); --chip-halong-fg: #86dceb;
+        --chip-ninhbinh-bg: rgba(227,180,90,0.16); --chip-ninhbinh-fg: #e3b45a;
+        --chip-sapa-bg: rgba(134,193,159,0.16); --chip-sapa-fg: #86c19f;
+        --chip-danang-bg: rgba(147,174,222,0.16); --chip-danang-fg: #93aede;
+        --chip-hoian-bg: rgba(203,177,140,0.18); --chip-hoian-fg: #d8bd91;
+        --chip-hue-bg: rgba(216,133,178,0.16); --chip-hue-fg: #e0a1c1;
+        --chip-hcm-bg: rgba(178,133,214,0.16); --chip-hcm-fg: #c5a4e0;
       }
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: var(--paper);
+      color: var(--ink);
       line-height: 1.55;
-      padding-bottom: 96px;
+      padding-bottom: 104px;
     }
 
-    /* ENCABEZADO */
+    h1, h2, h3, .display {
+      font-family: 'Fraunces', Georgia, serif;
+      letter-spacing: -0.01em;
+    }
+
+    /* ================= HEADER ================= */
     header {
-      background: var(--card-bg);
+      background: var(--paper);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 40;
-      padding: 12px 18px;
-      box-shadow: var(--shadow-sm);
     }
     .header-inner {
       max-width: 860px;
       margin: 0 auto;
+      padding: 14px 18px 8px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
     }
     .brand-group {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      font-size: 1.15rem;
-      letter-spacing: -0.02em;
+      flex-direction: column;
+      gap: 2px;
     }
-    .badge-route {
-      background: linear-gradient(135deg, var(--primary), #ea580c);
-      color: #ffffff;
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
+    .brand-title {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.28rem;
+    }
+    .brand-title i { color: var(--lacquer); font-size: 1.05rem; }
+    .brand-dates {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .countdown-chip {
+      background: var(--lacquer);
+      color: #fff8f2;
       font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
+      font-weight: 700;
+      padding: 6px 11px;
+      border-radius: 999px;
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
     }
 
-    /* CONTROLES SUPERIORES (Búsqueda y Conversor) */
+    .skyline {
+      display: block;
+      width: 100%;
+      height: 34px;
+      color: var(--border);
+    }
+    .skyline .accent { color: var(--lacquer); opacity: 0.55; }
+
+    /* ================= TOP CONTROLS ================= */
     .top-controls {
       max-width: 860px;
       margin: 14px auto 0;
@@ -107,84 +165,49 @@
       flex-direction: column;
       gap: 10px;
     }
-    .search-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .search-box i {
-      position: absolute;
-      left: 14px;
-      color: var(--text-muted);
-    }
+    .search-box { position: relative; display: flex; align-items: center; }
+    .search-box i { position: absolute; left: 14px; color: var(--muted); font-size: 0.85rem; }
     .search-box input {
       width: 100%;
-      padding: 11px 14px 11px 40px;
+      padding: 11px 14px 11px 38px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
-      background: var(--card-bg);
-      color: var(--text);
-      font-size: 0.92rem;
+      background: var(--paper-2);
+      color: var(--ink);
+      font-size: 0.9rem;
       outline: none;
       transition: all 0.2s ease;
+      font-family: inherit;
     }
-    .search-box input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.15);
-    }
+    .search-box input:focus { border-color: var(--lacquer); background: var(--paper); }
 
-    /* MINI CONVERSOR DE MONEDA DINÁMICO */
     .fx-widget {
-      background: var(--card-bg);
+      background: var(--paper-2);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 12px 14px;
-      box-shadow: var(--shadow-sm);
     }
-    .fx-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .fx-col {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex: 1;
-    }
-    .fx-col label {
-      font-weight: 700;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
+    .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .fx-col { display: flex; align-items: center; gap: 6px; flex: 1; }
+    .fx-col label { font-weight: 700; font-size: 0.78rem; color: var(--muted); }
     .fx-col input {
       width: 100%;
-      padding: 7px 10px;
+      padding: 7px 9px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
-      background: var(--bg);
+      background: var(--paper);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      color: var(--text);
+      color: var(--ink);
       outline: none;
     }
-    .fx-quick-chips {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      margin-top: 8px;
-      padding-top: 4px;
-      scrollbar-width: none;
-    }
-    .fx-quick-chips::-webkit-scrollbar {
-      display: none;
-    }
+    .fx-quick-chips { display: flex; gap: 6px; overflow-x: auto; margin-top: 8px; padding-top: 4px; scrollbar-width: none; }
+    .fx-quick-chips::-webkit-scrollbar { display: none; }
     .fx-chip {
-      background: var(--bg);
+      background: var(--paper);
       border: 1px solid var(--border);
-      color: var(--text-muted);
+      color: var(--muted);
       font-size: 0.72rem;
       font-weight: 700;
       padding: 3px 8px;
@@ -193,406 +216,334 @@
       cursor: pointer;
       user-select: none;
     }
-    .fx-chip:hover {
-      color: var(--primary);
-      border-color: var(--primary);
-    }
+    .fx-chip:active { color: var(--lacquer); border-color: var(--lacquer); }
+    .fx-note { font-size: 0.7rem; color: var(--muted); margin-top: 8px; }
 
-    /* CONTENEDOR PRINCIPAL */
-    main {
-      max-width: 860px;
-      margin: 16px auto;
-      padding: 0 16px;
-    }
+    /* ================= MAIN ================= */
+    main { max-width: 860px; margin: 18px auto; padding: 0 16px; }
 
-    .tab-view {
-      display: none;
-      animation: tabFadeIn 0.2s ease forwards;
-    }
-    .tab-view.active {
-      display: block;
-    }
-    @keyframes tabFadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .tab-view { display: none; }
+    .tab-view.active { display: block; animation: tabFadeIn 0.22s ease forwards; }
+    @keyframes tabFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ACCIONES DE RUTA */
-    .route-header-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
+    .section-eyebrow {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
     }
-    .btn-toggle-all {
-      background: none;
-      border: none;
-      color: var(--primary);
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    .section-eyebrow span.lbl { font-size: 0.86rem; font-weight: 800; color: var(--muted); }
+    .btn-toggle-all { background: none; border: none; color: var(--lacquer); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 4px; font-family: inherit; }
 
-    /* TARJETA DE CADA DÍA */
+    h2.tab-title { font-size: 1.28rem; font-weight: 700; margin-bottom: 4px; }
+    p.tab-sub { font-size: 0.86rem; color: var(--muted); margin-bottom: 16px; }
+
+    /* ================= RESUMEN TAB ================= */
+    .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+    .stat-card {
+      background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 12px 8px; text-align: center;
+    }
+    .stat-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.4rem; color: var(--lacquer); line-height: 1; }
+    .stat-lbl { font-size: 0.68rem; color: var(--muted); font-weight: 600; margin-top: 4px; }
+
+    .route-thread {
+      display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 12px; margin-bottom: 4px; scrollbar-width: none;
+    }
+    .route-thread::-webkit-scrollbar { display: none; }
+    .thread-stop {
+      flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      cursor: pointer; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border);
+      background: var(--paper-2); min-width: 74px;
+    }
+    .thread-stop i { font-size: 1rem; color: var(--lacquer); }
+    .thread-stop span { font-size: 0.68rem; font-weight: 700; text-align: center; }
+    .thread-stop:active { background: var(--lacquer-subtle); border-color: var(--lacquer); }
+
+    .fact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+    .fact-card {
+      background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 12px 13px;
+    }
+    .fact-card i { color: var(--indigo); margin-bottom: 5px; display: block; font-size: 1rem; }
+    .fact-card h5 { font-size: 0.82rem; font-weight: 800; margin-bottom: 3px; }
+    .fact-card p { font-size: 0.78rem; color: var(--muted); }
+
+    .weather-table-wrap {
+      background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+      overflow: hidden; margin: 14px 0 6px;
+    }
+    .weather-table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .weather-table-wrap th, .weather-table-wrap td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .weather-table-wrap th { background: var(--paper-3); color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; }
+    .weather-table-wrap tr:last-child td { border-bottom: none; }
+    .weather-temp { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--jade); white-space: nowrap; }
+
+    .disclaimer-note {
+      display: flex; gap: 8px; font-size: 0.76rem; color: var(--muted); background: var(--gold-subtle);
+      border-left: 3px solid var(--gold); border-radius: 4px; padding: 9px 11px; margin-bottom: 16px;
+    }
+    .disclaimer-note i { color: var(--gold); margin-top: 2px; }
+
+    /* ================= DAY CARDS ================= */
     .day-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      margin-bottom: 14px;
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
+      background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md);
+      margin-bottom: 12px; box-shadow: var(--shadow-sm); overflow: hidden; position: relative;
     }
-    .day-header {
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      background: rgba(0,0,0,0.012);
-    }
+    .day-header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
     .day-badge {
-      background: var(--primary-subtle);
-      color: var(--primary);
-      font-weight: 800;
-      font-size: 0.82rem;
-      padding: 5px 9px;
-      border-radius: var(--radius-sm);
-      min-width: 72px;
-      text-align: center;
-      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--lacquer-subtle); color: var(--lacquer); font-weight: 700; font-size: 0.78rem;
+      padding: 5px 9px; border-radius: var(--radius-sm); min-width: 66px; text-align: center; display: inline-block;
     }
-    .day-title {
-      font-weight: 700;
-      font-size: 0.96rem;
-      margin-left: 10px;
-    }
-    .day-chevron {
-      color: var(--text-muted);
-      transition: transform 0.25s ease;
-    }
-    .day-card.open .day-chevron {
-      transform: rotate(180deg);
-    }
-    .day-body {
-      display: none;
-      padding: 16px;
-      border-top: 1px solid var(--border);
-      font-size: 0.92rem;
-    }
-    .day-card.open .day-body {
-      display: block;
-    }
+    .day-title-wrap { margin-left: 10px; }
+    .day-title { font-weight: 700; font-size: 0.96rem; }
+    .day-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .day-meta .region-chip { font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.02em; }
+    .day-meta .transport-tag { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .day-chevron { color: var(--muted); transition: transform 0.25s ease; flex-shrink: 0; margin-left: 8px; }
+    .day-card.open .day-chevron { transform: rotate(180deg); }
+    .day-body { display: none; padding: 4px 16px 16px; border-top: 1px solid var(--border); font-size: 0.92rem; }
+    .day-card.open .day-body { display: block; padding-top: 14px; }
 
-    /* MÓDULOS DE HISTORIA Y LLUVIA */
     .culture-card {
-      background: rgba(15, 118, 110, 0.04);
-      border-left: 4px solid var(--accent);
-      border-radius: 4px;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-      font-size: 0.88rem;
+      background: var(--jade-subtle); border-left: 4px solid var(--jade); border-radius: 4px;
+      padding: 12px 14px; margin-bottom: 12px; font-size: 0.88rem;
     }
-    .culture-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 800;
-      color: var(--accent);
-      margin-bottom: 4px;
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
+    .culture-title { display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--jade); margin-bottom: 4px; font-size: 0.8rem; }
 
     .rain-card {
-      background: rgba(180, 83, 9, 0.05);
-      border-left: 4px solid var(--gold);
-      border-radius: 4px;
-      padding: 12px 14px;
-      margin-top: 12px;
-      font-size: 0.88rem;
+      background: var(--gold-subtle); border-left: 4px solid var(--gold); border-radius: 4px;
+      padding: 12px 14px; margin-top: 12px; font-size: 0.88rem;
     }
-    .rain-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 800;
-      color: var(--gold);
-      margin-bottom: 4px;
-      font-size: 0.82rem;
-      text-transform: uppercase;
-    }
+    .rain-title { display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--gold); margin-bottom: 4px; font-size: 0.8rem; }
 
     .hotel-subcard {
-      background: rgba(0,0,0,0.02);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      margin-bottom: 12px;
+      background: var(--paper-2); border: 1px dashed var(--border); border-radius: var(--radius-sm);
+      padding: 10px 12px; margin-bottom: 12px;
     }
 
-    ul.clean-steps {
-      list-style: none;
-      margin-top: 8px;
-    }
-    ul.clean-steps li {
-      position: relative;
-      padding-left: 18px;
-      margin-bottom: 7px;
-    }
-    ul.clean-steps li::before {
-      content: "•";
-      position: absolute;
-      left: 4px;
-      color: var(--primary);
-      font-weight: 800;
-    }
+    ul.clean-steps { list-style: none; margin-top: 8px; }
+    ul.clean-steps li { position: relative; padding-left: 18px; margin-bottom: 7px; }
+    ul.clean-steps li::before { content: "·"; position: absolute; left: 3px; top: -3px; color: var(--lacquer); font-weight: 800; font-size: 1.3rem; }
 
     .action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 5px 10px;
-      border-radius: var(--radius-sm);
-      text-decoration: none;
-      margin-top: 6px;
-      margin-right: 6px;
-      transition: all 0.15s ease;
+      display: inline-flex; align-items: center; gap: 6px; background: var(--paper); border: 1px solid var(--border);
+      color: var(--ink); font-size: 0.78rem; font-weight: 600; padding: 5px 10px; border-radius: var(--radius-sm);
+      text-decoration: none; margin-top: 6px; margin-right: 6px; transition: all 0.15s ease;
     }
-    .action-btn:hover {
-      background: var(--primary-subtle);
-      color: var(--primary);
-      border-color: var(--primary);
+    .action-btn:active { background: var(--lacquer-subtle); color: var(--lacquer); border-color: var(--lacquer); }
+
+    /* ================= TRANSPORTE TAB ================= */
+    .tl {
+      position: relative; padding-left: 28px; margin-bottom: 22px;
+    }
+    .tl::before {
+      content: ""; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px;
+      background: var(--border);
+    }
+    .tl-item { position: relative; margin-bottom: 16px; }
+    .tl-item::before {
+      content: ""; position: absolute; left: -23px; top: 4px; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--lacquer); border: 2px solid var(--paper);
+    }
+    .tl-date { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: var(--lacquer); margin-bottom: 2px; }
+    .tl-body { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 13px; }
+    .tl-body h5 { font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+    .tl-body h5 i { color: var(--indigo); width: 16px; }
+    .tl-body p { font-size: 0.82rem; color: var(--muted); }
+
+    .app-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .app-pill {
+      display: inline-flex; align-items: center; gap: 6px; background: var(--indigo-subtle); color: var(--indigo);
+      font-size: 0.78rem; font-weight: 700; padding: 6px 11px; border-radius: 999px;
     }
 
-    /* TARJETAS GASTRONÓMICAS Y SPOTS */
+    /* ================= SPOTS / GASTRO ================= */
     .spot-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow-sm);
+      background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--shadow-sm);
     }
-    .city-chip {
-      display: inline-block;
-      font-size: 0.72rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .chip-hanoi { background: #fee2e2; color: #991b1b; }
-    .chip-ninhbinh { background: #fef3c7; color: #92400e; }
-    .chip-sapa { background: #dcfce7; color: #166534; }
-    .chip-hoian { background: #e0e7ff; color: #3730a3; }
-    .chip-hue { background: #fce7f3; color: #9d174d; }
-    .chip-hcm { background: #f3e8ff; color: #6b21a8; }
+    .city-chip { display: inline-block; font-size: 0.68rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; margin-bottom: 7px; letter-spacing: 0.03em; }
+    .chip-hanoi { background: var(--chip-hanoi-bg); color: var(--chip-hanoi-fg); }
+    .chip-halong { background: var(--chip-halong-bg); color: var(--chip-halong-fg); }
+    .chip-ninhbinh { background: var(--chip-ninhbinh-bg); color: var(--chip-ninhbinh-fg); }
+    .chip-sapa { background: var(--chip-sapa-bg); color: var(--chip-sapa-fg); }
+    .chip-danang { background: var(--chip-danang-bg); color: var(--chip-danang-fg); }
+    .chip-hoian { background: var(--chip-hoian-bg); color: var(--chip-hoian-fg); }
+    .chip-hue { background: var(--chip-hue-bg); color: var(--chip-hue-fg); }
+    .chip-hcm { background: var(--chip-hcm-bg); color: var(--chip-hcm-fg); }
 
-    /* CHECKLIST INTERACTIVO */
-    .check-box-group {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 18px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-sm);
-    }
-    .check-box-group h3 {
-      font-size: 1.02rem;
-      font-weight: 800;
-      margin-bottom: 12px;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .check-line {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 9px 0;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      font-size: 0.92rem;
-      user-select: none;
-    }
-    .check-line:last-child {
-      border-bottom: none;
-    }
+    /* ================= CHECKLIST ================= */
+    .progress-wrap { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px; }
+    .progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.82rem; font-weight: 700; }
+    .progress-track { height: 8px; background: var(--paper-3); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--jade), var(--lacquer)); width: 0%; transition: width 0.3s ease; border-radius: 999px; }
+
+    .check-box-group { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
+    .check-box-group h3 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--lacquer); display: flex; align-items: center; gap: 8px; }
+    .check-line { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 0.9rem; user-select: none; }
+    .check-line:last-child { border-bottom: none; }
     .check-line input[type="checkbox"] {
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--text-muted);
-      border-radius: 6px;
-      outline: none;
-      cursor: pointer;
-      flex-shrink: 0;
-      position: relative;
-      margin-top: 2px;
-      transition: all 0.2s ease;
+      appearance: none; width: 20px; height: 20px; border: 2px solid var(--muted); border-radius: 6px; outline: none;
+      cursor: pointer; flex-shrink: 0; position: relative; margin-top: 2px; transition: all 0.2s ease;
     }
-    .check-line input[type="checkbox"]:checked {
-      background-color: var(--accent);
-      border-color: var(--accent);
-    }
-    .check-line input[type="checkbox"]:checked::after {
-      content: '✓';
-      position: absolute;
-      color: #ffffff;
-      font-size: 13px;
-      font-weight: 800;
-      left: 4px;
-      top: -1px;
-    }
-    .check-line.checked-done label {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-    .check-line label {
-      cursor: pointer;
-      flex: 1;
-    }
+    .check-line input[type="checkbox"]:checked { background-color: var(--jade); border-color: var(--jade); }
+    .check-line input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-size: 13px; font-weight: 800; left: 4px; top: -1px; }
+    .check-line.checked-done label { text-decoration: line-through; color: var(--muted); }
+    .check-line label { cursor: pointer; flex: 1; }
 
-    /* TABLAS DE DICCIONARIO */
-    .dict-table-wrap {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-sm);
-    }
-    .dict-table-wrap table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-    }
-    .dict-table-wrap th, .dict-table-wrap td {
-      padding: 10px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-    .dict-table-wrap th {
-      background: rgba(0,0,0,0.02);
-      color: var(--text-muted);
-      font-weight: 700;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-    }
-    .phonetic-label {
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--primary);
-      font-size: 0.84rem;
-    }
+    /* ================= DICT TABLES ================= */
+    .dict-table-wrap { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .dict-table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    .dict-table-wrap th, .dict-table-wrap td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    .dict-table-wrap th { background: var(--paper-2); color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; }
+    .phonetic-label { font-family: 'JetBrains Mono', monospace; color: var(--lacquer); font-size: 0.82rem; }
 
-    /* BARRA INFERIOR DE NAVEGACIÓN (App Móvil) */
+    /* ================= BUDGET TABLE ================= */
+    .budget-table-wrap { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 14px 0; box-shadow: var(--shadow-sm); }
+    .budget-table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .budget-table-wrap th, .budget-table-wrap td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    .budget-table-wrap th { background: var(--paper-2); color: var(--muted); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; }
+    .budget-table-wrap tr:last-child td { font-weight: 700; border-bottom: none; }
+    .budget-table-wrap td:not(:first-child) { font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+
+    /* ================= NOTES ================= */
+    .notes-box textarea {
+      width: 100%; min-height: 110px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--paper-2); color: var(--ink); padding: 10px 12px; font-family: inherit; font-size: 0.86rem;
+      resize: vertical; outline: none;
+    }
+    .notes-box textarea:focus { border-color: var(--lacquer); }
+    .notes-save-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .btn-save { background: var(--lacquer); color: #fff8f2; border: none; padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.82rem; cursor: pointer; font-family: inherit; }
+    #notesSaveStatus { font-size: 0.78rem; color: var(--jade); font-weight: 700; }
+
+    /* ================= BOTTOM DOCK ================= */
     .bottom-dock {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--card-bg);
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-around;
-      padding: 6px 0 max(6px, env(safe-area-inset-bottom));
-      z-index: 50;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+      position: fixed; bottom: 0; left: 0; right: 0; background: var(--paper); border-top: 1px solid var(--border);
+      display: flex; overflow-x: auto; padding: 6px 4px max(6px, env(safe-area-inset-bottom)); z-index: 50;
+      box-shadow: 0 -6px 18px rgba(35,32,26,0.08); scrollbar-width: none;
     }
+    .bottom-dock::-webkit-scrollbar { display: none; }
     .dock-tab-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 4px 6px;
-      width: 100%;
-      transition: color 0.15s ease;
+      background: none; border: none; color: var(--muted); display: flex; flex-direction: column; align-items: center;
+      gap: 3px; font-size: 0.62rem; font-weight: 700; cursor: pointer; padding: 5px 10px; flex: 0 0 auto;
+      transition: color 0.15s ease; font-family: inherit;
     }
-    .dock-tab-btn i {
-      font-size: 1.15rem;
-    }
-    .dock-tab-btn.active {
-      color: var(--primary);
-    }
+    .dock-tab-btn i { font-size: 1.05rem; }
+    .dock-tab-btn.active { color: var(--lacquer); }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header>
     <div class="header-inner">
       <div class="brand-group">
-        <i class="fa-solid fa-plane-departure" style="color:var(--primary)"></i>
-        <span>Vietnam 2026</span>
-        <strong class="badge-route">14 DÍAS</strong>
+        <div class="brand-title">
+          <i class="fa-solid fa-torii-gate"></i>
+          <span>Việt Nam 2026</span>
+        </div>
+        <div class="brand-dates">19 sept – 02 oct · 14 días</div>
       </div>
-      <div style="font-size:0.8rem; font-weight:800; color:var(--accent);">
-        19 Sept – 02 Oct
-      </div>
+      <div class="countdown-chip" id="countdownChip">Calculando…</div>
     </div>
+    <svg class="skyline" viewBox="0 0 800 34" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 30 L40 30 L55 12 L70 30 L110 30 L128 6 L146 30 L190 30 L205 16 L220 30 L260 30 L276 4 L292 30 L340 30 L355 18 L370 30 L410 30 L426 8 L442 30 L490 30 L505 14 L520 30 L560 30 L576 2 L592 30 L640 30 L655 16 L670 30 L710 30 L726 6 L742 30 L800 30" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle class="accent" cx="726" cy="10" r="5" fill="currentColor"/>
+    </svg>
   </header>
 
-  <!-- CONTROLES SUPERIORES (Búsqueda y Conversor de Divisa) -->
   <div class="top-controls">
     <div class="search-box">
       <i class="fa-solid fa-magnifying-glass"></i>
       <input type="text" id="routeSearch" placeholder="Buscar día, restaurante, plato, tren, joyerías..." onkeyup="executeGlobalSearch()">
     </div>
 
-    <!-- Conversor rápido VND / EUR -->
     <div class="fx-widget">
       <div class="fx-row">
         <div class="fx-col">
           <label for="vndInput">₫ VND</label>
           <input type="number" id="vndInput" placeholder="250000" oninput="calcVndToEur()">
         </div>
-        <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--text-muted); font-size:0.85rem;"></i>
+        <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--muted); font-size:0.85rem;"></i>
         <div class="fx-col">
           <label for="eurInput">€ EUR</label>
           <input type="number" id="eurInput" placeholder="9.25" oninput="calcEurToVnd()">
         </div>
       </div>
       <div class="fx-quick-chips">
-        <span class="fx-chip" onclick="setQuickVnd(50000)">50k (~1.8€)</span>
+        <span class="fx-chip" onclick="setQuickVnd(50000)">50k (~1.9€)</span>
         <span class="fx-chip" onclick="setQuickVnd(100000)">100k (~3.7€)</span>
-        <span class="fx-chip" onclick="setQuickVnd(250000)">250k (~9.2€)</span>
+        <span class="fx-chip" onclick="setQuickVnd(250000)">250k (~9.3€)</span>
         <span class="fx-chip" onclick="setQuickVnd(500000)">500k (~18.5€)</span>
         <span class="fx-chip" onclick="setQuickVnd(1000000)">1M (~37€)</span>
       </div>
+      <div class="fx-note">Tipo de referencia fijo (1€ ≈ 27.000₫). El tipo real varía a diario: ajusta si lo necesitas.</div>
     </div>
   </div>
 
   <main>
+
     <!-- ================================================================= -->
-    <!-- PESTAÑA 1: ITINERARIO DÍA A DÍA -->
+    <!-- RESUMEN -->
     <!-- ================================================================= -->
-    <section id="tab-itinerario" class="tab-view active">
-      <div class="route-header-actions">
-        <span style="font-size:0.85rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">Hoja de Ruta</span>
+    <section id="tab-resumen" class="tab-view active">
+      <h2 class="tab-title">De un vistazo</h2>
+      <p class="tab-sub">Norte, centro y sur de Vietnam en 14 días. Toca una parada para saltar a su día.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num">14</div><div class="stat-lbl">DÍAS</div></div>
+        <div class="stat-card"><div class="stat-num">7</div><div class="stat-lbl">REGIONES</div></div>
+        <div class="stat-card"><div class="stat-num">2</div><div class="stat-lbl">VUELOS INTERNOS</div></div>
+      </div>
+
+      <div class="route-thread">
+        <div class="thread-stop" onclick="jumpToRegion('hanoi')"><i class="fa-solid fa-city"></i><span>Hanoi</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('ha long bahia')"><i class="fa-solid fa-water"></i><span>Ha Long</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('ninh binh')"><i class="fa-solid fa-mountain"></i><span>Ninh Binh</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('sapa')"><i class="fa-solid fa-person-hiking"></i><span>Sapa</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('hoi an')"><i class="fa-solid fa-lightbulb"></i><span>Hoi An</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('hue')"><i class="fa-solid fa-crown"></i><span>Hue</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('ho chi minh')"><i class="fa-solid fa-building"></i><span>Sài Gòn</span></div>
+      </div>
+
+      <div class="fact-grid">
+        <div class="fact-card"><i class="fa-solid fa-passport"></i><h5>Visado</h5><p>Comprueba requisitos de e-visa vigentes para tu nacionalidad antes de volar.</p></div>
+        <div class="fact-card"><i class="fa-solid fa-sim-card"></i><h5>Conexión</h5><p>eSIM (Airalo/Holafly) antes de salir, o SIM Viettel/Mobifone al llegar (~5-8€, 10-20GB).</p></div>
+        <div class="fact-card"><i class="fa-solid fa-plug"></i><h5>Enchufes</h5><p>Tipo A/C, 220V · 50Hz. Los adaptadores europeos suelen funcionar sin adaptador extra.</p></div>
+        <div class="fact-card"><i class="fa-solid fa-coins"></i><h5>Propinas</h5><p>No obligatorias, pero apreciadas en tours y restaurantes turísticos: redondear o 10-50k₫.</p></div>
+      </div>
+
+      <div class="weather-table-wrap">
+        <table>
+          <thead><tr><th>Zona</th><th>Temp.</th><th>Qué esperar (sept-oct)</th></tr></thead>
+          <tbody>
+            <tr><td>Norte<br><span style="color:var(--muted); font-weight:400;">Hanoi · Ha Long · Ninh Binh</span></td><td class="weather-temp">24-32°C</td><td>Cola de la temporada de lluvias: chubascos breves por la tarde, humedad alta, mañanas más despejadas.</td></tr>
+            <tr><td>Sapa<br><span style="color:var(--muted); font-weight:400;">montaña, 1.600m</span></td><td class="weather-temp">15-24°C</td><td>Bajada térmica notable por la altitud, niebla habitual al amanecer. Lleva capas de abrigo.</td></tr>
+            <tr><td>Centro<br><span style="color:var(--muted); font-weight:400;">Da Nang · Hoi An · Hue</span></td><td class="weather-temp">24-30°C</td><td>Arranca la temporada de lluvias centrales, con riesgo de tifones: es el tramo con más probabilidad de lluvia fuerte del viaje.</td></tr>
+            <tr><td>Sur<br><span style="color:var(--muted); font-weight:400;">Ho Chi Minh · Mekong</span></td><td class="weather-temp">25-33°C</td><td>Temporada húmeda con chubascos tropicales cortos cada tarde y calor constante.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="disclaimer-note"><i class="fa-solid fa-circle-info"></i><span>Climatología orientativa según patrones históricos, no un pronóstico en tiempo real — revisa la previsión de cada tramo unos días antes de llegar.</span></div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- ITINERARIO -->
+    <!-- ================================================================= -->
+    <section id="tab-itinerario" class="tab-view">
+      <div class="section-eyebrow">
+        <span class="lbl">Hoja de Ruta</span>
         <button class="btn-toggle-all" onclick="toggleAllDayCards()">Expandir / Colapsar todo</button>
       </div>
 
       <!-- 19 Sept -->
       <div class="day-card open searchable-card" data-search="hanoi llegada 19 sept lago hoan kiem ngoc son san jose maison centrale hoa lo mercado nocturno">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">19 SEPT</span>
-            <div class="day-title">Llegada a Hanoi y Casco Antiguo</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Llegada a Hanoi y Casco Antiguo</div>
+              <div class="day-meta"><span class="region-chip chip-hanoi">Hanoi</span><span class="transport-tag"><i class="fa-solid fa-plane-arrival"></i> Llegada internacional</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -603,8 +554,8 @@
           </div>
 
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Ha Noi Lake View Hotel and Travel</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">40 Lo Su, phuong Ly Thai To, Hoan Kiem, Hanoi · Check-in ~15:30-16:00</p>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-hotel"></i> Ha Noi Lake View Hotel and Travel</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">40 Lo Su, phuong Ly Thai To, Hoan Kiem, Hanoi · Check-in ~15:30-16:00</p>
             <a href="https://maps.google.com/?q=40+Lo+Su+Hoan+Kiem+Hanoi" target="_blank" class="action-btn"><i class="fa-solid fa-map-location-dot"></i> Abrir en Google Maps</a>
           </div>
 
@@ -627,9 +578,12 @@
       <!-- 20 Sept -->
       <div class="day-card searchable-card" data-search="ha long bahia crucero islas cueva 20 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">20 SEPT</span>
-            <div class="day-title">Bahía de Ha Long (Noche a bordo)</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Bahía de Ha Long (Noche a bordo)</div>
+              <div class="day-meta"><span class="region-chip chip-halong">Ha Long</span><span class="transport-tag"><i class="fa-solid fa-ship"></i> Crucero, pernocta a bordo</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -640,8 +594,8 @@
           </div>
 
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-ship"></i> Noche a bordo del Crucero en Ha Long Bay</div>
-            <p style="font-size:0.84rem; color:#b91c1c; font-weight:700; margin-top:2px;">AVISO IMPORTANTE: Dejar la maleta grande en la consigna del hotel de Hanoi. Viajar a la bahía únicamente con mochila pequeña de mano.</p>
+            <div style="font-weight:700; color:var(--lacquer);"><i class="fa-solid fa-ship"></i> Noche a bordo del Crucero en Ha Long Bay</div>
+            <p style="font-size:0.84rem; color:var(--lacquer); font-weight:700; margin-top:2px;">AVISO IMPORTANTE: Dejar la maleta grande en la consigna del hotel de Hanoi. Viajar a la bahía únicamente con mochila pequeña de mano.</p>
           </div>
 
           <ul class="clean-steps">
@@ -659,16 +613,19 @@
       <!-- 21 Sept -->
       <div class="day-card searchable-card" data-search="hanoi regreso train street literatura mausoleo seda hang gai dong xuan 21 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">21 SEPT</span>
-            <div class="day-title">Vuelta a Hanoi y Train Street</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Vuelta a Hanoi y Train Street</div>
+              <div class="day-meta"><span class="region-chip chip-hanoi">Hanoi</span><span class="transport-tag"><i class="fa-solid fa-moon"></i> Última noche en Hanoi</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Ha Noi Lake View Hotel (Última noche en Hanoi)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Recoger el equipaje grande guardado al llegar (~15:00-16:00h). Ya no se pernocta más en Hanoi.</p>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-hotel"></i> Ha Noi Lake View Hotel (Última noche en Hanoi)</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">Recoger el equipaje grande guardado al llegar (~15:00-16:00h). Ya no se pernocta más en Hanoi.</p>
           </div>
 
           <ul class="clean-steps">
@@ -685,25 +642,28 @@
       <!-- 22 Sept -->
       <div class="day-card searchable-card" data-search="ninh binh trang an tam coc hang mua atardecer cueva 22 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">22 SEPT</span>
-            <div class="day-title">Ninh Binh: Trang An y Hang Mua</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Ninh Binh: Trang An y Hang Mua</div>
+              <div class="day-meta"><span class="region-chip chip-ninhbinh">Ninh Binh</span><span class="transport-tag"><i class="fa-solid fa-bus"></i> Bus desde Hanoi (~2-2.5h)</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
           <div class="culture-card">
             <div class="culture-title"><i class="fa-solid fa-mountain"></i> Ninh Binh: La Bahía de Halong en Tierra</div>
-            En el año 968, tras expulsar a los ocupantes chinos, Đinh Bộ Lĩnh escogió esta comarca como capital del primer estado vietnamita unificado independiente (Đại Cồ Việt). Su geografía cárstica kárstica creaba una fortaleza natural inexpugnable ante las caballerías invasoras, comunicando valles a través de laberintos fluviales subterráneos.
+            En el año 968, tras expulsar a los ocupantes chinos, Đinh Bộ Lĩnh escogió esta comarca como capital del primer estado vietnamita unificado independiente (Đại Cồ Việt). Su geografía cárstica creaba una fortaleza natural inexpugnable ante las caballerías invasoras, comunicando valles a través de laberintos fluviales subterráneos.
           </div>
 
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-house-chimney"></i> Tam Coc Sana Villa and Homestays</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Incluye bicicletas gratuitas, desayuno y excursión a la Pagoda Bich Dong.</p>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-house-chimney"></i> Tam Coc Sana Villa and Homestays</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">Incluye bicicletas gratuitas, desayuno y excursión a la Pagoda Bich Dong.</p>
           </div>
 
           <ul class="clean-steps">
-            <li><strong>Traslado en bus Hanoi → Ninh Binh / Tam Coc:</strong> ~2-2.5h (Reservable en <a href="https://12go.com/es/travel/hanoi/tam-coc/" target="_blank" style="color:var(--primary); font-weight:700;">12go.com</a>). Check-in y maletas (~10:30h).</li>
+            <li><strong>Traslado en bus Hanoi → Ninh Binh / Tam Coc:</strong> ~2-2.5h (Reservable en <a href="https://12go.com/es/travel/hanoi/tam-coc/" target="_blank" style="color:var(--lacquer); font-weight:700;">12go.com</a>). Check-in y maletas (~10:30h).</li>
             <li><strong>Ruta Fluvial de Trang An (12:00 a 15:00h):</strong> Barca tradicional remada a mano por 15 km de cañones kársticos, cruzando 9 cuevas kársticas y 3 templos históricos.</li>
             <li><strong>Hang Mua (Cueva Mua):</strong> Ascenso de 500 peldaños esculpidos en roca viva hasta la estatua del dragón para presenciar el atardecer (ocaso ~17:45h).</li>
           </ul>
@@ -718,16 +678,19 @@
       <!-- 23 Sept -->
       <div class="day-card searchable-card" data-search="tam coc bich dong bici outlet bus nocturno sapa 23 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">23 SEPT</span>
-            <div class="day-title">Tam Coc, Bich Dong y Bus Nocturno</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Tam Coc, Bich Dong y Bus Nocturno</div>
+              <div class="day-meta"><span class="region-chip chip-ninhbinh">Ninh Binh</span><span class="transport-tag"><i class="fa-solid fa-bed"></i> Bus cama nocturno a Sapa (21:30h)</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-bus"></i> Noche en Bus Nocturno Cama VIP (Salida 21:30h)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Salida desde la parada oficial de la compañía HK hacia Sapa. Llevar sudadera ligera y calcetines para el climatizador del autobús.</p>
+            <div style="font-weight:700; color:var(--lacquer);"><i class="fa-solid fa-bus"></i> Noche en Bus Nocturno Cama VIP (Salida 21:30h)</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">Salida desde la parada oficial de la compañía HK hacia Sapa. Llevar sudadera ligera y calcetines para el climatizador del autobús.</p>
           </div>
 
           <ul class="clean-steps">
@@ -743,9 +706,12 @@
       <!-- 24 Sept -->
       <div class="day-card searchable-card" data-search="sapa cat cat lao chai ta van muong hoa arrozales trekking 24 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">24 SEPT</span>
-            <div class="day-title">Sapa: Valle Muong Hoa y Aldeas Étnicas</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Sapa: Valle Muong Hoa y Aldeas Étnicas</div>
+              <div class="day-meta"><span class="region-chip chip-sapa">Sapa</span><span class="transport-tag"><i class="fa-solid fa-person-hiking"></i> Trekking valle Muong Hoa</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -756,8 +722,8 @@
           </div>
 
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> The Mysteri Sapa</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">10 Hoang Lien, Sapa · Llegada estimada ~06:00 am. Dejar mochilas y desayunar.</p>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-hotel"></i> The Mysteri Sapa</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">10 Hoang Lien, Sapa · Llegada estimada ~06:00 am. Dejar mochilas y desayunar.</p>
           </div>
 
           <ul class="clean-steps">
@@ -776,16 +742,19 @@
       <!-- 25 Sept -->
       <div class="day-card searchable-card" data-search="fansipan teleferico cascadas bus aeropuerto hanoi da nang 25 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">25 SEPT</span>
-            <div class="day-title">Fansipan y Traslado al Aeropuerto</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Fansipan y Traslado al Aeropuerto</div>
+              <div class="day-meta"><span class="region-chip chip-sapa">Sapa</span><span class="transport-tag"><i class="fa-solid fa-cable-car"></i> Teleférico + bus nocturno a Hanoi</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-plane-departure"></i> Noche en Bus Sapa → Aeropuerto Hanoi (Noi Bai)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Para tomar el vuelo interno hacia Da Nang (26 Sept a las 05:40h).</p>
+            <div style="font-weight:700; color:var(--lacquer);"><i class="fa-solid fa-plane-departure"></i> Noche en Bus Sapa → Aeropuerto Hanoi (Noi Bai)</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">Para tomar el vuelo interno hacia Da Nang (26 Sept a las 05:40h).</p>
           </div>
 
           <ul class="clean-steps">
@@ -800,9 +769,12 @@
       <!-- 26 Sept -->
       <div class="day-card searchable-card" data-search="da nang hoi an vuelo farolillos thu bon puente japones 26 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">26 SEPT</span>
-            <div class="day-title">Vuelo Da Nang → Encanto de Hoi An</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Vuelo Da Nang → Encanto de Hoi An</div>
+              <div class="day-meta"><span class="region-chip chip-danang">Da Nang / Hoi An</span><span class="transport-tag"><i class="fa-solid fa-plane"></i> Vuelo interno Hanoi → Da Nang</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -813,8 +785,8 @@
           </div>
 
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Backhome Boutique Old Town (Hoi An)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">39-41 Ba Trieu, phuong Cam Pho, Hoi An. Vuelo Da Nang aterriza 07:00h → Transfer a Hoi An (~28 km; taxi ~20€ o Shuttle Civitatis ~5€/pers).</p>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-hotel"></i> Backhome Boutique Old Town (Hoi An)</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">39-41 Ba Trieu, phuong Cam Pho, Hoi An. Vuelo Da Nang aterriza 07:00h → Transfer a Hoi An (~28 km; taxi ~20€ o Shuttle Civitatis ~5€/pers).</p>
           </div>
 
           <ul class="clean-steps">
@@ -834,9 +806,12 @@
       <!-- 27 Sept -->
       <div class="day-card searchable-card" data-search="hue ciudadela imperial tumbas thien mu bai choi bingo 27 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">27 SEPT</span>
-            <div class="day-title">Excursión a Hue (Ciudad Imperial)</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Excursión a Hue (Ciudad Imperial)</div>
+              <div class="day-meta"><span class="region-chip chip-hue">Hue</span><span class="transport-tag"><i class="fa-solid fa-car"></i> Ida/vuelta desde Hoi An (~3h trayecto)</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -847,8 +822,8 @@
           </div>
 
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Alojamiento: Noche en Hoi An (Backhome Boutique)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Trayecto Hue ↔ Hoi An: ~3 horas por trayecto cruzando el legendario Paso Hai Van.</p>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-hotel"></i> Alojamiento: Noche en Hoi An (Backhome Boutique)</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">Trayecto Hue ↔ Hoi An: ~3 horas por trayecto cruzando el legendario Paso Hai Van.</p>
           </div>
 
           <ul class="clean-steps">
@@ -864,9 +839,12 @@
       <!-- 28 Sept -->
       <div class="day-card searchable-card" data-search="ba na hills puente dorado manos playa my son tra nhieu 28 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">28 SEPT</span>
-            <div class="day-title">Ba Na Hills / Playas o My Son</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Ba Na Hills / Playas o My Son</div>
+              <div class="day-meta"><span class="region-chip chip-hoian">Hoi An</span><span class="transport-tag"><i class="fa-solid fa-sun"></i> Día flexible según el tiempo</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -883,9 +861,12 @@
       <!-- 29 Sept -->
       <div class="day-card searchable-card" data-search="da nang marmol lady buda vuelo ho chi minh saigon bitexco bui vien 29 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">29 SEPT</span>
-            <div class="day-title">Da Nang → Vuelo a Ho Chi Minh</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Da Nang → Vuelo a Ho Chi Minh</div>
+              <div class="day-meta"><span class="region-chip chip-hcm">Ho Chi Minh</span><span class="transport-tag"><i class="fa-solid fa-plane"></i> Vuelo Da Nang → HCMC (17:00h)</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -896,8 +877,8 @@
           </div>
 
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> The 1 hotel and restaurant (Ho Chi Minh)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Hem 40/11 Duong Bui Vien 5, HCMC · Vuelo a las 17:00h → Llegada ~19:00h</p>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-hotel"></i> The 1 hotel and restaurant (Ho Chi Minh)</div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:2px;">Hem 40/11 Duong Bui Vien 5, HCMC · Vuelo a las 17:00h → Llegada ~19:00h</p>
           </div>
 
           <ul class="clean-steps">
@@ -912,9 +893,12 @@
       <!-- 30 Sept -->
       <div class="day-card searchable-card" data-search="cu chi tuneles delta mekong guerra resistencia 30 sept">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">30 SEPT</span>
-            <div class="day-title">Túneles de Cu Chi y Delta del Mekong</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Túneles de Cu Chi y Delta del Mekong</div>
+              <div class="day-meta"><span class="region-chip chip-hcm">Ho Chi Minh</span><span class="transport-tag"><i class="fa-solid fa-water"></i> Excursión Cu Chi + Mekong</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
@@ -935,15 +919,18 @@
       <!-- 01 Oct -->
       <div class="day-card searchable-card" data-search="delta mekong canales fruta regreso ho chi minh 01 oct">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">01 OCT</span>
-            <div class="day-title">Delta del Mekong y Regreso a HCMC</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Delta del Mekong y Regreso a HCMC</div>
+              <div class="day-meta"><span class="region-chip chip-hcm">Ho Chi Minh</span><span class="transport-tag"><i class="fa-solid fa-water"></i> Canales del Mekong en sampán</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Ho Chi Minh City (The 1 hotel)</div>
+            <div style="font-weight:700; color:var(--jade);"><i class="fa-solid fa-hotel"></i> Ho Chi Minh City (The 1 hotel)</div>
           </div>
 
           <ul class="clean-steps">
@@ -957,22 +944,25 @@
       <!-- 02 Oct -->
       <div class="day-card searchable-card" data-search="ho chi minh cafe apartment museo guerra notre dame correos mercado ruso compras 02 oct">
         <div class="day-header" onclick="toggleCard(this)">
-          <div style="display:flex; align-items:center;">
+          <div style="display:flex; align-items:center; min-width:0;">
             <span class="day-badge">02 OCT</span>
-            <div class="day-title">Saigón Colonial, Compras y Regreso</div>
+            <div class="day-title-wrap">
+              <div class="day-title">Saigón Colonial, Compras y Regreso</div>
+              <div class="day-meta"><span class="region-chip chip-hcm">Ho Chi Minh</span><span class="transport-tag"><i class="fa-solid fa-plane-departure"></i> Vuelo internacional (02:30h)</span></div>
+            </div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
           <div class="hotel-subcard">
-            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-plane-departure"></i> Vuelo nocturno internacional de regreso a casa (02:30h)</div>
+            <div style="font-weight:700; color:var(--lacquer);"><i class="fa-solid fa-plane-departure"></i> Vuelo nocturno internacional de regreso a casa (02:30h)</div>
           </div>
 
           <ul class="clean-steps">
             <li>Café matinal en <strong>The Cafe Apartment</strong> (edificio de viviendas de los años 60 en Nguyen Hue transformado en cubo laberíntico de cafeterías de diseño).</li>
             <li><strong>Museo de Restos de la Guerra (War Remnants Museum):</strong> Exposición de blindados, helicópteros y desgarradoras fotografías de corresponsales internacionales (muy recomendable).</li>
             <li>Catedral de Notre-Dame, <strong>Oficina Central de Correos</strong> (diseñada a finales del XIX con estética de estación ferroviaria europea) y Palacio de la Reunificación.</li>
-            <li><strong>Compras técnicas:</strong> Mercado Ruso (el mejor enclave para regatear ropa técnica, chubasqueros, mochilas tipo The North Face, Arc’teryx o Patagonia) y Mercado Ben Thanh.</li>
+            <li><strong>Compras técnicas:</strong> Mercado Ruso (el mejor enclave para regatear ropa técnica, chubasqueros, mochilas tipo The North Face, Arc'teryx o Patagonia) y Mercado Ben Thanh.</li>
             <li><em>Si hay tiempo:</em> Pagoda Giac Lam (la más antigua de Saigón, 1744) o Pagoda del Emperador de Jade (Ngoc Hoang).</li>
             <li>Traslado al Aeropuerto Internacional Tan Son Nhat para el vuelo de regreso a las 02:30h.</li>
           </ul>
@@ -986,28 +976,66 @@
     </section>
 
     <!-- ================================================================= -->
-    <!-- PESTAÑA 2: COMIDA & SPOTS GASTRONÓMICOS -->
+    <!-- TRANSPORTE -->
+    <!-- ================================================================= -->
+    <section id="tab-transporte" class="tab-view">
+      <h2 class="tab-title">Cómo nos movemos</h2>
+      <p class="tab-sub">Todos los trayectos del viaje, en orden. Guarda esta pestaña para el día a día.</p>
+
+      <div class="tl">
+        <div class="tl-item"><div class="tl-date">19 SEPT</div><div class="tl-body"><h5><i class="fa-solid fa-plane-arrival"></i> Vuelo internacional → Hanoi</h5><p>Llegada estimada 14:00h. Transfer al Ha Noi Lake View Hotel.</p></div></div>
+        <div class="tl-item"><div class="tl-date">20 SEPT · 08:00</div><div class="tl-body"><h5><i class="fa-solid fa-van-shuttle"></i> Transfer hotel → crucero Ha Long</h5><p>Recogida en el hotel de Hanoi. Solo mochila de mano; la maleta grande queda en consigna.</p></div></div>
+        <div class="tl-item"><div class="tl-date">22 SEPT</div><div class="tl-body"><h5><i class="fa-solid fa-bus"></i> Bus Hanoi → Ninh Binh/Tam Coc</h5><p>~2-2.5h de trayecto. Reservable en <a href="https://12go.com/es/travel/hanoi/tam-coc/" target="_blank" style="color:var(--lacquer); font-weight:700;">12go.com</a>.</p></div></div>
+        <div class="tl-item"><div class="tl-date">23 SEPT · 21:30</div><div class="tl-body"><h5><i class="fa-solid fa-bed"></i> Bus cama nocturno → Sapa</h5><p>Compañía HK, parada oficial. Llevar capa de abrigo para el climatizador.</p></div></div>
+        <div class="tl-item"><div class="tl-date">24 SEPT</div><div class="tl-body"><h5><i class="fa-solid fa-taxi"></i> Taxi Sapa ↔ Ta Van</h5><p>~200.000-250.000 VND (8-9€) por trayecto para el trekking del Valle Muong Hoa.</p></div></div>
+        <div class="tl-item"><div class="tl-date">25 SEPT</div><div class="tl-body"><h5><i class="fa-solid fa-cable-car"></i> Teleférico a Fansipan + bus nocturno</h5><p>Ascenso entre 09:00-12:00h. Por la noche, bus directo Sapa → Aeropuerto Noi Bai para el vuelo de las 05:40h.</p></div></div>
+        <div class="tl-item"><div class="tl-date">26 SEPT · 05:40</div><div class="tl-body"><h5><i class="fa-solid fa-plane"></i> Vuelo interno Hanoi (HAN) → Da Nang (DAD)</h5><p>Aterrizaje ~07:00h. Transfer Da Nang → Hoi An (~28km): taxi ~20€ o shuttle compartido ~5€/persona.</p></div></div>
+        <div class="tl-item"><div class="tl-date">27 SEPT</div><div class="tl-body"><h5><i class="fa-solid fa-car"></i> Excursión Hoi An ↔ Hue</h5><p>~3h por trayecto cruzando el Paso Hai Van. Ida y vuelta en el día, se pernocta de nuevo en Hoi An.</p></div></div>
+        <div class="tl-item"><div class="tl-date">29 SEPT · 17:00</div><div class="tl-body"><h5><i class="fa-solid fa-plane"></i> Vuelo interno Da Nang (DAD) → Ho Chi Minh (SGN)</h5><p>Llegada estimada ~19:00h. Transfer al The 1 Hotel, Bui Vien.</p></div></div>
+        <div class="tl-item"><div class="tl-date">02 OCT · 02:30</div><div class="tl-body"><h5><i class="fa-solid fa-plane-departure"></i> Vuelo internacional de regreso</h5><p>Salida desde el Aeropuerto Internacional Tan Son Nhat (SGN).</p></div></div>
+      </div>
+
+      <div class="fact-card" style="margin-bottom:12px;">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+        <h5>Apps imprescindibles</h5>
+        <p>Todas funcionan bien con eSIM o SIM local vietnamita.</p>
+        <div class="app-row">
+          <span class="app-pill"><i class="fa-solid fa-car"></i> Grab (taxi/moto)</span>
+          <span class="app-pill"><i class="fa-solid fa-bus"></i> 12go.com (bus/tren)</span>
+          <span class="app-pill"><i class="fa-solid fa-map"></i> Maps.me offline</span>
+          <span class="app-pill"><i class="fa-solid fa-language"></i> Google Translate (cámara)</span>
+        </div>
+      </div>
+
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-person-walking"></i> La Regla de Oro: Cruzar la Calle</div>
+        El tráfico en Hanoi y Saigón no se detiene ante los pasos de cebra. La regla infalible para cruzar: <strong>camina a paso lento, constante y predecible, sin detenerte de golpe ni retroceder</strong>. Los miles de motociclistas calcularán tu trayectoria milimétricamente y esquivarán tu espalda o tu frente sin tocarte.
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- COMIDA -->
     <!-- ================================================================= -->
     <section id="tab-comida" class="tab-view">
-      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Gastronomía por Regiones</h2>
+      <h2 class="tab-title">Gastronomía por Regiones</h2>
 
       <div class="spot-card searchable-card" data-search="hanoi bun cha obama huong lien">
         <span class="city-chip chip-hanoi">Hanoi</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Bún Chả Hương Liên (El local de Obama y Bourdain)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">24 Lê Văn Hưu. Donde en 2016 Anthony Bourdain invitó a cenar al presidente Barack Obama. El menú clásico incluye bún chả (panceta y albóndigas de cerdo a la brasa en caldo agridulce con fideos finos de arroz), rollito frito de marisco y cerveza Hanoi fresca. Mesa original conservada en vitrina.</p>
+        <p style="font-size:0.86rem; color:var(--muted);">24 Lê Văn Hưu. Donde en 2016 Anthony Bourdain invitó a cenar al presidente Barack Obama. El menú clásico incluye bún chả (panceta y albóndigas de cerdo a la brasa en caldo agridulce con fideos finos de arroz), rollito frito de marisco y cerveza Hanoi fresca. Mesa original conservada en vitrina.</p>
         <a href="https://maps.google.com/?q=Bun+Cha+Huong+Lien+Hanoi" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> Maps</a>
       </div>
 
       <div class="spot-card searchable-card" data-search="hanoi bun cha hang quat diverxo dabiz munoz">
         <span class="city-chip chip-hanoi">Hanoi</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Bun Cha 74 Hang Quat (Recomendación Dabiz Muñoz)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">En un estrecho callejón del Barrio Viejo. Horario muy estricto: solo abierto de 10:00 a 14:00h. Panceta asada al carbón in situ con un marinado profundo caramelizado que roza la perfección callejera.</p>
+        <p style="font-size:0.86rem; color:var(--muted);">En un estrecho callejón del Barrio Viejo. Horario muy estricto: solo abierto de 10:00 a 14:00h. Panceta asada al carbón in situ con un marinado profundo caramelizado que roza la perfección callejera.</p>
       </div>
 
       <div class="spot-card searchable-card" data-search="hanoi cafe giang cafe huevo note coffee bia hoi ta hien cha ca">
         <span class="city-chip chip-hanoi">Hanoi</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Clásicos de Hanoi: Café de Huevo y Bia Hơi</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">
+        <p style="font-size:0.86rem; color:var(--muted);">
           • <strong>Giang Café (39 Nguyễn Hữu Huân):</strong> Creador en 1946 del genuino <em>Cà phê trứng</em> (café denso con crema dulce batida de yema de huevo y leche condensada).<br>
           • <strong>Chả Cá Lã Vọng (14 Chả Cá):</strong> Pescado blanco marinado con cúrcuma salteado en hornillo en la mesa con eneldo y cebolleta fresca.<br>
           • <strong>Bia Hơi en Ta Hien:</strong> Cerveza rubia de tirador de elaboración diaria muy ligera y económica para disfrutar en taburetes plásticos en plena calle cervecera.
@@ -1017,7 +1045,7 @@
       <div class="spot-card searchable-card" data-search="ninh binh cabra de montana de nui com chay arroz crujiente chef hien">
         <span class="city-chip chip-ninhbinh">Ninh Binh</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Especialidades: Dê Núi & Cơm Cháy</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">
+        <p style="font-size:0.86rem; color:var(--muted);">
           • <strong>Dê núi:</strong> Cabra salvaje de roca criada en las peñas calizas; carne firme salteada con hierba limón y jengibre o asada al carbón.<br>
           • <strong>Cơm cháy:</strong> Fondo de cazuela de arroz crujiente dorado servido con salsa espesa y tiras de carne.<br>
           • <strong>Restaurantes top:</strong> <em>Chef Hien</em> (especialidad pato asado), <em>HOANG Cuisine</em> y tardeo en <em>La Maison</em>.
@@ -1027,7 +1055,7 @@
       <div class="spot-card searchable-card" data-search="sapa salmon ca hoi curry good morning vietnam">
         <span class="city-chip chip-sapa">Sapa</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Curry de Coco & Salmón de Altura</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">
+        <p style="font-size:0.86rem; color:var(--muted);">
           • <strong>Good Morning Vietnam:</strong> Muy popular por su curry cremoso de coco y platos tradicionales de montaña.<br>
           • <strong>Restaurante Son Nhi:</strong> Especializado en <em>Cá Hồi</em> (salmón fresco criado en las corrientes frías de montaña de Sapa, servido en hot-pot/olla comunitaria).
         </p>
@@ -1036,7 +1064,7 @@
       <div class="spot-card searchable-card" data-search="hoi an cao lau banh mi phuong white rose com ga che">
         <span class="city-chip chip-hoian">Hoi An</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Pentalogía Gastronómica de Hoi An</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">
+        <p style="font-size:0.86rem; color:var(--muted);">
           • <strong>Cao Lầu en Cao Lau Ba Le:</strong> Fideos artesanos gruesos amasados con agua cenicienta extraída exclusivamente del milenario pozo Ba Le.<br>
           • <strong>Bánh Mì Phượng:</strong> La baguette crujiente vietnamita por excelencia (paté casero, asado de cerdo, pepino y salsas secretas).<br>
           • <strong>White Rose (Bánh Bao Bánh Vạc):</strong> Bocados al vapor de masa traslúcida de arroz que recuerdan a una rosa, rellenos de gambas picadas con chalota crujiente.<br>
@@ -1047,7 +1075,7 @@
       <div class="spot-card searchable-card" data-search="ho chi minh saigon com tam banh xeo bep me in bui vien">
         <span class="city-chip chip-hcm">Ho Chi Minh</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Platos Estrella del Sur</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">
+        <p style="font-size:0.86rem; color:var(--muted);">
           • <strong>Cơm Tấm Đề Thám:</strong> «Arroz de grano roto» con costilla de cerdo caramelizada al carbón, huevo frito y piel de cerdo crujiente.<br>
           • <strong>Bếp Mẹ Ỉn:</strong> Famoso por su <em>Bánh Xèo</em>: fina crêpe crujiente de harina de arroz y leche de coco teñida de cúrcuma rellena de gambas y soja, que se envuelve en hojas verdes aromáticas.
         </p>
@@ -1055,15 +1083,10 @@
     </section>
 
     <!-- ================================================================= -->
-    <!-- PESTAÑA 3: HISTORIA & CULTURA -->
+    <!-- CULTURA -->
     <!-- ================================================================= -->
     <section id="tab-historia" class="tab-view">
-      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Claves Culturales y Consejos Prácticos</h2>
-
-      <div class="culture-card">
-        <div class="culture-title"><i class="fa-solid fa-person-walking"></i> La Regla de Oro: Cruzar la Calle</div>
-        El tráfico en Hanoi y Saigón no se detiene ante los pasos de cebra. La regla infalible para cruzar: <strong>camina a paso lento, constante y predecible, sin detenerte de golpe ni retroceder</strong>. Los miles de motociclistas calcularán tu trayectoria milimétricamente y esquivarán tu espalda o tu frente sin tocarte.
-      </div>
+      <h2 class="tab-title">Claves Culturales y Consejos Prácticos</h2>
 
       <div class="culture-card">
         <div class="culture-title"><i class="fa-solid fa-shirt"></i> Código de Vestimenta en Templos y Pagodas</div>
@@ -1079,15 +1102,35 @@
         <div class="culture-title"><i class="fa-solid fa-car"></i> Transporte Urbano con Grab</div>
         Descarga y configura la aplicación <strong>Grab</strong> (funciona como Uber/Cabify). Fija el precio exacto antes de subir, permite pagar con tarjeta y evita cualquier discusión sobre taxímetros alterados tanto en coche como en moto-taxi (*GrabBike*).
       </div>
+
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-hand-holding-heart"></i> Propinas</div>
+        No son obligatorias ni tan arraigadas como en Estados Unidos, pero cada vez se esperan más en restaurantes orientados al turismo, tours guiados y spas. Redondear la cuenta o dejar entre 10.000 y 50.000 VND es un gesto bien recibido. En puestos callejeros y bares locales no se espera propina.
+      </div>
+
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-wifi"></i> Conectividad: eSIM y Wifi</div>
+        Compra la eSIM antes de volar (Airalo, Holafly) para tener datos desde el aterrizaje, o una SIM física Viettel/Mobifone en el aeropuerto (~5-8€ por 10-20GB). El wifi gratuito está disponible en la gran mayoría de hoteles, cafés y en los buses nocturnos.
+      </div>
+
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-plug"></i> Enchufes y Voltaje</div>
+        Vietnam usa tomas tipo A/C (clavijas redondas, como en gran parte de Europa continental) a 220V/50Hz. Los adaptadores españoles funcionan sin necesidad de adaptador adicional en la mayoría de hoteles, pero conviene llevar uno universal por seguridad.
+      </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- PESTAÑA 4: CHECKLIST Y MALETA (CON PERSISTENCIA) -->
+    <!-- CHECKLIST -->
     <!-- ================================================================= -->
     <section id="tab-checklist" class="tab-view">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h2 style="font-size:1.1rem; font-weight:800;">Lista de Control</h2>
+      <div class="section-eyebrow">
+        <span class="lbl">Lista de Control</span>
         <button class="btn-toggle-all" onclick="clearSavedChecklist()">Restablecer todo</button>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-top"><span>Preparativos</span><span id="checklistProgressLabel">0 / 0 completado (0%)</span></div>
+        <div class="progress-track"><div class="progress-fill" id="checklistProgressBar"></div></div>
       </div>
 
       <div class="check-box-group">
@@ -1131,10 +1174,10 @@
     </section>
 
     <!-- ================================================================= -->
-    <!-- PESTAÑA 5: MONEDA & JOYERÍAS -->
+    <!-- MONEDA -->
     <!-- ================================================================= -->
     <section id="tab-moneda" class="tab-view">
-      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">El Secreto del Cambio en Joyerías</h2>
+      <h2 class="tab-title">El Secreto del Cambio en Joyerías</h2>
 
       <div class="culture-card">
         <div class="culture-title"><i class="fa-solid fa-coins"></i> ¿Por qué cambiar en joyerías?</div>
@@ -1144,34 +1187,49 @@
       <div class="spot-card searchable-card" data-search="hanoi cambio joyeria ha trung">
         <span class="city-chip chip-hanoi">Hanoi</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Calle Hà Trung (Casco Antiguo)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">La meca del cambio en la capital. Especialmente recomendadas la <strong>Joyería del número 27 de la calle Hà Trung</strong> y <strong>Quốc Trinh (nº 27-29)</strong>, puntos de referencia para expatriados y viajeros por ofrecer la mejor tasa interbancaria.</p>
+        <p style="font-size:0.86rem; color:var(--muted);">La meca del cambio en la capital. Especialmente recomendadas la <strong>Joyería del número 27 de la calle Hà Trung</strong> y <strong>Quốc Trinh (nº 27-29)</strong>, puntos de referencia para expatriados y viajeros por ofrecer la mejor tasa interbancaria.</p>
       </div>
 
       <div class="spot-card searchable-card" data-search="ho chi minh saigon cambio joyeria ha tam ben thanh">
         <span class="city-chip chip-hcm">Ho Chi Minh</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Hà Tâm Jewelry (Frente a Ben Thanh)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">2 Đ. Nguyễn An Ninh, Bến Thành. Situada justo frente a la puerta oeste del mercado. Aunque suele verse una fila de gente en la acera, el despacho en ventanilla es inmediato y su tipo de cambio es el más ventajoso del sur.</p>
+        <p style="font-size:0.86rem; color:var(--muted);">2 Đ. Nguyễn An Ninh, Bến Thành. Situada justo frente a la puerta oeste del mercado. Aunque suele verse una fila de gente en la acera, el despacho en ventanilla es inmediato y su tipo de cambio es el más ventajoso del sur.</p>
       </div>
 
       <div class="spot-card searchable-card" data-search="ninh binh sasa hue da nang joyeria cambio">
         <span class="city-chip chip-hoian">Resto de Destinos</span>
         <h4 style="font-size:0.98rem; font-weight:700;">Puntos Verificados por Viajeros</h4>
-        <ul style="font-size:0.86rem; padding-left:18px; margin-top:6px; color:var(--text-muted);">
-          <li><strong>Ninh Binh:</strong> <em>Tam Coc Queen’s Travel</em>.</li>
+        <ul style="font-size:0.86rem; padding-left:18px; margin-top:6px; color:var(--muted);">
+          <li><strong>Ninh Binh:</strong> <em>Tam Coc Queen's Travel</em>.</li>
           <li><strong>Hue:</strong> <em>Phú Cường Gold Shop</em> y <em>Mango Travel</em>.</li>
           <li><strong>Da Nang:</strong> <em>Bích Service</em> o <em>Kim Yến Hương</em>.</li>
           <li><strong>Hoi An:</strong> <em>Phụ kiện Sasa (Accesorios Sasa)</em>.</li>
         </ul>
       </div>
+
+      <h3 style="font-size:0.98rem; font-weight:700; margin:18px 0 6px;">Presupuesto orientativo por persona/día</h3>
+      <div class="budget-table-wrap">
+        <table>
+          <thead><tr><th>Categoría</th><th>Ajustado</th><th>Cómodo</th></tr></thead>
+          <tbody>
+            <tr><td>Alojamiento/noche</td><td>15-25€</td><td>35-60€</td></tr>
+            <tr><td>Comida (día completo)</td><td>8-15€</td><td>20-35€</td></tr>
+            <tr><td>Transporte local</td><td>3-6€</td><td>8-15€</td></tr>
+            <tr><td>Entradas y excursiones</td><td>5-10€</td><td>15-30€</td></tr>
+            <tr><td>Total orientativo/día</td><td>~30-45€</td><td>~80-140€</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="disclaimer-note"><i class="fa-solid fa-circle-info"></i><span>Rangos orientativos, no precios reservados ni verificados en tiempo real — varían por temporada y por dónde y cómo reserves.</span></div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- PESTAÑA 6: DICCIONARIO BÁSICO & EXPRESIONES -->
+    <!-- IDIOMA -->
     <!-- ================================================================= -->
     <section id="tab-idioma" class="tab-view">
-      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Vocabulario y Expresiones Esenciales</h2>
+      <h2 class="tab-title">Vocabulario y Expresiones Esenciales</h2>
 
-      <h3 style="font-size:0.92rem; font-weight:800; margin-bottom:8px; color:var(--primary);">
+      <h3 style="font-size:0.92rem; font-weight:700; margin-bottom:8px; color:var(--lacquer);">
         <i class="fa-solid fa-comments"></i> Cortesía y Regateo
       </h3>
       <div class="dict-table-wrap searchable-card" data-search="idioma cortesía hola gracias regateo">
@@ -1198,7 +1256,7 @@
         </table>
       </div>
 
-      <h3 style="font-size:0.92rem; font-weight:800; margin-bottom:8px; color:var(--accent);">
+      <h3 style="font-size:0.92rem; font-weight:700; margin-bottom:8px; color:var(--jade);">
         <i class="fa-solid fa-bowl-rice"></i> Restauración y Seguridad Gastro
       </h3>
       <div class="dict-table-wrap searchable-card" data-search="idioma comida agua hielo cilantro picante carne verduras">
@@ -1219,7 +1277,7 @@
         </table>
       </div>
 
-      <h3 style="font-size:0.92rem; font-weight:800; margin-bottom:8px; color:var(--gold);">
+      <h3 style="font-size:0.92rem; font-weight:700; margin-bottom:8px; color:var(--gold);">
         <i class="fa-solid fa-arrow-up-1-9"></i> Números para Pagar y Comprar
       </h3>
       <div class="dict-table-wrap searchable-card" data-search="idioma numeros contar pagar dinero">
@@ -1237,24 +1295,41 @@
           </tbody>
         </table>
       </div>
+
+      <h3 style="font-size:0.92rem; font-weight:700; margin-bottom:8px; color:var(--lacquer);">
+        <i class="fa-solid fa-triangle-exclamation"></i> Frases de Emergencia
+      </h3>
+      <div class="dict-table-wrap searchable-card" data-search="idioma emergencia ayuda perdido alergia medico">
+        <table>
+          <thead>
+            <tr><th>Español</th><th>Vietnamita</th><th>Pronunciación</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Necesito ayuda</td><td>Tôi cần giúp đỡ</td><td class="phonetic-label">toi can yiup do</td></tr>
+            <tr><td>Estoy perdido/a</td><td>Tôi bị lạc</td><td class="phonetic-label">toi bi lac</td></tr>
+            <tr><td>Soy alérgico/a a...</td><td>Tôi bị dị ứng với...</td><td class="phonetic-label">toi bi yi ung voi...</td></tr>
+            <tr><td>Llame a un médico</td><td>Gọi bác sĩ giúp tôi</td><td class="phonetic-label">goi bac si yiup toi</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- PESTAÑA 7: SOS & EMERGENCIAS -->
+    <!-- SOS -->
     <!-- ================================================================= -->
     <section id="tab-sos" class="tab-view">
-      <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:var(--radius-md); padding:16px; margin-bottom:14px;">
-        <h3 style="color:#b91c1c; font-size:1.05rem; font-weight:800; margin-bottom:8px;">
+      <div style="background:var(--lacquer-subtle); border:1px solid var(--lacquer); border-radius:var(--radius-md); padding:16px; margin-bottom:14px;">
+        <h3 style="color:var(--lacquer); font-size:1.02rem; font-weight:700; margin-bottom:8px;">
           <i class="fa-solid fa-shield-halved"></i> Embajada de España en Vietnam
         </h3>
         <p style="font-size:0.86rem; margin-bottom:6px;"><strong>Dirección:</strong> 4 P. Lê Hồng Phong, Ba Đình, Hà Nội</p>
         <p style="font-size:0.86rem; margin-bottom:6px;">
-          <strong>Teléfono Fijo General:</strong> <a href="tel:+842437715207" style="color:#b91c1c; font-weight:700;">(+84) 24 3771 5207</a>
+          <strong>Teléfono Fijo General:</strong> <a href="tel:+842437715207" style="color:var(--lacquer); font-weight:700;">(+84) 24 3771 5207</a>
         </p>
         <p style="font-size:0.86rem; margin-bottom:6px;">
-          <strong>Emergencias Consulares 24h:</strong> <a href="tel:+84936333130" style="color:#b91c1c; font-weight:800;">(+84) 9 3633 3130</a>
+          <strong>Emergencias Consulares 24h:</strong> <a href="tel:+84936333130" style="color:var(--lacquer); font-weight:800;">(+84) 9 3633 3130</a>
         </p>
-        <p style="font-size:0.80rem; color:var(--text-muted);">Email: emb.hanoi@maec.es · Sección Visados: emb.hanoi.vis@maec.es</p>
+        <p style="font-size:0.8rem; color:var(--muted);">Email: emb.hanoi@maec.es · Sección Visados: emb.hanoi.vis@maec.es</p>
       </div>
 
       <div class="spot-card">
@@ -1268,87 +1343,103 @@
       </div>
 
       <div class="spot-card">
-        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i> Coordinación Bus Sapa ↔ Aeropuerto Noi Bai</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted); margin-top:4px;">Canales directos de WhatsApp de los coordinadores locales del trayecto:</p>
+        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-solid fa-house-chimney-medical"></i> Hospitales de referencia internacional</h4>
+        <p style="font-size:0.82rem; color:var(--muted); margin-top:4px; margin-bottom:8px;">Los más citados por viajeros y expatriados en cada zona. Verifica cobertura con tu seguro antes de acudir.</p>
+        <a href="https://maps.google.com/?q=Vinmec+Times+City+International+Hospital+Hanoi" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> Vinmec Times City (Hanoi)</a>
+        <a href="https://maps.google.com/?q=Hoan+My+Danang+Hospital" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> Hoan My (Da Nang)</a>
+        <a href="https://maps.google.com/?q=FV+Hospital+Ho+Chi+Minh" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> FV Hospital (Ho Chi Minh)</a>
+      </div>
+
+      <div class="spot-card">
+        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-brands fa-whatsapp" style="color:var(--jade);"></i> Coordinación Bus Sapa ↔ Aeropuerto Noi Bai</h4>
+        <p style="font-size:0.86rem; color:var(--muted); margin-top:4px;">Canales directos de WhatsApp de los coordinadores locales del trayecto:</p>
         <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
-          <a href="https://wa.me/84985873537" target="_blank" class="action-btn" style="background:#dcfce7; color:#166534;"><i class="fa-brands fa-whatsapp"></i> Mr Tom (+84 985 873 537)</a>
-          <a href="https://wa.me/84853154718" target="_blank" class="action-btn" style="background:#dcfce7; color:#166534;"><i class="fa-brands fa-whatsapp"></i> Ms Zang Le (+84 85 315 4718)</a>
+          <a href="https://wa.me/84985873537" target="_blank" class="action-btn" style="background:var(--jade-subtle); color:var(--jade);"><i class="fa-brands fa-whatsapp"></i> Mr Tom (+84 985 873 537)</a>
+          <a href="https://wa.me/84853154718" target="_blank" class="action-btn" style="background:var(--jade-subtle); color:var(--jade);"><i class="fa-brands fa-whatsapp"></i> Ms Zang Le (+84 85 315 4718)</a>
+        </div>
+      </div>
+
+      <div class="spot-card notes-box">
+        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-solid fa-note-sticky"></i> Notas personales de emergencia</h4>
+        <p style="font-size:0.8rem; color:var(--muted); margin:4px 0 8px;">Número de póliza del seguro, contacto de referencia en casa, grupo sanguíneo, alergias... Se guarda solo en este dispositivo/cuenta.</p>
+        <textarea id="emergencyNotes" placeholder="Ej: Seguro Mondo, póliza nº 000000, teléfono 24h +34 900 000 000. Contacto en España: ..."></textarea>
+        <div class="notes-save-row">
+          <button class="btn-save" onclick="saveNotes()">Guardar notas</button>
+          <span id="notesSaveStatus"></span>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- BARRA INFERIOR DE NAVEGACIÓN -->
   <nav class="bottom-dock">
-    <button class="dock-tab-btn active" onclick="activateTab('itinerario', this)">
-      <i class="fa-solid fa-route"></i>
-      <small>Ruta</small>
+    <button class="dock-tab-btn active" data-tab="resumen" onclick="activateTab('resumen', this)">
+      <i class="fa-solid fa-compass"></i><small>Resumen</small>
     </button>
-    <button class="dock-tab-btn" onclick="activateTab('comida', this)">
-      <i class="fa-solid fa-utensils"></i>
-      <small>Comer</small>
+    <button class="dock-tab-btn" data-tab="itinerario" onclick="activateTab('itinerario', this)">
+      <i class="fa-solid fa-route"></i><small>Ruta</small>
     </button>
-    <button class="dock-tab-btn" onclick="activateTab('historia', this)">
-      <i class="fa-solid fa-book-atlas"></i>
-      <small>Cultura</small>
+    <button class="dock-tab-btn" data-tab="transporte" onclick="activateTab('transporte', this)">
+      <i class="fa-solid fa-bus"></i><small>Transporte</small>
     </button>
-    <button class="dock-tab-btn" onclick="activateTab('checklist', this)">
-      <i class="fa-solid fa-clipboard-check"></i>
-      <small>Maleta</small>
+    <button class="dock-tab-btn" data-tab="comida" onclick="activateTab('comida', this)">
+      <i class="fa-solid fa-utensils"></i><small>Comer</small>
     </button>
-    <button class="dock-tab-btn" onclick="activateTab('moneda', this)">
-      <i class="fa-solid fa-coins"></i>
-      <small>Dinero</small>
+    <button class="dock-tab-btn" data-tab="historia" onclick="activateTab('historia', this)">
+      <i class="fa-solid fa-book-atlas"></i><small>Cultura</small>
     </button>
-    <button class="dock-tab-btn" onclick="activateTab('idioma', this)">
-      <i class="fa-solid fa-language"></i>
-      <small>Idioma</small>
+    <button class="dock-tab-btn" data-tab="checklist" onclick="activateTab('checklist', this)">
+      <i class="fa-solid fa-clipboard-check"></i><small>Maleta</small>
     </button>
-    <button class="dock-tab-btn" onclick="activateTab('sos', this)">
-      <i class="fa-solid fa-kit-medical"></i>
-      <small>SOS</small>
+    <button class="dock-tab-btn" data-tab="moneda" onclick="activateTab('moneda', this)">
+      <i class="fa-solid fa-coins"></i><small>Dinero</small>
+    </button>
+    <button class="dock-tab-btn" data-tab="idioma" onclick="activateTab('idioma', this)">
+      <i class="fa-solid fa-language"></i><small>Idioma</small>
+    </button>
+    <button class="dock-tab-btn" data-tab="sos" onclick="activateTab('sos', this)">
+      <i class="fa-solid fa-kit-medical"></i><small>SOS</small>
     </button>
   </nav>
 
-  <!-- SCRIPT DE CONTROL Y PERSISTENCIA -->
   <script>
-    // Gestión de Pestañas
+    // ---------- Pestañas ----------
     function activateTab(tabKey, btnElement) {
       document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
       document.querySelectorAll('.dock-tab-btn').forEach(btn => btn.classList.remove('active'));
-      
+
       const targetView = document.getElementById('tab-' + tabKey);
-      if (targetView) {
-        targetView.classList.add('active');
-      }
-      if (btnElement) {
-        btnElement.classList.add('active');
+      if (targetView) targetView.classList.add('active');
+
+      const btn = btnElement || document.querySelector('.dock-tab-btn[data-tab="' + tabKey + '"]');
+      if (btn) {
+        btn.classList.add('active');
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Acordeón individual
-    function toggleCard(headerElement) {
-      const parentCard = headerElement.closest('.day-card');
-      if (parentCard) {
-        parentCard.classList.toggle('open');
-      }
+    function jumpToRegion(keyword) {
+      activateTab('itinerario');
+      const input = document.getElementById('routeSearch');
+      input.value = keyword;
+      executeGlobalSearch();
     }
 
-    // Alternar todas las tarjetas de ruta simultáneamente
+    // ---------- Acordeón ----------
+    function toggleCard(headerElement) {
+      const parentCard = headerElement.closest('.day-card');
+      if (parentCard) parentCard.classList.toggle('open');
+    }
+
     let allExpanded = false;
     function toggleAllDayCards() {
       allExpanded = !allExpanded;
       document.querySelectorAll('.day-card').forEach(card => {
-        if (allExpanded) {
-          card.classList.add('open');
-        } else {
-          card.classList.remove('open');
-        }
+        card.classList.toggle('open', allExpanded);
       });
     }
 
-    // Buscador en tiempo real sobre todos los elementos relevantes
+    // ---------- Buscador global ----------
     function executeGlobalSearch() {
       const query = document.getElementById('routeSearch').value.toLowerCase().trim();
       const searchableElements = document.querySelectorAll('.searchable-card');
@@ -1366,27 +1457,19 @@
       });
     }
 
-    // Conversor de Moneda (Ratio de referencia: 1 EUR ~ 27.000 VND)
+    // ---------- Conversor de moneda ----------
     const EXCHANGE_RATE = 27000;
 
     function calcVndToEur() {
       const vnd = parseFloat(document.getElementById('vndInput').value);
       const eurInput = document.getElementById('eurInput');
-      if (!isNaN(vnd) && vnd > 0) {
-        eurInput.value = (vnd / EXCHANGE_RATE).toFixed(2);
-      } else {
-        eurInput.value = '';
-      }
+      eurInput.value = (!isNaN(vnd) && vnd > 0) ? (vnd / EXCHANGE_RATE).toFixed(2) : '';
     }
 
     function calcEurToVnd() {
       const eur = parseFloat(document.getElementById('eurInput').value);
       const vndInput = document.getElementById('vndInput');
-      if (!isNaN(eur) && eur > 0) {
-        vndInput.value = Math.round(eur * EXCHANGE_RATE);
-      } else {
-        vndInput.value = '';
-      }
+      vndInput.value = (!isNaN(eur) && eur > 0) ? Math.round(eur * EXCHANGE_RATE) : '';
     }
 
     function setQuickVnd(amount) {
@@ -1394,42 +1477,41 @@
       calcVndToEur();
     }
 
-    // Persistencia del Checklist con localStorage
-    const STORAGE_KEY = 'psq_vietnam_checklist_v_final';
-
-    function initChecklistEngine() {
-      const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      
-      document.querySelectorAll('.check-line input[type="checkbox"]').forEach(checkbox => {
-        if (savedState[checkbox.id]) {
-          checkbox.checked = true;
-          checkbox.closest('.check-line').classList.add('checked-done');
-        }
-
-        checkbox.addEventListener('change', () => {
-          const line = checkbox.closest('.check-line');
-          if (checkbox.checked) {
-            line.classList.add('checked-done');
-          } else {
-            line.classList.remove('checked-done');
-          }
-          savedState[checkbox.id] = checkbox.checked;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
-        });
-      });
-    }
-
-    function clearSavedChecklist() {
-      if (confirm('¿Deseas restablecer todos los elementos del checklist?')) {
-        localStorage.removeItem(STORAGE_KEY);
-        document.querySelectorAll('.check-line input[type="checkbox"]').forEach(checkbox => {
-          checkbox.checked = false;
-          checkbox.closest('.check-line').classList.remove('checked-done');
-        });
+    // ---------- Cuenta atrás ----------
+    function updateCountdown() {
+      const el = document.getElementById('countdownChip');
+      if (!el) return;
+      const tripStart = new Date('2026-09-19T00:00:00+07:00');
+      const tripEnd = new Date('2026-10-02T23:59:00+07:00');
+      const now = new Date();
+      let text;
+      if (now < tripStart) {
+        const diffDays = Math.max(1, Math.ceil((tripStart - now) / 86400000));
+        text = 'Faltan ' + diffDays + (diffDays === 1 ? ' día' : ' días');
+      } else if (now <= tripEnd) {
+        const dayNum = Math.min(14, Math.floor((now - tripStart) / 86400000) + 1);
+        text = 'Día ' + dayNum + ' de 14';
+      } else {
+        text = 'Viaje completado';
       }
+      el.textContent = text;
     }
 
-    document.addEventListener('DOMContentLoaded', initChecklistEngine);
-  </script>
-</body>
-</html>
+    // ---------- Persistencia: checklist ----------
+    const CHECKLIST_KEY = 'checklist-state';
+    let checklistState = {};
+
+    async function loadChecklistState() {
+      try {
+        const res = await window.storage.get(CHECKLIST_KEY);
+        checklistState = res && res.value ? JSON.parse(res.value) : {};
+      } catch (e) {
+        checklistState = {};
+      }
+      applyChecklistState();
+      updateChecklistProgress();
+    }
+
+    function applyChecklistState() {
+      document.querySelectorAll('.check-line input[type="checkbox"]').forEach(cb => {
+        const checked = !!ch
