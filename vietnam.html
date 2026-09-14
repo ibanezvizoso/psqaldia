@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Vietnam · Cuaderno de Ruta y Bitácora</title>
+  <title>Vietnam 2026 · Cuaderno de Ruta y Bitácora</title>
   <meta name="robots" content="noindex, nofollow">
-  
-  <!-- Iconografía FontAwesome local del repositorio de PSQALDÍA -->
+
+  <!-- Estilos e iconos locales del repositorio de PSQALDÍA con fallback de contingencia -->
   <link rel="stylesheet" href="/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -29,8 +31,8 @@
       --radius-sm: 8px;
       --radius-md: 14px;
       --radius-lg: 20px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-      --shadow-md: 0 6px 16px -2px rgba(0,0,0,0.07);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 8px 20px -3px rgba(0,0,0,0.08);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -42,7 +44,7 @@
         --border: #1e293b;
         --primary-subtle: rgba(194, 65, 12, 0.18);
         --accent-subtle: rgba(15, 118, 110, 0.18);
-        --gold-subtle: rgba(180, 83, 9, 0.2);
+        --gold-subtle: rgba(180, 83, 9, 0.20);
       }
     }
 
@@ -58,10 +60,10 @@
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.55;
-      padding-bottom: 95px;
+      padding-bottom: 96px;
     }
 
-    /* HEADER */
+    /* ENCABEZADO */
     header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
@@ -71,14 +73,14 @@
       padding: 12px 18px;
       box-shadow: var(--shadow-sm);
     }
-    .header-wrap {
+    .header-inner {
       max-width: 860px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .brand-title {
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -88,7 +90,7 @@
     }
     .badge-route {
       background: linear-gradient(135deg, var(--primary), #ea580c);
-      color: white;
+      color: #ffffff;
       padding: 3px 8px;
       border-radius: var(--radius-sm);
       font-size: 0.72rem;
@@ -96,7 +98,7 @@
       letter-spacing: 0.05em;
     }
 
-    /* BARRA DE BÚSQUEDA Y CONVERSOR */
+    /* CONTROLES SUPERIORES (Búsqueda y Conversor) */
     .top-controls {
       max-width: 860px;
       margin: 14px auto 0;
@@ -131,40 +133,68 @@
       box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.15);
     }
 
-    /* MINI CONVERSOR DE MONEDA RÁPIDO */
-    .fx-calculator {
+    /* MINI CONVERSOR DE MONEDA DINÁMICO */
+    .fx-widget {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 10px 14px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .fx-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      box-shadow: var(--shadow-sm);
     }
-    .fx-input-group {
+    .fx-col {
       display: flex;
       align-items: center;
       gap: 6px;
       flex: 1;
     }
-    .fx-input-group span {
+    .fx-col label {
       font-weight: 700;
       font-size: 0.8rem;
       color: var(--text-muted);
     }
-    .fx-input-group input {
+    .fx-col input {
       width: 100%;
-      padding: 6px 10px;
+      padding: 7px 10px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       font-weight: 600;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text);
       outline: none;
+    }
+    .fx-quick-chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      margin-top: 8px;
+      padding-top: 4px;
+      scrollbar-width: none;
+    }
+    .fx-quick-chips::-webkit-scrollbar {
+      display: none;
+    }
+    .fx-chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .fx-chip:hover {
+      color: var(--primary);
+      border-color: var(--primary);
     }
 
     /* CONTENEDOR PRINCIPAL */
@@ -174,19 +204,35 @@
       padding: 0 16px;
     }
 
-    .tab-content {
+    .tab-view {
       display: none;
-      animation: fadeIn 0.2s ease forwards;
+      animation: tabFadeIn 0.2s ease forwards;
     }
-    .tab-content.active {
+    .tab-view.active {
       display: block;
     }
-    @keyframes fadeIn {
+    @keyframes tabFadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* DÍA A DÍA */
+    /* ACCIONES DE RUTA */
+    .route-header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .btn-toggle-all {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* TARJETA DE CADA DÍA */
     .day-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -202,9 +248,9 @@
       align-items: center;
       cursor: pointer;
       user-select: none;
-      background: rgba(0,0,0,0.015);
+      background: rgba(0,0,0,0.012);
     }
-    .day-tag {
+    .day-badge {
       background: var(--primary-subtle);
       color: var(--primary);
       font-weight: 800;
@@ -216,7 +262,7 @@
     }
     .day-title {
       font-weight: 700;
-      font-size: 0.98rem;
+      font-size: 0.96rem;
       margin-left: 10px;
     }
     .day-chevron {
@@ -236,8 +282,8 @@
       display: block;
     }
 
-    /* BLOQUES CULTURALES / HISTORIA / ALERTA CLIMA */
-    .history-box {
+    /* MÓDULOS DE HISTORIA Y LLUVIA */
+    .culture-card {
       background: rgba(15, 118, 110, 0.04);
       border-left: 4px solid var(--accent);
       border-radius: 4px;
@@ -245,19 +291,19 @@
       margin-bottom: 12px;
       font-size: 0.88rem;
     }
-    .history-title {
+    .culture-title {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--accent);
       margin-bottom: 4px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
-    .rain-plan-box {
+    .rain-card {
       background: rgba(180, 83, 9, 0.05);
       border-left: 4px solid var(--gold);
       border-radius: 4px;
@@ -269,32 +315,31 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--gold);
       margin-bottom: 4px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
+      text-transform: uppercase;
     }
 
-    .hotel-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-      font-size: 0.92rem;
+    .hotel-subcard {
+      background: rgba(0,0,0,0.02);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-bottom: 12px;
     }
 
-    ul.route-steps {
+    ul.clean-steps {
       list-style: none;
       margin-top: 8px;
     }
-    ul.route-steps li {
+    ul.clean-steps li {
       position: relative;
       padding-left: 18px;
       margin-bottom: 7px;
     }
-    ul.route-steps li::before {
+    ul.clean-steps li::before {
       content: "•";
       position: absolute;
       left: 4px;
@@ -302,7 +347,7 @@
       font-weight: 800;
     }
 
-    .btn-action {
+    .action-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -318,13 +363,13 @@
       margin-right: 6px;
       transition: all 0.15s ease;
     }
-    .btn-action:hover {
+    .action-btn:hover {
       background: var(--primary-subtle);
       color: var(--primary);
       border-color: var(--primary);
     }
 
-    /* TARJETAS GASTRONÓMICAS */
+    /* TARJETAS GASTRONÓMICAS Y SPOTS */
     .spot-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -350,7 +395,7 @@
     .chip-hcm { background: #f3e8ff; color: #6b21a8; }
 
     /* CHECKLIST INTERACTIVO */
-    .check-container {
+    .check-box-group {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
@@ -358,16 +403,16 @@
       margin-bottom: 16px;
       box-shadow: var(--shadow-sm);
     }
-    .check-container h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
+    .check-box-group h3 {
+      font-size: 1.02rem;
+      font-weight: 800;
       margin-bottom: 12px;
       color: var(--primary);
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .check-row {
+    .check-line {
       display: flex;
       align-items: flex-start;
       gap: 12px;
@@ -377,10 +422,10 @@
       font-size: 0.92rem;
       user-select: none;
     }
-    .check-row:last-child {
+    .check-line:last-child {
       border-bottom: none;
     }
-    .check-row input[type="checkbox"] {
+    .check-line input[type="checkbox"] {
       appearance: none;
       width: 20px;
       height: 20px;
@@ -393,26 +438,26 @@
       margin-top: 2px;
       transition: all 0.2s ease;
     }
-    .check-row input[type="checkbox"]:checked {
+    .check-line input[type="checkbox"]:checked {
       background-color: var(--accent);
       border-color: var(--accent);
     }
-    .check-row input[type="checkbox"]:checked::after {
+    .check-line input[type="checkbox"]:checked::after {
       content: '✓';
       position: absolute;
-      color: white;
+      color: #ffffff;
       font-size: 13px;
       font-weight: 800;
       left: 4px;
       top: -1px;
     }
-    .check-row.done span {
+    .check-line.checked-done span {
       text-decoration: line-through;
       color: var(--text-muted);
     }
 
-    /* TABLA DICCIONARIO */
-    .table-box {
+    /* TABLAS DE DICCIONARIO */
+    .dict-table-wrap {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
@@ -420,31 +465,31 @@
       margin-bottom: 16px;
       box-shadow: var(--shadow-sm);
     }
-    .table-box table {
+    .dict-table-wrap table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
-    .table-box th, .table-box td {
+    .dict-table-wrap th, .dict-table-wrap td {
       padding: 10px 14px;
       text-align: left;
       border-bottom: 1px solid var(--border);
     }
-    .table-box th {
+    .dict-table-wrap th {
       background: rgba(0,0,0,0.02);
       color: var(--text-muted);
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
     }
-    .phonetic-txt {
+    .phonetic-label {
       font-family: 'JetBrains Mono', monospace;
       color: var(--primary);
       font-size: 0.84rem;
     }
 
-    /* NAVEGADOR INFERIOR FIJO */
-    .dock-nav {
+    /* BARRA INFERIOR DE NAVEGACIÓN (App Móvil) */
+    .bottom-dock {
       position: fixed;
       bottom: 0;
       left: 0;
@@ -457,7 +502,7 @@
       z-index: 50;
       box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
     }
-    .dock-btn {
+    .dock-tab-btn {
       background: none;
       border: none;
       color: var(--text-muted);
@@ -465,802 +510,920 @@
       flex-direction: column;
       align-items: center;
       gap: 3px;
-      font-size: 0.68rem;
-      font-weight: 600;
+      font-size: 0.65rem;
+      font-weight: 700;
       cursor: pointer;
-      padding: 4px 8px;
+      padding: 4px 6px;
       width: 100%;
       transition: color 0.15s ease;
     }
-    .dock-btn i {
-      font-size: 1.18rem;
+    .dock-tab-btn i {
+      font-size: 1.15rem;
     }
-    .dock-btn.active {
+    .dock-tab-btn.active {
       color: var(--primary);
     }
   </style>
 </head>
 <body>
 
-  <!-- ENCABEZADO -->
+  <!-- HEADER -->
   <header>
-    <div class="header-wrap">
-      <div class="brand-title">
-        <i class="fa-solid fa-compass" style="color:var(--primary)"></i>
+    <div class="header-inner">
+      <div class="brand-group">
+        <i class="fa-solid fa-plane-departure" style="color:var(--primary)"></i>
         <span>Vietnam 2026</span>
-        <span class="badge-route">14D</span>
+        <span class="badge-route">14 DÍAS</span>
       </div>
-      <div style="font-size:0.8rem; font-weight:700; color:var(--accent);">
+      <div style="font-size:0.8rem; font-weight:800; color:var(--accent);">
         19 Sept – 02 Oct
       </div>
     </div>
   </header>
 
-  <!-- CONTROLES SUPERIORES (Buscador & Conversor Express) -->
+  <!-- CONTROLES SUPERIORES (Búsqueda y Conversor de Divisa) -->
   <div class="top-controls">
     <div class="search-box">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="routeSearch" placeholder="Buscar lugar, plato, tren, joyerías..." onkeyup="filterApp()">
+      <input type="text" id="routeSearch" placeholder="Buscar día, restaurante, plato, tren, joyerías..." onkeyup="executeGlobalSearch()">
     </div>
 
-    <!-- Conversor rápido VND / EUR (Tipo medio de cambio referencial) -->
-    <div class="fx-calculator">
-      <div class="fx-input-group">
-        <span>₫ (VND)</span>
-        <input type="number" id="vndInput" placeholder="250.000" oninput="convertVndToEur()">
+    <!-- Conversor rápido VND / EUR -->
+    <div class="fx-widget">
+      <div class="fx-row">
+        <div class="fx-col">
+          <label for="vndInput">₫ VND</label>
+          <input type="number" id="vndInput" placeholder="250000" oninput="calcVndToEur()">
+        </div>
+        <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--text-muted); font-size:0.85rem;"></i>
+        <div class="fx-col">
+          <label for="eurInput">€ EUR</label>
+          <input type="number" id="eurInput" placeholder="9.25" oninput="calcEurToVnd()">
+        </div>
       </div>
-      <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--text-muted); font-size:0.85rem;"></i>
-      <div class="fx-input-group">
-        <span>€ (EUR)</span>
-        <input type="number" id="eurInput" placeholder="9.00" oninput="convertEurToVnd()">
+      <div class="fx-quick-chips">
+        <span class="fx-chip" onclick="setQuickVnd(50000)">50k (~1.8€)</span>
+        <span class="fx-chip" onclick="setQuickVnd(100000)">100k (~3.7€)</span>
+        <span class="fx-chip" onclick="setQuickVnd(250000)">250k (~9.2€)</span>
+        <span class="fx-chip" onclick="setQuickVnd(500000)">500k (~18.5€)</span>
+        <span class="fx-chip" onclick="setQuickVnd(1000000)">1M (~37€)</span>
       </div>
     </div>
   </div>
 
   <main>
     <!-- ================================================================= -->
-    <!-- TAB 1: ITINERARIO DÍA A DÍA CON CONTEXTO Y CLIMA -->
+    <!-- PESTAÑA 1: ITINERARIO DÍA A DÍA -->
     <!-- ================================================================= -->
-    <section id="tab-itinerario" class="tab-content active">
+    <section id="tab-itinerario" class="tab-view active">
+      <div class="route-header-actions">
+        <span style="font-size:0.85rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">Hoja de Ruta</span>
+        <button class="btn-toggle-all" onclick="toggleAllDayCards()">Expandir / Colapsar todo</button>
+      </div>
 
-      <!-- Día 19 Sept -->
-      <div class="day-card open filterable" data-tags="hanoi lago hoan kiem maison centrale catedral san jose mercado nocturno tran quoc">
+      <!-- 19 Sept -->
+      <div class="day-card open searchable-card" data-search="hanoi llegada 19 sept lago hoan kiem ngoc son san jose maison centrale hoa lo mercado nocturno">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">19 SEPT</span>
+            <span class="day-badge">19 SEPT</span>
             <div class="day-title">Llegada a Hanoi y Casco Antiguo</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-landmark"></i> Hanoi: Historia & Alma</div>
-            Fundada en 1010 como Thăng Long («Dragón que asciende») por el rey Lý Thái Tổ. El Barrio Viejo (Old Quarter) mantiene su trazado gremial de hace mil años: 36 calles donde cada gremio vendía un único producto (plata, seda, hierbas medicinales). El Lago Hoàn Kiếm («Espada Restituida») encarna la leyenda del emperador Lê Lợi y la tortuga gigante dorada que le otorgó la victoria sobre la dinastía Ming.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-landmark"></i> Hanoi: Historia de la Capital Milenaria</div>
+            Fundada en 1010 por el emperador Lý Thái Tổ bajo el nombre de Thăng Long («Dragón que Asciende») tras divisar un dragón dorado sobre el Río Rojo. El Barrio Viejo (Old Quarter) conserva su trazado gremial medieval de 36 calles (Pho Phuong), donde cada calle pertenecía a un gremio artesano. El lago central Hoàn Kiếm («Espada Restituida») debe su nombre a la leyenda del rey Lê Lợi, a quien una tortuga gigante dorada entregó una espada mágica para derrotar a las tropas Ming, reclamándola de vuelta en este lago tras la victoria.
           </div>
 
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-hotel" style="color:var(--accent);"></i> Ha Noi Lake View Hotel and Travel</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">40 Lo Su, Hoan Kiem, Hanoi · Check-in ~15:30-16:00[span_0](start_span)[span_0](end_span)</p>
-            <a href="https://maps.google.com/?q=40+Lo+Su+Hoan+Kiem+Hanoi" target="_blank" class="btn-action"><i class="fa-solid fa-map-pin"></i> Maps</a>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Ha Noi Lake View Hotel and Travel</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">40 Lo Su, phuong Ly Thai To, Hoan Kiem, Hanoi · Check-in ~15:30-16:00[span_1](start_span)[span_1](end_span)</p>
+            <a href="https://maps.google.com/?q=40+Lo+Su+Hoan+Kiem+Hanoi" target="_blank" class="action-btn"><i class="fa-solid fa-map-location-dot"></i> Abrir en Google Maps</a>
           </div>
 
-          <p><strong>Ruta recomendada (Llegada 14:00h)[span_1](start_span)[span_1](end_span):</strong></p>
-          <ul class="route-steps">
-            <li>Paseo por el <strong>Lago Hoan Kiem</strong> y Templo <strong>Ngoc Son</strong> cruzando el puente rojo The Huc (cierra 17:00h)[span_2](start_span)[span_2](end_span).</li>
-            <li>Plaza Ly Thai To, Ópera de Hanoi y Catedral gótica de San José[span_3](start_span)[span_3](end_span).</li>
-            <li>Prisión histórica de <strong>Hoa Lo</strong> (la antigua «Maison Centrale» colonial)[span_4](start_span)[span_4](end_span).</li>
-            <li>Inmersión por las 36 calles gremiales de Pho Phuong[span_5](start_span)[span_5](end_span).</li>
-            <li><strong>Por la noche:</strong> Mercado Nocturno del Barrio Viejo (activo solo viernes, sábado y domingo, ideal para regateo)[span_6](start_span)[span_6](end_span).</li>
+          <p><strong>Plan del día (Llegada estimada 14:00h)[span_2](start_span)[span_2](end_span):</strong></p>
+          <ul class="clean-steps">
+            <li>Paseo por el <strong>Lago Hoan Kiem</strong> y visita al <strong>Templo Ngoc Son</strong> cruzando el emblemático puente rojo The Huc (abierto de 07:30 a 17:00h)[span_3](start_span)[span_3](end_span).</li>
+            <li>Plaza Ly Thai To (fundador de la capital), Teatro de la Ópera y la Catedral neogótica de San José[span_4](start_span)[span_4](end_span).</li>
+            <li>Prisión de Hoa Lo (la irónicamente llamada «Hanoi Hilton» durante la guerra, antigua Maison Centrale colonial francesa)[span_5](start_span)[span_5](end_span).</li>
+            <li>Cena e inmersión por el casco antiguo (calle 36 Pho Phuong)[span_6](start_span)[span_6](end_span).</li>
+            <li><strong>Mercado Nocturno del Barrio Viejo:</strong> Exclusivo de viernes, sábados y domingos por la noche. Excelente para compras textiles y regateo activo[span_7](start_span)[span_7](end_span).</li>
           </ul>
 
-          <div class="rain-plan-box">
-            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Alternativa si llueve con fuerza</div>
-            Visita interior extensa a la <strong>Prisión de Hoa Lo</strong>, espectáculo tradicional en el <strong>Teatro de Marionetas sobre Agua de Thang Long</strong> (a orillas del lago, techado), o refugio cafetero en <em>The Note Coffee</em> o <em>Giang Café</em>[span_7](start_span)[span_7](end_span).
+          <div class="rain-card">
+            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Plan alternativo por lluvia</div>
+            Refugiarse en el <strong>Teatro de Marionetas sobre Agua de Thang Long</strong> (a orillas del lago; arte nacido en los arrozales inundados en el s. XI, espectáculo techado con música tradicional en vivo), o tarde de lectura y café en <em>The Note Coffee</em> o <em>Giang Café</em>[span_8](start_span)[span_8](end_span).
           </div>
         </div>
       </div>
 
-      <!-- Día 20 Sept -->
-      <div class="day-card filterable" data-tags="ha long bay bahia crucero islas cueva">
+      <!-- 20 Sept -->
+      <div class="day-card searchable-card" data-search="ha long bahia crucero islas cueva 20 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">20 SEPT</span>
-            <div class="day-title">Bahía de Ha Long (Crucero)</div>
+            <span class="day-badge">20 SEPT</span>
+            <div class="day-title">Bahía de Ha Long (Noche a bordo)</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-dragon"></i> Ha Long: «Donde desciende el Dragón»</div>
-            Según la cosmogonía vietnamita, los dioses enviaron una familia de dragones celestiales para proteger el reino de los invasores marinos. Los dragones escupieron joyas de jade que, al tocar el mar, se transformaron en más de 1.600 islotes kársticos escarpados que hundieron la flota enemiga.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-dragon"></i> Ha Long: El Descenso del Dragón</div>
+            Según la mitología viet, cuando el país naciente fue invadido por mar, los dioses enviaron a una madre dragona y sus crías. Éstas arrojaron perlas y esmeraldas que se transformaron en más de 1.900 islotes kársticos escarpados, levantando una barrera impenetrable que destrozó los navíos enemigos. Científicamente, es un relieve cárstico cónico y de torre modelado a lo largo de 500 millones de años.
           </div>
 
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-ship" style="color:var(--primary);"></i> Noche en Camarote en Ha Long Bay[span_8](start_span)[span_8](end_span)</div>
-            <p style="font-size:0.84rem; color:#dc2626; font-weight:700;">AVISO: Dejar la maleta voluminosa en consigna del hotel de Hanoi y viajar solo con mochila de mano[span_9](start_span)[span_9](end_span).</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-ship"></i> Noche a bordo del Crucero en Ha Long Bay[span_9](start_span)[span_9](end_span)</div>
+            <p style="font-size:0.84rem; color:#b91c1c; font-weight:700; margin-top:2px;">AVISO IMPORTANTE: Dejar la maleta grande en la consigna del hotel de Hanoi. Viajar a la bahía únicamente con mochila pequeña de mano[span_10](start_span)[span_10](end_span).</p>
           </div>
 
-          <ul class="route-steps">
-            <li><strong>08:00 AM:</strong> Recogida puntual del transfer en el hotel en Hanoi[span_10](start_span)[span_10](end_span).</li>
-            <li>Embarque en el crucero, navegación entre formaciones kársticas, visita a cuevas (Sung Sot / Cueva de las Sorpresas) y kayak/relax al atardecer.</li>
+          <ul class="clean-steps">
+            <li><strong>08:00 AM:</strong> Recogida en el hotel de Hanoi por el transfer del crucero[span_11](start_span)[span_11](end_span).</li>
+            <li>Embarque a mediodía, almuerzo de navegación entre torres kársticas, visita a cuevas (Sung Sot) y atardecer en la bahía.</li>
           </ul>
 
-          <div class="rain-plan-box">
-            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Mal tiempo en la Bahía</div>
-            Los cruceros modernos cuentan con salones panorámicos cerrados de 360 grados, demostraciones culinarias de rollitos (nem) a bordo y talleres de cocina mientras la bruma kárstica genera un paisaje brumoso muy fotogénico.
+          <div class="rain-card">
+            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> En caso de lluvia o niebla</div>
+            La niebla densa sobre los mogotes de Ha Long dota a la bahía de una estética de pintura tradicional china a tinta china (*Shan Shui*). Las naves cuentan con salones panorámicos cerrados, clases de cocina tradicional vietnamita (rollitos nem) y pesca nocturna de calamar con focos.
           </div>
         </div>
       </div>
 
-      <!-- Día 21 Sept -->
-      <div class="day-card filterable" data-tags="hanoi vuelta train street dong xuan literatura mausoleo seda hang gai">
+      <!-- 21 Sept -->
+      <div class="day-card searchable-card" data-search="hanoi regreso train street literatura mausoleo seda hang gai dong xuan 21 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">21 SEPT</span>
-            <div class="day-title">Regreso a Hanoi y Train Street</div>
+            <span class="day-badge">21 SEPT</span>
+            <div class="day-title">Vuelta a Hanoi y Train Street</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-hotel" style="color:var(--accent);"></i> Ha Noi Lake View Hotel (Última noche en Hanoi)[span_11](start_span)[span_11](end_span)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">Recoger el equipaje guardado tras volver de la bahía (~15:00-16:00h)[span_12](start_span)[span_12](end_span).</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Ha Noi Lake View Hotel (Última noche en Hanoi)[span_12](start_span)[span_12](end_span)</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Recoger el equipaje grande guardado al llegar (~15:00-16:00h)[span_13](start_span)[span_13](end_span). Ya no se pernocta más en Hanoi[span_14](start_span)[span_14](end_span).</p>
           </div>
 
-          <ul class="route-steps">
-            <li><strong>Templo de la Literatura (Văn Miếu):</strong> Construido en 1070 y sede de la primera universidad imperial de Vietnam (08:00 a 17:00h)[span_13](start_span)[span_13](end_span).</li>
-            <li>Exterior del <strong>Mausoleo de Ho Chi Minh</strong> y Casa Presidencial[span_14](start_span)[span_14](end_span).</li>
-            <li><strong>Train Street:</strong> Sentarse en una cafetería junto a las vías para ver pasar el convoy rozando las fachadas[span_15](start_span)[span_15](end_span). <em>Horarios domingo: 15:20, 17:30, 18:00, 19:00, 19:45, 20:30, 21:00[span_16](start_span)[span_16](end_span).</em></li>
-            <li>Paseo por <strong>Hang Gai</strong> (calle de la seda pura; pañuelos tradicionales desde ~400.000 VND / 13€)[span_17](start_span)[span_17](end_span).</li>
-            <li>Cena en calle cervecera <strong>Ta Hien (Beer Street)</strong> o Jazz nocturno en <em>Minh’s Jazz Club</em>[span_18](start_span)[span_18](end_span).</li>
+          <ul class="clean-steps">
+            <li><strong>Templo de la Literatura (Văn Miếu):</strong> Construido en 1070 y consagrado a Confucio. Albergó la primera universidad imperial para mandarines. Horario: 08:00 a 17:00h[span_15](start_span)[span_15](end_span).</li>
+            <li>Exterior del <strong>Mausoleo de Ho Chi Minh</strong> y Palacio Presidencial (abierto 07:30 a 16:00h; cerrado lunes y viernes)[span_16](start_span)[span_16](end_span).</li>
+            <li>Ciudadela Imperial de Thang Long (08:00 a 17:00h)[span_17](start_span)[span_17](end_span).</li>
+            <li><strong>Train Street:</strong> Horarios del paso del convoy: Lunes a Viernes (17:00, 17:45, 20:30, 22:00); Fines de semana (06:00, 09:00, 11:20, 15:20, 17:30, 18:00, 19:00, 19:45, 20:30, 21:00, 23:00)[span_18](start_span)[span_18](end_span).</li>
+            <li>Compras de seda en <strong>Hang Gai</strong> (pañuelos de seda pura desde ~400.000 VND / 13€)[span_19](start_span)[span_19](end_span).</li>
+            <li><em>Si sobra tiempo:</em> Distrito elegante de Tay Ho y Pagoda Tran Quoc (la pagoda más antigua de Hanoi, s. VI)[span_20](start_span)[span_20](end_span).</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 22 Sept -->
-      <div class="day-card filterable" data-tags="ninh binh trang an tam coc hang mua cuevas mirador">
+      <!-- 22 Sept -->
+      <div class="day-card searchable-card" data-search="ninh binh trang an tam coc hang mua atardecer cueva 22 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">22 SEPT</span>
+            <span class="day-badge">22 SEPT</span>
             <div class="day-title">Ninh Binh: Trang An y Hang Mua</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-mountain"></i> Hoa Lu y Trang An: Fortaleza Natural</div>
-            En el siglo X, el rey Đinh Bộ Lĩnh unificó los 12 señoríos de la guerra y convirtió esta cuenca rodeada de montañas calizas inexpugnables en la capital imperial de Đại Cồ Việt. Trang An fue refugio militar estratégico por sus ríos subterráneos antes de que la capital se mudara a Hanoi.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-mountain"></i> Ninh Binh: La Bahía de Halong en Tierra</div>
+            En el año 968, tras expulsar a los ocupantes chinos, Đinh Bộ Lĩnh escogió esta comarca como capital del primer estado vietnamita unificado independiente (Đại Cồ Việt). Su geografía cárstica kárstica creaba una fortaleza natural inexpugnable ante las caballerías invasoras, comunicando valles a través de laberintos fluviales subterráneos.
           </div>
 
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-house-chimney" style="color:var(--accent);"></i> Tam Coc Sana Villa and Homestays[span_19](start_span)[span_19](end_span)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">Incluye bicicletas, desayuno y visita libre a Pagoda Bich Dong[span_20](start_span)[span_20](end_span).</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-house-chimney"></i> Tam Coc Sana Villa and Homestays[span_21](start_span)[span_21](end_span)</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Incluye bicicletas gratuitas, desayuno y excursión a la Pagoda Bich Dong[span_22](start_span)[span_22](end_span).</p>
           </div>
 
-          <ul class="route-steps">
-            <li><strong>Bus Hanoi → Tam Coc:</strong> 2 - 2.5h (Llegada al hotel ~10:30h)[span_21](start_span)[span_21](end_span).</li>
-            <li><strong>Complejo de Trang An en barca (12:00 - 15:00h):</strong> Circuito fluvial de 3h navegando por 9 cuevas y 3 templos calizos[span_22](start_span)[span_22](end_span).</li>
-            <li><strong>Hang Mua (Cueva Mua):</strong> Subir los 500 escalones de piedra hacia el dragón de la cima para el atardecer sobre los arrozales (ocaso ~17:45h)[span_23](start_span)[span_23](end_span).</li>
+          <ul class="clean-steps">
+            <li><strong>Traslado en bus Hanoi → Ninh Binh / Tam Coc:</strong> ~2-2.5h (Reservable en <a href="https://12go.com/es/travel/hanoi/tam-coc/" target="_blank" style="color:var(--primary); font-weight:700;">12go.com</a>)[span_23](start_span)[span_23](end_span). Check-in y maletas (~10:30h)[span_24](start_span)[span_24](end_span).</li>
+            <li><strong>Ruta Fluvial de Trang An (12:00 a 15:00h):</strong> Barca tradicional remada a mano por 15 km de cañones kársticos, cruzando 9 cuevas kársticas y 3 templos históricos[span_25](start_span)[span_25](end_span).</li>
+            <li><strong>Hang Mua (Cueva Mua):</strong> Ascenso de 500 peldaños esculpidos en roca viva hasta la estatua del dragón para presenciar el atardecer (ocaso ~17:45h)[span_26](start_span)[span_26](end_span).</li>
           </ul>
 
-          <div class="rain-plan-box">
-            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Lluvia en Ninh Binh</div>
-            Si el barro dificulta la subida a Hang Mua, sustitúyelo por el inmenso complejo monumental techado de la <strong>Pagoda de Bai Dinh</strong> (el templo budista más grande del Sudeste Asiático, con claustros kilométricos cubiertos con 500 estatuas Arhat talladas en piedra).
+          <div class="rain-card">
+            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Alternativa si hay barro o lluvia fuerte</div>
+            Sustituir la ascensión resbaladiza de Hang Mua por el gigantesco recinto monumental cubierto de la <strong>Pagoda de Bai Dinh</strong>: el complejo budista techado más grande de Indochina, con corredores techados de 3 km flanqueados por 500 esculturas Arhat de piedra maciza y un Buda gigante de bronce de 100 toneladas.
           </div>
         </div>
       </div>
 
-      <!-- Día 23 Sept -->
-      <div class="day-card filterable" data-tags="tam coc bich dong bici outlet bus nocturno sapa">
+      <!-- 23 Sept -->
+      <div class="day-card searchable-card" data-search="tam coc bich dong bici outlet bus nocturno sapa 23 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">23 SEPT</span>
+            <span class="day-badge">23 SEPT</span>
             <div class="day-title">Tam Coc, Bich Dong y Bus Nocturno</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-bus" style="color:var(--primary);"></i> Noche: Bus Cama VIP Ninh Binh → Sapa (Salida 21:30h)[span_24](start_span)[span_24](end_span)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">Punto de encuentro: Parada compañía HK[span_25](start_span)[span_25](end_span). Llevar calcetines/sudadera ligera (aire acondicionado fuerte).</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-bus"></i> Noche en Bus Nocturno Cama VIP (Salida 21:30h)[span_27](start_span)[span_27](end_span)</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Salida desde la parada oficial de la compañía HK hacia Sapa[span_28](start_span)[span_28](end_span). Llevar sudadera ligera y calcetines para el climatizador del autobús.</p>
           </div>
 
-          <ul class="route-steps">
-            <li>Navegación matinal en barca por <strong>Tam Coc</strong> (remadoras tradicionales que impulsan la barca con los pies)[span_26](start_span)[span_26](end_span).</li>
-            <li>Ruta en bicicleta entre arrozales hasta la <strong>Pagoda de Bich Dong</strong> (entrada de postal budista del s. XV incrustada en la roca)[span_27](start_span)[span_27](end_span).</li>
-            <li>Compras textiles: <em>Store 86 Authentic Factory Outlet</em>[span_28](start_span)[span_28](end_span).</li>
-            <li>Cena temprana en Tam Coc (probar arroz crujiente <em>Cơm cháy</em> y pato de <em>Chef Hien</em>)[span_29](start_span)[span_29](end_span).</li>
+          <ul class="clean-steps">
+            <li>Navegación matutina en barca por <strong>Tam Coc</strong> (1 hora; famosa por sus barqueras remando con los pies)[span_29](start_span)[span_29](end_span).</li>
+            <li>Paseo en bicicleta entre campos de arroz hasta la <strong>Pagoda Bich Dong</strong> (construida en 1428 en tres niveles adosados a la montaña; horario 08:00 a 17:00h)[span_30](start_span)[span_30](end_span).</li>
+            <li>Compras textiles: <em>Store 86 Authentic Factory Outlet</em>[span_31](start_span)[span_31](end_span).</li>
+            <li><em>Si hay tiempo:</em> Ruinas históricas de Hoa Lu (antigua capital dinástica)[span_32](start_span)[span_32](end_span).</li>
+            <li>Cena en Tam Coc y relax antes de abordar el sleeper bus a las 21:30h[span_33](start_span)[span_33](end_span).</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 24 Sept -->
-      <div class="day-card filterable" data-tags="sapa cat cat lao chai ta van trekking etnias hmong">
+      <!-- 24 Sept -->
+      <div class="day-card searchable-card" data-search="sapa cat cat lao chai ta van muong hoa arrozales trekking 24 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">24 SEPT</span>
-            <div class="day-title">Sapa: Trekking Cat Cat y Valle Muong Hoa</div>
+            <span class="day-badge">24 SEPT</span>
+            <div class="day-title">Sapa: Valle Muong Hoa y Aldeas Étnicas</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-seedling"></i> Sapa: Culturas de Montaña</div>
-            Territorio dominado históricamente por minorías étnicas (H'mong Negros, Dao Rojos y Giay). Crearon el prodigioso sistema de terrazas de arroz para cultivar las laderas de la cordillera Hoang Lien Son. Los franceses convirtieron Sapa a principios del s. XX en un sanatorio militar por su clima templado de montaña.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-person-hiking"></i> Sapa: Culturas Ancestrales de Altura</div>
+            Ubicada a 1.600 metros de altitud bajo la cordillera Hoang Lien Son. Es hogar milenario de etnias minoritarias: los H'mong Negros (famosos por teñir su ropa de lino con índigo natural azul profundo), los Dao Rojos (distinguibles por sus turbantes escarlata y cabezas afeitadas según la tradición de las mujeres casadas) y los Giay. Sus terrazas de arroz escalonadas representan una de las mayores obras de ingeniería agrícola del planeta.
           </div>
 
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-hotel" style="color:var(--accent);"></i> The Mysteri Sapa</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">10 Hoang Lien, Sapa · Llegada ~06:00 am[span_30](start_span)[span_30](end_span). Dejar mochilas y desayunar[span_31](start_span)[span_31](end_span).</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> The Mysteri Sapa</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">10 Hoang Lien, Sapa · Llegada estimada ~06:00 am. Dejar mochilas y desayunar[span_34](start_span)[span_34](end_span).</p>
           </div>
 
-          <ul class="route-steps">
-            <li>Inicio de trekking hacia <strong>Cat Cat</strong> (75.000 VND), cascadas y ruta por el valle de <strong>Muong Hoa</strong> cruzando <strong>Lao Chai</strong> y <strong>Ta Van</strong>[span_32](start_span)[span_32](end_span).</li>
-            <li>Almuerzo con vistas a los arrozales en Ta Van[span_33](start_span)[span_33](end_span).</li>
-            <li>Regreso al hotel en taxi (200k - 250k VND / 8-9€)[span_34](start_span)[span_34](end_span).</li>
-            <li>Tarde de descanso, paseo por la iglesia colonial de piedra, lago de Sapa y cena de salmón local en <em>Son Nhi</em> o curry en <em>Good Morning Vietnam</em>[span_35](start_span)[span_35](end_span).</li>
+          <ul class="clean-steps">
+            <li><strong>Trekking por el Valle de Muong Hoa:</strong> Cat Cat (entrada 75.000 VND) → Lao Chai → Ta Van (vistas panorámicas de terrazas y cascadas de Cau May)[span_35](start_span)[span_35](end_span). Taxi Sapa a Ta Van: ~200.000-250.000 VND (8-9€)[span_36](start_span)[span_36](end_span).</li>
+            <li>Almuerzo tradicional en la aldea de Ta Van[span_37](start_span)[span_37](end_span).</li>
+            <li>Regreso al pueblo de Sapa en taxi; tarde relajada visitando la iglesia de piedra de 1895, el lago de Sapa y el mercado central[span_38](start_span)[span_38](end_span).</li>
           </ul>
 
-          <div class="rain-plan-box">
-            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Mal tiempo en la montaña</div>
-            Si los senderos de barro están resbaladizos: tomar un reconfortante <strong>baño de hierbas medicinales tradicional de los Dao Rojos</strong> (con maderas aromáticas en barricas calientes, disponible en spas locales), y café contemplativo en <em>Fansipan Terrace Cafe</em>[span_36](start_span)[span_36](end_span).
+          <div class="rain-card">
+            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Si los senderos están resbaladizos por lluvia</div>
+            Darse un tradicional <strong>baño de hierbas medicinales de los Dao Rojos</strong> en tinas de madera de ciprés aromático en un spa local (infusión medicinal caliente con más de 30 plantas de alta montaña para la circulación y el cansancio), seguido de un café de altura en <em>Fansipan Terrace Cafe</em> contemplando el mar de nubes[span_39](start_span)[span_39](end_span).
           </div>
         </div>
       </div>
 
-      <!-- Día 25 Sept -->
-      <div class="day-card filterable" data-tags="fansipan teleferico cascadas bus nocturno aeropuerto noi bai">
+      <!-- 25 Sept -->
+      <div class="day-card searchable-card" data-search="fansipan teleferico cascadas bus aeropuerto hanoi da nang 25 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">25 SEPT</span>
+            <span class="day-badge">25 SEPT</span>
             <div class="day-title">Fansipan y Traslado al Aeropuerto</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-plane-departure" style="color:var(--primary);"></i> Noche: Bus nocturno Sapa → Aeropuerto Hanoi (Noi Bai)[span_37](start_span)[span_37](end_span)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">Para tomar el vuelo interno hacia Da Nang (26 Sept a las 05:40h)[span_38](start_span)[span_38](end_span).</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-plane-departure"></i> Noche en Bus Sapa → Aeropuerto Hanoi (Noi Bai)[span_40](start_span)[span_40](end_span)</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Para tomar el vuelo interno hacia Da Nang (26 Sept a las 05:40h)[span_41](start_span)[span_41](end_span).</p>
           </div>
 
-          <ul class="route-steps">
-            <li><strong>Techo de Indochina (Fansipan - 3.143m):</strong> Subida en teleférico (~25-30€) entre 09:00 y 12:00h[span_39](start_span)[span_39](end_span). <em>Comprobar web/cámara meteorológica antes de subir: si está cubierto de niebla densa no merece la pena el coste[span_40](start_span)[span_40](end_span).</em></li>
-            <li>Si no se sube por bruma: ruta por carretera hacia <em>Silver Waterfall</em> y <em>Love Waterfall</em> con café en <em>O Quy Ho</em>[span_41](start_span)[span_41](end_span).</li>
-            <li>Comida relajada en Sapa pueblo y preparación para el transfer directo al aeropuerto[span_42](start_span)[span_42](end_span).</li>
+          <ul class="clean-steps">
+            <li><strong>Fansipan (3.143m - Techo de Indochina):</strong> Subida en teleférico de récord mundial (~25-30€) entre 09:00 y 12:00h[span_42](start_span)[span_42](end_span). <em>IMPORTANTE: Comprobar cámaras en vivo en la estación base antes de pagar el billete; si la cumbre está totalmente tapada por la niebla, las vistas son nulas[span_43](start_span)[span_43](end_span).</em></li>
+            <li>Almuerzo en <em>Good Morning View Restaurant</em> (Sapa)[span_44](start_span)[span_44](end_span).</li>
+            <li>Si no se sube a Fansipan o sobra tiempo: excursión por carretera a las cascadas de <em>Silver Waterfall</em> (Thác Bạc) y <em>Love Waterfall</em> (Thác Tình Yêu)[span_45](start_span)[span_45](end_span).</li>
+            <li>Bus nocturno con llegada directa a la terminal del Aeropuerto Noi Bai[span_46](start_span)[span_46](end_span).</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 26 Sept -->
-      <div class="day-card filterable" data-tags="da nang hoi an vuelo farolillos rio thu bon puente japones">
+      <!-- 26 Sept -->
+      <div class="day-card searchable-card" data-search="da nang hoi an vuelo farolillos thu bon puente japones 26 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">26 SEPT</span>
-            <div class="day-title">Vuelo a Da Nang y Farolillos de Hoi An</div>
+            <span class="day-badge">26 SEPT</span>
+            <div class="day-title">Vuelo Da Nang → Encanto de Hoi An</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-anchor"></i> Hoi An: El Gran Puerto de la Seda</div>
-            Conocida entre los siglos XV y XIX como Faifo, fue el puerto comercial internacional más boyante del sudeste asiático. Comerciantes japoneses, chinos, holandeses y portugueses convivieron aquí. Cuando el río Thu Bon se encalló por los sedimentos a finales del s. XIX, el comercio se mudó a Da Nang, dejando la arquitectura de Hoi An congelada e intacta en el tiempo frente a la modernización y las guerras.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-sailboat"></i> Hoi An: El Puerto Cosmopolita de la Seda</div>
+            Conocida entre los siglos XV y XIX como Faifo, fue el puerto comercial más activo del sudeste asiático, punto neurálgico de la Ruta Marítima de la Seda y la Cerámica. Las corrientes monzónicas obligaban a los navíos mercantes de Japón, China, Portugal y Holanda a asentarse aquí durante meses, creando barrios diferenciados. El Puente Japonés cubierto (s. XVI) contenía templos para apaciguar al monstruo submarino *Namazu*, cuyos movimientos causaban terremotos. La ciudad sobrevivió intacta a las guerras del s. XX porque el cauce fluvial se colmató de sedimentos a finales del XIX y el tráfico marítimo se desvió a Da Nang.
           </div>
 
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-hotel" style="color:var(--accent);"></i> Backhome Boutique Old Town (Hoi An)[span_43](start_span)[span_43](end_span)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">39-41 Ba Trieu, Hoi An · Vuelo aterriza 07:00h Da Nang → Transfer (28 km)[span_44](start_span)[span_44](end_span)</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Backhome Boutique Old Town (Hoi An)[span_47](start_span)[span_47](end_span)</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">39-41 Ba Trieu, phuong Cam Pho, Hoi An[span_48](start_span)[span_48](end_span). Vuelo Da Nang aterriza 07:00h → Transfer a Hoi An (~28 km; taxi ~20€ o Shuttle Civitatis ~5€/pers)[span_49](start_span)[span_49](end_span).</p>
           </div>
 
-          <ul class="route-steps">
-            <li>Llegada a Hoi An, desayuno y paseo matutino por el casco histórico peatonal[span_45](start_span)[span_45](end_span).</li>
-            <li>Piqueo de 5 monumentos con el ticket municipal: <strong>Puente Cubierto Japonés</strong> (construido para unir el barrio nipón con el chino), Salón Phuc Kien y Casa Antigua de Tan Ky[span_46](start_span)[span_46](end_span).</li>
-            <li>Degustación del genuino <strong>Cao Lầu</strong> en <em>Cao Lau Ba Le</em>[span_47](start_span)[span_47](end_span).</li>
-            <li><strong>Atardecer (18:00h):</strong> Encendido de los farolillos de seda y paseo en barca por el río Thu Bon soltando linternas flotantes de papel[span_48](start_span)[span_48](end_span).</li>
+          <ul class="clean-steps">
+            <li>Llegada a Hoi An, depósito de equipaje y desayuno matutino[span_50](start_span)[span_50](end_span).</li>
+            <li><strong>Casco Histórico Peatonal (Entrada de 5 monumentos):</strong> Puente Cubierto Japonés, Casa Antigua Tan Ky, Salón de Asambleas Phuc Kien, Capilla Familiar Tran y Museo Sa Huynh (08:30 a 17:30h)[span_51](start_span)[span_51](end_span).</li>
+            <li>Almuerzo: Degustar el mítico <strong>Cao Lầu</strong> en <em>Cao Lau Ba Le</em> y el bocadillo de <em>Bánh Mì Phượng</em>[span_52](start_span)[span_52](end_span).</li>
+            <li><strong>Atardecer y Noche (18:00h):</strong> Encendido de miles de farolillos de seda y paseo en barca tradicional por el río Thu Bon soltando linternas de papel votivo (~220.000 VND barca)[span_53](start_span)[span_53](end_span).</li>
           </ul>
 
-          <div class="rain-plan-box">
-            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Hoi An bajo la lluvia</div>
-            Hacerse un traje/camisa a medida en las prestigiosas sastrerías exprés del centro (listos en 24h), apuntarse a un taller de fabricación de farolillos de seda tradicional o merendar té y dulces en el silencioso café <em>Reaching Out Teahouse</em> (atendido por personal con discapacidad auditiva).
+          <div class="rain-card">
+            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> En caso de lluvia en Hoi An</div>
+            Entrar en las afamadas sastrerías a medida (diseñan y confeccionan trajes, abrigos o camisas de seda en 24h con ajuste impecable), realizar un taller de fabricación artesanal de farolillos de seda o pasar la tarde tomando infusiones en <em>Reaching Out Teahouse</em> (un oasis de silencio y comercio justo atendido íntegramente por personal sordo).
           </div>
         </div>
       </div>
 
-      <!-- Día 27 Sept -->
-      <div class="day-card filterable" data-tags="hue ciudadela imperial tumbas thien mu bai choi">
+      <!-- 27 Sept -->
+      <div class="day-card searchable-card" data-search="hue ciudadela imperial tumbas thien mu bai choi bingo 27 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">27 SEPT</span>
-            <div class="day-title">Excursión a Hue (Capital Imperial)</div>
+            <span class="day-badge">27 SEPT</span>
+            <div class="day-title">Excursión a Hue (Ciudad Imperial)</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-crown"></i> Hue: Dinastía Nguyen y Ciudad Prohibida</div>
-            Hue fue la capital del Imperio vietnamita unificado desde 1802 hasta la abdicación de Bảo Đại en 1945. Su Ciudadela alberga la Ciudad Púrpura Prohibida, inspirada en Pekín pero con identidad propia. Fue escenario de la sangrienta Batalla de Hue en la Ofensiva del Tet (1968), cuyos impactos de bala aún son visibles en sus murallas de piedra.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-crown"></i> Hue: Dinastía Nguyen y la Ciudad Púrpura</div>
+            Capital política y cultural de Vietnam unificado de 1802 a 1945 bajo los 13 emperadores de la dinastía Nguyễn. Su majestuosa Ciudadela amurallada sigue el trazado de la Ciudad Prohibida de Pekín y los principios de geomancia (Feng Shui), flanqueada por el Río Perfume. En 1968 fue escenario de la sangrienta Batalla de Hue durante la Ofensiva del Tet, cuyos combates urbanos causaron cicatrices de metralla todavía visibles en sus pabellones de piedra.
           </div>
 
-          <ul class="route-steps">
-            <li>Trayecto Hoi An → Hue (~3 horas cruzando el mítico paso Hai Van)[span_49](start_span)[span_49](end_span).</li>
-            <li><strong>Ciudadela Imperial de Hue:</strong> 08:00 a 17:30h (comprar ticket combinado con tumbas)[span_50](start_span)[span_50](end_span).</li>
-            <li><strong>Pagoda Thien Mu:</strong> Torre octogonal de 7 pisos junto al Río Perfume[span_51](start_span)[span_51](end_span).</li>
-            <li><strong>Tumbas Imperiales:</strong> Majestuosidad poética de Tu Duc o arquitectura ecléctica franco-vietnamita de Khai Dinh[span_52](start_span)[span_52](end_span).</li>
-            <li>Vuelta nocturna a Hoi An: Mercado de An Hoi y partidas populares de <strong>Bài Chòi</strong> (bingo poético musical vietnamita)[span_53](start_span)[span_53](end_span).</li>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Alojamiento: Noche en Hoi An (Backhome Boutique)[span_54](start_span)[span_54](end_span)</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Trayecto Hue ↔ Hoi An: ~3 horas por trayecto cruzando el legendario Paso Hai Van[span_55](start_span)[span_55](end_span).</p>
+          </div>
+
+          <ul class="clean-steps">
+            <li><strong>Ciudadela Imperial de Hue:</strong> Murallas, Puerta del Mediodía y palacios de la corte (08:00 a 17:30h; comprar entrada combinada con tumbas)[span_56](start_span)[span_56](end_span).</li>
+            <li><strong>Pagoda Thien Mu:</strong> Torre octogonal de siete plantas a orillas del Río Perfume (símbolo de la ciudad)[span_57](start_span)[span_57](end_span).</li>
+            <li><strong>Tumbas Imperiales:</strong> Elegir entre el equilibrio lírico y jardines de <em>Tự Đức</em> o la sobrecogedora y oscura mezcla hispano-francesa de hormigón y mosaicos de porcelana de <em>Khải Định</em>[span_58](start_span)[span_58](end_span).</li>
+            <li>Comida en Hue: <em>Madam Thu Restaurant</em> o <em>Nook Eatery</em>[span_59](start_span)[span_59](end_span).</li>
+            <li>Regreso a Hoi An: Mercado nocturno de An Hoi y probar suerte en las rondas de <strong>Bài Chòi</strong> (juego tradicional vietnamita mezcla de bingo, coplas y teatro cantado)[span_60](start_span)[span_60](end_span).</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 28 Sept -->
-      <div class="day-card filterable" data-tags="ba na hills puente dorado manos playa my son tra nhieu">
+      <!-- 28 Sept -->
+      <div class="day-card searchable-card" data-search="ba na hills puente dorado manos playa my son tra nhieu 28 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">28 SEPT</span>
+            <span class="day-badge">28 SEPT</span>
             <div class="day-title">Ba Na Hills / Playas o My Son</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <p><strong>Planes según el tiempo:</strong>[span_54](start_span)[span_54](end_span)</p>
-          <ul class="route-steps">
-            <li><strong>Opción A (Cielo despejado):</strong> Subir a <strong>Ba Na Hills</strong> para cruzar el monumental <em>Golden Bridge</em> sostenido por gigantescas manos de piedra en la niebla[span_55](start_span)[span_55](end_span).</li>
-            <li><strong>Opción B (Día soleado de relax):</strong> Bicicleta hasta la playa de An Bang, paseo por el barrio artesano de pescadores de Trà Nhiêu o tour al <strong>Santuario Cham de My Son</strong> (las ruinas hinduistas de la civilización Champa, contemporáneas de Angkor Wat)[span_56](start_span)[span_56](end_span).</li>
+          <p><strong>Planes flexibles según el pronóstico meteorológico:</strong>[span_61](start_span)[span_61](end_span)</p>
+          <ul class="clean-steps">
+            <li><strong>Opción A (Buen tiempo en cotas altas):</strong> Ba Na Hills y cruzar el icónico <em>Golden Bridge</em> sostenido por dos manos colosales de piedra que emergen de la selva[span_62](start_span)[span_62](end_span).</li>
+            <li><strong>Opción B (Día despejado y calor de costa):</strong> Relajarse en la playa de An Bang o explorar en bicicleta el poblado de artesanos pescadores de Trà Nhiêu[span_63](start_span)[span_63](end_span).</li>
+            <li><strong>Opción C (Interés arqueológico):</strong> Excursión al <strong>Santuario Cham de My Son</strong>: complejo de templos hinduistas de ladrillo rojizo erigidos entre los siglos IV y XIV por la civilización Champa en honor a Shiva.</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 29 Sept -->
-      <div class="day-card filterable" data-tags="da nang marmol lady buda ho chi minh bitexco bui vien saigon">
+      <!-- 29 Sept -->
+      <div class="day-card searchable-card" data-search="da nang marmol lady buda vuelo ho chi minh saigon bitexco bui vien 29 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">29 SEPT</span>
+            <span class="day-badge">29 SEPT</span>
             <div class="day-title">Da Nang → Vuelo a Ho Chi Minh</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-city"></i> Saigón / Ciudad Ho Chi Minh</div>
-            Fundada como Prey Nokor (antiguo poblado pesquero jemer), se convirtió bajo el dominio colonial francés en la «Perla de Oriente», diseñada con amplios bulevares haussmannianos y arquitectura beaux-arts. La caída de Saigón el 30 de abril de 1975 selló el fin de la guerra y la reunificación del país.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-city"></i> Saigón: La Metrópolis del Sur</div>
+            Nacida como Prey Nokor (aldea pesquera y puesto comercial jemer), fue absorbida por los vietnamitas en el s. XVII y bautizada Saigón. Bajo el protectorado francés se convirtió en la «Perla de Indochina», con bulevares arbolados y palacetes. Epicentro de la Guerra de Vietnam; el 30 de abril de 1975, los tanques del norte rompieron las verjas del Palacio Presidencial marcando el fin del conflicto bélico y su rebautizo como Ciudad Ho Chi Minh.
           </div>
 
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-hotel" style="color:var(--accent);"></i> The 1 Hotel and Restaurant (HCMC)[span_57](start_span)[span_57](end_span)</div>
-            <p style="font-size:0.84rem; color:var(--text-muted);">Hem 40/11 Duong Bui Vien 5, Ho Chi Minh[span_58](start_span)[span_58](end_span)</p>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> The 1 hotel and restaurant (Ho Chi Minh)[span_64](start_span)[span_64](end_span)</div>
+            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">Hem 40/11 Duong Bui Vien 5, HCMC · Vuelo a las 17:00h → Llegada ~19:00h[span_65](start_span)[span_65](end_span)</p>
           </div>
 
-          <ul class="route-steps">
-            <li>Mañana en Da Nang: Montañas de Mármol (grutas budistas dentro de la roca) y Pagoda Linh Ung con la colosal estatua blanca de Lady Buda[span_59](start_span)[span_59](end_span).</li>
-            <li>Puente del Dragón y paseo por Love Bridge[span_60](start_span)[span_60](end_span).</li>
-            <li><strong>17:00h:</strong> Vuelo Da Nang → Ho Chi Minh (Llegada ~19:00h)[span_61](start_span)[span_61](end_span).</li>
-            <li>Noche en el sur: Bulevar peatonal Nguyen Hue, vistas de rascacielos en Bitexco Tower y cañas en Bui Vien Walking Street[span_62](start_span)[span_62](end_span).</li>
+          <ul class="clean-steps">
+            <li><strong>Mañana en Da Nang:</strong> Montañas de Mármol (grutas con altares budistas excavados en la roca), Pagoda Linh Ung y la colosal estatua blanca de Lady Buda (67 metros de altura; ¡precaución con los monos!)[span_66](start_span)[span_66](end_span).</li>
+            <li>Paseo por el Puente del Dragón y el Love Bridge de Da Nang[span_67](start_span)[span_67](end_span).</li>
+            <li><strong>17:00h:</strong> Vuelo con destino Ho Chi Minh (Saigón)[span_68](start_span)[span_68](end_span).</li>
+            <li><strong>Noche en HCMC:</strong> Calle peatonal Nguyen Hue, vistas de la torre Bitexco y cañas en los puestos callejeros de la bulliciosa Bui Vien Walking Street o el paseo fluvial Ton Duc Thang[span_69](start_span)[span_69](end_span).</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 30 Sept -->
-      <div class="day-card filterable" data-tags="cu chi tuneles delta mekong guerra">
+      <!-- 30 Sept -->
+      <div class="day-card searchable-card" data-search="cu chi tuneles delta mekong guerra resistencia 30 sept">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">30 SEPT</span>
+            <span class="day-badge">30 SEPT</span>
             <div class="day-title">Túneles de Cu Chi y Delta del Mekong</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div class="history-box">
-            <div class="history-title"><i class="fa-solid fa-person-digging"></i> Resistencia en el Subsuelo</div>
-            La red subterránea de Cu Chi se extendía por más de 250 kilómetros hasta la frontera con Camboya. Diseñada en múltiples niveles con trampas, hospitales de campaña, cocinas sin humo (sistema Hoàng Cầm) y salas de mando, permitió a la guerrilla del Viet Cong resistir los bombardeos masivos B-52.
+          <div class="culture-card">
+            <div class="culture-title"><i class="fa-solid fa-shield-halved"></i> Cu Chi: La Ciudad Subterránea de la Guerrilla</div>
+            Una red de más de 250 kilómetros de galerías excavadas a mano por el Viet Cong en suelo arcilloso durante décadas. Conectaba cuarteles, dormitorios, almacenes de munición, hospitales de campaña y cocinas subterráneas con chimeneas difusoras de humo Hoàng Cầm. Su reducido diámetro protegía a los combatientes locales y dejaba atrapados a los soldados estadounidenses.
           </div>
 
-          <ul class="route-steps">
-            <li>Recorrido por los estrechos túneles de <strong>Cu Chi</strong> y demostración de las trampas rústicas de la selva[span_63](start_span)[span_63](end_span).</li>
-            <li>Traslado hacia las arterias fluviales del <strong>Delta del Mekong</strong> (el «cuenco de arroz» de Vietnam)[span_64](start_span)[span_64](end_span).</li>
+          <ul class="clean-steps">
+            <li>Visita guiada a los túneles subterráneos de <strong>Cu Chi</strong> y demostración de trampas históricas de la selva[span_70](start_span)[span_70](end_span).</li>
+            <li>Traslado hacia los canales del <strong>Delta del Mekong</strong> (el gran granero de arroz fluvial de Vietnam)[span_71](start_span)[span_71](end_span).</li>
+            <li>Noche en homestay del Delta o regreso a Saigón según reserva[span_72](start_span)[span_72](end_span).</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 01 Oct -->
-      <div class="day-card filterable" data-tags="delta mekong canales fruta vuelta ho chi minh">
+      <!-- 01 Oct -->
+      <div class="day-card searchable-card" data-search="delta mekong canales fruta regreso ho chi minh 01 oct">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">01 OCT</span>
+            <span class="day-badge">01 OCT</span>
             <div class="day-title">Delta del Mekong y Regreso a HCMC</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <ul class="route-steps">
-            <li>Navegación por los canales sombreados por palmeras de agua (sampanes tradicionales)[span_65](start_span)[span_65](end_span).</li>
-            <li>Visita a talleres de caramelos de coco, huertos de frutas tropicales y regreso a Saigón por la tarde[span_66](start_span)[span_66](end_span).</li>
-            <li>Cena de despedida: crepe crujiente <em>Bánh xèo</em> en <em>Bếp Mẹ Ỉn</em>[span_67](start_span)[span_67](end_span).</li>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--accent);"><i class="fa-solid fa-hotel"></i> Ho Chi Minh City (The 1 hotel)[span_73](start_span)[span_73](end_span)</div>
+          </div>
+
+          <ul class="clean-steps">
+            <li>Recorrido en barcas tradicionales sampán por los canales sombreados de palmeras de agua[span_74](start_span)[span_74](end_span).</li>
+            <li>Talleres artesanales de papel de arroz, caramelos de coco y huertos frutales tropicales[span_75](start_span)[span_75](end_span).</li>
+            <li>Regreso a Ho Chi Minh por la tarde; cena de despedida degustando las crêpes crujientes <em>Bánh Xèo</em> en <em>Bếp Mẹ Ỉn</em>[span_76](start_span)[span_76](end_span).</li>
           </ul>
         </div>
       </div>
 
-      <!-- Día 02 Oct -->
-      <div class="day-card filterable" data-tags="ho chi minh cafe apartment museo guerra notre dame mercado ruso compras vuelo regreso">
+      <!-- 02 Oct -->
+      <div class="day-card searchable-card" data-search="ho chi minh cafe apartment museo guerra notre dame correos mercado ruso compras 02 oct">
         <div class="day-header" onclick="toggleCard(this)">
           <div style="display:flex; align-items:center;">
-            <span class="day-tag">02 OCT</span>
+            <span class="day-badge">02 OCT</span>
             <div class="day-title">Saigón Colonial, Compras y Regreso</div>
           </div>
           <i class="fa-solid fa-chevron-down day-chevron"></i>
         </div>
         <div class="day-body">
-          <div style="background:rgba(0,0,0,0.02); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-            <div class="hotel-badge"><i class="fa-solid fa-plane-departure" style="color:var(--primary);"></i> Vuelo internacional de regreso a casa (Madrugada: 02:30h)[span_68](start_span)[span_68](end_span)</div>
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--primary);"><i class="fa-solid fa-plane-departure"></i> Vuelo nocturno internacional de regreso a casa (02:30h)[span_77](start_span)[span_77](end_span)</div>
           </div>
 
-          <ul class="route-steps">
-            <li>Desayuno en <strong>The Cafe Apartment</strong> (antiguo bloque residencial de los 60 convertido en un panal de boutiques y cafés hipster)[span_69](start_span)[span_69](end_span).</li>
-            <li><strong>Museo de los Restos de la Guerra (War Remnants Museum):</strong> Una visita sobrecogedora con fotografías de época y blindados[span_70](start_span)[span_70](end_span).</li>
-            <li>Catedral de Notre Dame, <strong>Oficina Central de Correos</strong> (diseñada a finales del s. XIX) y Palacio de la Reunificación[span_71](start_span)[span_71](end_span).</li>
-            <li><strong>Compras ropa técnica:</strong> Mercado Ruso (ropa outdoor, The North Face, Arc’teryx, mochilas) y Mercado Ben Thanh[span_72](start_span)[span_72](end_span).</li>
-            <li>Si sobra tiempo: Pagoda del Emperador de Jade (Ngoc Hoang - atmósfera de incienso y deidades taoístas)[span_73](start_span)[span_73](end_span).</li>
+          <ul class="clean-steps">
+            <li>Café matinal en <strong>The Cafe Apartment</strong> (edificio de viviendas de los años 60 en Nguyen Hue transformado en cubo laberíntico de cafeterías de diseño)[span_78](start_span)[span_78](end_span).</li>
+            <li><strong>Museo de Restos de la Guerra (War Remnants Museum):</strong> Exposición de blindados, helicópteros y desgarradoras fotografías de corresponsales internacionales (muy recomendable)[span_79](start_span)[span_79](end_span).</li>
+            <li>Catedral de Notre-Dame, <strong>Oficina Central de Correos</strong> (diseñada a finales del XIX con estética de estación ferroviaria europea) y Palacio de la Reunificación[span_80](start_span)[span_80](end_span).</li>
+            <li><strong>Compras técnicas:</strong> Mercado Ruso (el mejor enclave para regatear ropa técnica, chubasqueros, mochilas tipo The North Face, Arc’teryx o Patagonia) y Mercado Ben Thanh[span_81](start_span)[span_81](end_span).</li>
+            <li><em>Si hay tiempo:</em> Pagoda Giac Lam (la más antigua de Saigón, 1744) o Pagoda del Emperador de Jade (Ngoc Hoang)[span_82](start_span)[span_82](end_span).</li>
+            <li>Traslado al Aeropuerto Internacional Tan Son Nhat para el vuelo de regreso a las 02:30h[span_83](start_span)[span_83](end_span).</li>
           </ul>
 
-          <div class="rain-plan-box">
-            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Si llueve torrencialmente en Saigón</div>
-            El <strong>Museo de Historia de la Ciudad</strong> y el <strong>Museo de Bellas Artes</strong> (ubicado en una fastuosa mansión colonial amarilla con patios interiores y vidrieras) ofrecen horas de recorrido protegido con enorme encanto estético.
+          <div class="rain-card">
+            <div class="rain-title"><i class="fa-solid fa-cloud-showers-heavy"></i> Planes bajo techo en Saigón</div>
+            El <strong>Museo de Bellas Artes de HCMC</strong> ocupa tres imponentes mansiones coloniales amarillas con patios porticados interiores, suelos de baldosas hidráulicas originales y ascensores de forja centenarios.
           </div>
         </div>
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- TAB 2: COMIDA & SPOTS -->
+    <!-- PESTAÑA 2: COMIDA & SPOTS GASTRONÓMICOS -->
     <!-- ================================================================= -->
-    <section id="tab-comida" class="tab-content">
-      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:14px;">Restaurantes y Platos Emblemáticos</h2>
+    <section id="tab-comida" class="tab-view">
+      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Gastronomía por Regiones</h2>
 
-      <div class="spot-card filterable" data-tags="hanoi bun cha obama bourdain">
+      <div class="spot-card searchable-card" data-search="hanoi bun cha obama huong lien">
         <span class="city-chip chip-hanoi">Hanoi</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Bún Chả Hương Liên (Bun Cha de Obama)[span_74](start_span)[span_74](end_span)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">Mítico local donde cenó Anthony Bourdain con Barack Obama[span_75](start_span)[span_75](end_span). Albóndigas de cerdo a la brasa, caldo con vinagre de arroz, fideos de arroz y nem de marisco[span_76](start_span)[span_76](end_span). Mesa original conservada en vitrina.</p>
-        <a href="https://maps.google.com/?q=Bun+Cha+Huong+Lien+Hanoi" target="_blank" class="btn-action"><i class="fa-solid fa-location-dot"></i> Maps</a>
+        <h4 style="font-size:0.98rem; font-weight:700;">Bún Chả Hương Liên (El local de Obama y Bourdain)[span_84](start_span)[span_84](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted);">24 Lê Văn Hưu. Donde en 2016 Anthony Bourdain invitó a cenar al presidente Barack Obama[span_85](start_span)[span_85](end_span). El menú clásico incluye bún chả (panceta y albóndigas de cerdo a la brasa en caldo agridulce con fideos finos de arroz), rollito frito de marisco y cerveza Hanoi fresca[span_86](start_span)[span_86](end_span).</p>
+        <a href="https://maps.google.com/?q=Bun+Cha+Huong+Lien+Hanoi" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> Maps</a>
       </div>
 
-      <div class="spot-card filterable" data-tags="hanoi bun cha hang quat diverxo dabiz">
+      <div class="spot-card searchable-card" data-search="hanoi bun cha hang quat diverxo dabiz munoz">
         <span class="city-chip chip-hanoi">Hanoi</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Bun Cha 74 Hang Quat (Recomendación Dabiz Muñoz)[span_77](start_span)[span_77](end_span)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">En un callejón estrechísimo del Barrio Viejo[span_78](start_span)[span_78](end_span). Solo abre de 10:00 a 14:00h[span_79](start_span)[span_79](end_span). Carbón humeante y panceta caramelizada de nivel gastronómico extraordinario.</p>
+        <h4 style="font-size:0.98rem; font-weight:700;">Bun Cha 74 Hang Quat (Recomendación Dabiz Muñoz)[span_87](start_span)[span_87](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted);">En un estrecho callejón del Barrio Viejo[span_88](start_span)[span_88](end_span). Horario muy estricto: solo abierto de 10:00 a 14:00h[span_89](start_span)[span_89](end_span). Panceta asada al carbón in situ con un marinado profundo caramelizado que roza la perfección callejera.</p>
       </div>
 
-      <div class="spot-card filterable" data-tags="hanoi cafe giang cafe huevo egg coffee note coffee">
+      <div class="spot-card searchable-card" data-search="hanoi cafe giang cafe huevo note coffee bia hoi ta hien cha ca">
         <span class="city-chip chip-hanoi">Hanoi</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Giang Café & The Note Coffee[span_80](start_span)[span_80](end_span)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);"><strong>Giang Café:</strong> Creador en 1946 del <em>Cà phê trứng</em> (café con crema emulsionada de yema de huevo y leche condensada para suplir la falta de leche en época de escasez)[span_81](start_span)[span_81](end_span).<br><strong>The Note Coffee:</strong> Famoso café empapelado entero con mensajes de viajeros frente al lago[span_82](start_span)[span_82](end_span).</p>
+        <h4 style="font-size:0.98rem; font-weight:700;">Clásicos de Hanoi: Café de Huevo y Bia Hơi[span_90](start_span)[span_90](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted);">
+          • <strong>Giang Café (39 Nguyễn Hữu Huân):</strong> Creador en 1946 del genuino <em>Cà phê trứng</em> (café denso con crema dulce batida de yema de huevo y leche condensada)[span_91](start_span)[span_91](end_span).<br>
+          • <strong>Chả Cá Lã Vọng (14 Chả Cá):</strong> Pescado blanco marinado con cúrcuma salteado en hornillo en la mesa con eneldo y cebolleta fresca[span_92](start_span)[span_92](end_span).<br>
+          • <strong>Bia Hơi en Ta Hien:</strong> Cerveza rubia de tirador de elaboración diaria muy ligera y económica para disfrutar en taburetes plásticos en plena calle cervecera[span_93](start_span)[span_93](end_span).
+        </p>
       </div>
 
-      <div class="spot-card filterable" data-tags="ninh binh cabra com chay arroz chef hien">
+      <div class="spot-card searchable-card" data-search="ninh binh cabra de montana de nui com chay arroz crujiente chef hien">
         <span class="city-chip chip-ninhbinh">Ninh Binh</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Dê Núi & Cơm Cháy[span_83](start_span)[span_83](end_span)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);"><strong>Dê núi:</strong> Carne de cabra de roca alimentada con hierbas silvestres de las montañas calizas (tierna y aromática, a la brasa)[span_84](start_span)[span_84](end_span).<br><strong>Cơm cháy:</strong> Fondo crujiente de arroz dorado servido con salsa densa de carne[span_85](start_span)[span_85](end_span). Probar en <em>Chef Hien</em> (gran pato asado) y <em>HOANG Cuisine</em>[span_86](start_span)[span_86](end_span).</p>
+        <h4 style="font-size:0.98rem; font-weight:700;">Especialidades: Dê Núi & Cơm Cháy[span_94](start_span)[span_94](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted);">
+          • <strong>Dê núi:</strong> Cabra salvaje de roca criada en las peñas calizas; carne firme salteada con hierba limón y jengibre o asada al carbón[span_95](start_span)[span_95](end_span).<br>
+          • <strong>Cơm cháy:</strong> Fondo de cazuela de arroz crujiente dorado servido con salsa espesa y tiras de carne[span_96](start_span)[span_96](end_span).<br>
+          • <strong>Restaurantes top:</strong> <em>Chef Hien</em> (especialidad pato asado), <em>HOANG Cuisine</em> y tardeo en <em>La Maison</em>[span_97](start_span)[span_97](end_span).
+        </p>
       </div>
 
-      <div class="spot-card filterable" data-tags="sapa curry salmon ca hoi good morning vietnam">
+      <div class="spot-card searchable-card" data-search="sapa salmon ca hoi curry good morning vietnam">
         <span class="city-chip chip-sapa">Sapa</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Good Morning Vietnam & Salmón Ca Hoi[span_87](start_span)[span_87](end_span)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">En las aguas frías de Sapa se crían truchas y salmones únicos en Indochina. Probar el hot-pot de salmón en <em>Son Nhi</em> y el renombrado curry de coco en <em>Good Morning Vietnam</em>[span_88](start_span)[span_88](end_span).</p>
+        <h4 style="font-size:0.98rem; font-weight:700;">Curry de Coco & Salmón de Altura[span_98](start_span)[span_98](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted);">
+          • <strong>Good Morning Vietnam:</strong> Muy popular por su curry cremoso de coco y platos tradicionales de montaña[span_99](start_span)[span_99](end_span).<br>
+          • <strong>Restaurante Son Nhi:</strong> Especializado en <em>Cá Hồi</em> (salmón fresco criado en las corrientes frías de montaña de Sapa, servido en hot-pot/olla comunitaria)[span_100](start_span)[span_100](end_span).
+        </p>
       </div>
 
-      <div class="spot-card filterable" data-tags="hoi an cao lau banh mi phuong white rose com ga">
+      <div class="spot-card searchable-card" data-search="hoi an cao lau banh mi phuong white rose com ga che">
         <span class="city-chip chip-hoian">Hoi An</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Pentalogía Gastronómica de Hoi An[span_89](start_span)[span_89](end_span)</h4>
+        <h4 style="font-size:0.98rem; font-weight:700;">Pentalogía Gastronómica de Hoi An[span_101](start_span)[span_101](end_span)</h4>
         <p style="font-size:0.86rem; color:var(--text-muted);">
-          • <strong>Cao Lầu:</strong> Fideos gruesos cocinados exclusivamente con agua cenicienta del milenario pozo Ba Le[span_90](start_span)[span_90](end_span).<br>
-          • <strong>Bánh Mì Phượng:</strong> El bocadillo ensalzado por la crítica internacional (crujiente baguette con paté, cerdo y encurtidos)[span_91](start_span)[span_91](end_span).<br>
-          • <strong>White Rose (Bánh Bao Bánh Vạc):</strong> Paquetitos al vapor de harina de arroz translúcida rellenos de gambas con cebolla crujiente[span_92](start_span)[span_92](end_span).<br>
-          • <strong>Cơm Gà Bà Buội:</strong> Arroz con pollo dorado con cúrcuma y hierbas del río[span_93](start_span)[span_93](end_span).
+          • <strong>Cao Lầu en Cao Lau Ba Le:</strong> Fideos artesanos gruesos amasados con agua cenicienta extraída exclusivamente del milenario pozo Ba Le[span_102](start_span)[span_102](end_span).<br>
+          • <strong>Bánh Mì Phượng:</strong> La baguette crujiente vietnamita por excelencia (paté casero, asado de cerdo, pepino y salsas secretas)[span_103](start_span)[span_103](end_span).<br>
+          • <strong>White Rose (Bánh Bao Bánh Vạc):</strong> Bocados al vapor de masa traslúcida de arroz que recuerdan a una rosa, rellenos de gambas picadas con chalota crujiente[span_104](start_span)[span_104](end_span).<br>
+          • <strong>Cơm Gà Bà Buội:</strong> Arroz cocido en caldo de ave aromatizado con cúrcuma y pollo de corral desmenuzado[span_105](start_span)[span_105](end_span).
         </p>
       </div>
 
-      <div class="spot-card filterable" data-tags="ho chi minh com tam banh xeo bui vien saigon">
+      <div class="spot-card searchable-card" data-search="ho chi minh saigon com tam banh xeo bep me in bui vien">
         <span class="city-chip chip-hcm">Ho Chi Minh</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Cơm Tấm & Bánh Xèo del Sur[span_94](start_span)[span_94](end_span)</h4>
+        <h4 style="font-size:0.98rem; font-weight:700;">Platos Estrella del Sur[span_106](start_span)[span_106](end_span)</h4>
         <p style="font-size:0.86rem; color:var(--text-muted);">
-          • <strong>Cơm Tấm Đề Thám:</strong> «Arroz roto» con chuleta de cerdo caramelizada al carbón y huevo[span_95](start_span)[span_95](end_span).<br>
-          • <strong>Bánh Xèo en Bếp Mẹ Ỉn:</strong> Crêpe crujiente de harina de arroz y coco repleta de brotes de soja y gambas que se envuelve en hojas de mostaza y lechuga fresca con salsa Nuoc Cham[span_96](start_span)[span_96](end_span).
+          • <strong>Cơm Tấm Đề Thám:</strong> «Arroz de grano roto» con costilla de cerdo caramelizada al carbón, huevo frito y piel de cerdo crujiente[span_107](start_span)[span_107](end_span).<br>
+          • <strong>Bếp Mẹ Ỉn:</strong> Famoso por su <em>Bánh Xèo</em>: fina crêpe crujiente de harina de arroz y leche de coco teñida de cúrcuma rellena de gambas y soja, que se envuelve en hojas verdes aromáticas[span_108](start_span)[span_108](end_span).
         </p>
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- TAB 3: CHECKLIST Y MALETA (PERSISTENTE) -->
+    <!-- PESTAÑA 3: HISTORIA & CULTURA -->
     <!-- ================================================================= -->
-    <section id="tab-checklist" class="tab-content">
-      <div class="check-container">
-        <h3><i class="fa-solid fa-list-check"></i> Trámites Previos Clave</h3>
-        <div class="check-row"><input type="checkbox" id="chk-t1"><span>Rellenar 3 días antes la declaración/formulario sanitario de entrada[span_97](start_span)[span_97](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-t2"><span>Comprobar tarjetas sin comisiones (Revolut/N26) y avisar al banco</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-t3"><span>Billetes de 50€/100€ impolutos y planos para joyerías[span_98](start_span)[span_98](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-t4"><span>Descargar mapas offline en Google Maps / Maps.me</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-t5"><span>Instalar Grab en el móvil (el Uber del sudeste asiático)</span></div>
+    <section id="tab-historia" class="tab-view">
+      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Claves Culturales y Consejos Prácticos</h2>
+
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-person-walking"></i> La Regla de Oro: Cruzar la Calle</div>
+        El tráfico en Hanoi y Saigón no se detiene ante los pasos de cebra. La regla infalible para cruzar: <strong>camina a paso lento, constante y predecible, sin detenerte de golpe ni retroceder</strong>. Los miles de motociclistas calcularán tu trayectoria milimétricamente y esquivarán tu espalda o tu frente sin tocarte.
       </div>
 
-      <div class="check-container">
-        <h3><i class="fa-solid fa-file-shield"></i> Documentación & Respaldo</h3>
-        <div class="check-row"><input type="checkbox" id="chk-d1"><span>Pasaportes con caducidad superior a 6 meses[span_99](start_span)[span_99](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-d2"><span>Billetes de avión internacionales e internos impresos[span_100](start_span)[span_100](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-d3"><span>Póliza del seguro médico internacional impresa y offline[span_101](start_span)[span_101](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-d4"><span>Fotos tamaño carnet por duplicado (para visados/pérdidas)[span_102](start_span)[span_102](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-d5"><span>Copia digital de todo alojada en nube</span></div>
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-shirt"></i> Código de Vestimenta en Templos y Pagodas</div>
+        Tanto en el Templo de la Literatura como en las pagodas budistas y el Mausoleo de Ho Chi Minh se exige cubrir hombros y rodillas. No se admiten camisetas de tirantes ni pantalones cortos por encima de la rodilla. Conviene llevar siempre en la mochila un fular o pantalón fino convertible.
       </div>
 
-      <div class="check-container">
-        <h3><i class="fa-solid fa-kit-medical"></i> Botiquín Sanitario Completo</h3>
-        <div class="check-row"><input type="checkbox" id="chk-b1"><span>Repelente antimosquitos con DEET ≥ 30-50% (Relec Extra Fuerte)[span_103](start_span)[span_103](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-b2"><span>Ondansetrón / Primperan (antiemético potente)[span_104](start_span)[span_104](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-b3"><span>Loperamida + Sobres de sales de rehidratación oral[span_105](start_span)[span_105](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-b4"><span>Biodramina con cafeína (crucero y puertos de montaña)[span_106](start_span)[span_106](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-b5"><span>Antibiótico de amplio espectro pautado (ej. Ciprofloxacino/Amoxicilina-Clav)[span_107](start_span)[span_107](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-b6"><span>Antihistamínicos, paracetamol/ibuprofeno y apósitos para ampollas[span_108](start_span)[span_108](end_span)</span></div>
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-hand-holding-dollar"></i> Cultura del Regateo (Trả Giá)</div>
+        El regateo es una práctica social cotidiana y respetada en mercados tradicionales (Mercado Nocturno, Dong Xuan, Ben Thanh, Mercado Ruso), pero no en restaurantes fijos ni tiendas de conveniencia[span_109](start_span)[span_109](end_span). Regla orientativa: ofrece educadamente entre el 40% y el 50% del primer precio que te pidan y ve subiendo con una sonrisa. La frase mágica: <em>«Rẻ hơn được không?»</em> (¿Puede ser más barato?)[span_110](start_span)[span_110](end_span).
       </div>
 
-      <div class="check-container">
-        <h3><i class="fa-solid fa-shirt"></i> Ropa y Equipo Especial</h3>
-        <div class="check-row"><input type="checkbox" id="chk-r1"><span>Chubasquero transpirable y paraguas compacto[span_109](start_span)[span_109](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-r2"><span>Forro polar / capa térmica para Sapa y Fansipan[span_110](start_span)[span_110](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-r3"><span>Pantalón largo fino y pañuelo para entrar a pagodas (cubrir hombros/rodillas)[span_111](start_span)[span_111](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-r4"><span>Funda estanca impermeable para móvil y mochila[span_112](start_span)[span_112](end_span)</span></div>
-        <div class="check-row"><input type="checkbox" id="chk-r5"><span>Powerbank de 10.000 - 20.000 mAh[span_113](start_span)[span_113](end_span)</span></div>
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-car"></i> Transporte Urbano con Grab</div>
+        Descarga y configura la aplicación <strong>Grab</strong> (funciona como Uber/Cabify). Fija el precio exacto antes de subir, permite pagar con tarjeta y evita cualquier discusión sobre taxímetros alterados tanto en coche como en moto-taxi (*GrabBike*).
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- TAB 4: MONEDA & JOYERÍAS -->
+    <!-- PESTAÑA 4: CHECKLIST Y MALETA (CON PERSISTENCIA) -->
     <!-- ================================================================= -->
-    <section id="tab-moneda" class="tab-content">
-      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">El Arte de Cambiar Moneda (VND)</h2>
-      
-      <div class="history-box">
-        <div class="history-title"><i class="fa-solid fa-circle-info"></i> La regla de oro del cambio</div>
-        En Vietnam los mejores tipos de cambio del mercado los ofrecen históricamente las <strong>joyerías autorizadas de oro y plata</strong>[span_114](start_span)[span_114](end_span). Piden billetes de <strong>50€ y 100€ sin dobleces marcados ni roturas</strong> (los billetes deteriorados tienen menor valor de cambio)[span_115](start_span)[span_115](end_span). En cajeros (ATMs), los del banco local <strong>TPBank</strong> o <strong>VPBank</strong> suelen operar sin comisiones abusivas por retiro con tarjetas internacionales.
+    <section id="tab-checklist" class="tab-view">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="font-size:1.1rem; font-weight:800;">Lista de Control</h2>
+        <button class="btn-toggle-all" onclick="clearSavedChecklist()">Restablecer todo</button>
       </div>
 
-      <div class="spot-card filterable" data-tags="hanoi cambio joyeria ha trung">
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-calendar-check"></i> Trámites Previos Clave</h3>
+        <div class="check-line"><input type="checkbox" id="chk-p1"><span>Rellenar 3 días antes la declaración/hoja oficial de entrada al país[span_111](start_span)[span_111](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-p2"><span>Verificar activación internacional de tarjetas sin comisión (Revolut / N26)[span_112](start_span)[span_112](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-p3"><span>Llevar billetes de 50€ y 100€ impolutos (sin roturas ni marcas)[span_113](start_span)[span_113](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-p4"><span>Descargar mapas offline en Google Maps o Maps.me de las 6 zonas</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-p5"><span>Activar paquete de datos eSIM para Vietnam antes de despegar[span_114](start_span)[span_114](end_span)</span></div>
+      </div>
+
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-passport"></i> Documentación Impresa y en Nube</h3>
+        <div class="check-line"><input type="checkbox" id="chk-d1"><span>Pasaportes originales con más de 6 meses de vigencia[span_115](start_span)[span_115](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-d2"><span>Billetes aéreos impresos (internacionales e internos: HAN→DAD y DAD→SGN)[span_116](start_span)[span_116](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-d3"><span>Póliza completa del seguro de viaje con coberturas médicas impresa[span_117](start_span)[span_117](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-d4"><span>Fotos de carnet de repuesto para trámites consulares urgentes[span_118](start_span)[span_118](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-d5"><span>Copia digitalizada en Google Drive / iCloud de toda la documentación[span_119](start_span)[span_119](end_span)</span></div>
+      </div>
+
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-kit-medical"></i> Botiquín Médico Recomendado</h3>
+        <div class="check-line"><input type="checkbox" id="chk-m1"><span>Repelente de mosquitos con DEET ≥ 30-50% (Relec Extra Fuerte)[span_120](start_span)[span_120](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-m2"><span>Ondansetrón oral (antiemético) y protectores gástricos[span_121](start_span)[span_121](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-m3"><span>Loperamida (Fortasec) + Sobres de suero oral de rehidratación[span_122](start_span)[span_122](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-m4"><span>Biodramina con cafeína (para trayectos en barco y curvas de montaña)[span_123](start_span)[span_123](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-m5"><span>Antibiótico de amplio espectro (Ciprofloxacino o Amoxicilina/Clavulánico)[span_124](start_span)[span_124](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-m6"><span>Corticoides orales, antihistamínicos (ebastina/cetirizina) y analgésicos habituales[span_125](start_span)[span_125](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-m7"><span>Apósitos para rozaduras/ampollas, vendas, antiséptico y gel hidroalcohólico[span_126](start_span)[span_126](end_span)</span></div>
+      </div>
+
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-vest-patches"></i> Equipamiento y Ropa Técnica</h3>
+        <div class="check-line"><input type="checkbox" id="chk-e1"><span>Chubasquero técnico transpirable / impermeable y paraguas compacto[span_127](start_span)[span_127](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-e2"><span>Capa térmica / sudadera ligera para Fansipan, Sapa y climatizador de buses[span_128](start_span)[span_128](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-e3"><span>Funda impermeable estanca para teléfonos móviles y mochilas[span_129](start_span)[span_129](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-e4"><span>Batería externa portátil (Powerbank 10.000-20.000 mAh)[span_130](start_span)[span_130](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-e5"><span>Adaptador universal de corriente (clavija estándar tipo A/C)[span_131](start_span)[span_131](end_span)</span></div>
+        <div class="check-line"><input type="checkbox" id="chk-e6"><span>Calzado cómodo cerrado con tracción + sandalias sujetas al tobillo[span_132](start_span)[span_132](end_span)</span></div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- PESTAÑA 5: MONEDA & JOYERÍAS -->
+    <!-- ================================================================= -->
+    <section id="tab-moneda" class="tab-view">
+      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">El Secreto del Cambio en Joyerías</h2>
+
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-coins"></i> ¿Por qué cambiar en joyerías?</div>
+        En Vietnam las joyerías autorizadas de oro y plata manejan un volumen masivo de divisas y ofrecen tipos de cambio muy superiores a los de aeropuertos y entidades bancarias (sin cobrar comisiones encubiertas)[span_133](start_span)[span_133](end_span). Piden <strong>billetes de 50€ o 100€ completamente limpios, estirados y sin tachaduras</strong> (los billetes arrugados o rasgados pierden cotización)[span_134](start_span)[span_134](end_span). Al finalizar el viaje, las mismas joyerías te recomprarán los dongs sobrantes a euros[span_135](start_span)[span_135](end_span).
+      </div>
+
+      <div class="spot-card searchable-card" data-search="hanoi cambio joyeria ha trung">
         <span class="city-chip chip-hanoi">Hanoi</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Calle Hà Trung (El epicentro de cambio del Norte)[span_116](start_span)[span_116](end_span)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">Ubicada al borde del Barrio Viejo[span_117](start_span)[span_117](end_span). La <strong>Joyería del número 27 de calle Hà Trung</strong> y <strong>Quốc Trinh (nº 27-29)</strong> ofrecen sistemáticamente el cambio más fiel al mercado interbancario[span_118](start_span)[span_118](end_span).</p>
+        <h4 style="font-size:0.98rem; font-weight:700;">Calle Hà Trung (Casco Antiguo)[span_136](start_span)[span_136](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted);">La meca del cambio en la capital[span_137](start_span)[span_137](end_span). Especialmente recomendadas la <strong>Joyería del número 27 de la calle Hà Trung</strong> y <strong>Quốc Trinh (nº 27-29)</strong>, puntos de referencia para expatriados y viajeros por ofrecer la mejor tasa interbancaria[span_138](start_span)[span_138](end_span).</p>
       </div>
 
-      <div class="spot-card filterable" data-tags="ho chi minh saigon cambio joyeria ha tam ben thanh">
+      <div class="spot-card searchable-card" data-search="ho chi minh saigon cambio joyeria ha tam ben thanh">
         <span class="city-chip chip-hcm">Ho Chi Minh</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Hà Tâm Jewelry (Frente al Mercado Ben Thanh)[span_119](start_span)[span_119](end_span)</h4>
-        <p style="font-size:0.86rem; color:var(--text-muted);">2 Đ. Nguyễn An Ninh, Bến Thành[span_120](start_span)[span_120](end_span). Muy conocida por los viajeros locales; suele haber pequeña cola en la puerta pero el trámite en mostrador dura menos de dos minutos[span_121](start_span)[span_121](end_span).</p>
+        <h4 style="font-size:0.98rem; font-weight:700;">Hà Tâm Jewelry (Frente a Ben Thanh)[span_139](start_span)[span_139](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted);">2 Đ. Nguyễn An Ninh, Bến Thành[span_140](start_span)[span_140](end_span). Situada justo frente a la puerta oeste del mercado. Aunque suele verse una fila de gente en la acera, el despacho en ventanilla es inmediato y su tipo de cambio es el más ventajoso del sur[span_141](start_span)[span_141](end_span).</p>
       </div>
 
-      <div class="spot-card filterable" data-tags="ninh binh sasa hue da nang joyeria cambio">
+      <div class="spot-card searchable-card" data-search="ninh binh sasa hue da nang joyeria cambio">
         <span class="city-chip chip-hoian">Resto de Destinos</span>
-        <h4 style="font-size:0.98rem; font-weight:700;">Puntos de Cambio Verificados[span_122](start_span)[span_122](end_span)</h4>
+        <h4 style="font-size:0.98rem; font-weight:700;">Puntos Verificados por Viajeros[span_142](start_span)[span_142](end_span)</h4>
         <ul style="font-size:0.86rem; padding-left:18px; margin-top:6px; color:var(--text-muted);">
-          <li><strong>Tam Coc / Ninh Binh:</strong> <em>Tam Coc Queen’s Travel</em>[span_123](start_span)[span_123](end_span).</li>
-          <li><strong>Hue:</strong> <em>Phú Cường Gold Shop</em> y <em>Mango Travel</em>[span_124](start_span)[span_124](end_span).</li>
-          <li><strong>Da Nang:</strong> <em>Bích Service</em> o <em>Kim Yến Hương</em>[span_125](start_span)[span_125](end_span).</li>
-          <li><strong>Hoi An:</strong> <em>Phụ kiện Sasa (Accesorios Sasa)</em>[span_126](start_span)[span_126](end_span).</li>
+          <li><strong>Ninh Binh:</strong> <em>Tam Coc Queen’s Travel</em>[span_143](start_span)[span_143](end_span).</li>
+          <li><strong>Hue:</strong> <em>Phú Cường Gold Shop</em> y <em>Mango Travel</em>[span_144](start_span)[span_144](end_span).</li>
+          <li><strong>Da Nang:</strong> <em>Bích Service</em> o <em>Kim Yến Hương</em>[span_145](start_span)[span_145](end_span).</li>
+          <li><strong>Hoi An:</strong> <em>Phụ kiện Sasa (Accesorios Sasa)</em>[span_146](start_span)[span_146](end_span).</li>
         </ul>
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- TAB 5: DICCIONARIO BÁSICO & EXPRESIONES CLAVE -->
+    <!-- PESTAÑA 6: DICCIONARIO BÁSICO & EXPRESIONES -->
     <!-- ================================================================= -->
-    <section id="tab-idioma" class="tab-content">
-      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Vocabulario Esencial y Práctico</h2>
+    <section id="tab-idioma" class="tab-view">
+      <h2 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;">Vocabulario y Expresiones Esenciales</h2>
 
-      <!-- Expresiones Cotidianas -->
-      <div class="table-box filterable" data-tags="idioma frases cortesía regateo">
+      <h3 style="font-size:0.92rem; font-weight:800; margin-bottom:8px; color:var(--primary);">
+        <i class="fa-solid fa-comments"></i> Cortesía y Regateo
+      </h3>
+      <div class="dict-table-wrap searchable-card" data-search="idioma cortesía hola gracias regateo">
         <table>
           <thead>
-            <tr>
-              <th>Español</th>
-              <th>Vietnamita</th>
-              <th>Pronunciación fonética</th>
-            </tr>
+            <tr><th>Español</th><th>Vietnamita</th><th>Pronunciación fonética</th></tr>
           </thead>
           <tbody>
-            <tr><td>Hola</td><td><strong>Xin chào</strong>[span_127](start_span)[span_127](end_span)</td><td class="phonetic-txt">sin chao[span_128](start_span)[span_128](end_span)</td></tr>
-            <tr><td>Gracias</td><td><strong>Cảm ơn</strong>[span_129](start_span)[span_129](end_span)</td><td class="phonetic-txt">cam on[span_130](start_span)[span_130](end_span)</td></tr>
-            <tr><td>Muchas gracias</td><td>Cảm ơn rất nhiều[span_131](start_span)[span_131](end_span)</td><td class="phonetic-txt">cam on rat ñieu[span_132](start_span)[span_132](end_span)</td></tr>
-            <tr><td>De nada</td><td>Không có gì[span_133](start_span)[span_133](end_span)</td><td class="phonetic-txt">jom co yi[span_134](start_span)[span_134](end_span)</td></tr>
-            <tr><td>Por favor / Perdón</td><td>Xin lỗi[span_135](start_span)[span_135](end_span)</td><td class="phonetic-txt">sin loi[span_136](start_span)[span_136](end_span)</td></tr>
-            <tr><td>Sí / No</td><td>Vâng / Không[span_137](start_span)[span_137](end_span)</td><td class="phonetic-txt">vang / jom[span_138](start_span)[span_138](end_span)</td></tr>
-            <tr><td>Adiós</td><td>Tạm biệt[span_139](start_span)[span_139](end_span)</td><td class="phonetic-txt">tam biet[span_140](start_span)[span_140](end_span)</td></tr>
-            <tr><td>¿Cuánto cuesta?</td><td><strong>Bao nhiêu tiền?</strong>[span_141](start_span)[span_141](end_span)</td><td class="phonetic-txt">bao ñieu tien?[span_142](start_span)[span_142](end_span)</td></tr>
-            <tr><td>Demasiado caro</td><td>Đắt quá[span_143](start_span)[span_143](end_span)</td><td class="phonetic-txt">dat cua[span_144](start_span)[span_144](end_span)</td></tr>
-            <tr><td>¿Más barato? (regateo)</td><td><strong>Rẻ hơn được không?</strong>[span_145](start_span)[span_145](end_span)</td><td class="phonetic-txt">re jon duoc jom?[span_146](start_span)[span_146](end_span)</td></tr>
-            <tr><td>La cuenta, por favor</td><td><strong>Tính tiền / Hóa đơn</strong>[span_147](start_span)[span_147](end_span)</td><td class="phonetic-txt">tin tien / jua don[span_148](start_span)[span_148](end_span)</td></tr>
-            <tr><td>¿Dónde está el baño?</td><td>Nhà vệ sinh ở đâu?</td><td class="phonetic-txt">ña ve sin o dou?</td></tr>
-            <tr><td>Ayuda</td><td>Cứu tôi với</td><td class="phonetic-txt">cu toi voi</td></tr>
+            <tr><td>Hola</td><td><strong>Xin chào</strong>[span_147](start_span)[span_147](end_span)</td><td class="phonetic-label">sin chao[span_148](start_span)[span_148](end_span)</td></tr>
+            <tr><td>Buenos días</td><td>Chào buổi sáng[span_149](start_span)[span_149](end_span)</td><td class="phonetic-label">chao buoi sang[span_150](start_span)[span_150](end_span)</td></tr>
+            <tr><td>Buenas noches</td><td>Chào buổi tối[span_151](start_span)[span_151](end_span)</td><td class="phonetic-label">chao buoi toi[span_152](start_span)[span_152](end_span)</td></tr>
+            <tr><td>Adiós</td><td>Tạm biệt[span_153](start_span)[span_153](end_span)</td><td class="phonetic-label">tam biet[span_154](start_span)[span_154](end_span)</td></tr>
+            <tr><td>Gracias</td><td><strong>Cảm ơn</strong>[span_155](start_span)[span_155](end_span)</td><td class="phonetic-label">cam on[span_156](start_span)[span_156](end_span)</td></tr>
+            <tr><td>Muchas gracias</td><td>Cảm ơn rất nhiều[span_157](start_span)[span_157](end_span)</td><td class="phonetic-label">cam on rat ñieu[span_158](start_span)[span_158](end_span)</td></tr>
+            <tr><td>De nada</td><td>Không có gì[span_159](start_span)[span_159](end_span)</td><td class="phonetic-label">jom co yi[span_160](start_span)[span_160](end_span)</td></tr>
+            <tr><td>Perdón / Disculpe</td><td>Xin lỗi[span_161](start_span)[span_161](end_span)</td><td class="phonetic-label">sin loi[span_162](start_span)[span_162](end_span)</td></tr>
+            <tr><td>Sí / No</td><td>Vâng / Không[span_163](start_span)[span_163](end_span)</td><td class="phonetic-label">vang / jom[span_164](start_span)[span_164](end_span)</td></tr>
+            <tr><td>¿Cuánto cuesta?</td><td><strong>Bao nhiêu tiền?</strong>[span_165](start_span)[span_165](end_span)</td><td class="phonetic-label">bao ñieu tien?[span_166](start_span)[span_166](end_span)</td></tr>
+            <tr><td>Demasiado caro</td><td>Đắt quá[span_167](start_span)[span_167](end_span)</td><td class="phonetic-label">dat cua[span_168](start_span)[span_168](end_span)</td></tr>
+            <tr><td>¿Más barato? (regateo)</td><td><strong>Rẻ hơn được không?</strong>[span_169](start_span)[span_169](end_span)</td><td class="phonetic-label">re jon duoc jom?[span_170](start_span)[span_170](end_span)</td></tr>
+            <tr><td>La cuenta, por favor</td><td>Tính tiền / Hóa đơn[span_171](start_span)[span_171](end_span)</td><td class="phonetic-label">tin tien / jua don[span_172](start_span)[span_172](end_span)</td></tr>
+            <tr><td>¿Dónde está el baño?</td><td>Nhà vệ sinh ở đâu?</td><td class="phonetic-label">ña ve sin o dou?</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Alimentos, Bebidas y Salud -->
-      <h3 style="font-size:0.95rem; font-weight:700; margin-bottom:8px; color:var(--accent);">
-        <i class="fa-solid fa-utensils"></i> Comida, Alergias y Salud
+      <h3 style="font-size:0.92rem; font-weight:800; margin-bottom:8px; color:var(--accent);">
+        <i class="fa-solid fa-bowl-rice"></i> Restauración y Seguridad Gastro
       </h3>
-      <div class="table-box filterable" data-tags="idioma comida agua hielo picante picar">
+      <div class="dict-table-wrap searchable-card" data-search="idioma comida agua hielo cilantro picante carne verduras">
         <table>
           <thead>
-            <tr>
-              <th>Concepto</th>
-              <th>Vietnamita</th>
-              <th>Nota / Pronunciación</th>
-            </tr>
+            <tr><th>Concepto</th><th>Vietnamita</th><th>Nota de uso</th></tr>
           </thead>
           <tbody>
-            <tr><td>Agua embotellada</td><td>Nước suối[span_149](start_span)[span_149](end_span)</td><td class="phonetic-txt">nuoc suoi[span_150](start_span)[span_150](end_span)</td></tr>
-            <tr><td>Sin hielo</td><td><strong>Không đá</strong></td><td class="phonetic-txt">jom da (seguridad gastro)</td></tr>
-            <tr><td>No picante</td><td><strong>Không cay</strong>[span_151](start_span)[span_151](end_span)</td><td class="phonetic-txt">jom cai[span_152](start_span)[span_152](end_span)</td></tr>
-            <tr><td>Sin cilantro</td><td>Không cho rau mùi</td><td class="phonetic-txt">jom cho rau mui</td></tr>
-            <tr><td>Vegetariano</td><td>Ăn chay</td><td class="phonetic-txt">an chai</td></tr>
-            <tr><td>Cerveza / Café</td><td>Bia / Cà phê[span_153](start_span)[span_153](end_span)</td><td class="phonetic-txt">bia / ca fe[span_154](start_span)[span_154](end_span)</td></tr>
-            <tr><td>Pollo / Cerdo / Vaca</td><td>Gà / Heo / Bò</td><td class="phonetic-txt">ga / jeo / bo</td></tr>
-            <tr><td>Marisco / Pescado</td><td>Hải sản / Cá[span_155](start_span)[span_155](end_span)</td><td class="phonetic-txt">jai san / ca[span_156](start_span)[span_156](end_span)</td></tr>
-            <tr><td>Hospital / Farmacia</td><td>Bệnh viện / Nhà thuốc</td><td class="phonetic-txt">ben vien / ña tuoc</td></tr>
+            <tr><td>Agua mineral embotellada</td><td>Nước suối[span_173](start_span)[span_173](end_span)</td><td class="phonetic-label">nuoc suoi (pedir siempre precintada)[span_174](start_span)[span_174](end_span)</td></tr>
+            <tr><td>Sin hielo (crucial)</td><td><strong>Không đá</strong></td><td class="phonetic-label">jom da (evitar agua no hervida)</td></tr>
+            <tr><td>No picante</td><td><strong>Không cay</strong>[span_175](start_span)[span_175](end_span)</td><td class="phonetic-label">jom cai[span_176](start_span)[span_176](end_span)</td></tr>
+            <tr><td>Sin cilantro</td><td>Không cho rau mùi</td><td class="phonetic-label">jom cho rau mui</td></tr>
+            <tr><td>Arroz / Bocadillo / Sopa</td><td>Cơm / Bánh mì / Phở[span_177](start_span)[span_177](end_span)</td><td class="phonetic-label">com / ban mi / fo[span_178](start_span)[span_178](end_span)</td></tr>
+            <tr><td>Cerveza / Café</td><td>Bia / Cà phê[span_179](start_span)[span_179](end_span)</td><td class="phonetic-label">bia / ca fe[span_180](start_span)[span_180](end_span)</td></tr>
+            <tr><td>Pollo / Ternera / Cerdo</td><td>Thịt gà / Thịt bò / Thịt heo</td><td class="phonetic-label">tit ga / tit bo / tit jeo</td></tr>
+            <tr><td>Pescado / Marisco</td><td>Cá / Hải sản[span_181](start_span)[span_181](end_span)</td><td class="phonetic-label">ca / jai san[span_182](start_span)[span_182](end_span)</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Números para regateo -->
-      <h3 style="font-size:0.95rem; font-weight:700; margin-bottom:8px; color:var(--primary);">
-        <i class="fa-solid fa-calculator"></i> Números Clave
+      <h3 style="font-size:0.92rem; font-weight:800; margin-bottom:8px; color:var(--gold);">
+        <i class="fa-solid fa-arrow-up-1-9"></i> Números para Pagar y Comprar
       </h3>
-      <div class="table-box filterable" data-tags="idioma numeros dinero">
+      <div class="dict-table-wrap searchable-card" data-search="idioma numeros contar pagar dinero">
         <table>
           <thead>
             <tr><th>Número</th><th>Vietnamita</th><th>Pronunciación</th></tr>
           </thead>
           <tbody>
-            <tr><td>1 / 2 / 3</td><td>Một / Hai / Ba[span_157](start_span)[span_157](end_span)</td><td class="phonetic-txt">mot / jai / ba[span_158](start_span)[span_158](end_span)</td></tr>
-            <tr><td>4 / 5 / 6</td><td>Bốn / Năm / Sáu[span_159](start_span)[span_159](end_span)</td><td class="phonetic-txt">bon / nam / sau[span_160](start_span)[span_160](end_span)</td></tr>
-            <tr><td>7 / 8 / 9</td><td>Bảy / Tám / Chín[span_161](start_span)[span_161](end_span)</td><td class="phonetic-txt">bai / tam / chin[span_162](start_span)[span_162](end_span)</td></tr>
-            <tr><td>10 / 20</td><td>Mười / Hai mươi[span_163](start_span)[span_163](end_span)</td><td class="phonetic-txt">muoi / jai muoi[span_164](start_span)[span_164](end_span)</td></tr>
-            <tr><td>100 / 1.000</td><td>Một trăm / Một nghìn[span_165](start_span)[span_165](end_span)</td><td class="phonetic-txt">mot cham / mot ngin[span_166](start_span)[span_166](end_span)</td></tr>
-            <tr><td>10.000 / 100.000</td><td>Mười nghìn / Một trăm nghìn</td><td class="phonetic-txt">muoi ngin / mot cham ngin</td></tr>
+            <tr><td>1 / 2 / 3</td><td>Một / Hai / Ba[span_183](start_span)[span_183](end_span)</td><td class="phonetic-label">mot / jai / ba[span_184](start_span)[span_184](end_span)</td></tr>
+            <tr><td>4 / 5 / 6</td><td>Bốn / Năm / Sáu[span_185](start_span)[span_185](end_span)</td><td class="phonetic-label">bon / nam / sau[span_186](start_span)[span_186](end_span)</td></tr>
+            <tr><td>7 / 8 / 9 / 10</td><td>Bảy / Tám / Chín / Mười[span_187](start_span)[span_187](end_span)</td><td class="phonetic-label">bai / tam / chin / muoi[span_188](start_span)[span_188](end_span)</td></tr>
+            <tr><td>100 / 1.000</td><td>Một trăm / Một nghìn[span_189](start_span)[span_189](end_span)</td><td class="phonetic-label">mot cham / mot ngin[span_190](start_span)[span_190](end_span)</td></tr>
+            <tr><td>10.000 / 100.000</td><td>Mười nghìn / Một trăm nghìn</td><td class="phonetic-label">muoi ngin / mot cham ngin</td></tr>
+            <tr><td>500.000 (Billete azul)</td><td>Năm trăm nghìn</td><td class="phonetic-label">nam cham ngin (~18.5€)</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
     <!-- ================================================================= -->
-    <!-- TAB 6: CONTACTOS DE EMERGENCIA -->
+    <!-- PESTAÑA 7: SOS & EMERGENCIAS -->
     <!-- ================================================================= -->
-    <section id="tab-sos" class="tab-content">
+    <section id="tab-sos" class="tab-view">
       <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:var(--radius-md); padding:16px; margin-bottom:14px;">
         <h3 style="color:#b91c1c; font-size:1.05rem; font-weight:800; margin-bottom:8px;">
-          <i class="fa-solid fa-shield-halved"></i> Embajada de España en Vietnam[span_167](start_span)[span_167](end_span)
+          <i class="fa-solid fa-shield-halved"></i> Embajada de España en Vietnam[span_191](start_span)[span_191](end_span)
         </h3>
-        <p style="font-size:0.86rem; margin-bottom:6px;"><strong>Dirección:</strong> 4 P. Lê Hồng Phong, Ba Đình, Hà Nội[span_168](start_span)[span_168](end_span)</p>
+        <p style="font-size:0.86rem; margin-bottom:6px;"><strong>Dirección:</strong> 4 P. Lê Hồng Phong, Ba Đình, Hà Nội[span_192](start_span)[span_192](end_span)</p>
         <p style="font-size:0.86rem; margin-bottom:6px;">
-          <strong>Teléfono Fijo:</strong> <a href="tel:+842437715207" style="color:#b91c1c; font-weight:700;">(+84) 24 3771 5207</a>[span_169](start_span)[span_169](end_span)
+          <strong>Teléfono Fijo General:</strong> <a href="tel:+842437715207" style="color:#b91c1c; font-weight:700;">(+84) 24 3771 5207</a>[span_193](start_span)[span_193](end_span)
         </p>
         <p style="font-size:0.86rem; margin-bottom:6px;">
-          <strong>Emergencias 24h (Consular):</strong> <a href="tel:+84936333130" style="color:#b91c1c; font-weight:700;">(+84) 9 3633 3130</a>[span_170](start_span)[span_170](end_span)
+          <strong>Emergencias Consulares 24h:</strong> <a href="tel:+84936333130" style="color:#b91c1c; font-weight:800;">(+84) 9 3633 3130</a>[span_194](start_span)[span_194](end_span)
         </p>
-        <p style="font-size:0.8rem; color:var(--text-muted);">Email: emb.hanoi@maec.es[span_171](start_span)[span_171](end_span)</p>
+        <p style="font-size:0.80rem; color:var(--text-muted);">Email: emb.hanoi@maec.es · Sección Visados: emb.hanoi.vis@maec.es[span_195](start_span)[span_195](end_span)</p>
       </div>
 
       <div class="spot-card">
-        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-solid fa-phone"></i> Teléfonos Locales de Urgencia[span_172](start_span)[span_172](end_span)</h4>
+        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-solid fa-phone-volume"></i> Números de Urgencia en Vietnam[span_196](start_span)[span_196](end_span)</h4>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px;">
-          <a href="tel:113" class="btn-action" style="justify-content:center; padding:9px;"><i class="fa-solid fa-shield"></i> Policía: 113[span_173](start_span)[span_173](end_span)</a>
-          <a href="tel:115" class="btn-action" style="justify-content:center; padding:9px;"><i class="fa-solid fa-truck-medical"></i> Ambulancia: 115[span_174](start_span)[span_174](end_span)</a>
-          <a href="tel:114" class="btn-action" style="justify-content:center; padding:9px;"><i class="fa-solid fa-fire-extinguisher"></i> Bomberos: 114[span_175](start_span)[span_175](end_span)</a>
-          <a href="tel:112" class="btn-action" style="justify-content:center; padding:9px;"><i class="fa-solid fa-triangle-exclamation"></i> Rescate: 112[span_176](start_span)[span_176](end_span)</a>
+          <a href="tel:113" class="action-btn" style="justify-content:center; padding:10px;"><i class="fa-solid fa-shield"></i> Policía: 113[span_197](start_span)[span_197](end_span)</a>
+          <a href="tel:115" class="action-btn" style="justify-content:center; padding:10px;"><i class="fa-solid fa-truck-medical"></i> Ambulancia: 115[span_198](start_span)[span_198](end_span)</a>
+          <a href="tel:114" class="action-btn" style="justify-content:center; padding:10px;"><i class="fa-solid fa-fire-extinguisher"></i> Bomberos: 114[span_199](start_span)[span_199](end_span)</a>
+          <a href="tel:112" class="action-btn" style="justify-content:center; padding:10px;"><i class="fa-solid fa-triangle-exclamation"></i> Rescate: 112[span_200](start_span)[span_200](end_span)</a>
         </div>
       </div>
 
       <div class="spot-card">
-        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i> Coordinación Bus Sapa - Aeropuerto Hanoi[span_177](start_span)[span_177](end_span)</h4>
+        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i> Coordinación Bus Sapa ↔ Aeropuerto Noi Bai[span_201](start_span)[span_201](end_span)</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted); margin-top:4px;">Canales directos de WhatsApp de los coordinadores locales del trayecto:[span_202](start_span)[span_202](end_span)</p>
         <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
-          <a href="https://wa.me/84985873537" target="_blank" class="btn-action" style="background:#dcfce7; color:#166534;"><i class="fa-brands fa-whatsapp"></i> Mr Tom (+84 985 873 537)[span_178](start_span)[span_178](end_span)</a>
-          <a href="https://wa.me/84853154718" target="_blank" class="btn-action" style="background:#dcfce7; color:#166534;"><i class="fa-brands fa-whatsapp"></i> Ms Zang Le (+84 85 315 4718)[span_179](start_span)[span_179](end_span)</a>
+          <a href="https://wa.me/84985873537" target="_blank" class="action-btn" style="background:#dcfce7; color:#166534;"><i class="fa-brands fa-whatsapp"></i> Mr Tom (+84 985 873 537)[span_203](start_span)[span_203](end_span)</a>
+          <a href="https://wa.me/84853154718" target="_blank" class="action-btn" style="background:#dcfce7; color:#166534;"><i class="fa-brands fa-whatsapp"></i> Ms Zang Le (+84 85 315 4718)[span_204](start_span)[span_204](end_span)</a>
         </div>
       </div>
     </section>
   </main>
 
   <!-- BARRA INFERIOR DE NAVEGACIÓN -->
-  <nav class="dock-nav">
-    <button class="dock-btn active" onclick="switchTab('itinerario', this)">
-      <i class="fa-solid fa-map-location-dot"></i>
+  <nav class="bottom-dock">
+    <button class="dock-tab-btn active" onclick="activateTab('itinerario', this)">
+      <i class="fa-solid fa-route"></i>
       <span>Ruta</span>
     </button>
-    <button class="dock-btn" onclick="switchTab('comida', this)">
+    <button class="dock-tab-btn" onclick="activateTab('comida', this)">
       <i class="fa-solid fa-utensils"></i>
       <span>Comer</span>
     </button>
-    <button class="dock-btn" onclick="switchTab('checklist', this)">
-      <i class="fa-solid fa-check-double"></i>
-      <span>Checklist</span>
+    <button class="dock-tab-btn" onclick="activateTab('historia', this)">
+      <i class="fa-solid fa-book-atlas"></i>
+      <span>Cultura</span>
     </button>
-    <button class="dock-btn" onclick="switchTab('moneda', this)">
+    <button class="dock-tab-btn" onclick="activateTab('checklist', this)">
+      <i class="fa-solid fa-clipboard-check"></i>
+      <span>Maleta</span>
+    </button>
+    <button class="dock-tab-btn" onclick="activateTab('moneda', this)">
       <i class="fa-solid fa-coins"></i>
       <span>Dinero</span>
     </button>
-    <button class="dock-btn" onclick="switchTab('idioma', this)">
+    <button class="dock-tab-btn" onclick="activateTab('idioma', this)">
       <i class="fa-solid fa-language"></i>
       <span>Idioma</span>
     </button>
-    <button class="dock-btn" onclick="switchTab('sos', this)">
+    <button class="dock-tab-btn" onclick="activateTab('sos', this)">
       <i class="fa-solid fa-kit-medical"></i>
       <span>SOS</span>
     </button>
   </nav>
 
-  <!-- SCRIPT CONVERSOR, BÚSQUEDA Y LOCALSTORAGE -->
+  <!-- SCRIPT DE CONTROL Y PERSISTENCIA -->
   <script>
-    // Cambio entre pestañas
-    function switchTab(tabId, btnEl) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.dock-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + tabId).classList.add('active');
-      btnEl.classList.add('active');
+    // Gestión de Pestañas
+    function activateTab(tabKey, btnElement) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
+      document.querySelectorAll('.dock-tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      const targetView = document.getElementById('tab-' + tabKey);
+      if (targetView) {
+        targetView.classList.add('active');
+      }
+      if (btnElement) {
+        btnElement.classList.add('active');
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Acordeón de días
-    function toggleCard(headerEl) {
-      headerEl.parentElement.classList.toggle('open');
+    // Acordeón individual
+    function toggleCard(headerElement) {
+      const parentCard = headerElement.closest('.day-card');
+      if (parentCard) {
+        parentCard.classList.toggle('open');
+      }
     }
 
-    // Buscador instantáneo sobre elementos filtrables
-    function filterApp() {
-      const q = document.getElementById('routeSearch').value.toLowerCase().trim();
-      const items = document.querySelectorAll('.filterable');
-      
-      items.forEach(el => {
-        const fullText = (el.innerText + " " + (el.getAttribute('data-tags') || '')).toLowerCase();
-        if (fullText.includes(q)) {
-          el.style.display = "";
-          if (el.classList.contains('day-card') && q.length > 2) {
-            el.classList.add('open');
-          }
+    // Alternar todas las tarjetas de ruta simultáneamente
+    let allExpanded = false;
+    function toggleAllDayCards() {
+      allExpanded = !allExpanded;
+      document.querySelectorAll('.day-card').forEach(card => {
+        if (allExpanded) {
+          card.classList.add('open');
         } else {
-          el.style.display = "none";
+          card.classList.remove('open');
         }
       });
     }
 
-    // Conversor de divisas dinámico (Tipo aproximado: 1 EUR = ~27.000 VND)
-    const FX_RATE = 27000;
-    function convertVndToEur() {
-      const vnd = parseFloat(document.getElementById('vndInput').value);
-      if (!isNaN(vnd) && vnd > 0) {
-        document.getElementById('eurInput').value = (vnd / FX_RATE).toFixed(2);
-      } else {
-        document.getElementById('eurInput').value = '';
-      }
+    // Buscador en tiempo real sobre todos los elementos relevantes
+    function executeGlobalSearch() {
+      const query = document.getElementById('routeSearch').value.toLowerCase().trim();
+      const searchableElements = document.querySelectorAll('.searchable-card');
+
+      searchableElements.forEach(item => {
+        const textContent = (item.innerText + " " + (item.getAttribute('data-search') || '')).toLowerCase();
+        if (textContent.includes(query)) {
+          item.style.display = "";
+          if (query.length > 2 && item.classList.contains('day-card')) {
+            item.classList.add('open');
+          }
+        } else {
+          item.style.display = "none";
+        }
+      });
     }
-    function convertEurToVnd() {
-      const eur = parseFloat(document.getElementById('eurInput').value);
-      if (!isNaN(eur) && eur > 0) {
-        document.getElementById('vndInput').value = Math.round(eur * FX_RATE);
+
+    // Conversor de Moneda (Ratio de referencia: 1 EUR ~ 27.000 VND)
+    const EXCHANGE_RATE = 27000;
+
+    function calcVndToEur() {
+      const vnd = parseFloat(document.getElementById('vndInput').value);
+      const eurInput = document.getElementById('eurInput');
+      if (!isNaN(vnd) && vnd > 0) {
+        eurInput.value = (vnd / EXCHANGE_RATE).toFixed(2);
       } else {
-        document.getElementById('vndInput').value = '';
+        eurInput.value = '';
       }
     }
 
-    // Persistencia de los estados del checklist en el almacenamiento del navegador
-    const CHECK_KEY = 'psq_vietnam_checklist_v2';
-    function loadChecklist() {
-      const data = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
-      document.querySelectorAll('.check-row input[type="checkbox"]').forEach(chk => {
-        if (data[chk.id]) {
-          chk.checked = true;
-          chk.parentElement.classList.add('done');
+    function calcEurToVnd() {
+      const eur = parseFloat(document.getElementById('eurInput').value);
+      const vndInput = document.getElementById('vndInput');
+      if (!isNaN(eur) && eur > 0) {
+        vndInput.value = Math.round(eur * EXCHANGE_RATE);
+      } else {
+        vndInput.value = '';
+      }
+    }
+
+    function setQuickVnd(amount) {
+      document.getElementById('vndInput').value = amount;
+      calcVndToEur();
+    }
+
+    // Persistencia del Checklist con localStorage
+    const STORAGE_KEY = 'psq_vietnam_checklist_v3';
+
+    function initChecklistEngine() {
+      const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      
+      document.querySelectorAll('.check-line input[type="checkbox"]').forEach(checkbox => {
+        if (savedState[checkbox.id]) {
+          checkbox.checked = true;
+          checkbox.closest('.check-line').classList.add('checked-done');
         }
-        chk.addEventListener('change', () => {
-          chk.parentElement.classList.toggle('done', chk.checked);
-          data[chk.id] = chk.checked;
-          localStorage.setItem(CHECK_KEY, JSON.stringify(data));
+
+        checkbox.addEventListener('change', () => {
+          const line = checkbox.closest('.check-line');
+          if (checkbox.checked) {
+            line.classList.add('checked-done');
+          } else {
+            line.classList.remove('checked-done');
+          }
+          savedState[checkbox.id] = checkbox.checked;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
         });
       });
     }
 
-    document.addEventListener('DOMContentLoaded', loadChecklist);
+    function clearSavedChecklist() {
+      if (confirm('¿Deseas restablecer todos los elementos del checklist?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        document.querySelectorAll('.check-line input[type="checkbox"]').forEach(checkbox => {
+          checkbox.checked = false;
+          checkbox.closest('.check-line').classList.remove('checked-done');
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initChecklistEngine);
   </script>
 </body>
 </html>
