@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Japón · Cuaderno de Ruta & SuperApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --ink: #1f1e1c;
+      --paper: #fbf9f4;
+      --paper-2: #f3efe6;
+      --paper-3: #e8e1d3;
+      --muted: #6e675c;
+      --torii: #c82d25;
+      --torii-hover: #a8221b;
+      --torii-subtle: #fae6e5;
+      --matcha: #2e5939;
+      --matcha-subtle: #dbe8dd;
+      --indigo: #1b324d;
+      --indigo-subtle: #dbe4ee;
+      --gold: #aa7a1e;
+      --gold-subtle: #f6ebd1;
+      --border: #e0d7c5;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --shadow-sm: 0 1px 3px rgba(31,30,28,0.08);
+      --shadow-md: 0 10px 24px -8px rgba(31,30,28,0.18);
+      
+      --chip-osaka-bg: #fae6e5; --chip-osaka-fg: #a8221b;
+      --chip-kyoto-bg: #dbe8dd; --chip-kyoto-fg: #234b2c;
+      --chip-nara-bg: #f6ebd1; --chip-nara-fg: #7a540f;
+      --chip-takayama-bg: #f0e6dc; --chip-takayama-fg: #6e4627;
+      --chip-tokyo-bg: #dbe4ee; --chip-tokyo-fg: #193452;
+      --chip-nikko-bg: #e5def0; --chip-nikko-fg: #502e78;
+      --chip-fuji-bg: #d7eef2; --chip-fuji-fg: #155763;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #f4efe6;
+        --paper: #141210;
+        --paper-2: #1e1b17;
+        --paper-3: #2a2620;
+        --muted: #a3998a;
+        --torii: #e04b43;
+        --torii-hover: #ea645d;
+        --torii-subtle: rgba(224,75,67,0.16);
+        --matcha: #7bb588;
+        --matcha-subtle: rgba(123,181,136,0.15);
+        --indigo: #8ab2db;
+        --indigo-subtle: rgba(138,178,219,0.15);
+        --gold: #e2b052;
+        --gold-subtle: rgba(226,176,82,0.15);
+        --border: #332d26;
+        
+        --chip-osaka-bg: rgba(224,75,67,0.18); --chip-osaka-fg: #f29a95;
+        --chip-kyoto-bg: rgba(123,181,136,0.18); --chip-kyoto-fg: #8fc29b;
+        --chip-nara-bg: rgba(226,176,82,0.18); --chip-nara-fg: #e2b052;
+        --chip-takayama-bg: rgba(196,151,114,0.18); --chip-takayama-fg: #dcb391;
+        --chip-tokyo-bg: rgba(138,178,219,0.18); --chip-tokyo-fg: #9fc1e5;
+        --chip-nikko-bg: rgba(181,152,222,0.18); --chip-nikko-fg: #ccafe8;
+        --chip-fuji-bg: rgba(109,203,219,0.18); --chip-fuji-fg: #8ee0ee;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--paper);
+      color: var(--ink);
+      line-height: 1.55;
+      padding-bottom: 110px;
+    }
+    h1, h2, h3, h4, .display { font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.01em; }
+
+    /* HEADER */
+    header {
+      background: var(--paper);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 12px 16px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-group { display: flex; flex-direction: column; gap: 2px; }
+    .brand-title { display: flex; align-items: baseline; gap: 8px; font-weight: 800; font-size: 1.25rem; }
+    .brand-title i { color: var(--torii); font-size: 1.05rem; }
+    .brand-dates { font-size: 0.76rem; color: var(--muted); font-weight: 600; }
+    .countdown-chip {
+      background: var(--torii);
+      color: #fff9f7;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 999px;
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* TOP CONTROLS */
+    .top-controls {
+      max-width: 860px;
+      margin: 12px auto 0;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .search-box { position: relative; display: flex; align-items: center; }
+    .search-box i { position: absolute; left: 14px; color: var(--muted); font-size: 0.85rem; }
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--paper-2);
+      color: var(--ink);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .search-box input:focus { border-color: var(--torii); background: var(--paper); }
+
+    /* MAIN CONTENT */
+    main { max-width: 860px; margin: 16px auto; padding: 0 16px; }
+    .tab-view { display: none; }
+    .tab-view.active { display: block; animation: tabFade 0.2s ease forwards; }
+    @keyframes tabFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section-eyebrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .section-eyebrow span.lbl { font-size: 0.85rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .btn-toggle-all { background: none; border: none; color: var(--torii); font-size: 0.8rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+
+    h2.tab-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
+    p.tab-sub { font-size: 0.86rem; color: var(--muted); margin-bottom: 16px; }
+
+    /* STATS & QUICK THREAD */
+    .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
+    .stat-card { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 6px; text-align: center; }
+    .stat-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.35rem; color: var(--torii); line-height: 1; }
+    .stat-lbl { font-size: 0.65rem; color: var(--muted); font-weight: 700; margin-top: 3px; }
+
+    .route-thread { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 12px; margin-bottom: 14px; scrollbar-width: none; }
+    .route-thread::-webkit-scrollbar { display: none; }
+    .thread-stop {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 9px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--paper-2);
+      min-width: 80px;
+      transition: transform 0.15s ease;
+    }
+    .thread-stop:active { transform: scale(0.96); background: var(--torii-subtle); border-color: var(--torii); }
+    .thread-stop i { font-size: 1.05rem; color: var(--torii); }
+    .thread-stop span { font-size: 0.7rem; font-weight: 700; text-align: center; white-space: nowrap; }
+
+    .fact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .fact-card { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; }
+    .fact-card i { color: var(--indigo); margin-bottom: 4px; display: block; font-size: 1rem; }
+    .fact-card h5 { font-size: 0.84rem; font-weight: 800; margin-bottom: 2px; }
+    .fact-card p { font-size: 0.78rem; color: var(--muted); }
+
+    /* FLIGHTS CARD */
+    .flight-card {
+      background: var(--paper-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .flight-segment { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+    .flight-segment:last-child { border-bottom: none; }
+    .flight-code { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; color: var(--torii); }
+    .flight-route { font-size: 0.85rem; font-weight: 700; }
+    .flight-time { font-size: 0.78rem; color: var(--muted); }
+
+    /* DAY CARDS */
+    .day-card { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 12px; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .day-header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+    .day-badge {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--torii-subtle);
+      color: var(--torii);
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      min-width: 66px;
+      text-align: center;
+      display: inline-block;
+    }
+    .day-title-wrap { margin-left: 10px; }
+    .day-title { font-weight: 700; font-size: 0.95rem; }
+    .day-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+    .region-chip { font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; }
+    .transport-tag { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .day-chevron { color: var(--muted); transition: transform 0.25s ease; flex-shrink: 0; margin-left: 8px; }
+    .day-card.open .day-chevron { transform: rotate(180deg); }
+    .day-body { display: none; padding: 4px 16px 16px; border-top: 1px solid var(--border); font-size: 0.9rem; }
+    .day-card.open .day-body { display: block; padding-top: 14px; }
+
+    .culture-card { background: var(--matcha-subtle); border-left: 4px solid var(--matcha); border-radius: 4px; padding: 12px 14px; margin-bottom: 12px; font-size: 0.86rem; }
+    .culture-title { display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--matcha); margin-bottom: 4px; font-size: 0.8rem; text-transform: uppercase; }
+    .tip-card { background: var(--gold-subtle); border-left: 4px solid var(--gold); border-radius: 4px; padding: 12px 14px; margin-top: 12px; font-size: 0.86rem; }
+    .tip-title { display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--gold); margin-bottom: 4px; font-size: 0.8rem; }
+    .hotel-subcard { background: var(--paper-2); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 12px; }
+
+    ul.clean-steps { list-style: none; margin-top: 8px; }
+    ul.clean-steps li { position: relative; padding-left: 18px; margin-bottom: 7px; font-size: 0.88rem; }
+    ul.clean-steps li::before { content: "•"; position: absolute; left: 3px; color: var(--torii); font-weight: 800; font-size: 1.1rem; }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      margin-top: 6px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+    .action-btn:active { background: var(--torii-subtle); color: var(--torii); border-color: var(--torii); }
+
+    /* TIMELINE */
+    .tl { position: relative; padding-left: 28px; margin-bottom: 22px; }
+    .tl::before { content: ""; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+    .tl-item { position: relative; margin-bottom: 16px; }
+    .tl-item::before { content: ""; position: absolute; left: -23px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--torii); border: 2px solid var(--paper); }
+    .tl-date { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: var(--torii); margin-bottom: 2px; }
+    .tl-body { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 13px; }
+    .tl-body h5 { font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+    .tl-body p { font-size: 0.82rem; color: var(--muted); }
+
+    /* GASTRO & SPOTS */
+    .spot-card { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+    .city-chip { display: inline-block; font-size: 0.68rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; margin-bottom: 7px; }
+    .chip-osaka { background: var(--chip-osaka-bg); color: var(--chip-osaka-fg); }
+    .chip-kyoto { background: var(--chip-kyoto-bg); color: var(--chip-kyoto-fg); }
+    .chip-nara { background: var(--chip-nara-bg); color: var(--chip-nara-fg); }
+    .chip-takayama { background: var(--chip-takayama-bg); color: var(--chip-takayama-fg); }
+    .chip-tokyo { background: var(--chip-tokyo-bg); color: var(--chip-tokyo-fg); }
+    .chip-nikko { background: var(--chip-nikko-bg); color: var(--chip-nikko-fg); }
+    .chip-fuji { background: var(--chip-fuji-bg); color: var(--chip-fuji-fg); }
+
+    /* CHECKLIST */
+    .progress-wrap { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px; }
+    .progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.82rem; font-weight: 700; }
+    .progress-track { height: 8px; background: var(--paper-3); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--matcha), var(--torii)); width: 0%; transition: width 0.3s ease; border-radius: 999px; }
+    .check-box-group { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
+    .check-box-group h3 { font-size: 0.98rem; font-weight: 700; margin-bottom: 10px; color: var(--torii); display: flex; align-items: center; gap: 8px; }
+    .check-line { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; cursor: pointer; }
+    .check-line:last-child { border-bottom: none; }
+    .check-line input[type="checkbox"] {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--muted);
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      margin-top: 2px;
+      transition: all 0.2s ease;
+    }
+    .check-line input[type="checkbox"]:checked { background-color: var(--matcha); border-color: var(--matcha); }
+    .check-line input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-size: 13px; font-weight: 800; left: 4px; top: -1px; }
+    .check-line.checked-done label { text-decoration: line-through; color: var(--muted); }
+    .check-line label { cursor: pointer; flex: 1; }
+
+    /* TABLES */
+    .dict-table-wrap, .budget-table-wrap, .weather-table-wrap {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--paper-2); color: var(--muted); font-weight: 800; font-size: 0.72rem; text-transform: uppercase; }
+    tr:last-child td { border-bottom: none; }
+    .phonetic-label { font-family: 'JetBrains Mono', monospace; color: var(--torii); font-size: 0.8rem; font-weight: 600; }
+
+    /* WIDGETS & TOOLS */
+    .fx-widget {
+      background: var(--paper-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .fx-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .fx-col { display: flex; align-items: center; gap: 6px; flex: 1; }
+    .fx-col label { font-weight: 800; font-size: 0.75rem; color: var(--muted); }
+    .fx-col input {
+      width: 100%;
+      padding: 7px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--ink);
+      outline: none;
+    }
+    .fx-quick-chips { display: flex; gap: 6px; overflow-x: auto; margin-top: 8px; scrollbar-width: none; }
+    .fx-quick-chips::-webkit-scrollbar { display: none; }
+    .fx-chip {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .fx-chip:active { color: var(--torii); border-color: var(--torii); }
+
+    /* FLASHCARDS INTERACTIVAS */
+    .flashcard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .flashcard {
+      background: var(--paper-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+    .flashcard:active { border-color: var(--torii); background: var(--torii-subtle); transform: scale(0.98); }
+    .fc-es { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .fc-jp { font-size: 1.05rem; font-weight: 800; color: var(--ink); margin: 6px 0 2px; }
+    .fc-phonetic { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--torii); }
+
+    /* MODAL DE PANTALLA GIGANTE */
+    .giant-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .giant-modal.active { display: flex; }
+    .giant-card {
+      background: #ffffff;
+      color: #111111;
+      padding: 28px 20px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 90%;
+      width: 380px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .giant-jp { font-size: 2rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px; color: #c82d25; }
+    .giant-phonetic { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #444; margin-bottom: 8px; }
+    .giant-es { font-size: 0.95rem; color: #666; font-weight: 600; margin-bottom: 16px; }
+
+    /* QUIZ */
+    .quiz-card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .quiz-q { font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; }
+    .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-btn {
+      background: var(--paper-2);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    .quiz-btn:active { transform: scale(0.99); }
+    .quiz-btn.correct { background: var(--matcha-subtle); border-color: var(--matcha); color: var(--matcha); font-weight: 700; }
+    .quiz-btn.wrong { background: var(--torii-subtle); border-color: var(--torii); color: var(--torii); font-weight: 700; }
+    .quiz-explanation { margin-top: 10px; font-size: 0.8rem; color: var(--muted); display: none; line-height: 1.45; }
+
+    /* CURIOSIDADES */
+    .curiosity-card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--torii);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .curiosity-card h5 { font-size: 0.88rem; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .curiosity-card p { font-size: 0.82rem; color: var(--muted); }
+
+    /* BOTTOM DOCK */
+    .bottom-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--paper);
+      border-top: 1px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      padding: 6px 4px max(6px, env(safe-area-inset-bottom));
+      z-index: 50;
+      box-shadow: 0 -6px 18px rgba(31,30,28,0.08);
+      scrollbar-width: none;
+    }
+    .bottom-dock::-webkit-scrollbar { display: none; }
+    .dock-tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 11px;
+      flex: 0 0 auto;
+      transition: color 0.15s ease;
+      font-family: inherit;
+    }
+    .dock-tab-btn i { font-size: 1.05rem; }
+    .dock-tab-btn.active { color: var(--torii); }
+  </style>
+</head>
+<body>
+
+  <!-- MODAL GIGANTE PARA MOSTRAR PANTALLA EN TAXIS O RESTAURANTES -->
+  <div class="giant-modal" id="giantModal" onclick="closeGiantCard()">
+    <div class="giant-card" onclick="event.stopPropagation()">
+      <div class="fc-es" id="gModalEs">ESPAÑOL</div>
+      <div class="giant-jp" id="gModalJp">日本語</div>
+      <div class="giant-phonetic" id="gModalPhonetic">fonética</div>
+      <div class="giant-es" id="gModalSub">Toca fuera para cerrar</div>
+      <button class="action-btn" onclick="closeGiantCard()"><i class="fa-solid fa-xmark"></i> Cerrar pantalla</button>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-title"><i class="fa-solid fa-torii-gate"></i> Japón · 紅葉 Momiji</div>
+        <div class="brand-dates">08 Nov – 24 Nov · 17 días</div>
+      </div>
+      <div class="countdown-chip" id="countdownChip">Calculando…</div>
+    </div>
+  </header>
+
+  <!-- TOP CONTROLS -->
+  <div class="top-controls">
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="search" id="routeSearch" placeholder="Buscar templo, ramen, tren, barrio, hotel..." oninput="executeGlobalSearch()">
+    </div>
+  </div>
+
+  <main>
+    <!-- ==================== RESUMEN ==================== -->
+    <section id="tab-resumen" class="tab-view active">
+      <h2 class="tab-title">De un vistazo</h2>
+      <p class="tab-sub">Ruta completa de Kansai a los Alpes Japoneses y Kanto. Toca una parada para saltar al itinerario.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num">17</div><div class="stat-lbl">DÍAS</div></div>
+        <div class="stat-card"><div class="stat-num">8</div><div class="stat-lbl">ZONAS</div></div>
+        <div class="stat-card"><div class="stat-num">4</div><div class="stat-lbl">HOTELES</div></div>
+        <div class="stat-card"><div class="stat-num">4</div><div class="stat-lbl">VUELOS</div></div>
+      </div>
+
+      <!-- Quick Route Thread -->
+      <div class="route-thread">
+        <div class="thread-stop" onclick="jumpToRegion('osaka')"><i class="fa-solid fa-building"></i><span>Osaka</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('nara')"><i class="fa-solid fa-paw"></i><span>Nara</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('kyoto')"><i class="fa-solid fa-torii-gate"></i><span>Kioto</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('takayama')"><i class="fa-solid fa-mountain"></i><span>Takayama</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('shirakawa')"><i class="fa-solid fa-house-chimney"></i><span>Shirakawa</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('tokyo')"><i class="fa-solid fa-city"></i><span>Tokio</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('nikko')"><i class="fa-solid fa-tree"></i><span>Nikko</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('kamakura')"><i class="fa-solid fa-monument"></i><span>Kamakura</span></div>
+        <div class="thread-stop" onclick="jumpToRegion('fuji')"><i class="fa-solid fa-volcano"></i><span>Mt. Fuji</span></div>
+      </div>
+
+      <!-- Plan de hoy -->
+      <div id="todayRouteBox" class="culture-card" style="display:none; margin-bottom:14px;">
+        <div class="culture-title"><i class="fa-solid fa-calendar-day"></i> <span id="todayRouteTitle">Plan para hoy</span></div>
+        <p id="todayRouteDesc" style="margin-bottom:6px; font-weight:600;"></p>
+        <button class="action-btn" onclick="activateTab('itinerario')"><i class="fa-solid fa-eye"></i> Abrir en el itinerario</button>
+      </div>
+
+      <!-- Vuelos -->
+      <div class="flight-card">
+        <h4 style="font-size:0.9rem; font-weight:800; margin-bottom:8px; color:var(--torii);"><i class="fa-solid fa-plane"></i> Vuelos Reservados (Localizador: MKZQD)[span_0](start_span)[span_0](end_span)</h4>
+        <div class="flight-segment">
+          <div><span class="flight-code">IB0462</span> <span class="flight-route">LCG → MAD</span></div>
+          <div class="flight-time">Vie 08 Nov · 21:40 - 23:00[span_1](start_span)[span_1](end_span)</div>
+        </div>
+        <div class="flight-segment">
+          <div><span class="flight-code">IB0281</span> <span class="flight-route">MAD → NRT</span></div>
+          <div class="flight-time">Sáb 09 Nov · 11:55 - 10:15 (+1)[span_2](start_span)[span_2](end_span)</div>
+        </div>
+        <div class="flight-segment">
+          <div><span class="flight-code">IB0282</span> <span class="flight-route">NRT → MAD</span></div>
+          <div class="flight-time">Dom 24 Nov · 11:55 - 19:45[span_3](start_span)[span_3](end_span)</div>
+        </div>
+        <div class="flight-segment">
+          <div><span class="flight-code">IB0463</span> <span class="flight-route">MAD → LCG</span></div>
+          <div class="flight-time">Dom 24 Nov · 22:15 - 23:35[span_4](start_span)[span_4](end_span)</div>
+        </div>
+      </div>
+
+      <div class="fact-grid">
+        <div class="fact-card"><i class="fa-solid fa-train"></i><h5>Tokaido Shinkansen</h5><p>Hikari y Kodama incluidos en JR Pass. Nozomi y Mizuho requieren suplemento[span_5](start_span)[span_5](end_span).</p></div>
+        <div class="fact-card"><i class="fa-solid fa-credit-card"></i><h5>Tarjetas IC</h5><p>Suica, Pasmo o ICOCA en Apple Wallet para metro, autobuses y konbini[span_6](start_span)[span_6](end_span).</p></div>
+        <div class="fact-card"><i class="fa-solid fa-leaf"></i><h5>Temporada Momiji</h5><p>Noviembre es el mes cumbre del enrojecimiento de los arces japoneses[span_7](start_span)[span_7](end_span).</p></div>
+        <div class="fact-card"><i class="fa-solid fa-trash-can"></i><h5>Papeleras y Bolsas</h5><p>Apenas hay papeleras en la calle; lleva siempre una bolsa plástica en la mochila[span_8](start_span)[span_8](end_span).</p></div>
+      </div>
+
+      <div class="weather-table-wrap">
+        <table>
+          <thead><tr><th>Región</th><th>Temp. Noviembre</th><th>Momiji & Clima</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Osaka & Kioto</strong></td><td style="font-weight:700; color:var(--matcha);">9–18°C</td><td>Clima templado y seco; apogeo del momiji en templos y jardines[span_9](start_span)[span_9](end_span).</td></tr>
+            <tr><td><strong>Takayama & Shirakawa</strong></td><td style="font-weight:700; color:var(--matcha);">1–11°C</td><td>Frío alpino; primeras heladas. Ropa térmica y forro polar necesarios[span_10](start_span)[span_10](end_span).</td></tr>
+            <tr><td><strong>Tokio & Alrededores</strong></td><td style="font-weight:700; color:var(--matcha);">8–17°C</td><td>Días despejados ideales para divisar el Monte Fuji desde miradores[span_11](start_span)[span_11](end_span).</td></tr>
+            <tr><td><strong>Nikko & Monte Fuji</strong></td><td style="font-weight:700; color:var(--matcha);">2–12°C</td><td>Ambiente de montaña; vientos frescos en lagos y bosques[span_12](start_span)[span_12](end_span).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== ITINERARIO ==================== -->
+    <section id="tab-itinerario" class="tab-view">
+      <div class="section-eyebrow">
+        <span class="lbl">Itinerario Día a Día</span>
+        <button class="btn-toggle-all" onclick="toggleAllDayCards()">Expandir / Plegar todo</button>
+      </div>
+
+      <!-- 8 NOV -->
+      <div class="day-card searchable-card" data-day="8" data-search="8 nov viernes vuelo salida coruña madrid lcg mad ib0462">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">08 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Salida: A Coruña → Madrid</div>
+              <div class="day-meta"><span class="region-chip chip-osaka">Vuelo</span><span class="transport-tag"><i class="fa-solid fa-plane"></i> IB0462 · 21:40h</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>21:40h:</strong> Salida del vuelo IB0462 desde el aeropuerto de A Coruña (LCG)[span_13](start_span)[span_13](end_span).</li>
+            <li><strong>23:00h:</strong> Llegada a Madrid-Barajas (MAD)[span_14](start_span)[span_14](end_span). Noche en hotel de tránsito o alrededores para enlazar con el vuelo transcontinental[span_15](start_span)[span_15](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 9 NOV -->
+      <div class="day-card searchable-card" data-day="9" data-search="9 nov sabado vuelo directo madrid tokio narita ib0281 noche a bordo">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">09 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Vuelo Transcontinental: Madrid → Tokio</div>
+              <div class="day-meta"><span class="region-chip chip-tokyo">Vuelo</span><span class="transport-tag"><i class="fa-solid fa-plane"></i> IB0281 · 11:55h</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>11:55h:</strong> Despegue del vuelo directo IB0281 desde Madrid-Barajas con destino al Aeropuerto Internacional de Narita (Tokio)[span_16](start_span)[span_16](end_span).</li>
+            <li>Noche a bordo del avión cruzando husos horarios hacia el este[span_17](start_span)[span_17](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 10 NOV -->
+      <div class="day-card open searchable-card" data-day="10" data-search="10 nov domingo llegada narita nex shinkansen osaka dotonbori miyako city hozenji glico">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">10 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Llegada a Narita → Shinkansen a Osaka y Dotonbori</div>
+              <div class="day-meta"><span class="region-chip chip-osaka">Osaka</span><span class="transport-tag"><i class="fa-solid fa-train"></i> Llegada NRT 10:15h</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--torii);"><i class="fa-solid fa-hotel"></i> Miyako City Osaka Hommachi</div>
+            <p style="font-size:0.82rem; color:var(--muted); margin-top:2px;">1 Chome-8-7 Kitakyuhojimachi, Chuo Ward, Osaka 541-0057[span_18](start_span)[span_18](end_span).</p>
+            <a href="https://maps.google.com/?q=Miyako+City+Osaka+Hommachi" target="_blank" class="action-btn"><i class="fa-solid fa-map-location-dot"></i> Abrir Maps</a>
+          </div>
+          <ul class="clean-steps">
+            <li><strong>10:15h:</strong> Aterrizaje en Narita (NRT)[span_19](start_span)[span_19](end_span). Control de aduanas con QR de Visit Japan Web y recogida de maletas.</li>
+            <li>Canjear o activar el JR Pass en la oficina de JR de Narita[span_20](start_span)[span_20](end_span). Subir al <strong>Narita Express (N'EX)</strong> hasta la estación de Tokio o Shinagawa (~1 hora)[span_21](start_span)[span_21](end_span).</li>
+            <li>Transbordo al Shinkansen Tokaido (tren <strong>Hikari</strong> con JR Pass; no Nozomi) hasta Shin-Osaka (~2h 40min)[span_22](start_span)[span_22](end_span). Llegada prevista a Osaka hacia las 16:00h[span_23](start_span)[span_23](end_span).</li>
+            <li>Metro hasta Hommachi, check-in en el hotel Miyako City[span_24](start_span)[span_24](end_span).</li>
+            <li><strong>Tarde-Noche en Dotonbori:</strong> Paseo por el canal Tonbori[span_25](start_span)[span_25](end_span), foto con el letrero icónico del <em>Glico Running Man</em>[span_26](start_span)[span_26](end_span), callejón de farolillos tradicionales <strong>Hozenji Yokocho</strong> con el templo Hozenji y su estatua cubierta de musgo[span_27](start_span)[span_27](end_span).</li>
+            <li>Cena probando el auténtico <em>Takoyaki</em> (Acchichi honpo o puesto callejero) y <em>Okonomiyaki</em> en Ajinoya[span_28](start_span)[span_28](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 11 NOV -->
+      <div class="day-card searchable-card" data-day="11" data-search="11 nov lunes castillo osaka kuromon namba yasaka shitennoji shinsaibashi america mura nipponbashi">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">11 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Castillo de Osaka, Kuromon y Barrios del Sur</div>
+              <div class="day-meta"><span class="region-chip chip-osaka">Osaka</span><span class="transport-tag"><i class="fa-solid fa-person-walking"></i> Día urbano</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>Castillo de Osaka:</strong> 40 min andando o 25 min en metro[span_29](start_span)[span_29](end_span). Parque y jardín Nishinomaru con vistas a la fortaleza (09:00 a 17:00h, 600¥; descuento con JR Pass)[span_30](start_span)[span_30](end_span).</li>
+            <li><strong>Templo Shitenno-ji:</strong> Uno de los templos budistas más antiguos de Japón[span_31](start_span)[span_31](end_span).</li>
+            <li><strong>Mercado Kuromon Ichiba:</strong> Mercado gastronómico tradicional (lunes a sábados de 08:00 a 18:00h)[span_32](start_span)[span_32](end_span). Puestos de marisco al instante, vieiras a la plancha, brochetas de wagyu y sushi fresco[span_33](start_span)[span_33](end_span).</li>
+            <li><strong>Santuario Namba Yasaka:</strong> El impresionante santuario con el gigantesco escenario en forma de cabeza de león que devora los malos espíritus[span_34](start_span)[span_34](end_span).</li>
+            <li><strong>Nipponbashi (Den Den Town):</strong> La meca del manga, anime, figuras de colección y electrónica en Osaka[span_35](start_span)[span_35](end_span).</li>
+            <li><strong>Shinsaibashi-Suji & America-Mura:</strong> Galería comercial cubierta[span_36](start_span)[span_36](end_span), tarta de queso temblorosa en <em>Rikuro Ojisan</em>[span_37](start_span)[span_37](end_span) y ambiente juvenil urbano con cafés y tiendas vintage en America-Mura[span_38](start_span)[span_38](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 12 NOV -->
+      <div class="day-card searchable-card" data-day="12" data-search="12 nov martes nara todaiji gran buda ciervos sika kasuga taisha umeda sky building takimi koji nakatanidou">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">12 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Excursión a Nara y Distrito Umeda</div>
+              <div class="day-meta"><span class="region-chip chip-nara">Nara / Osaka</span><span class="transport-tag"><i class="fa-solid fa-train"></i> Tren 45-50 min</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li>Tren desde Osaka hacia Nara (~45-50 min; JR Yamatoji Line o Kintetsu)[span_39](start_span)[span_39](end_span).</li>
+            <li><strong>Parque de Nara:</strong> Encuentro con los ciervos sagrados Sika en libertad[span_40](start_span)[span_40](end_span) (hacen reverencias para pedir galletas <em>shika-senbei</em>)[span_41](start_span)[span_41](end_span).</li>
+            <li><strong>Templo Todai-ji:</strong> El Daibutsuden (edificio de madera más grande del mundo) que alberga el monumental <strong>Gran Buda de Bronce</strong> de 15 metros (08:00 a 16:30h, 600¥) y la puerta Nandaimon[span_42](start_span)[span_42](end_span).</li>
+            <li>Jardines Isuien (casas de té y estanques, 900¥)[span_43](start_span)[span_43](end_span) y Santuario <strong>Kasuga Taisha</strong> con sus más de 3.000 farolillos de piedra y bronce entre cedros centenarios[span_44](start_span)[span_44](end_span).</li>
+            <li><strong>Galería Higashimuki y Naramachi:</strong> Ver el espectáculo de golpeo de mochi en <em>Nakatanidou Mochi</em> (mochi de matcha fresco relleno de judía roja)[span_45](start_span)[span_45](end_span) y pasear por las antiguas casas mercantes de Naramachi[span_46](start_span)[span_46](end_span).</li>
+            <li><strong>Regreso a Osaka (Umeda):</strong> Subir al mirador futurista <strong>Umeda Sky Building</strong> (10:00 a 22:30h, 1500¥) para contemplar el anochecer de Osaka[span_47](start_span)[span_47](end_span).</li>
+            <li>Paseo por el callejón gastronómico retro <strong>Takimi Koji</strong> en el sótano del edificio[span_48](start_span)[span_48](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 13 NOV -->
+      <div class="day-card searchable-card" data-day="13" data-search="13 nov miercoles kioto fushimi inari kiyomizu dera sannenzaka ninenzaka yasaka chion in maruyama gion itoya">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">13 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Llegada a Kioto: Fushimi Inari y Este de Higashiyama</div>
+              <div class="day-meta"><span class="region-chip chip-kyoto">Kioto</span><span class="transport-tag"><i class="fa-solid fa-train"></i> Tren ~1h (600¥)</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--matcha);"><i class="fa-solid fa-hotel"></i> Kyoto Itoya Hotel Mon</div>
+            <p style="font-size:0.82rem; color:var(--muted); margin-top:2px;">179 Nakanonocho, Shimogyo Ward, Kyoto 600-8435 (cerca de Karasuma Station)[span_49](start_span)[span_49](end_span).</p>
+            <a href="https://maps.google.com/?q=Kyoto+Itoya+Hotel+Mon" target="_blank" class="action-btn"><i class="fa-solid fa-map-location-dot"></i> Abrir Maps</a>
+          </div>
+          <ul class="clean-steps">
+            <li>Traslado matinal en tren hacia la estación de Karasuma en Kioto[span_50](start_span)[span_50](end_span). Dejar maletas en Kyoto Itoya Hotel Mon[span_51](start_span)[span_51](end_span).</li>
+            <li><strong>Santuario Fushimi Inari-Taisha:</strong> Los miles de toriis bermellones que ascienden por la montaña sagrada de Inari[span_52](start_span)[span_52](end_span).</li>
+            <li><strong>Templo Kiyomizu-dera:</strong> Monumental terraza de madera construida sin un solo clavo sobre la ladera boscosa, con vistas panorámicas de Kioto y arces en pleno momiji (06:00 a 18:00h, 400¥)[span_53](start_span)[span_53](end_span).</li>
+            <li>Descenso por las históricas cuestas empedradas de <strong>Ninenzaka y Sannenzaka</strong>[span_54](start_span)[span_54](end_span): casas de madera tradicionales, vista de la Pagoda Yasaka[span_55](start_span)[span_55](end_span), el Starbucks con tatamis y la tienda Donguri de Estudio Ghibli[span_56](start_span)[span_56](end_span).</li>
+            <li>Templo <strong>Kodai-ji</strong> con su pequeño bosque de bambú[span_57](start_span)[span_57](end_span) y Templo <strong>Chion-in</strong> (cuyas colosales escaleras aparecen en «El Último Samurái»)[span_58](start_span)[span_58](end_span).</li>
+            <li>Santuario <strong>Yasaka</strong> iluminado de noche con cientos de farolillos[span_59](start_span)[span_59](end_span) y Parque Maruyama[span_60](start_span)[span_60](end_span).</li>
+            <li>Cena: probar el afamado ramen y pollo frito en <em>Tenkaippin</em> saliendo del santuario[span_61](start_span)[span_61](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 14 NOV -->
+      <div class="day-card searchable-card" data-day="14" data-search="14 nov jueves kinkaku ji pabellon dorado ryoan ji arashiyama bambu tenryu ji kimono forest mono">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">14 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Sendero Kinukake no Michi y Arashiyama</div>
+              <div class="day-meta"><span class="region-chip chip-kyoto">Kioto</span><span class="transport-tag"><i class="fa-solid fa-ticket"></i> Free Tour 14:30h</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>Sendero Kinukake no Michi:</strong>
+              <br>• <strong>Kinkaku-ji (Pabellón Dorado):</strong> Forrado en pan de oro reluciendo sobre el estanque espejo[span_62](start_span)[span_62](end_span).
+              <br>• <strong>Ryoan-ji:</strong> El jardín seco zen de 15 piedras más célebre del mundo[span_63](start_span)[span_63](end_span).
+              <br>• <strong>Ninna-ji:</strong> Gran complejo imperial budista[span_64](start_span)[span_64](end_span).
+            </li>
+            <li>Tranvía histórico Randen hasta Arashiyama; atravesar el <strong>Kimono Forest</strong> en la estación[span_65](start_span)[span_65](end_span).</li>
+            <li><strong>Bosque de Bambú de Arashiyama:</strong> Cañas de bambú gigantes susurrando con el viento[span_66](start_span)[span_66](end_span).</li>
+            <li><strong>Templo Tenryu-ji:</strong> Uno de los 5 grandes templos zen, con jardín del siglo XIV espléndido en momiji[span_67](start_span)[span_67](end_span).</li>
+            <li>Distrito histórico de conservación de <strong>Saga-Toriimoto</strong> (casas de campo con techos de paja)[span_68](start_span)[span_68](end_span) y fideos udon en <em>Tsure-zure</em>[span_69](start_span)[span_69](end_span).</li>
+            <li>Puente Togetsukyo («Puente que cruza la Luna») sobre el río Katsura[span_70](start_span)[span_70](end_span) y subida al Monkey Park Iwatayama (550¥)[span_71](start_span)[span_71](end_span).</li>
+            <li><strong>14:30h:</strong> Free tour programado[span_72](start_span)[span_72](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 15 NOV -->
+      <div class="day-card searchable-card" data-day="15" data-search="15 nov viernes ginkakuji paseo filosofia eikando nanzenji nishiki pontocho gion geishas hanamikoji">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">15 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Paseo de la Filosofía, Mercado Nishiki y Gion</div>
+              <div class="day-meta"><span class="region-chip chip-kyoto">Kioto</span><span class="transport-tag"><i class="fa-solid fa-person-walking"></i> Senderos Zen</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>Ginkaku-ji (Pabellón de Plata):</strong> Con su jardín de arena blanca esculpida y vistas sobre Kioto (500¥)[span_73](start_span)[span_73](end_span).</li>
+            <li><strong>Paseo de la Filosofía (Tetsugaku-no-Michi):</strong> Sendero empedrado de 2 km a lo largo del canal Shishigatani[span_74](start_span)[span_74](end_span).</li>
+            <li>Templos de la ruta: Honen-in (puerta de musgo, gratis)[span_75](start_span)[span_75](end_span), Eikan-do (600¥, máxima referencia del momiji otoñal en Kioto)[span_76](start_span)[span_76](end_span) y el acueducto de ladrillo rojo de Nanzen-ji[span_77](start_span)[span_77](end_span). Parada en el templo de los conejos <em>Okazaki-Jinja</em>[span_78](start_span)[span_78](end_span).</li>
+            <li>Metro hasta el centro: Almuerzo en el bullicioso <strong>Mercado Nishiki</strong> («la cocina de Kioto»)[span_79](start_span)[span_79](end_span).</li>
+            <li>Tarde en los distritos de Geishas (Hanamachi): callejón <strong>Pontocho</strong> junto al río Kamo[span_80](start_span)[span_80](end_span), barrio tradicional de <strong>Miyagawacho</strong>[span_81](start_span)[span_81](end_span) y paseo por la calle <strong>Hanamikoji</strong> en Gion hasta la famosa casa de té <em>Ichiriki</em>[span_82](start_span)[span_82](end_span).</li>
+            <li>Pausa dulce en <em>Panel Cafe</em> (soufflé pancakes con vistas al riachuelo Shirakawa)[span_83](start_span)[span_83](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 16 NOV -->
+      <div class="day-card searchable-card" data-day="16" data-search="16 nov sabado takayama hida express sanmachi suji jinya kusakabe yoshijima maruaki wagyu">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">16 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Kioto → Alpes Japoneses: Takayama</div>
+              <div class="day-meta"><span class="region-chip chip-takayama">Takayama</span><span class="transport-tag"><i class="fa-solid fa-train"></i> Shinkansen + Hida Exp.</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--gold);"><i class="fa-solid fa-house"></i> Alojamiento en Takayama</div>
+            <p style="font-size:0.82rem; color:var(--muted); margin-top:2px;">80-2 Kamininomachi, Takayama, Gifu 506-0845[span_84](start_span)[span_84](end_span).</p>
+            <a href="https://maps.google.com/?q=80-2+Kamininomachi+Takayama" target="_blank" class="action-btn"><i class="fa-solid fa-map-location-dot"></i> Abrir Maps</a>
+          </div>
+          <ul class="clean-steps">
+            <li>Shinkansen desde Kioto a Nagoya + transbordo al pintoresco tren panorámico <strong>Hida Limited Express</strong> serpenteando por los valles alpinos hasta Takayama[span_85](start_span)[span_85](end_span).</li>
+            <li><strong>Casco Antiguo (Sanmachi Suji):</strong> Calles de madera de la era Edo (calle Sannomachi) con destilerías de sake centenarias marcadas con bolas de cedro (sugidama)[span_86](start_span)[span_86](end_span).</li>
+            <li>Casas históricas: Casa Kusakabe (500¥) y Casa Yoshijima (antigua destilería, 500¥)[span_87](start_span)[span_87](end_span).</li>
+            <li><strong>Takayama Jinya:</strong> Antigua sede de gobierno del shogunato Tokugawa (430¥, 08:45 a 17:00h)[span_88](start_span)[span_88](end_span).</li>
+            <li>Paseo por el sendero Higashiyama Yūho entre templos y bosques de la colina[span_89](start_span)[span_89](end_span).</li>
+            <li>Aldea museo al aire libre <strong>Hida no Sato</strong> (30 granjas tradicionales gassho-zukuri, 700¥)[span_90](start_span)[span_90](end_span).</li>
+            <li>Cena legendaria: Probar la prestigiosa carne <strong>Hida-gyu (Wagyu de Hida)</strong> cocinada a la brasa en <em>Maruaki</em>[span_91](start_span)[span_91](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 17 NOV -->
+      <div class="day-card searchable-card" data-day="17" data-search="17 nov domingo shirakawa go aldea gassho zukuri wada ke shiroyama bus tokio akihabara resol">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">17 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Shirakawa-go y Llegada a Tokio</div>
+              <div class="day-meta"><span class="region-chip chip-takayama">Shirakawa / Tokio</span><span class="transport-tag"><i class="fa-solid fa-bus"></i> Nohi Bus 07:20h</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <div class="hotel-subcard">
+            <div style="font-weight:700; color:var(--indigo);"><i class="fa-solid fa-hotel"></i> Hotel Resol Akihabara (Tokio)</div>
+            <p style="font-size:0.82rem; color:var(--muted); margin-top:2px;">〒101-0041 Tokyo, Chiyoda City, Kanda Sudacho, 2 Chome-25-12[span_92](start_span)[span_92](end_span).</p>
+            <a href="https://maps.google.com/?q=Hotel+Resol+Akihabara" target="_blank" class="action-btn"><i class="fa-solid fa-map-location-dot"></i> Abrir Maps</a>
+          </div>
+          <ul class="clean-steps">
+            <li><strong>07:20h:</strong> Autobús Takayama Nohi Bus Center → Aldea de Shirakawa-go (llegada ~08:10h; llevar algo de comida para picar)[span_93](start_span)[span_93](end_span).</li>
+            <li><strong>Mirador de Shiroyama:</strong> La panorámica de cuento sobre el valle y las casas con techos de paja inclinados <em>Gassho-zukuri</em>[span_94](start_span)[span_94](end_span).</li>
+            <li>Visita a la <strong>Casa Wada-ke</strong> (la mayor granja comunal, 300¥)[span_95](start_span)[span_95](end_span), Casa Kanda-ke (300¥)[span_96](start_span)[span_96](end_span) y el Templo Myozenji con techo de paja[span_97](start_span)[span_97](end_span). Cruce del puente colgante Deai[span_98](start_span)[span_98](end_span).</li>
+            <li><strong>12:35h:</strong> Bus de regreso de Shirakawa-go Ogimachi a Takayama[span_99](start_span)[span_99](end_span).</li>
+            <li>Tren Hida Limited Express hacia Nagoya + Shinkansen Tokaido a Tokio[span_100](start_span)[span_100](end_span).</li>
+            <li>Check-in en el <strong>Hotel Resol Akihabara</strong>[span_101](start_span)[span_101](end_span). Primera toma de contacto con las luces y neones de Tokio.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 18 NOV -->
+      <div class="day-card searchable-card" data-day="18" data-search="18 nov lunes tokio roppongi senso ji asakusa shibuya scramble hachiko shibuya sky harajuku meiji shinjuku omoide">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">18 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Tokio Esencial: Roppongi, Asakusa, Shibuya y Shinjuku</div>
+              <div class="day-meta"><span class="region-chip chip-tokyo">Tokio</span><span class="transport-tag"><i class="fa-solid fa-train-subway"></i> Metro + JR Yamanote</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>Roppongi:</strong> Mirador <em>Tokyo City View</em> en la Torre Mori para una panorámica general de la metrópoli[span_102](start_span)[span_102](end_span).</li>
+            <li><strong>Asakusa:</strong> El corazón del Tokio tradicional (shitamachi). Puerta Kaminarimon con el farol gigante, calle Nakamise-dori[span_103](start_span)[span_103](end_span) y el templo milenario <strong>Senso-ji</strong>[span_104](start_span)[span_104](end_span). Paseo cercano por la calle de utensilios y cuchillos <em>Kappabashi</em>[span_105](start_span)[span_105](end_span).</li>
+            <li><strong>Shibuya:</strong> El cruce peatonal más abarrotado del planeta (Shibuya Scramble)[span_106](start_span)[span_106](end_span), estatua del fiel perro <strong>Hachiko</strong>[span_107](start_span)[span_107](end_span), mirador <strong>Shibuya Sky</strong> en la azotea del Scramble Square[span_108](start_span)[span_108](end_span) y terraza urbana de Miyashita Park[span_109](start_span)[span_109](end_span).</li>
+            <li><strong>Harajuku:</strong> Serenidad en los bosques del <strong>Santuario Meiji</strong> y Parque Yoyogi[span_110](start_span)[span_110](end_span), contrastando con la estrafalaria calle <em>Takeshita</em> y la elegante avenida Omotesando[span_111](start_span)[span_111](end_span). Gyozas en <em>Gyoza Lou</em>[span_112](start_span)[span_112](end_span).</li>
+            <li><strong>Shinjuku nocturno:</strong> Mirador gratuito del Gobierno Metropolitano de Tokio (subida hasta 22:30h)[span_113](start_span)[span_113](end_span), callejón de tabernas yakitori <strong>Omoide Yokocho</strong> («Memory Lane»)[span_114](start_span)[span_114](end_span), neones de Kabukicho[span_115](start_span)[span_115](end_span) y copas en los diminutos bares de <strong>Golden Gai</strong>[span_116](start_span)[span_116](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 19 NOV -->
+      <div class="day-card searchable-card" data-day="19" data-search="19 nov martes nikko toshogu futarasan shinkyo jizo kanmangafuchi taiyuin rinnoji tokugawa">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">19 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Excursión a Nikko: Mausoleos y Bosques Sagrados</div>
+              <div class="day-meta"><span class="region-chip chip-nikko">Nikko</span><span class="transport-tag"><i class="fa-solid fa-train"></i> Shinkansen + Nikko Line (~2h)</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <div class="tip-card">
+            <div class="tip-title"><i class="fa-solid fa-utensils"></i> Consejo para la excursión</div>
+            Comprar comida o bento antes de subir a la zona de templos superiores en Nikko, ya que arriba no hay tiendas ni puestos[span_117](start_span)[span_117](end_span).
+          </div>
+          <ul class="clean-steps">
+            <li>Shinkansen Tohoku desde Tokio/Ueno a Utsunomiya (50 min) + transbordo a JR Nikko Line hasta Nikko (50 min)[span_118](start_span)[span_118](end_span). Autobús local (Day pass 500¥)[span_119](start_span)[span_119](end_span).</li>
+            <li><strong>Puente Sagrado Shinkyo:</strong> El emblemático puente curvo lacado en rojo que cruza el río Daiya[span_120](start_span)[span_120](end_span).</li>
+            <li><strong>Santuario Toshogu:</strong> Espectacular complejo fúnebre del shogún Tokugawa Ieyasu con la famosa talla de los Tres Monos Sabios y la puerta Yomeimon (1300¥)[span_121](start_span)[span_121](end_span).</li>
+            <li>Santuario <strong>Futarasan</strong> (con su árbol de la fortuna de tronco hueco, 200¥)[span_122](start_span)[span_122](end_span) y Templo <strong>Taiyuin-byo</strong> (550¥)[span_123](start_span)[span_123](end_span).</li>
+            <li>Templo Rinnoji (400¥) y Villa Imperial Tamozawa (510¥)[span_124](start_span)[span_124](end_span).</li>
+            <li><strong>Abismo de Kanmangafuchi:</strong> Desfiladero formado por lava volcánica custodiado por una hilera infinita de estatuas de piedra de Jizo con gorros de lana roja[span_125](start_span)[span_125](end_span).</li>
+            <li>Almuerzo: <em>Hippari Dako</em> o <em>Asaya Resthouse</em>[span_126](start_span)[span_126](end_span). Regreso a Tokio al caer la tarde.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 20 NOV -->
+      <div class="day-card searchable-card" data-day="20" data-search="20 nov miercoles kamakura gran buda kotoku in hase dera yokohama minato mirai chinatown">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">20 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Excursión a Kamakura y Bahía de Yokohama</div>
+              <div class="day-meta"><span class="region-chip chip-tokyo">Kamakura / Yokohama</span><span class="transport-tag"><i class="fa-solid fa-train"></i> JR Yokosuka Line (~55 min)</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li>Tren JR directo desde Tokio hasta Kamakura[span_127](start_span)[span_127](end_span).</li>
+            <li><strong>Gran Buda de Kamakura (Kotoku-in):</strong> Monumental estatua de bronce al aire libre de 13 metros de altura.</li>
+            <li><strong>Templo Hase-dera:</strong> Templo en la ladera con terrazas ajardinadas, vistas al océano Pacífico y la efigie dorada de Kannon de once cabezas.</li>
+            <li>Calle comercial tradicional Komachi-dori y Santuario Tsurugaoka Hachimangu.</li>
+            <li><strong>Tarde en Yokohama:</strong> Distrito futurista <em>Minato Mirai 21</em> frente a la bahía, Landmark Tower y paseo gastronómico por el mayor <em>Chinatown (Chukagai)</em> de Japón[span_128](start_span)[span_128](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 21 NOV -->
+      <div class="day-card searchable-card" data-day="21" data-search="21 nov jueves monte fuji kawaguchiko chureito pagoda lago fujisan富士山">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">21 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Lagos del Monte Fuji: Kawaguchiko y Pagoda Chureito</div>
+              <div class="day-meta"><span class="region-chip chip-fuji">Monte Fuji</span><span class="transport-tag"><i class="fa-solid fa-bus"></i> Excursión de día</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li>Tren Fuji Excursion desde Shinjuku o autobús exprés hacia la región de los Cinco Lagos (Kawaguchiko)[span_129](start_span)[span_129](end_span).</li>
+            <li><strong>Pagoda Chureito (Santuario Arakura Sengen):</strong> La postal por excelencia de Japón: subir los 398 escalones para contemplar la pagoda de cinco pisos con la silueta nevada del Monte Fuji al fondo[span_130](start_span)[span_130](end_span).</li>
+            <li>Paseo por la orilla norte del <strong>Lago Kawaguchiko</strong>, admirando los arces rojos enmarcando el volcán sagrado[span_131](start_span)[span_131](end_span).</li>
+            <li>Teleférico Mt. Fuji Panoramic Ropeway con vistas de 360 grados sobre el lago.</li>
+            <li>Degustar los contundentes fideos locales <em>Hoto Udon</em> servidos en caldero de hierro caliente.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 22 NOV -->
+      <div class="day-card searchable-card" data-day="22" data-search="22 nov viernes ginza tsukiji hamarikyu akihabara ameyoko ueno yamabe tonkatsu henrys burger">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">22 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Ginza, Mercado Tsukiji, Akihabara y Parque de Ueno</div>
+              <div class="day-meta"><span class="region-chip chip-tokyo">Tokio</span><span class="transport-tag"><i class="fa-solid fa-person-walking"></i> Ruta Urbana</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>Ginza:</strong> Avenidas de arquitectura vanguardista[span_132](start_span)[span_132](end_span). Desayuno de tortitas esponjosas en <em>A Happy Pancake</em>[span_133](start_span)[span_133](end_span).</li>
+            <li><strong>Mercado Exterior de Tsukiji:</strong> Degustación de sushi fresco matutino en <em>Daiwa Sushi</em>, wagyu a la brasa y visita al templo Tsukiji Honganji[span_134](start_span)[span_134](end_span).</li>
+            <li><strong>Jardines Hamarikyu:</strong> Remanso verde feudal con estanque mareal de agua salada rodeado por los rascacielos de Shiodome[span_135](start_span)[span_135](end_span).</li>
+            <li><strong>Akihabara:</strong> La meca otaku; galerías de figuras Mandarake, tiendas retro y el callejón de diseño artesano <em>2k540 Aki-Oka Artisan</em> bajo las vías del tren[span_136](start_span)[span_136](end_span). Almuerzo: hamburguesa de wagyu en <em>Henry's Burger</em>[span_137](start_span)[span_137](end_span).</li>
+            <li><strong>Ameyoko Market:</strong> Paseo a pie bajo el viaducto del tren por el mercado callejero más bullicioso de Tokio[span_138](start_span)[span_138](end_span).</li>
+            <li><strong>Parque de Ueno:</strong> Santuarios, museos nacionales y cena del auténtico tonkatsu en <em>Yamabe</em> (imprescindible pedir el Special pork loin cutlet)[span_139](start_span)[span_139](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 23 NOV -->
+      <div class="day-card searchable-card" data-day="23" data-search="23 nov sabado estacion tokio palacio imperial shimbashi shiodome ghibli odaiba gundam rainbow bridge">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">23 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Palacio Imperial, Shiodome y Bahía de Odaiba</div>
+              <div class="day-meta"><span class="region-chip chip-tokyo">Tokio</span><span class="transport-tag"><i class="fa-solid fa-train"></i> Monorraíl Yurikamome</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li><strong>Estación de Tokio:</strong> Majestuosa fachada de ladrillo rojo de 1914, Character Street y Tokyo Ramen Street[span_140](start_span)[span_140](end_span).</li>
+            <li><strong>Palacio Imperial:</strong> Paseo por la explanada Kokyo Gaien, el icónico puente doble <em>Nijubashi</em>, jardines Wadakura y foso Chidorigafuchi[span_141](start_span)[span_141](end_span).</li>
+            <li><strong>Shimbashi & Shiodome:</strong> Ver el gigantesco reloj mecánico autómata diseñado por Hayao Miyazaki (Studio Ghibli) en Nittele Tower[span_142](start_span)[span_142](end_span).</li>
+            <li><strong>Isla Artificial de Odaiba:</strong> Llegada cruzando el Rainbow Bridge en el tren automático sin conductor <em>Yurikamome</em> (situarse en el primer vagón para mejores vistas)[span_143](start_span)[span_143](end_span).</li>
+            <li>Estatua del robot gigante <strong>Unicorn Gundam</strong> a escala 1:1 en DiverCity (con espectáculo de transformación)[span_144](start_span)[span_144](end_span).</li>
+            <li>Atardecer desde el paseo marítimo de Odaiba: Vistas sublimes de la Estatua de la Libertad réplica, el Rainbow Bridge iluminado y la silueta de la Torre de Tokio[span_145](start_span)[span_145](end_span).</li>
+            <li>Cena de despedida: sukiyaki/shabu-shabu en <em>Nabezo</em>[span_146](start_span)[span_146](end_span).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 24 NOV -->
+      <div class="day-card searchable-card" data-day="24" data-search="24 nov domingo vuelo regreso narita madrid coruña nrt mad lcg ib0282 ib0463">
+        <div class="day-header" onclick="toggleCard(this)">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <span class="day-badge">24 NOV</span>
+            <div class="day-title-wrap">
+              <div class="day-title">Vuelo de Vuelta: Tokio → Madrid → A Coruña</div>
+              <div class="day-meta"><span class="region-chip chip-tokyo">Regreso</span><span class="transport-tag"><i class="fa-solid fa-plane-departure"></i> Salida NRT 11:55h</span></div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-down day-chevron"></i>
+        </div>
+        <div class="day-body">
+          <ul class="clean-steps">
+            <li>Traslado a primera hora de la mañana al Aeropuerto de Narita en Narita Express (N'EX)[span_147](start_span)[span_147](end_span).</li>
+            <li><strong>11:55h:</strong> Vuelo IB0282 Tokio Narita (NRT) → Madrid (MAD)[span_148](start_span)[span_148](end_span). Llegada a Madrid a las 19:45h[span_149](start_span)[span_149](end_span).</li>
+            <li><strong>22:15h:</strong> Vuelo IB0463 Madrid (MAD) → A Coruña (LCG)[span_150](start_span)[span_150](end_span). Aterrizaje final a las 23:35h[span_151](start_span)[span_151](end_span).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TRANSPORTE & JR PASS ==================== -->
+    <section id="tab-transporte" class="tab-view">
+      <h2 class="tab-title">Manual de Transporte & JR Pass</h2>
+      <p class="tab-sub">Reglas de tren bala, reserva de asientos y desplazamiento urbano.</p>
+
+      <div class="culture-card">
+        <div class="culture-title"><i class="fa-solid fa-train"></i> Regla de Oro de los Shinkansen (JR Pass)</div>
+        Con el JR Pass están <strong>incluidos sin recargo los trenes bala HIKARI y KODAMA</strong> de la línea Tokaido[span_152](start_span)[span_152](end_span). Los servicios <em>Nozomi y Mizuho</em> están excluidos salvo pago de suplemento especial[span_153](start_span)[span_153](end_span). Para la ruta Tokio-Kioto-Osaka, el <strong>Hikari es la mejor opción</strong> (solo 20 minutos más que el Nozomi)[span_154](start_span)[span_154](end_span).
+      </div>
+
+      <div class="spot-card">
+        <h4 style="font-size:0.95rem; font-weight:700;"><i class="fa-solid fa-ticket"></i> ¿Dónde canjear y reservar asientos?</h4>
+        <ul style="font-size:0.86rem; padding-left:18px; margin-top:6px; color:var(--muted);">
+          <li><strong>Canje del bono:</strong> Oficinas JR en el aeropuerto de Narita o en las grandes estaciones (Tokio, Shinjuku, Shin-Osaka, Kioto) presentando la orden de intercambio y pasaportes[span_155](start_span)[span_155](end_span).</li>
+          <li><strong>Máquinas de billetes verdes (Midori no Madoguchi):</strong> Permiten reservar asientos gratis escaneando el código QR de tu JR Pass[span_156](start_span)[span_156](end_span).</li>
+          <li><strong>Trenes con reserva obligatoria:</strong> Narita Express (N'EX), Shinkansen Hayabusa/Komachi (Tohoku) y Kagayaki (Hokuriku)[span_157](start_span)[span_157](end_span).</li>
+        </ul>
+      </div>
+
+      <div class="tl">
+        <div class="tl-item"><div class="tl-date">10 NOV · 11:30</div><div class="tl-body"><h5><i class="fa-solid fa-train"></i> Narita Express (N'EX)</h5><p>Narita Airport → Tokio/Shinagawa (~1h). Asientos 100% reservados[span_158](start_span)[span_158](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">10 NOV · 13:00</div><div class="tl-body"><h5><i class="fa-solid fa-bolt"></i> Shinkansen Hikari (Tokaido)</h5><p>Shinagawa/Tokio → Shin-Osaka (~2h 40min). Válido con JR Pass[span_159](start_span)[span_159](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">12 NOV</div><div class="tl-body"><h5><i class="fa-solid fa-train-subway"></i> Osaka ↔ Nara</h5><p>JR Yamatoji Rapid (~45 min) o línea Kintetsu[span_160](start_span)[span_160](end_span). Autobuses locales en Nara (Day Pass 500¥)[span_161](start_span)[span_161](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">13 NOV</div><div class="tl-body"><h5><i class="fa-solid fa-train"></i> Osaka → Kioto</h5><p>JR Special Rapid (~30 min) hasta Kyoto Station o Hankyu a Karasuma (~600¥)[span_162](start_span)[span_162](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">16 NOV</div><div class="tl-body"><h5><i class="fa-solid fa-mountain"></i> Shinkansen + Hida Limited Express</h5><p>Kioto → Nagoya (Shinkansen) + Nagoya → Takayama (tren Hida)[span_163](start_span)[span_163](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">17 NOV · 07:20</div><div class="tl-body"><h5><i class="fa-solid fa-bus"></i> Nohi Bus Takayama ↔ Shirakawa-go</h5><p>Salida 07:20h / Regreso 12:35h desde Nohi Bus Center (~50 min)[span_164](start_span)[span_164](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">17 NOV · TARDE</div><div class="tl-body"><h5><i class="fa-solid fa-bolt"></i> Shinkansen Nagoya → Tokio</h5><p>Llegada a la capital y traslado a Akihabara en línea Yamanote[span_165](start_span)[span_165](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">19 NOV</div><div class="tl-body"><h5><i class="fa-solid fa-train"></i> Shinkansen Tohoku + JR Nikko Line</h5><p>Tokio/Ueno → Utsunomiya (Shinkansen 50 min) + Nikko Line (50 min)[span_166](start_span)[span_166](end_span).</p></div></div>
+        <div class="tl-item"><div class="tl-date">24 NOV · 08:30</div><div class="tl-body"><h5><i class="fa-solid fa-plane-departure"></i> Narita Express hacia el aeropuerto</h5><p>Traslado directo a la terminal de Narita para el vuelo de regreso[span_167](start_span)[span_167](end_span).</p></div></div>
+      </div>
+    </section>
+
+    <!-- ==================== COMIDA & PASAPORTE GOURMET ==================== -->
+    <section id="tab-comida" class="tab-view">
+      <h2 class="tab-title">Gastronomía & Pasaporte Gourmet</h2>
+      <p class="tab-sub">Marca los platos tradicionales conforme los pruebes a lo largo de tu viaje[span_168](start_span)[span_168](end_span).</p>
+
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-utensils"></i> Pasaporte Gourmet de Japón</h3>
+        <div class="check-line"><input type="checkbox" id="food-1" onchange="handleFoodCheck(this)"><label for="food-1"><strong>Takoyaki en Dotonbori:</strong> Bolas de pulpo con salsa dulce, mayonesa japonesa y copos de bonito (Acchichi Honpo o Tako Tako King)[span_169](start_span)[span_169](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-2" onchange="handleFoodCheck(this)"><label for="food-2"><strong>Okonomiyaki estilo Kansai:</strong> La pizza/tortilla japonesa cocinada a la plancha teppan (Ajinoya Honten, Osaka)[span_170](start_span)[span_170](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-3" onchange="handleFoodCheck(this)"><label for="food-3"><strong>Tarta de queso temblorosa:</strong> Suave, esponjosa y recién horneada con pasas en el fondo (Rikuro Ojisan Namba)[span_171](start_span)[span_171](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-4" onchange="handleFoodCheck(this)"><label for="food-4"><strong>Matcha Mochi fresco:</strong> Mochi machacado en vivo en mortero de madera (Nakatanidou en Nara)[span_172](start_span)[span_172](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-5" onchange="handleFoodCheck(this)"><label for="food-5"><strong>Carne Wagyu de Hida (Hida-gyu):</strong> Ternera marmoleada con denominación de origen a la parrilla (Maruaki en Takayama)[span_173](start_span)[span_173](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-6" onchange="handleFoodCheck(this)"><label for="food-6"><strong>Tonkatsu crujiente de cerdo:</strong> Chuleta empanada panko ultracrujiente (Yamabe en Ueno o Katsukura en Kioto)[span_174](start_span)[span_174](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-7" onchange="handleFoodCheck(this)"><label for="food-7"><strong>Gyozas de Harajuku:</strong> Empanadillas al vapor o fritas con cebollino (Gyoza Lou / Harajuku Gyozaro)[span_175](start_span)[span_175](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-8" onchange="handleFoodCheck(this)"><label for="food-8"><strong>Sukiyaki en cazuela:</strong> Carne de buey en finas láminas cocinada en caldo dulce y mojada en huevo crudo batido (Nabezo Shinjuku)[span_176](start_span)[span_176](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-9" onchange="handleFoodCheck(this)"><label for="food-9"><strong>Ramen Tonkotsu en cabina individual:</strong> Caldo espeso de cerdo con fideos al dente (Ichiran Dotonbori o Shibuya)[span_177](start_span)[span_177](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-10" onchange="handleFoodCheck(this)"><label for="food-10"><strong>Sushi matutino en lonja:</strong> Nigiris recién preparados con pescado de primera calidad (Daiwa Sushi en Tsukiji/Toyosu)[span_178](start_span)[span_178](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-11" onchange="handleFoodCheck(this)"><label for="food-11"><strong>Kushikatsu:</strong> Brochetas empanadas fritas en aceite de sésamo; ¡prohibido mojar dos veces en la salsa común! (Daruma Hozenji)[span_179](start_span)[span_179](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="food-12" onchange="handleFoodCheck(this)"><label for="food-12"><strong>Kaitenzushi accesible:</strong> Platos de sushi en cinta giratoria seleccionados por pantalla táctil (Sushiro)[span_180](start_span)[span_180](end_span)</label></div>
+      </div>
+
+      <div class="spot-card searchable-card" data-search="osaka dotonbori acchichi ajinoya daruma rikuro tako king gyozaoh kinryu">
+        <span class="city-chip chip-osaka">Osaka</span>
+        <h4 style="font-size:0.95rem; font-weight:700;">Osaka: «Kuidaore» (Comer hasta caer rendido)</h4>
+        <ul style="font-size:0.86rem; padding-left:18px; margin-top:6px; color:var(--muted);">
+          <li><strong>Ajinoya Honten:</strong> Considerado el mejor Okonomiyaki de la ciudad[span_181](start_span)[span_181](end_span).</li>
+          <li><strong>Kushikatsu Daruma (Hozenji):</strong> Brochetas crujientes en el callejón de farolillos[span_182](start_span)[span_182](end_span).</li>
+          <li><strong>Tako Tako King & Acchichi Honpo:</strong> Los takoyakis de referencia en Dotonbori y Shinsaibashi[span_183](start_span)[span_183](end_span).</li>
+          <li><strong>Rikuro Ojisan Namba:</strong> Su tarta de queso japonesa recién salida del horno con timbre[span_184](start_span)[span_184](end_span).</li>
+        </ul>
+      </div>
+
+      <div class="spot-card searchable-card" data-search="kioto tenkaippin tsure zure hinode udon chao chao panel cafe katsukura menya inoichi">
+        <span class="city-chip chip-kyoto">Kioto</span>
+        <h4 style="font-size:0.95rem; font-weight:700;">Kioto: Delicias de Tradición & Fideos</h4>
+        <ul style="font-size:0.86rem; padding-left:18px; margin-top:6px; color:var(--muted);">
+          <li><strong>Tenkaippin (junto al Santuario Yasaka):</strong> Caldo kotteri denso e inolvidable con pollo frito karaage[span_185](start_span)[span_185](end_span).</li>
+          <li><strong>Tsure-zure (Arashiyama, Saga-Toriimoto):</strong> Auténtico tazón de udon en una casa tradicional[span_186](start_span)[span_186](end_span).</li>
+          <li><strong>Gyoza ChaoChao:</strong> Especialistas en tiras de gyozas con masa crujiente unida[span_187](start_span)[span_187](end_span).</li>
+          <li><strong>Panel Cafe:</strong> Famoso por sus tortitas soufflé esponjosas frente al canal Shirakawa de Gion[span_188](start_span)[span_188](end_span).</li>
+        </ul>
+      </div>
+
+      <div class="spot-card searchable-card" data-search="tokyo yamabe tonkatsu gyoza lou henrys burger nabezo daiwa sushi ichiran a happy pancake">
+        <span class="city-chip chip-tokyo">Tokio</span>
+        <h4 style="font-size:0.95rem; font-weight:700;">Tokio: Selección de Especialistas</h4>
+        <ul style="font-size:0.86rem; padding-left:18px; margin-top:6px; color:var(--muted);">
+          <li><strong>Tonkatsu Yamabe (Ueno):</strong> Muy auténtico, concurrido por japoneses. Pedir el <em>Special pork loin cutlet</em>[span_189](start_span)[span_189](end_span).</li>
+          <li><strong>Gyoza Lou (Harajuku):</strong> Barato, rápido y centrado únicamente en gyozas al vapor o fritas[span_190](start_span)[span_190](end_span).</li>
+          <li><strong>Henry’s Burger (Akihabara):</strong> Jugosa hamburguesa elaborada con carne de buey Wagyu japonés A5[span_191](start_span)[span_191](end_span).</li>
+          <li><strong>Nabezo (Shinjuku, planta 7):</strong> Excepcional buffet de carne en olla Sukiyaki y Shabu-Shabu[span_192](start_span)[span_192](end_span).</li>
+          <li><strong>A Happy Pancake (Ginza):</strong> Tortitas soufflé de altura aireada cubiertas de miel y fruta[span_193](start_span)[span_193](end_span).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ==================== ETIQUETA & PROTOCOLO ==================== -->
+    <section id="tab-etiqueta" class="tab-view">
+      <h2 class="tab-title">Normas de Etiqueta & Onsen</h2>
+      <p class="tab-sub">Consejos culturales imprescindibles para viajar con respeto por Japón.</p>
+
+      <div class="curiosity-card">
+        <h5><i class="fa-solid fa-ban" style="color:var(--torii);"></i> Propinas: ¡Nunca las dejes!</h5>
+        <p>En Japón no existe la cultura de la propina. Si dejas dinero de más sobre la mesa, el camarero saldrá corriendo tras de ti a la calle pensando que has olvidado tu cambio. Un servicio impecable se considera la norma básica y el orgullo del negocio.</p>
+      </div>
+
+      <div class="curiosity-card">
+        <h5><i class="fa-solid fa-hot-tub-person" style="color:var(--matcha);"></i> Protocolo del Onsen y Baños Termales</h5>
+        <p>1. Desnudarse por completo (nada de bañador). 2. Ducharse minuciosamente sentado en el taburete antes de entrar al agua. 3. Nunca meter la toalla pequeña dentro del agua termal (se dobla sobre la cabeza). 4. Si tienes tatuajes visibles, cúbrelos con parches o consulta si aceptan <em>tattoo-friendly</em>.</p>
+      </div>
+
+      <div class="curiosity-card">
+        <h5><i class="fa-solid fa-stairs" style="color:var(--indigo);"></i> Escaleras Mecánicas: Tokio vs Osaka</h5>
+        <p>En Tokio y Kanto la gente se detiene en el lado <strong>izquierdo</strong> dejando el derecho libre para caminar[span_194](start_span)[span_194](end_span). Curiosamente, en Osaka y Kansai se hace al revés: la gente se para a la <strong>derecha</strong> y adelanta por la izquierda[span_195](start_span)[span_195](end_span).</p>
+      </div>
+
+      <div class="curiosity-card">
+        <h5><i class="fa-solid fa-utensils" style="color:var(--gold);"></i> Tabúes con los Palillos (Hashi)</h5>
+        <p>Nunca claves los palillos verticalmente en un cuenco de arroz (<em>Tsukitate-bashi</em>): esto solo se hace en los altares funerarios budistas. Tampoco te pases comida de palillo a palillo (<em>Hashi-watashi</em>), pues recuerda al rito funerario de recoger cenizas.</p>
+      </div>
+
+      <div class="curiosity-card">
+        <h5><i class="fa-solid fa-volume-xmark" style="color:var(--torii);"></i> Trenes y Metros Silenciosos</h5>
+        <p>En trenes y vagones de metro se exige poner el móvil en modo silencio («manner mode») y está terminantemente prohibido hablar por teléfono. Tampoco se suele comer ni beber en trenes urbanos de metro (en el Shinkansen sí está permitido el bento o <em>ekiben</em>).</p>
+      </div>
+    </section>
+
+    <!-- ==================== HERRAMIENTAS & COMUNICACIÓN ==================== -->
+    <section id="tab-herramientas" class="tab-view">
+      <h2 class="tab-title">Herramientas & Tarjetas de Pantalla</h2>
+      <p class="tab-sub">Conversor de Yenes a Euros y tarjetas gigantes para enseñar a taxistas o en restaurantes.</p>
+
+      <!-- Conversor de Moneda JPY ⇄ EUR -->
+      <div class="fx-widget">
+        <div class="fx-row">
+          <div class="fx-col">
+            <label for="jpyInput">¥ JPY</label>
+            <input type="number" id="jpyInput" placeholder="1500" oninput="calcJpyToEur()">
+          </div>
+          <i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--muted); font-size:0.8rem;"></i>
+          <div class="fx-col">
+            <label for="eurInput">€ EUR</label>
+            <input type="number" id="eurInput" placeholder="9.10" oninput="calcEurToJpy()">
+          </div>
+        </div>
+        <div class="fx-quick-chips">
+          <span class="fx-chip" onclick="setQuickJpy(500)">500¥ (~3€)</span>
+          <span class="fx-chip" onclick="setQuickJpy(1000)">1.000¥ (~6€)</span>
+          <span class="fx-chip" onclick="setQuickJpy(3000)">3.000¥ (~18€)</span>
+          <span class="fx-chip" onclick="setQuickJpy(5000)">5.000¥ (~30€)</span>
+          <span class="fx-chip" onclick="setQuickJpy(10000)">10.000¥ (~61€)</span>
+        </div>
+      </div>
+
+      <div class="section-eyebrow"><span class="lbl">Toca una tarjeta para enseñarla en pantalla gigante</span></div>
+      <div class="flashcard-grid">
+        <div class="flashcard" onclick="openGiantCard('La cuenta, por favor', 'お会計をお願いします', 'O-kaikei o-negai shimasu')">
+          <div class="fc-es">En restaurante</div>
+          <div class="fc-jp">お会計をお願いします</div>
+          <div class="fc-phonetic">o-kaikei o-negai shimasu</div>
+        </div>
+
+        <div class="flashcard" onclick="openGiantCard('¿Tienen menú en inglés?', '英語のメニューはありますか？', 'Eigo no menyuu wa arimasu ka?')">
+          <div class="fc-es">Pedir carta</div>
+          <div class="fc-jp">英語のメニューはありますか？</div>
+          <div class="fc-phonetic">eigo no menyuu wa arimasu ka?</div>
+        </div>
+
+        <div class="flashcard" onclick="openGiantCard('Sin bolsa de plástico, gracias (en el konbini)', '袋は結構です', 'Fukuro wa kekkou desu')">
+          <div class="fc-es">Konbini / Tienda</div>
+          <div class="fc-jp">袋は結構です</div>
+          <div class="fc-phonetic">fukuro wa kekkou desu</div>
+        </div>
+
+        <div class="flashcard" onclick="openGiantCard('¿Dónde está el baño?', 'お手洗いはどこですか？', 'O-tearai wa doko desu ka?')">
+          <div class="fc-es">Aseos</div>
+          <div class="fc-jp">お手洗いはどこですか？</div>
+          <div class="fc-phonetic">o-tearai wa doko desu ka?</div>
+        </div>
+
+        <div class="flashcard" onclick="openGiantCard('Por favor, lléveme a la estación de tren', '駅までお願いします', 'Eki made o-negai shimasu')">
+          <div class="fc-es">Taxi / Traslado</div>
+          <div class="fc-jp">駅までお願いします</div>
+          <div class="fc-phonetic">eki made o-negai shimasu</div>
+        </div>
+
+        <div class="flashcard" onclick="openGiantCard('¿Lleva carne de cerdo?', '豚肉は入っていますか？', 'Butaniku wa haitte imasu ka?')">
+          <div class="fc-es">Alergias / Dieta</div>
+          <div class="fc-jp">豚肉は入っていますか？</div>
+          <div class="fc-phonetic">butaniku wa haitte imasu ka?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== QUIZ INTERACTIVO ==================== -->
+    <section id="tab-quiz" class="tab-view">
+      <h2 class="tab-title">Quiz: ¿Cuánto sabes de Japón?</h2>
+      <p class="tab-sub">Pon a prueba tu conocimiento de cultura y transporte japonés.</p>
+
+      <div class="stat-card" style="margin-bottom:14px; text-align:left; padding:12px 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:800; font-size:0.9rem;">Puntuación del Quiz:</span>
+          <span class="stat-num" id="quizScoreText" style="font-size:1.2rem;">0 / 5</span>
+        </div>
+      </div>
+
+      <div class="quiz-card" id="qcard-1">
+        <div class="quiz-q">1. ¿Qué servicio de tren bala Shinkansen Tokaido NO está incluido en el JR Pass regular sin suplemento?[span_196](start_span)[span_196](end_span)</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="answerQuiz(1, 0, false)">El servicio Hikari[span_197](start_span)[span_197](end_span)</button>
+          <button class="quiz-btn" onclick="answerQuiz(1, 1, true)">El servicio Nozomi[span_198](start_span)[span_198](end_span)</button>
+          <button class="quiz-btn" onclick="answerQuiz(1, 2, false)">El servicio Kodama[span_199](start_span)[span_199](end_span)</button>
+        </div>
+        <div class="quiz-explanation" id="qexp-1">¡Exacto! El Nozomi y el Mizuho son los trenes más rápidos con menos paradas, y exigen un suplemento extra con el JR Pass[span_200](start_span)[span_200](end_span). El Hikari hace el mismo trayecto en solo 20 minutos más y está 100% incluido[span_201](start_span)[span_201](end_span).</div>
+      </div>
+
+      <div class="quiz-card" id="qcard-2">
+        <div class="quiz-q">2. ¿Por qué se consideran sagrados los ciervos Sika del Parque de Nara?[span_202](start_span)[span_202](end_span)</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="answerQuiz(2, 0, true)">Eran considerados mensajeros de los dioses sintoístas del Santuario Kasuga Taisha[span_203](start_span)[span_203](end_span)</button>
+          <button class="quiz-btn" onclick="answerQuiz(2, 1, false)">Fueron un regalo personal del emperador Meiji en el siglo XIX</button>
+          <button class="quiz-btn" onclick="answerQuiz(2, 2, false)">Eran criados para cuidar los jardines de musgo del templo Todai-ji</button>
+        </div>
+        <div class="quiz-explanation" id="qexp-2">¡Correcto! Según la mitología sintoísta, el dios Takemikazuchi llegó a Nara montando un ciervo blanco para proteger la ciudad; desde entonces se les considera mensajeros divinos[span_204](start_span)[span_204](end_span).</div>
+      </div>
+
+      <div class="quiz-card" id="qcard-3">
+        <div class="quiz-q">3. ¿Qué peculiaridad constructiva tiene la gran plataforma del Templo Kiyomizu-dera en Kioto?[span_205](start_span)[span_205](end_span)</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="answerQuiz(3, 0, false)">Fue tallada en una sola roca de granito de la montaña</button>
+          <button class="quiz-btn" onclick="answerQuiz(3, 1, true)">Fue construida con cientos de vigas de madera sin usar un solo clavo[span_206](start_span)[span_206](end_span)</button>
+          <button class="quiz-btn" onclick="answerQuiz(3, 2, false)">Descansa sobre resortes de bronce para resistir terremotos</button>
+        </div>
+        <div class="quiz-explanation" id="qexp-3">¡Impresionante pero cierto! La plataforma de Kiyomizu-dera se sustenta sobre pilares de madera ensamblados mediante juntas de caja y espiga tradicionales japonesas, sin utilizar clavos[span_207](start_span)[span_207](end_span).</div>
+      </div>
+
+      <div class="quiz-card" id="qcard-4">
+        <div class="quiz-q">4. En Tokio, ¿en qué lado de la escalera mecánica debes permanecer quieto si no vas a adelantar?[span_208](start_span)[span_208](end_span)</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="answerQuiz(4, 0, true)">En el lado izquierdo (en Osaka se hace en el derecho)[span_209](start_span)[span_209](end_span)</button>
+          <button class="quiz-btn" onclick="answerQuiz(4, 1, false)">En el lado derecho en todo Japón sin excepción</button>
+          <button class="quiz-btn" onclick="answerQuiz(4, 2, false)">En el centro exacto</button>
+        </div>
+        <div class="quiz-explanation" id="qexp-4">¡Muy bien! En Tokio la costumbre es situarse a la izquierda dejando la derecha libre[span_210](start_span)[span_210](end_span). Si viajas a Osaka, la regla se invierte y la gente se para a la derecha[span_211](start_span)[span_211](end_span).</div>
+      </div>
+
+      <div class="quiz-card" id="qcard-5">
+        <div class="quiz-q">5. ¿Qué significa la bola de hojas de cedro verde (Sugidama) colgada a la entrada de los locales de Takayama?[span_212](start_span)[span_212](end_span)</div>
+        <div class="quiz-opts">
+          <button class="quiz-btn" onclick="answerQuiz(5, 0, false)">Indica que es un taller de madera sagrada para templos</button>
+          <button class="quiz-btn" onclick="answerQuiz(5, 1, true)">Anuncia una destilería de sake; cuando se vuelve marrón, el nuevo sake ya está maduro[span_213](start_span)[span_213](end_span)</button>
+          <button class="quiz-btn" onclick="answerQuiz(5, 2, false)">Es un amuleto para ahuyentar los incendios en las casas de madera</button>
+        </div>
+        <div class="quiz-explanation" id="qexp-5">¡Exacto! El Sugidama lo cuelgan las destilerías de sake con hojas de cedro verde tras la cosecha de arroz[span_214](start_span)[span_214](end_span). Cuando las hojas se secan y se vuelven marrones, avisan de que el sake de temporada está listo para degustar[span_215](start_span)[span_215](end_span).</div>
+      </div>
+    </section>
+
+    <!-- ==================== MALETA / CHECKLIST ==================== -->
+    <section id="tab-checklist" class="tab-view">
+      <div class="section-eyebrow">
+        <span class="lbl">Control de Maleta & Documentos</span>
+        <button class="btn-toggle-all" onclick="resetChecklist()">Desmarcar todo</button>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span>Preparativos listos</span>
+          <span id="checklistProgressLabel">0 / 0 (0%)</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="checklistProgressBar"></div></div>
+      </div>
+
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-passport"></i> Documentación & Trámites[span_216](start_span)[span_216](end_span)</h3>
+        <div class="check-line"><input type="checkbox" id="chk-1" onchange="handleCheck(this)"><label for="chk-1">Pasaporte en regla (validez > 6 meses) y DNI[span_217](start_span)[span_217](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-2" onchange="handleCheck(this)"><label for="chk-2">Generar códigos QR de Inmigración y Aduana en Visit Japan Web</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-3" onchange="handleCheck(this)"><label for="chk-3">Bono impreso o justificante de intercambio del JR Pass[span_218](start_span)[span_218](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-4" onchange="handleCheck(this)"><label for="chk-4">Billetes de vuelo de ida y vuelta impresos (LCG-MAD-NRT)[span_219](start_span)[span_219](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-5" onchange="handleCheck(this)"><label for="chk-5">Póliza del seguro de viaje con coberturas médicas altas impresa[span_220](start_span)[span_220](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-6" onchange="handleCheck(this)"><label for="chk-6">Tarjeta Suica o Pasmo cargada en Apple Wallet (o reservar tarjeta IC física)[span_221](start_span)[span_221](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-7" onchange="handleCheck(this)"><label for="chk-7">Tarjetas sin comisiones tipo Revolut o N26 activadas[span_222](start_span)[span_222](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-8" onchange="handleCheck(this)"><label for="chk-8">Efectivo inicial en Yenes (¥) para pequeños comercios y templos[span_223](start_span)[span_223](end_span)</label></div>
+      </div>
+
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-plug"></i> Electrónica & Accesorios[span_224](start_span)[span_224](end_span)</h3>
+        <div class="check-line"><input type="checkbox" id="chk-e1" onchange="handleCheck(this)"><label for="chk-e1">Adaptador de enchufe americano plano (Tipo A, 100V)[span_225](start_span)[span_225](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-e2" onchange="handleCheck(this)"><label for="chk-e2">Regleta múltiple para cargar varios móviles con un solo adaptador[span_226](start_span)[span_226](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-e3" onchange="handleCheck(this)"><label for="chk-e3">Batería externa portátil (Powerbank 10.000-20.000 mAh)[span_227](start_span)[span_227](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-e4" onchange="handleCheck(this)"><label for="chk-e4">eSIM activada o reserva de Pocket WiFi[span_228](start_span)[span_228](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-e5" onchange="handleCheck(this)"><label for="chk-e5">Libreta pequeña para coleccionar sellos de goma (Eki Stamps en estaciones JR)[span_229](start_span)[span_229](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-e6" onchange="handleCheck(this)"><label for="chk-e6">Bolsa plástica personal para guardar desechos durante el día[span_230](start_span)[span_230](end_span)</label></div>
+      </div>
+
+      <div class="check-box-group">
+        <h3><i class="fa-solid fa-shirt"></i> Ropa & Botiquín (Otoño / Momiji)[span_231](start_span)[span_231](end_span)</h3>
+        <div class="check-line"><input type="checkbox" id="chk-r1" onchange="handleCheck(this)"><label for="chk-r1">Calzado muy cómodo fácil de poner y quitar (templos y casas de té)[span_232](start_span)[span_232](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-r2" onchange="handleCheck(this)"><label for="chk-r2">Calcetines limpios e impecables (se camina mucho en calcetines sobre tatami)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-r3" onchange="handleCheck(this)"><label for="chk-r3">Capa térmica fina y forro polar para Takayama, Shirakawa y Nikko[span_233](start_span)[span_233](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-r4" onchange="handleCheck(this)"><label for="chk-r4">Chaqueta cortavientos impermeable y paraguas compacto[span_234](start_span)[span_234](end_span)</label></div>
+        <div class="check-line"><input type="checkbox" id="chk-r5" onchange="handleCheck(this)"><label for="chk-r5">Botiquín básico: analgésicos, tiritas para rozaduras y antidiarreico</label></div>
+      </div>
+    </section>
+
+    <!-- ==================== SOS & CONTACTOS ==================== -->
+    <section id="tab-sos" class="tab-view">
+      <h2 class="tab-title">Emergencias & Asistencia</h2>
+      <p class="tab-sub">Canales consulares oficiales, números de socorro y hospitales internacionales en Japón.</p>
+
+      <div style="background:var(--torii-subtle); border:1px solid var(--torii); border-radius:var(--radius-md); padding:16px; margin-bottom:14px;">
+        <h3 style="color:var(--torii); font-size:1rem; font-weight:700; margin-bottom:6px;">
+          <i class="fa-solid fa-shield-halved"></i> Embajada de España en Japón (Tokio)
+        </h3>
+        <p style="font-size:0.86rem; margin-bottom:4px;"><strong>Dirección:</strong> 1-3-29 Roppongi, Minato-ku, Tokyo 106-0032 (cerca de la estación Roppongi-Itchome)</p>
+        <p style="font-size:0.86rem; margin-bottom:4px;"><strong>Teléfono cancillería:</strong> <a href="tel:+81335838531" style="color:var(--torii); font-weight:700;">(+81) 3 3583 8531</a></p>
+        <p style="font-size:0.86rem; margin-bottom:4px;"><strong>Emergencia consular 24h:</strong> <a href="tel:+818043682883" style="color:var(--torii); font-weight:800;">(+81) 80 4368 2883</a></p>
+        <p style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Email: emb.tokio@maec.es</p>
+      </div>
+
+      <div class="spot-card">
+        <h4 style="font-size:0.92rem; font-weight:700;"><i class="fa-solid fa-phone"></i> Teléfonos de Emergencia Locales</h4>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px;">
+          <a href="tel:110" class="action-btn" style="justify-content:center;"><i class="fa-solid fa-shield"></i> Policía: 110</a>
+          <a href="tel:119" class="action-btn" style="justify-content:center;"><i class="fa-solid fa-truck-medical"></i> Ambulancia: 119</a>
+          <a href="tel:119" class="action-btn" style="justify-content:center;"><i class="fa-solid fa-fire-extinguisher"></i> Bomberos: 119</a>
+          <a href="tel:0570000911" class="action-btn" style="justify-content:center;"><i class="fa-solid fa-circle-info"></i> Japan Helpline: 0570-000-911</a>
+        </div>
+      </div>
+
+      <div class="spot-card">
+        <h4 style="font-size:0.92rem; font-weight:700;"><i class="fa-solid fa-hospital"></i> Hospitales con Atención en Inglés</h4>
+        <p style="font-size:0.82rem; color:var(--muted); margin-top:4px; margin-bottom:8px;">Centros médicos de referencia con departamento internacional:</p>
+        <a href="https://maps.google.com/?q=St.+Luke's+International+Hospital+Tokyo" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> St. Luke's International (Tokio)</a>
+        <a href="https://maps.google.com/?q=Kyoto+University+Hospital" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> Kyoto University Hospital (Kioto)</a>
+        <a href="https://maps.google.com/?q=Osaka+Red+Cross+Hospital" target="_blank" class="action-btn"><i class="fa-solid fa-location-dot"></i> Osaka Red Cross Hospital (Osaka)</a>
+      </div>
+
+      <div class="spot-card notes-box">
+        <h4 style="font-size:0.92rem; font-weight:700;"><i class="fa-solid fa-note-sticky"></i> Libreta Personal de Emergencia</h4>
+        <p style="font-size:0.8rem; color:var(--muted); margin:4px 0 8px;">Guarda aquí tu número de póliza, teléfono de cobro revertido del seguro o alergias:</p>
+        <textarea id="jpEmergencyNotes" style="width:100%; min-height:100px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--paper-2); color:var(--ink); padding:8px; font-family:inherit; font-size:0.85rem;" placeholder="Ej: Póliza IATI nº 1234567, contacto asistencia 24h: +34..."></textarea>
+        <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+          <button class="action-btn" style="background:var(--torii); color:#fff; border:none;" onclick="saveJpNotes()"><i class="fa-solid fa-floppy-disk"></i> Guardar datos</button>
+          <span id="jpNotesStatus" style="font-size:0.8rem; color:var(--matcha); font-weight:700;"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== BARRA DE NAVEGACIÓN INFERIOR ==================== -->
+  <nav class="bottom-dock" id="bottomDock">
+    <button class="dock-tab-btn active" onclick="activateTab('resumen', this)"><i class="fa-solid fa-compass"></i><span>Resumen</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('itinerario', this)"><i class="fa-solid fa-calendar-days"></i><span>Ruta</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('transporte', this)"><i class="fa-solid fa-train"></i><span>JR Pass</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('comida', this)"><i class="fa-solid fa-utensils"></i><span>Comer</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('etiqueta', this)"><i class="fa-solid fa-handshake"></i><span>Etiqueta</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('herramientas', this)"><i class="fa-solid fa-toolbox"></i><span>Tarjetas</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('quiz', this)"><i class="fa-solid fa-circle-question"></i><span>Quiz</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('checklist', this)"><i class="fa-solid fa-list-check"></i><span>Maleta</span></button>
+    <button class="dock-tab-btn" onclick="activateTab('sos', this)"><i class="fa-solid fa-kit-medical"></i><span>SOS</span></button>
+  </nav>
+
+  <script>
+    // ---------- NAVEGACIÓN DE PESTAÑAS ----------
+    function activateTab(tabKey, btnElement) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
+      document.querySelectorAll('.dock-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+      const targetView = document.getElementById('tab-' + tabKey);
+      if (targetView) targetView.classList.add('active');
+
+      if (btnElement) {
+        btnElement.classList.add('active');
+        btnElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      } else {
+        const matchingBtn = document.querySelector(`.dock-tab-btn[onclick*="'${tabKey}'"]`);
+        if (matchingBtn) {
+          matchingBtn.classList.add('active');
+          matchingBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function jumpToRegion(regionKeyword) {
+      activateTab('itinerario');
+      const input = document.getElementById('routeSearch');
+      input.value = regionKeyword;
+      executeGlobalSearch();
+    }
+
+    // ---------- ACORDEONES DÍA A DÍA ----------
+    function toggleCard(headerElement) {
+      const card = headerElement.closest('.day-card');
+      if (card) card.classList.toggle('open');
+    }
+
+    let allDaysExpanded = false;
+    function toggleAllDayCards() {
+      allDaysExpanded = !allDaysExpanded;
+      document.querySelectorAll('.day-card').forEach(c => c.classList.toggle('open', allDaysExpanded));
+    }
+
+    // ---------- BUSCADOR GLOBAL ----------
+    function executeGlobalSearch() {
+      const q = document.getElementById('routeSearch').value.toLowerCase().trim();
+      const elements = document.querySelectorAll('.searchable-card');
+      elements.forEach(el => {
+        const text = (el.innerText + " " + (el.getAttribute('data-search') || '')).toLowerCase();
+        if (text.includes(q)) {
+          el.style.display = "";
+          if (q.length > 2 && el.classList.contains('day-card')) el.classList.add('open');
+        } else {
+          el.style.display = "none";
+        }
+      });
+    }
+
+    // ---------- CONVERSOR MONEDA JPY ⇄ EUR ----------
+    const JPY_RATE = 164.5;
+    function calcJpyToEur() {
+      const j = parseFloat(document.getElementById('jpyInput').value);
+      const eInput = document.getElementById('eurInput');
+      eInput.value = (!isNaN(j) && j > 0) ? (j / JPY_RATE).toFixed(2) : '';
+    }
+    function calcEurToJpy() {
+      const e = parseFloat(document.getElementById('eurInput').value);
+      const jInput = document.getElementById('jpyInput');
+      jInput.value = (!isNaN(e) && e > 0) ? Math.round(e * JPY_RATE) : '';
+    }
+    function setQuickJpy(amount) {
+      document.getElementById('jpyInput').value = amount;
+      calcJpyToEur();
+    }
+
+    // ---------- PANTALLA GIGANTE PARA MOSTRAR ----------
+    function openGiantCard(es, jp, phonetic) {
+      document.getElementById('gModalEs').textContent = es;
+      document.getElementById('gModalJp').textContent = jp;
+      document.getElementById('gModalPhonetic').textContent = phonetic;
+      document.getElementById('giantModal').classList.add('active');
+    }
+    function closeGiantCard() {
+      document.getElementById('giantModal').classList.remove('active');
+    }
+
+    // ---------- QUIZ INTERACTIVO ----------
+    let quizScore = 0;
+    const answeredMap = {};
+    function answerQuiz(questionId, optionIdx, isCorrect) {
+      if (answeredMap[questionId]) return;
+      answeredMap[questionId] = true;
+
+      const card = document.getElementById('qcard-' + questionId);
+      const btns = card.querySelectorAll('.quiz-btn');
+      const exp = document.getElementById('qexp-' + questionId);
+
+      if (isCorrect) {
+        btns[optionIdx].classList.add('correct');
+        quizScore++;
+      } else {
+        btns[optionIdx].classList.add('wrong');
+        btns.forEach(b => {
+          if (b.getAttribute('onclick').includes('true')) b.classList.add('correct');
+        });
+      }
+      exp.style.display = 'block';
+      document.getElementById('quizScoreText').textContent = `${quizScore} / 5`;
+    }
+
+    // ---------- CUENTA ATRÁS Y DÍA ACTUAL ----------
+    function updateTripCountdown() {
+      const badge = document.getElementById('countdownChip');
+      const todayBox = document.getElementById('todayRouteBox');
+      const todayTitle = document.getElementById('todayRouteTitle');
+      const todayDesc = document.getElementById('todayRouteDesc');
+
+      const start = new Date('2024-11-08T00:00:00+09:00');
+      const end = new Date('2024-11-24T23:59:00+09:00');
+      const now = new Date();
+
+      if (now < start) {
+        const diff = Math.max(1, Math.ceil((start - now) / 86400000));
+        badge.textContent = `Faltan ${diff} ${diff === 1 ? 'día' : 'días'}`;
+      } else if (now <= end) {
+        const day = Math.min(17, Math.floor((now - start) / 86400000) + 1);
+        badge.textContent = `Día ${day} de 17`;
+
+        const currentDayCard = document.querySelector(`.day-card[data-day="${now.getDate()}"]`);
+        if (currentDayCard) {
+          todayBox.style.display = 'block';
+          const title = currentDayCard.querySelector('.day-title').textContent;
+          todayTitle.textContent = `Día ${day} del viaje (Hoy)`;
+          todayDesc.textContent = title;
+          currentDayCard.classList.add('open');
+        }
+      } else {
+        badge.textContent = 'Viaje completado';
+      }
+    }
+
+    // ---------- CHECKLIST CON PERSISTENCIA ----------
+    const STORAGE_KEY = 'jp2024_checklist';
+    function loadSavedChecklist() {
+      try {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        document.querySelectorAll('#tab-checklist .check-line input[type="checkbox"]').forEach(box => {
+          if (data[box.id]) {
+            box.checked = true;
+            box.closest('.check-line').classList.add('checked-done');
+          }
+        });
+      } catch (e) {}
+      calcProgress();
+    }
+
+    function handleCheck(box) {
+      box.closest('.check-line').classList.toggle('checked-done', box.checked);
+      saveChecklist();
+      calcProgress();
+    }
+
+    function saveChecklist() {
+      const state = {};
+      document.querySelectorAll('#tab-checklist .check-line input[type="checkbox"]').forEach(b => {
+        if (b.checked) state[b.id] = true;
+      });
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function resetChecklist() {
+      document.querySelectorAll('#tab-checklist .check-line input[type="checkbox"]').forEach(b => {
+        b.checked = false;
+        b.closest('.check-line').classList.remove('checked-done');
+      });
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      calcProgress();
+    }
+
+    function calcProgress() {
+      const total = document.querySelectorAll('#tab-checklist .check-line input[type="checkbox"]').length;
+      const done = document.querySelectorAll('#tab-checklist .check-line input[type="checkbox"]:checked').length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      const label = document.getElementById('checklistProgressLabel');
+      const bar = document.getElementById('checklistProgressBar');
+      if (label) label.textContent = `${done} / ${total} (${pct}%)`;
+      if (bar) bar.style.width = `${pct}%`;
+    }
+
+    // ---------- PASAPORTE GOURMET ----------
+    const FOOD_KEY = 'jp2024_food_passport';
+    function handleFoodCheck(box) {
+      box.closest('.check-line').classList.toggle('checked-done', box.checked);
+      const state = {};
+      document.querySelectorAll('#tab-comida .check-line input[type="checkbox"]').forEach(b => {
+        if (b.checked) state[b.id] = true;
+      });
+      try { localStorage.setItem(FOOD_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function loadFoodChecklist() {
+      try {
+        const data = JSON.parse(localStorage.getItem(FOOD_KEY) || '{}');
+        document.querySelectorAll('#tab-comida .check-line input[type="checkbox"]').forEach(box => {
+          if (data[box.id]) {
+            box.checked = true;
+            box.closest('.check-line').classList.add('checked-done');
+          }
+        });
+      } catch (e) {}
+    }
+
+    // ---------- NOTAS DE EMERGENCIA ----------
+    const NOTES_KEY = 'jp2024_sos_notes';
+    function loadJpNotes() {
+      try {
+        const val = localStorage.getItem(NOTES_KEY);
+        if (val) document.getElementById('jpEmergencyNotes').value = val;
+      } catch (e) {}
+    }
+    function saveJpNotes() {
+      const txt = document.getElementById('jpEmergencyNotes').value;
+      try {
+        localStorage.setItem(NOTES_KEY, txt);
+        const st = document.getElementById('jpNotesStatus');
+        st.textContent = 'Guardado';
+        setTimeout(() => { st.textContent = ''; }, 2500);
+      } catch (e) {}
+    }
+
+    // Inicialización al cargar la página
+    window.addEventListener('DOMContentLoaded', () => {
+      updateTripCountdown();
+      loadSavedChecklist();
+      loadFoodChecklist();
+      loadJpNotes();
+    });
+  </script>
+</body>
+</html>
