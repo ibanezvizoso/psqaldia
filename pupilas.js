@@ -409,3 +409,11 @@
         }
     };
 })();
+// Disparador global compatible con la Hoja 1 y el modal de PSQALDÍA
+window.iniciarPupilas = function () {
+    if (window.PupilasApp && typeof window.PupilasApp.init === 'function') {
+        window.PupilasApp.init();
+    } else {
+        console.error("PupilasApp no está cargado correctamente.");
+    }
+};
