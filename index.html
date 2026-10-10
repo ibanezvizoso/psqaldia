@@ -276,6 +276,7 @@ async function compartirRecurso(e, id) {
     }
 
     async function openAbout() {
+       history.pushState({ modal: 'panel' }, '', location.pathname);
         toggleMenu();
         const modalData = document.getElementById('modalData');
         modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
@@ -287,6 +288,7 @@ async function compartirRecurso(e, id) {
     }
 
     async function openLegal() {
+       history.pushState({ modal: 'panel' }, '', location.pathname);
         const modalData = document.getElementById('modalData');
         modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
         document.getElementById('modal').style.display = 'flex';
@@ -297,6 +299,7 @@ async function compartirRecurso(e, id) {
     }
 
     function openSettings() {
+      history.pushState({ modal: 'panel' }, '', location.pathname);
         toggleMenu();
         document.getElementById('modalData').innerHTML = `<div style="padding:2.5rem;"><h2>Ajustes</h2><button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button></div>`;
         document.getElementById('modal').style.display = 'flex';
@@ -353,10 +356,7 @@ async function compartirRecurso(e, id) {
         let textoBoton = "ACCEDER"; 
 
         // Al hacer clic, abre el modal al instante (sin preguntar contraseña)
-        card.onclick = () => {
-            window.history.pushState({}, '', `/${item.id}`); 
-            openModal(item.id); 
-        };
+                card.onclick = () => abrirEntrada(item.id);
 
         const shareUrl = window.location.origin + '/' + item.id;
         const shareText = item.accion !== '' ? `🛠️ *Herramienta*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}*: ${shareUrl}`;
@@ -418,11 +418,39 @@ async function compartirRecurso(e, id) {
         }
     }
 
-    function closeModal() { 
-        document.getElementById('modal').style.display = 'none'; 
-        document.body.style.overflow = 'auto';
-        if (window.location.pathname !== '/') window.history.pushState({}, '', '/');
+    // Oculta el modal sin tocar el historial
+function ocultarModal() {
+    document.getElementById('modal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Cierre desde la X, el fondo o Escape
+function closeModal() {
+    if (history.state && history.state.modal) {
+        history.back(); // el evento popstate lo oculta
+    } else {
+        ocultarModal();
+        if (location.pathname !== '/') history.replaceState(null, '', '/');
     }
+}
+
+// Abrir una entrada añadiendo un paso al historial
+function abrirEntrada(id) {
+    history.pushState({ modal: id }, '', '/' + id);
+    openModal(id);
+}
+
+// Botón atrás/adelante del navegador o del móvil
+window.addEventListener('popstate', (e) => {
+    const id = e.state && e.state.modal;
+    if (id && db.some(i => i.id === id)) openModal(id);
+    else ocultarModal();
+});
+
+// Cerrar con Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('modal').style.display === 'flex') closeModal();
+});
     
     function toggleFavorite(e, id) { 
         e.stopPropagation(); 
@@ -466,8 +494,10 @@ async function compartirRecurso(e, id) {
         const cleanId = sharedId.replace('psq-', '');
         const item = db.find(i => i.id === cleanId);
         if (item) {
-            setTimeout(() => { openModal(item.id); document.getElementById('anchor-' + item.id)?.scrollIntoView({ behavior: 'smooth' }); }, 600);
-        }
+    history.replaceState(null, '', '/');
+    history.pushState({ modal: item.id }, '', '/' + item.id);
+    setTimeout(() => { openModal(item.id); document.getElementById('anchor-' + item.id)?.scrollIntoView({ behavior: 'smooth' }); }, 600);
+}
     }
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
