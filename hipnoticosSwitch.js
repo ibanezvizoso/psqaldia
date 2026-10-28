@@ -8,54 +8,33 @@
 
 const CONFIG_HIP = {
     SHEET_NAME: 'Data_Hipnotics',
-    COL_A_KEY: 0,
-    COL_A_ES: 1,
-    COL_A_EN: 2,
-    COL_B_KEY: 3,
-    COL_B_ES: 4,
-    COL_B_EN: 5,
-    COL_MODALITY: 6,
-    COL_CODE: 7,
-    COL_REC_ES: 8,
-    COL_REC_EN: 9
+    // Mapeo de columnas según tu pestaña de Sheets (A2:J500)
+    COL_A_KEY: 0,      // Drug_A_Key
+    COL_A_ES: 1,       // Farmaco_A_ES
+    COL_A_EN: 2,       // Farmaco_A_EN
+    COL_B_KEY: 3,      // Drug_B_Key
+    COL_B_ES: 4,       // Farmaco_B_ES
+    COL_B_EN: 5,       // Farmaco_B_EN
+    COL_MODALITY: 6,   // Modality
+    COL_CODE: 7,       // Codigo_Algoritmico
+    COL_REC_ES: 8,     // Recomendacion_Clinica_ES
+    COL_REC_EN: 9      // Clinical_Notes_EN
 };
-
-// Base de datos de reserva (Fallback local inmediato para que nunca quede vacío)
-const FALLBACK_HIPNOTICS = [
-    { aKey: "BZ_ZDRUG", aES: "BZD / Fármacos Z", aEN: "BZD / Z-Drugs", bKey: "BZ_ZDRUG", bES: "BZD / Fármacos Z", bEN: "BZD / Z-Drugs", modality: "SWITCH_DIRECT", code: "TYPE:DIRECT | A:D1(0%) | B:D1(100%)", recES: "Cambio intracrítico directo al día siguiente a dosis terapéutica equivalente.", recEN: "Direct intra-class switch on the next day at equivalent therapeutic dose." },
-    { aKey: "BZ_ZDRUG", aES: "BZD / Fármacos Z", aEN: "BZD / Z-Drugs", bKey: "ESZOPICLONE", bES: "Eszopiclona", bEN: "Eszopiclone", modality: "CROSS_TAPER", code: "TYPE:CROSS | A:W1(75%),W2(50%),W3(25%),W4(0%) | B:W1(2mg),W2(2mg),W3(3mg),W4(3mg)", recES: "Reducción del 25% semanal de BZD/Z con eszopiclona 2 mg (S1-S2) y titulación a 3 mg (S3-S4).", recEN: "25% weekly BZD/Z reduction with eszopiclone 2 mg (W1-2), escalating to 3 mg (W3-4)." },
-    { aKey: "BZ_ZDRUG", aES: "BZD / Fármacos Z", aEN: "BZD / Z-Drugs", bKey: "DARIDOREXANT", bES: "Daridorexant", bEN: "Daridorexant", modality: "CROSS_TAPER", code: "TYPE:CROSS | A:W1(75%),W2(50%),W3(25%),W4(0%) | B:W1(25mg),W2(25mg),W3(50mg),W4(50mg)", recES: "Reducción del 25% semanal de BZD/Z con daridorexant 25 mg (S1-S2) y subida a 50 mg (S3-S4).", recEN: "25% weekly BZD/Z reduction while cross-tapering daridorexant 25 mg (W1-2) to 50 mg (W3-4)." },
-    { aKey: "BZ_ZDRUG", aES: "BZD / Fármacos Z", aEN: "BZD / Z-Drugs", bKey: "MELATONIN_PR", bES: "Melatonina 2 mg PR", bEN: "Melatonin 2 mg PR", modality: "CROSS_TAPER", code: "TYPE:CROSS | A:W1(75%),W2(50%),W3(25%),W4(0%) | B:W1(2mg),W2(2mg),W3(2mg),W4(2mg)", recES: "Reducción del 25% semanal de BZD/Z manteniendo dosis fija de melatonina 2 mg PR (S1-S4).", recEN: "25% weekly BZD/Z reduction while maintaining continuous fixed melatonin 2 mg PR (W1-4)." },
-    { aKey: "BZ_ZDRUG", aES: "BZD / Fármacos Z", aEN: "BZD / Z-Drugs", bKey: "NONE", bES: "Ninguno (Retirada)", bEN: "None / Taper", modality: "TAPER", code: "TYPE:TAPER | A:W1(75%),W2(50%),W3(25%),W4(0%)", recES: "Retirada gradual lineal con descensos del 25% semanal a lo largo de 4 semanas. Se recomienda asociar TCC-I.", recEN: "Gradual 25% weekly linear dose reduction across 4 weeks. Multi-component CBT-I is recommended." },
-    { aKey: "DARIDOREXANT", aES: "Daridorexant", aEN: "Daridorexant", bKey: "BZ_ZDRUG", bES: "BZD / Fármacos Z", bEN: "BZD / Z-Drugs", modality: "SWITCH_DIRECT", code: "TYPE:DIRECT | A:D1(0mg) | B:D1(100%)", recES: "No produce efecto rebote ni abstinencia; cambio directo al día siguiente a dosis terapéutica de BZD.", recEN: "No withdrawal or rebound insomnia; direct next-day switch to therapeutic dose of BZD." },
-    { aKey: "DARIDOREXANT", aES: "Daridorexant", aEN: "Daridorexant", bKey: "ESZOPICLONE", bES: "Eszopiclona", bEN: "Eszopiclone", modality: "SWITCH_DIRECT", code: "TYPE:DIRECT | A:D1(0mg) | B:D1(100%)", recES: "Cese de daridorexant y cambio directo la noche siguiente a eszopiclona.", recEN: "Direct next-day switch from daridorexant to eszopiclone." },
-    { aKey: "DARIDOREXANT", aES: "Daridorexant", aEN: "Daridorexant", bKey: "MELATONIN_PR", bES: "Melatonina 2 mg PR", bEN: "Melatonin 2 mg PR", modality: "SWITCH_DIRECT", code: "TYPE:DIRECT | A:D1(0mg) | B:D1(2mg)", recES: "Cese de daridorexant e inicio directo de melatonina 2 mg PR la noche siguiente.", recEN: "Direct switch to melatonin 2 mg PR on the next night without tapering." },
-    { aKey: "DARIDOREXANT", aES: "Daridorexant", aEN: "Daridorexant", bKey: "NONE", bES: "Ninguno (Retirada)", bEN: "None / Taper", modality: "ABRUPT_STOP", code: "TYPE:ABRUPT | A:D1(0mg)", recES: "No requiere pauta descendente; se suspende de forma directa y brusca en día 1 sin riesgo de rebote.", recEN: "Discontinue abruptly on day 1; no tapering schedule required due to lack of rebound effects." },
-    { aKey: "MELATONIN_PR", aES: "Melatonina 2 mg PR", aEN: "Melatonin 2 mg PR", bKey: "BZ_ZDRUG", bES: "BZD / Fármacos Z", bEN: "BZD / Z-Drugs", modality: "SWITCH_DIRECT", code: "TYPE:DIRECT | A:D1(0mg) | B:D1(100%)", recES: "Carece de síndrome de retirada; switch directo al día siguiente al fármaco pautado.", recEN: "No withdrawal effects; direct switch to the target hypnotic next day." },
-    { aKey: "MELATONIN_PR", aES: "Melatonina 2 mg PR", aEN: "Melatonin 2 mg PR", bKey: "ESZOPICLONE", bES: "Eszopiclona", bEN: "Eszopiclone", modality: "SWITCH_DIRECT", code: "TYPE:DIRECT | A:D1(0mg) | B:D1(100%)", recES: "Cambio directo al día siguiente a eszopiclona.", recEN: "Direct next-day switch to eszopiclone." },
-    { aKey: "MELATONIN_PR", aES: "Melatonina 2 mg PR", aEN: "Melatonin 2 mg PR", bKey: "DARIDOREXANT", bES: "Daridorexant", bEN: "Daridorexant", modality: "SWITCH_DIRECT", code: "TYPE:DIRECT | A:D1(0mg) | B:D1(50mg)", recES: "Cambio directo a daridorexant 50 mg la noche siguiente.", recEN: "Direct switch to daridorexant 50 mg on the next night." },
-    { aKey: "MELATONIN_PR", aES: "Melatonina 2 mg PR", aEN: "Melatonin 2 mg PR", bKey: "NONE", bES: "Ninguno (Retirada)", bEN: "None / Taper", modality: "ABRUPT_STOP", code: "TYPE:ABRUPT | A:D1(0mg)", recES: "Sin dependencia ni insomnio de rebote; suspensión brusca directa en día 1.", recEN: "No dependence or rebound insomnia; abrupt discontinuation on day 1." },
-    { aKey: "OFF_LABEL_AD", aES: "Antidepresivo sedante off-label", aEN: "Off-label sedating AD", bKey: "DARIDOREXANT", bES: "Daridorexant", bEN: "Daridorexant", modality: "CROSS_TAPER", code: "TYPE:CROSS | A:W1(75%),W2(50%),W3(25%),W4(0%) | B:W1(25mg),W2(25mg),W3(50mg),W4(50mg)", recES: "Reducción del 25% semanal del antidepresivo introduciendo daridorexant 25 mg (S1-S2) y escalando a 50 mg (S3-S4).", recEN: "25% weekly antidepressant taper cross-tapering daridorexant 25 mg (W1-2) to 50 mg (W3-4)." },
-    { aKey: "OFF_LABEL_AD", aES: "Antidepresivo sedante off-label", aEN: "Off-label sedating AD", bKey: "MELATONIN_PR", bES: "Melatonina 2 mg PR", bEN: "Melatonin 2 mg PR", modality: "CROSS_TAPER", code: "TYPE:CROSS | A:W1(75%),W2(50%),W3(25%),W4(0%) | B:W1(2mg),W2(2mg),W3(2mg),W4(2mg)", recES: "Reducción del 25% semanal del antidepresivo manteniendo melatonina 2 mg PR continua durante 4 semanas.", recEN: "25% weekly antidepressant taper with continuous melatonin 2 mg PR (W1-4)." },
-    { aKey: "OFF_LABEL_AD", aES: "Antidepresivo sedante off-label", aEN: "Off-label sedating AD", bKey: "NONE", bES: "Ninguno (Retirada)", bEN: "None / Taper", modality: "TAPER", code: "TYPE:TAPER | A:W1(75%),W2(50%),W3(25%),W4(0%)", recES: "Desescalada del 25% semanal para prevenir síndrome de discontinuación por antidepresivos.", recEN: "25% weekly gradual taper to avoid antidepressant discontinuation symptoms." },
-    { aKey: "OFF_LABEL_AP", aES: "Antipsicótico sedante off-label", aEN: "Off-label sedating AP", bKey: "DARIDOREXANT", bES: "Daridorexant", bEN: "Daridorexant", modality: "CROSS_TAPER", code: "TYPE:CROSS | A:W1(75%),W2(50%),W3(25%),W4(0%) | B:W1(25mg),W2(25mg),W3(50mg),W4(50mg)", recES: "Reducción del 25% semanal del antipsicótico introduciendo daridorexant 25 mg (S1-S2) y escalando a 50 mg (S3-S4).", recEN: "25% weekly antipsychotic taper cross-tapering daridorexant 25 mg (W1-2) to 50 mg (W3-4)." },
-    { aKey: "OFF_LABEL_AP", aES: "Antipsicótico sedante off-label", aEN: "Off-label sedating AP", bKey: "MELATONIN_PR", bES: "Melatonina 2 mg PR", bEN: "Melatonin 2 mg PR", modality: "CROSS_TAPER", code: "TYPE:CROSS | A:W1(75%),W2(50%),W3(25%),W4(0%) | B:W1(2mg),W2(2mg),W3(2mg),W4(2mg)", recES: "Reducción del 25% semanal del antipsicótico manteniendo melatonina 2 mg PR continua durante 4 semanas.", recEN: "25% weekly antipsychotic taper with continuous melatonin 2 mg PR (W1-4)." },
-    { aKey: "OFF_LABEL_AP", aES: "Antipsicótico sedante off-label", aEN: "Off-label sedating AP", bKey: "NONE", bES: "Ninguno (Retirada)", bEN: "None / Taper", modality: "TAPER", code: "TYPE:TAPER | A:W1(75%),W2(50%),W3(25%),W4(0%)", recES: "Desescalada del 25% semanal para evitar síntomas de rebote colinérgico o histaminérgico.", recEN: "25% weekly gradual taper to prevent withdrawal/rebound phenomena." }
-];
 
 window.currentLangHip = window.currentLangHip || 'es';
 window.hipCurrentMode = window.hipCurrentMode || 'SWITCH';
-window.dbHipnotics = window.dbHipnotics || FALLBACK_HIPNOTICS;
+window.dbHipnotics = []; // Se llena exclusivamente desde Google Sheets
 
 const i18nHip = {
     es: {
         title: "Switch & Deprescripción de Hipnóticos",
+        subtitle: "Consenso Europeo de Expertos (Palagini et al., Sleep Med 2025)",
         modeSwitch: "Cambio (Switch)",
-        modeTaper: "Retirada (Taper)",
+        modeTaper: "Retirada pura (Taper)",
         fromDrug: "Fármaco Actual (Origen)",
         currentDose: "Dosis Actual (mg)",
         toDrug: "Fármaco Objetivo (Destino)",
-        melatoninFixedNote: "Melatonina 2 mg PR es dosis terapéutica fija según ficha técnica.",
+        melatoninFixedNote: "Melatonina 2 mg PR es dosis terapéutica fija según consenso y ficha técnica.",
         btnRun: "GENERAR CALENDARIO DE PAUTA",
         btnCopy: "COPIAR PAUTA PARA HISTORIA CLÍNICA",
         copied: "¡Pauta copiada al portapapeles!",
@@ -64,24 +43,28 @@ const i18nHip = {
         stop: "Suspender",
         take: "Tomar",
         reduce: "Reducir a",
-        increase: "Aumentar a",
+        increase: "Subir a",
         maintain: "Mantener",
-        directSwitchNotice: "Cambio directo: suspender Fármaco A e iniciar Fármaco B al día siguiente a dosis terapéutica.",
-        abruptStopNotice: "Suspensión directa: fármaco sin riesgo demostrado de abstinencia ni insomnio de rebote.",
+        directSwitchNotice: "Cambio directo: suspender Fármaco A e iniciar Fármaco B al día siguiente a dosis plena.",
+        abruptStopNotice: "Suspensión directa: carece de potencial adictivo o insomnio de rebote relevante.",
         recHeader: "Recomendación clínica del consenso:",
-        biblioHeader: "Referencia bibliográfica:",
-        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
+        biblioHeader: "Referencia del consenso:",
+        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia. Sleep Med. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
+        disclaimer: "Pauta algorítmica orientativa basada en el Consenso Europeo de Neuropsicofarmacología (2025). Requiere supervisión médica individualizada.",
+        loading: "Cargando datos del consenso desde Sheets...",
+        errorLoad: "No se pudieron obtener los datos de la hoja Data_Hipnotics."
     },
     en: {
         title: "Hypnotic Switching & Deprescribing",
+        subtitle: "European Expert Consensus (Palagini et al., Sleep Med 2025)",
         modeSwitch: "Switch Medication",
-        modeTaper: "Deprescribe (Taper)",
+        modeTaper: "Deprescribe (Taper only)",
         fromDrug: "Current Hypnotic (Origin)",
         currentDose: "Current Dose (mg)",
         toDrug: "Target Hypnotic (Destination)",
         melatoninFixedNote: "Melatonin 2 mg PR is a fixed dose per European guidelines.",
         btnRun: "GENERATE TAPERING SCHEDULE",
-        btnCopy: "COPY SCHEDULE TO CLIPBOARD",
+        btnCopy: "COPY STRATEGY TO CLIPBOARD",
         copied: "Schedule copied to clipboard!",
         day: "Day",
         week: "Week",
@@ -90,19 +73,20 @@ const i18nHip = {
         reduce: "Reduce to",
         increase: "Increase to",
         maintain: "Maintain",
-        directSwitchNotice: "Direct switch: discontinue Drug A and initiate Drug B the following night at therapeutic dose.",
-        abruptStopNotice: "Abrupt discontinuation: no documented risk of withdrawal syndrome or rebound insomnia.",
+        directSwitchNotice: "Direct switch: discontinue Drug A and initiate Drug B next night at therapeutic dose.",
+        abruptStopNotice: "Abrupt discontinuation: no documented risk of withdrawal or rebound insomnia.",
         recHeader: "Consensus recommendation:",
-        biblioHeader: "Bibliographic citation:",
-        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
+        biblioHeader: "Reference citation:",
+        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia. Sleep Med. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
+        disclaimer: "Algorithm proposal based on the European Expert Consensus (2025). Must be tailored to clinical judgment and individual response.",
+        loading: "Loading consensus data from Sheets...",
+        errorLoad: "Unable to retrieve data from Data_Hipnotics sheet."
     }
 };
 
-// Función auxiliar para obtener el contenedor correcto (soporta modal de móvil y HTML independiente)
 function getHipContainer() {
     return document.getElementById('modalData') || 
            document.getElementById('hipnoticos-app') || 
-           document.getElementById('app') || 
            document.getElementById('mainContainer');
 }
 
@@ -114,290 +98,85 @@ window.iniciarHipnoticosSwitch = async function() {
         const styleTag = document.createElement('style');
         styleTag.id = 'hip-styles';
         styleTag.innerHTML = `
-            .hip-ui { 
-                padding: 1.25rem; 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.65rem; 
-                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                color: #0f172a;
-                box-sizing: border-box;
-            }
-            /* Header con margen derecho para no solapar la X de cerrar modal */
-            .hip-header { 
-                display: grid; 
-                grid-template-columns: 1fr auto; 
-                align-items: center; 
-                gap: 0.75rem;
-                padding-right: 44px; /* Margen de seguridad para botón X del modal */
-                margin-bottom: 0.25rem; 
-                width: 100%; 
-                box-sizing: border-box;
-            }
-            .hip-title { 
-                margin: 0; 
-                font-weight: 800; 
-                font-size: 1.15rem; 
-                color: #1e3a8a; 
-                line-height: 1.25;
-            }
-            .hip-subtitle { 
-                font-size: 0.75rem; 
-                color: #64748b; 
-                margin-top: 3px; 
-                line-height: 1.35;
-            }
-            .hip-lang-toggle { 
-                display: flex; 
-                background: #e2e8f0; 
-                border-radius: 0.65rem; 
-                padding: 2px; 
-                flex-shrink: 0;
-            }
-            .hip-lang-btn { 
-                padding: 4px 10px; 
-                border-radius: 0.5rem; 
-                border: none; 
-                cursor: pointer; 
-                font-size: 0.72rem; 
-                font-weight: 800; 
-                color: #64748b; 
-                background: transparent; 
-                transition: all 0.2s; 
-            }
-            .hip-lang-btn.active { 
-                background: #ffffff; 
-                color: #1e3a8a; 
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-            }
-            .hip-mode-toggle { 
-                display: grid; 
-                grid-template-columns: 1fr 1fr; 
-                background: #f1f5f9; 
-                border-radius: 0.85rem; 
-                padding: 3px; 
-                margin-top: 0.4rem; 
-                gap: 4px; 
-            }
-            .hip-mode-btn { 
-                padding: 0.65rem; 
-                border: none; 
-                border-radius: 0.7rem; 
-                cursor: pointer; 
-                font-size: 0.82rem; 
-                font-weight: 800; 
-                color: #64748b; 
-                background: transparent; 
-                transition: all 0.2s; 
-                text-align: center; 
-            }
-            .hip-mode-btn.active { 
-                background: #ffffff; 
-                color: #2563eb; 
-                box-shadow: 0 1px 4px rgba(0,0,0,0.06); 
-            }
-            .hip-field { 
-                display: flex; 
-                flex-direction: column; 
-                margin-top: 0.4rem; 
-            }
-            .hip-field label { 
-                font-size: 0.72rem; 
-                font-weight: 800; 
-                text-transform: uppercase; 
-                letter-spacing: 0.03em;
-                color: #475569; 
-                margin-bottom: 0.35rem; 
-            }
-            .hip-select-custom, .hip-input-custom { 
-                width: 100%; 
-                padding: 0.75rem 0.9rem; 
-                border-radius: 0.75rem; 
-                border: 2px solid #cbd5e1; 
-                font-size: 0.92rem; 
-                outline: none; 
-                background: #ffffff; 
-                box-sizing: border-box; 
-                color: #0f172a;
-                font-weight: 500;
-                transition: border-color 0.2s;
-            }
-            .hip-select-custom:focus, .hip-input-custom:focus { 
-                border-color: #2563eb; 
-            }
-            .hip-input-custom:disabled { 
-                background: #f8fafc; 
-                color: #64748b; 
-                border-color: #e2e8f0;
-                cursor: not-allowed; 
-            }
-            .hip-help-text { 
-                font-size: 0.72rem; 
-                color: #0284c7; 
-                margin-top: 4px; 
-                font-weight: 600; 
-            }
-            .btn-ejecutar-hip { 
-                margin-top: 0.9rem; 
-                padding: 0.9rem; 
-                background: #1e3a8a; 
-                color: #ffffff; 
-                border: none; 
-                border-radius: 0.85rem; 
-                cursor: pointer; 
-                font-weight: 800; 
-                font-size: 0.92rem; 
-                letter-spacing: 0.02em;
-                transition: background 0.2s, transform 0.05s; 
-            }
+            .hip-ui { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; font-family: inherit; }
+            .hip-header { display: grid; grid-template-columns: 1fr auto; align-items: center; margin-bottom: 0.25rem; width: 100%; box-sizing: border-box; padding-right: 45px; }
+            .hip-title { margin: 0; font-weight: 800; font-size: 1.2rem; color: #1e3a8a; }
+            .hip-subtitle { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+            .hip-lang-toggle { display: flex; background: #e2e8f0; border-radius: 0.65rem; padding: 2px; }
+            .hip-lang-btn { padding: 4px 10px; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; }
+            .hip-lang-btn.active { background: #ffffff; color: #1e3a8a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+            .hip-mode-toggle { display: grid; grid-template-columns: 1fr 1fr; background: #f1f5f9; border-radius: 0.85rem; padding: 3px; margin-top: 0.4rem; gap: 4px; }
+            .hip-mode-btn { padding: 0.7rem; border: none; border-radius: 0.7rem; cursor: pointer; font-size: 0.82rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; text-align: center; }
+            .hip-mode-btn.active { background: #ffffff; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .hip-field { display: flex; flex-direction: column; margin-top: 0.4rem; }
+            .hip-field label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 0.35rem; }
+            .hip-field select, .hip-field input { width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 2px solid #e2e8f0; font-size: 0.95rem; outline: none; background: #fff; box-sizing: border-box; }
+            .hip-field select:focus, .hip-field input:focus { border-color: #3b82f6; }
+            .hip-field input:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+            .hip-help-text { font-size: 0.68rem; color: #0284c7; margin-top: 4px; font-weight: 600; }
+            .btn-ejecutar-hip { margin-top: 0.9rem; padding: 0.95rem; background: #1e3a8a; color: white; border: none; border-radius: 0.9rem; cursor: pointer; font-weight: 900; font-size: 0.95rem; transition: background 0.2s; }
             .btn-ejecutar-hip:hover { background: #172554; }
-            .btn-ejecutar-hip:active { transform: scale(0.99); }
-
-            .hip-res-container { 
-                margin-top: 1.25rem; 
-                border-radius: 1rem; 
-                display: none; 
-                border: 1px solid #cbd5e1; 
-                background: #ffffff; 
-                overflow: hidden; 
-                box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
-            }
-            .hip-res-header { 
-                background: #f8fafc; 
-                border-bottom: 1px solid #e2e8f0; 
-                padding: 0.9rem 1.15rem; 
-                font-size: 0.82rem; 
-                color: #334155; 
-                line-height: 1.5; 
-            }
+            .hip-res-container { margin-top: 1.25rem; border-radius: 1rem; display: none; border: 1px solid #e2e8f0; background: #fff; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+            .hip-res-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0.9rem 1.15rem; font-size: 0.8rem; color: #334155; line-height: 1.5; }
             .hip-res-header b { color: #0f172a; }
             .hip-res-body { padding: 1.25rem 1.15rem; }
-
-            .hip-step { 
-                display: flex; 
-                gap: 0.9rem; 
-                margin-bottom: 1.15rem; 
-                position: relative; 
-            }
-            .hip-step:not(:last-child)::after { 
-                content: ''; 
-                position: absolute; 
-                left: 17px; 
-                top: 36px; 
-                bottom: -15px; 
-                width: 2px; 
-                background: #e2e8f0; 
-            }
-            .hip-step-idx { 
-                min-width: 36px; 
-                height: 36px; 
-                background: #ffffff; 
-                border: 2px solid #cbd5e1; 
-                border-radius: 50%; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                font-weight: 800; 
-                font-size: 0.72rem; 
-                color: #1e3a8a; 
-                z-index: 1; 
-                flex-shrink: 0; 
-            }
-            .hip-step-content { 
-                flex-grow: 1; 
-                display: flex; 
-                flex-direction: column; 
-                gap: 6px; 
-                justify-content: center;
-            }
-            .hip-tag { 
-                font-weight: 800; 
-                font-size: 0.65rem; 
-                text-transform: uppercase; 
-                padding: 2px 7px; 
-                border-radius: 5px; 
-                display: inline-block; 
-                margin-right: 6px;
-                vertical-align: middle;
-            }
+            .hip-step { display: flex; gap: 0.9rem; margin-bottom: 1.1rem; position: relative; }
+            .hip-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 36px; bottom: -14px; width: 2px; background: #f1f5f9; }
+            .hip-step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.72rem; color: #1e3a8a; z-index: 1; flex-shrink: 0; }
+            .hip-step-content { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+            .hip-tag { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; display: inline-block; width: fit-content; }
             .hip-tag-orig { background: #fee2e2; color: #b91c1c; }
             .hip-tag-dest { background: #dcfce7; color: #15803d; }
-            .hip-dose-txt { font-size: 0.88rem; color: #1e293b; vertical-align: middle; }
-
-            .hip-biblio-box {
-                font-size: 0.72rem;
-                color: #475569;
-                padding: 0.85rem 1.15rem;
-                background: #f1f5f9;
-                border-top: 1px solid #e2e8f0;
-                line-height: 1.45;
-            }
-            .hip-biblio-box b { color: #1e293b; }
-            .hip-disclaimer { 
-                font-size: 0.68rem; 
-                color: #64748b; 
-                padding: 0.75rem 1.15rem; 
-                border-top: 1px solid #f1f5f9; 
-                background: #fafafa; 
-                font-style: italic; 
-                line-height: 1.45; 
-                text-align: justify; 
-            }
-            .btn-copiar-hip { 
-                margin-top: 0.5rem; 
-                width: 100%; 
-                padding: 0.85rem; 
-                background: #f8fafc; 
-                border-radius: 0.75rem; 
-                border: 1px solid #cbd5e1; 
-                cursor: pointer; 
-                font-weight: 800; 
-                font-size: 0.78rem; 
-                color: #334155; 
-                transition: all 0.2s; 
-            }
+            .hip-dose-txt { font-size: 0.92rem; color: #1e293b; }
+            .hip-biblio-box { font-size: 0.72rem; color: #475569; padding: 0.8rem 1.15rem; background: #f8fafc; border-top: 1px solid #e2e8f0; line-height: 1.4; }
+            .hip-biblio-box b { color: #0f172a; }
+            .hip-disclaimer { font-size: 0.68rem; color: #64748b; padding: 0.8rem 1.15rem; border-top: 1px solid #f1f5f9; background: #fafafa; font-style: italic; line-height: 1.45; text-align: justify; }
+            .btn-copiar-hip { margin-top: 0.6rem; width: 100%; padding: 0.85rem; background: #f1f5f9; border-radius: 0.8rem; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 800; font-size: 0.78rem; color: #475569; transition: all 0.2s; }
             .btn-copiar-hip:hover { background: #e2e8f0; color: #0f172a; }
+            .hip-loading-box { text-align: center; padding: 2rem; color: #64748b; font-size: 0.85rem; font-weight: 600; }
         `;
         document.head.appendChild(styleTag);
     }
 
-    // Renderizado inmediato con base de datos disponible
-    renderInterfazHip();
+    // Indicador visual de carga
+    const t = i18nHip[window.currentLangHip];
+    container.innerHTML = `<div class="hip-loading-box">${t.loading}</div>`;
 
-    // Intentar actualización asíncrona desde Google Sheets sin bloquear la UI
     try {
-        const response = await fetch(`/?sheet=${CONFIG_HIP.SHEET_NAME}`);
-        if (response.ok) {
-            const data = await response.json();
-            const rawRows = (data && data.values) ? data.values : [];
-            
-            // Filtro robusto: descarta cabecera si viniera y filas vacías
-            const parsed = rawRows
-                .filter(r => r && r[CONFIG_HIP.COL_A_KEY] && r[CONFIG_HIP.COL_A_KEY].toString().trim().toLowerCase() !== 'drug_a_key')
-                .map(r => ({
-                    aKey: (r[CONFIG_HIP.COL_A_KEY] || '').toString().trim(),
-                    aES: (r[CONFIG_HIP.COL_A_ES] || r[CONFIG_HIP.COL_A_KEY] || '').toString().trim(),
-                    aEN: (r[CONFIG_HIP.COL_A_EN] || r[CONFIG_HIP.COL_A_ES] || r[CONFIG_HIP.COL_A_KEY] || '').toString().trim(),
-                    bKey: (r[CONFIG_HIP.COL_B_KEY] || '').toString().trim(),
-                    bES: (r[CONFIG_HIP.COL_B_ES] || r[CONFIG_HIP.COL_B_KEY] || '').toString().trim(),
-                    bEN: (r[CONFIG_HIP.COL_B_EN] || r[CONFIG_HIP.COL_B_ES] || r[CONFIG_HIP.COL_B_KEY] || '').toString().trim(),
-                    modality: (r[CONFIG_HIP.COL_MODALITY] || '').toString().trim(),
-                    code: (r[CONFIG_HIP.COL_CODE] || '').toString().trim(),
-                    recES: (r[CONFIG_HIP.COL_REC_ES] || '').toString().trim(),
-                    recEN: (r[CONFIG_HIP.COL_REC_EN] || r[CONFIG_HIP.COL_REC_ES] || '').toString().trim()
-                }))
-                .filter(item => item.aKey && item.code);
+        // Enrutamiento seguro: si se prueba fuera de psqaldia.com apunta directo al Worker
+        const apiBase = window.location.origin.includes('psqaldia.com') ? '' : 'https://psqaldia.com';
+        const response = await fetch(`${apiBase}/?sheet=${CONFIG_HIP.SHEET_NAME}`);
+        
+        if (!response.ok) throw new Error("Error HTTP " + response.status);
+        const data = await response.json();
+        
+        // El Worker pide A2:Z500 -> data.values[0] YA es la primera fila de datos reales
+        const rawRows = (data && data.values) ? data.values : [];
 
-            if (parsed.length > 0) {
-                window.dbHipnotics = parsed;
-                // Guardar selecciones actuales y refrescar
-                const curA = document.getElementById('hip_a_select')?.value;
-                const curB = document.getElementById('hip_b_select')?.value;
-                renderInterfazHip(curA, curB);
-            }
-        }
+        // Mapeo seguro celda por celda frente a valores vacíos (undefined)
+        window.dbHipnotics = rawRows
+            .filter(r => r && r[CONFIG_HIP.COL_A_KEY] && r[CONFIG_HIP.COL_A_KEY].toString().trim().toLowerCase() !== 'drug_a_key')
+            .map(r => {
+                const getCol = idx => (r[idx] !== undefined && r[idx] !== null) ? r[idx].toString().trim() : '';
+                return {
+                    aKey: getCol(CONFIG_HIP.COL_A_KEY),
+                    aES: getCol(CONFIG_HIP.COL_A_ES) || getCol(CONFIG_HIP.COL_A_KEY),
+                    aEN: getCol(CONFIG_HIP.COL_A_EN) || getCol(CONFIG_HIP.COL_A_ES) || getCol(CONFIG_HIP.COL_A_KEY),
+                    bKey: getCol(CONFIG_HIP.COL_B_KEY),
+                    bES: getCol(CONFIG_HIP.COL_B_ES) || getCol(CONFIG_HIP.COL_B_KEY),
+                    bEN: getCol(CONFIG_HIP.COL_B_EN) || getCol(CONFIG_HIP.COL_B_ES) || getCol(CONFIG_HIP.COL_B_KEY),
+                    modality: getCol(CONFIG_HIP.COL_MODALITY),
+                    code: getCol(CONFIG_HIP.COL_CODE),
+                    recES: getCol(CONFIG_HIP.COL_REC_ES),
+                    recEN: getCol(CONFIG_HIP.COL_REC_EN) || getCol(CONFIG_HIP.COL_REC_ES)
+                };
+            })
+            .filter(item => item.aKey && item.code);
+
+        renderInterfazHip();
     } catch (e) {
-        console.warn("Utilizando catálogo clínico local para Hipnóticos:", e);
+        console.error("Error al cargar datos desde Sheets:", e);
+        container.innerHTML = `<div class="hip-loading-box" style="color:#b91c1c;">${t.errorLoad}</div>`;
     }
 };
 
@@ -406,7 +185,7 @@ window.setLanguageHip = function(lang) {
     const curA = document.getElementById('hip_a_select')?.value;
     const curB = document.getElementById('hip_b_select')?.value;
     renderInterfazHip(curA, curB);
-    if (document.getElementById('hip-res-box') && document.getElementById('hip-res-box').style.display === 'block') {
+    if (document.getElementById('hip-res-box')?.style.display === 'block') {
         ejecutarHipnoticosSwitch();
     }
 };
@@ -415,7 +194,7 @@ window.setModeHip = function(mode) {
     window.hipCurrentMode = mode;
     const curA = document.getElementById('hip_a_select')?.value;
     renderInterfazHip(curA);
-    if (document.getElementById('hip-res-box') && document.getElementById('hip-res-box').style.display === 'block') {
+    if (document.getElementById('hip-res-box')?.style.display === 'block') {
         ejecutarHipnoticosSwitch();
     }
 };
@@ -426,7 +205,7 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
     const container = getHipContainer();
     if (!container) return;
 
-    // Obtener lista única de Fármacos A según el modo actual
+    // Extraer lista única de Fármaco A según la modalidad elegida
     const drugAMap = new Map();
     window.dbHipnotics.forEach(row => {
         if (window.hipCurrentMode === 'TAPER') {
@@ -464,18 +243,18 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
 
             <div class="hip-field">
                 <label for="hip_a_select">${t.fromDrug}</label>
-                <select id="hip_a_select" class="hip-select-custom" onchange="onDrugAChanged()">${optDrugA}</select>
+                <select id="hip_a_select" onchange="onDrugAChanged()">${optDrugA}</select>
             </div>
 
             <div class="hip-field">
                 <label for="hip_a_dose">${t.currentDose}</label>
-                <input type="number" id="hip_a_dose" class="hip-input-custom" value="10" min="0.1" step="any">
+                <input type="number" id="hip_a_dose" value="10" min="0.1" step="any">
                 <div id="hip_melatonin_note" class="hip-help-text" style="display:none;">${t.melatoninFixedNote}</div>
             </div>
 
             <div class="hip-field" id="hip_dest_container" style="${window.hipCurrentMode === 'TAPER' ? 'display:none;' : ''}">
                 <label for="hip_b_select">${t.toDrug}</label>
-                <select id="hip_b_select" class="hip-select-custom"></select>
+                <select id="hip_b_select"></select>
             </div>
 
             <button type="button" class="btn-ejecutar-hip" onclick="ejecutarHipnoticosSwitch()">${t.btnRun}</button>
@@ -492,7 +271,7 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
         </div>
     `;
 
-    // Restaurar valor previo de Fármaco A si aún existe
+    // Preservar la selección previa si existe
     const aSelect = document.getElementById('hip_a_select');
     if (prevSelectedA && Array.from(aSelect.options).some(o => o.value === prevSelectedA)) {
         aSelect.value = prevSelectedA;
@@ -511,7 +290,7 @@ window.onDrugAChanged = function(prevSelectedB) {
     const bSelect = document.getElementById('hip_b_select');
     const isES = window.currentLangHip === 'es';
 
-    // Regla clínica de Melatonina PR: dosis fija en 2 mg
+    // Regla fija de Melatonina 2 mg PR
     if (aKey === 'MELATONIN_PR') {
         doseInput.value = 2;
         doseInput.disabled = true;
@@ -582,7 +361,6 @@ function parseHipDSL(code, aDose, nameA, nameB) {
         return steps;
     }
 
-    // Modalidades CROSS o TAPER por semanas (W1..W4)
     const aMap = parseTokensToMap(parts.find(p => p.startsWith('A:'))?.replace('A:', ''));
     const bMap = parseTokensToMap(parts.find(p => p.startsWith('B:'))?.replace('B:', ''));
 
@@ -592,7 +370,7 @@ function parseHipDSL(code, aDose, nameA, nameB) {
         const weekLabel = `${t.week} ${weekNum}`;
         const items = [];
 
-        // Fármaco A (Origen)
+        // Fármaco A
         if (aMap[wk] !== undefined) {
             const tokenA = aMap[wk];
             if (tokenA.endsWith('%')) {
@@ -613,7 +391,7 @@ function parseHipDSL(code, aDose, nameA, nameB) {
             }
         }
 
-        // Fármaco B (Destino, en Cross-Taper)
+        // Fármaco B (en Cross-Taper)
         if (bMap && bMap[wk] !== undefined) {
             const tokenB = bMap[wk];
             const mgB = parseFloat(tokenB);
@@ -698,15 +476,11 @@ window.copiarEstrategiaHip = function() {
     });
 };
 
-// Autoarranque si se carga directamente en un archivo .html independiente
+// Disparo si se abre como página HTML independiente
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        if (!document.getElementById('modalData')) {
-            window.iniciarHipnoticosSwitch();
-        }
+        if (!document.getElementById('modalData')) window.iniciarHipnoticosSwitch();
     });
 } else {
-    if (!document.getElementById('modalData')) {
-        window.iniciarHipnoticosSwitch();
-    }
+    if (!document.getElementById('modalData')) window.iniciarHipnoticosSwitch();
 }
