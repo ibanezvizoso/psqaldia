@@ -1,5 +1,5 @@
 /**
- * hipnoticosSwitch.js - Motor de Conmutación y Deprescripción de Hipnóticos PSQALDÍA v2.0
+ * hipnoticosSwitch.js - Motor de Conmutación y Deprescripción de Hipnóticos PSQALDÍA v2.3
  * Basado en: Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al.
  * Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia:
  * Results of European neuropsychopharmacology and sleep expert's consensus group.
@@ -8,7 +8,7 @@
 
 const CONFIG_HIP = {
     SHEET_NAME: 'Data_Hipnotics',
-    // Mapeo de columnas según tu pestaña de Sheets (A2:J500)
+    // Mapeo según la pestaña Data_Hipnotics (Worker solicita A2:Z500)
     COL_A_KEY: 0,      // Drug_A_Key
     COL_A_ES: 1,       // Farmaco_A_ES
     COL_A_EN: 2,       // Farmaco_A_EN
@@ -23,62 +23,54 @@ const CONFIG_HIP = {
 
 window.currentLangHip = window.currentLangHip || 'es';
 window.hipCurrentMode = window.hipCurrentMode || 'SWITCH';
-window.dbHipnotics = []; // Se llena exclusivamente desde Google Sheets
+window.dbHipnotics = []; // Origen exclusivo: Google Sheets vía Worker
 
 const i18nHip = {
     es: {
         title: "Switch & Deprescripción de Hipnóticos",
-        subtitle: "Consenso Europeo de Expertos (Palagini et al., Sleep Med 2025)",
         modeSwitch: "Cambio (Switch)",
-        modeTaper: "Retirada pura (Taper)",
+        modeTaper: "Retirada (Taper)",
         fromDrug: "Fármaco Actual (Origen)",
         currentDose: "Dosis Actual (mg)",
         toDrug: "Fármaco Objetivo (Destino)",
-        melatoninFixedNote: "Melatonina 2 mg PR es dosis terapéutica fija según consenso y ficha técnica.",
-        btnRun: "GENERAR CALENDARIO DE PAUTA",
-        btnCopy: "COPIAR PAUTA PARA HISTORIA CLÍNICA",
+        melatoninFixedNote: "Melatonina 2 mg PR es dosis terapéutica fija según ficha técnica.",
+        btnRun: "GENERAR PAUTA",
+        btnCopy: "COPIAR PAUTA PARA HISTORIA",
         copied: "¡Pauta copiada al portapapeles!",
         day: "Día",
         week: "Semana",
         stop: "Suspender",
-        take: "Tomar",
+        initiate: "Iniciar",
         reduce: "Reducir a",
         increase: "Subir a",
         maintain: "Mantener",
-        directSwitchNotice: "Cambio directo: suspender Fármaco A e iniciar Fármaco B al día siguiente a dosis plena.",
-        abruptStopNotice: "Suspensión directa: carece de potencial adictivo o insomnio de rebote relevante.",
         recHeader: "Recomendación clínica del consenso:",
         biblioHeader: "Referencia del consenso:",
-        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia. Sleep Med. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
-        disclaimer: "Pauta algorítmica orientativa basada en el Consenso Europeo de Neuropsicofarmacología (2025). Requiere supervisión médica individualizada.",
+        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
         loading: "Cargando datos del consenso desde Sheets...",
         errorLoad: "No se pudieron obtener los datos de la hoja Data_Hipnotics."
     },
     en: {
         title: "Hypnotic Switching & Deprescribing",
-        subtitle: "European Expert Consensus (Palagini et al., Sleep Med 2025)",
         modeSwitch: "Switch Medication",
-        modeTaper: "Deprescribe (Taper only)",
+        modeTaper: "Deprescribe (Taper)",
         fromDrug: "Current Hypnotic (Origin)",
         currentDose: "Current Dose (mg)",
         toDrug: "Target Hypnotic (Destination)",
         melatoninFixedNote: "Melatonin 2 mg PR is a fixed dose per European guidelines.",
-        btnRun: "GENERATE TAPERING SCHEDULE",
+        btnRun: "GENERATE SCHEDULE",
         btnCopy: "COPY STRATEGY TO CLIPBOARD",
         copied: "Schedule copied to clipboard!",
         day: "Day",
         week: "Week",
         stop: "Discontinue",
-        take: "Take",
+        initiate: "Initiate",
         reduce: "Reduce to",
         increase: "Increase to",
         maintain: "Maintain",
-        directSwitchNotice: "Direct switch: discontinue Drug A and initiate Drug B next night at therapeutic dose.",
-        abruptStopNotice: "Abrupt discontinuation: no documented risk of withdrawal or rebound insomnia.",
         recHeader: "Consensus recommendation:",
-        biblioHeader: "Reference citation:",
-        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia. Sleep Med. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
-        disclaimer: "Algorithm proposal based on the European Expert Consensus (2025). Must be tailored to clinical judgment and individual response.",
+        biblioHeader: "Consensus reference:",
+        biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
         loading: "Loading consensus data from Sheets...",
         errorLoad: "Unable to retrieve data from Data_Hipnotics sheet."
     }
@@ -98,62 +90,243 @@ window.iniciarHipnoticosSwitch = async function() {
         const styleTag = document.createElement('style');
         styleTag.id = 'hip-styles';
         styleTag.innerHTML = `
-            .hip-ui { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; font-family: inherit; }
-            .hip-header { display: grid; grid-template-columns: 1fr auto; align-items: center; margin-bottom: 0.25rem; width: 100%; box-sizing: border-box; padding-right: 45px; }
-            .hip-title { margin: 0; font-weight: 800; font-size: 1.2rem; color: #1e3a8a; }
-            .hip-subtitle { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
-            .hip-lang-toggle { display: flex; background: #e2e8f0; border-radius: 0.65rem; padding: 2px; }
-            .hip-lang-btn { padding: 4px 10px; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.7rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; }
-            .hip-lang-btn.active { background: #ffffff; color: #1e3a8a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-            .hip-mode-toggle { display: grid; grid-template-columns: 1fr 1fr; background: #f1f5f9; border-radius: 0.85rem; padding: 3px; margin-top: 0.4rem; gap: 4px; }
-            .hip-mode-btn { padding: 0.7rem; border: none; border-radius: 0.7rem; cursor: pointer; font-size: 0.82rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; text-align: center; }
-            .hip-mode-btn.active { background: #ffffff; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-            .hip-field { display: flex; flex-direction: column; margin-top: 0.4rem; }
-            .hip-field label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 0.35rem; }
-            .hip-field select, .hip-field input { width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 2px solid #e2e8f0; font-size: 0.95rem; outline: none; background: #fff; box-sizing: border-box; }
-            .hip-field select:focus, .hip-field input:focus { border-color: #3b82f6; }
-            .hip-field input:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
-            .hip-help-text { font-size: 0.68rem; color: #0284c7; margin-top: 4px; font-weight: 600; }
-            .btn-ejecutar-hip { margin-top: 0.9rem; padding: 0.95rem; background: #1e3a8a; color: white; border: none; border-radius: 0.9rem; cursor: pointer; font-weight: 900; font-size: 0.95rem; transition: background 0.2s; }
+            .hip-ui { 
+                padding: 1.25rem; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.65rem; 
+                font-family: inherit; 
+                box-sizing: border-box; 
+            }
+            .hip-header { 
+                display: grid; 
+                grid-template-columns: 1fr auto; 
+                align-items: center; 
+                margin-bottom: 0.25rem; 
+                width: 100%; 
+                box-sizing: border-box; 
+                padding-right: 48px; /* Margen para no solapar botón X del modal */
+            }
+            .hip-title { 
+                margin: 0; 
+                font-weight: 800; 
+                font-size: 1.2rem; 
+                color: #1e3a8a; 
+                line-height: 1.25; 
+            }
+            .hip-lang-toggle { 
+                display: flex; 
+                background: #e2e8f0; 
+                border-radius: 0.65rem; 
+                padding: 2px; 
+                flex-shrink: 0; 
+            }
+            .hip-lang-btn { 
+                padding: 4px 10px; 
+                border-radius: 0.5rem; 
+                border: none; 
+                cursor: pointer; 
+                font-size: 0.72rem; 
+                font-weight: 800; 
+                color: #64748b; 
+                background: transparent; 
+                transition: all 0.2s; 
+            }
+            .hip-lang-btn.active { 
+                background: #ffffff; 
+                color: #1e3a8a; 
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            }
+            .hip-mode-toggle { 
+                display: grid; 
+                grid-template-columns: 1fr 1fr; 
+                background: #f1f5f9; 
+                border-radius: 0.85rem; 
+                padding: 3px; 
+                margin-top: 0.4rem; 
+                gap: 4px; 
+            }
+            .hip-mode-btn { 
+                padding: 0.7rem; 
+                border: none; 
+                border-radius: 0.7rem; 
+                cursor: pointer; 
+                font-size: 0.82rem; 
+                font-weight: 800; 
+                color: #64748b; 
+                background: transparent; 
+                transition: all 0.2s; 
+                text-align: center; 
+            }
+            .hip-mode-btn.active { 
+                background: #ffffff; 
+                color: #2563eb; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            }
+            .hip-field { 
+                display: flex; 
+                flex-direction: column; 
+                margin-top: 0.4rem; 
+            }
+            .hip-field label { 
+                font-size: 0.7rem; 
+                font-weight: 800; 
+                text-transform: uppercase; 
+                color: #64748b; 
+                margin-bottom: 0.35rem; 
+            }
+            .hip-field select, .hip-field input { 
+                width: 100%; 
+                padding: 0.8rem; 
+                border-radius: 0.8rem; 
+                border: 2px solid #e2e8f0; 
+                font-size: 0.95rem; 
+                outline: none; 
+                background: #fff; 
+                box-sizing: border-box; 
+            }
+            .hip-field select:focus, .hip-field input:focus { 
+                border-color: #3b82f6; 
+            }
+            .hip-field input:disabled { 
+                background: #f8fafc; 
+                color: #94a3b8; 
+                cursor: not-allowed; 
+            }
+            .hip-help-text { 
+                font-size: 0.68rem; 
+                color: #0284c7; 
+                margin-top: 4px; 
+                font-weight: 600; 
+            }
+            .btn-ejecutar-hip { 
+                margin-top: 0.9rem; 
+                padding: 0.95rem; 
+                background: #1e3a8a; 
+                color: white; 
+                border: none; 
+                border-radius: 0.9rem; 
+                cursor: pointer; 
+                font-weight: 900; 
+                font-size: 0.95rem; 
+                transition: background 0.2s; 
+            }
             .btn-ejecutar-hip:hover { background: #172554; }
-            .hip-res-container { margin-top: 1.25rem; border-radius: 1rem; display: none; border: 1px solid #e2e8f0; background: #fff; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-            .hip-res-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0.9rem 1.15rem; font-size: 0.8rem; color: #334155; line-height: 1.5; }
+            .hip-res-container { 
+                margin-top: 1.25rem; 
+                border-radius: 1rem; 
+                display: none; 
+                border: 1px solid #e2e8f0; 
+                background: #fff; 
+                overflow: hidden; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+            }
+            .hip-res-header { 
+                background: #f8fafc; 
+                border-bottom: 1px solid #e2e8f0; 
+                padding: 0.9rem 1.15rem; 
+                font-size: 0.82rem; 
+                color: #334155; 
+                line-height: 1.5; 
+            }
             .hip-res-header b { color: #0f172a; }
             .hip-res-body { padding: 1.25rem 1.15rem; }
-            .hip-step { display: flex; gap: 0.9rem; margin-bottom: 1.1rem; position: relative; }
-            .hip-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 36px; bottom: -14px; width: 2px; background: #f1f5f9; }
-            .hip-step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.72rem; color: #1e3a8a; z-index: 1; flex-shrink: 0; }
-            .hip-step-content { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
-            .hip-tag { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; display: inline-block; width: fit-content; }
+            .hip-step { 
+                display: flex; 
+                gap: 0.9rem; 
+                margin-bottom: 1.1rem; 
+                position: relative; 
+            }
+            .hip-step:not(:last-child)::after { 
+                content: ''; 
+                position: absolute; 
+                left: 17px; 
+                top: 36px; 
+                bottom: -14px; 
+                width: 2px; 
+                background: #f1f5f9; 
+            }
+            .hip-step-idx { 
+                min-width: 36px; 
+                height: 36px; 
+                background: white; 
+                border: 2px solid #e2e8f0; 
+                border-radius: 50%; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                font-weight: 900; 
+                font-size: 0.72rem; 
+                color: #1e3a8a; 
+                z-index: 1; 
+                flex-shrink: 0; 
+            }
+            .hip-step-content { 
+                flex-grow: 1; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 6px; 
+                justify-content: center; 
+            }
+            .hip-tag { 
+                font-weight: 800; 
+                font-size: 0.65rem; 
+                text-transform: uppercase; 
+                padding: 2px 7px; 
+                border-radius: 5px; 
+                display: inline-block; 
+                margin-right: 6px; 
+                vertical-align: middle; 
+            }
             .hip-tag-orig { background: #fee2e2; color: #b91c1c; }
             .hip-tag-dest { background: #dcfce7; color: #15803d; }
-            .hip-dose-txt { font-size: 0.92rem; color: #1e293b; }
-            .hip-biblio-box { font-size: 0.72rem; color: #475569; padding: 0.8rem 1.15rem; background: #f8fafc; border-top: 1px solid #e2e8f0; line-height: 1.4; }
+            .hip-dose-txt { font-size: 0.9rem; color: #1e293b; vertical-align: middle; }
+            .hip-biblio-box { 
+                font-size: 0.72rem; 
+                color: #475569; 
+                padding: 0.85rem 1.15rem; 
+                background: #f8fafc; 
+                border-top: 1px solid #e2e8f0; 
+                line-height: 1.45; 
+            }
             .hip-biblio-box b { color: #0f172a; }
-            .hip-disclaimer { font-size: 0.68rem; color: #64748b; padding: 0.8rem 1.15rem; border-top: 1px solid #f1f5f9; background: #fafafa; font-style: italic; line-height: 1.45; text-align: justify; }
-            .btn-copiar-hip { margin-top: 0.6rem; width: 100%; padding: 0.85rem; background: #f1f5f9; border-radius: 0.8rem; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 800; font-size: 0.78rem; color: #475569; transition: all 0.2s; }
+            .btn-copiar-hip { 
+                margin-top: 0.6rem; 
+                width: 100%; 
+                padding: 0.85rem; 
+                background: #f1f5f9; 
+                border-radius: 0.8rem; 
+                border: 1px solid #e2e8f0; 
+                cursor: pointer; 
+                font-weight: 800; 
+                font-size: 0.78rem; 
+                color: #475569; 
+                transition: all 0.2s; 
+            }
             .btn-copiar-hip:hover { background: #e2e8f0; color: #0f172a; }
-            .hip-loading-box { text-align: center; padding: 2rem; color: #64748b; font-size: 0.85rem; font-weight: 600; }
+            .hip-loading-box { 
+                text-align: center; 
+                padding: 2.5rem 1rem; 
+                color: #64748b; 
+                font-size: 0.85rem; 
+                font-weight: 600; 
+            }
         `;
         document.head.appendChild(styleTag);
     }
 
-    // Indicador visual de carga
     const t = i18nHip[window.currentLangHip];
     container.innerHTML = `<div class="hip-loading-box">${t.loading}</div>`;
 
     try {
-        // Enrutamiento seguro: si se prueba fuera de psqaldia.com apunta directo al Worker
         const apiBase = window.location.origin.includes('psqaldia.com') ? '' : 'https://psqaldia.com';
         const response = await fetch(`${apiBase}/?sheet=${CONFIG_HIP.SHEET_NAME}`);
         
         if (!response.ok) throw new Error("Error HTTP " + response.status);
         const data = await response.json();
-        
-        // El Worker pide A2:Z500 -> data.values[0] YA es la primera fila de datos reales
         const rawRows = (data && data.values) ? data.values : [];
 
-        // Mapeo seguro celda por celda frente a valores vacíos (undefined)
+        // Mapeo seguro celda por celda frente a celdas vacías (undefined)
         window.dbHipnotics = rawRows
             .filter(r => r && r[CONFIG_HIP.COL_A_KEY] && r[CONFIG_HIP.COL_A_KEY].toString().trim().toLowerCase() !== 'drug_a_key')
             .map(r => {
@@ -205,7 +378,7 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
     const container = getHipContainer();
     if (!container) return;
 
-    // Extraer lista única de Fármaco A según la modalidad elegida
+    // Extracción de lista única de fármaco origen según la modalidad activa
     const drugAMap = new Map();
     window.dbHipnotics.forEach(row => {
         if (window.hipCurrentMode === 'TAPER') {
@@ -226,10 +399,7 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
     container.innerHTML = `
         <div class="hip-ui">
             <div class="hip-header">
-                <div>
-                    <h2 class="hip-title">${t.title}</h2>
-                    <div class="hip-subtitle">${t.subtitle}</div>
-                </div>
+                <h2 class="hip-title">${t.title}</h2>
                 <div class="hip-lang-toggle">
                     <button type="button" class="hip-lang-btn ${isES ? 'active' : ''}" onclick="setLanguageHip('es')">ES</button>
                     <button type="button" class="hip-lang-btn ${!isES ? 'active' : ''}" onclick="setLanguageHip('en')">EN</button>
@@ -266,12 +436,11 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
                     <b>${t.biblioHeader}</b><br>
                     ${t.biblioCitation}
                 </div>
-                <div class="hip-disclaimer">${t.disclaimer}</div>
             </div>
         </div>
     `;
 
-    // Preservar la selección previa si existe
+    // Preservar selección previa si existe
     const aSelect = document.getElementById('hip_a_select');
     if (prevSelectedA && Array.from(aSelect.options).some(o => o.value === prevSelectedA)) {
         aSelect.value = prevSelectedA;
@@ -290,7 +459,7 @@ window.onDrugAChanged = function(prevSelectedB) {
     const bSelect = document.getElementById('hip_b_select');
     const isES = window.currentLangHip === 'es';
 
-    // Regla fija de Melatonina 2 mg PR
+    // Regla fija clínica: Melatonina 2 mg PR
     if (aKey === 'MELATONIN_PR') {
         doseInput.value = 2;
         doseInput.disabled = true;
@@ -342,25 +511,28 @@ function parseHipDSL(code, aDose, nameA, nameB) {
     const parts = (code || '').split('|').map(s => s.trim());
     const typePart = parts[0]?.replace('TYPE:', '').trim();
 
+    // Suspensión directa limpia (sin mensajes redundantes)
     if (typePart === 'ABRUPT') {
         steps.push({
             label: `${t.day} 1`,
-            items: [{ name: nameA, tag: 'hip-tag-orig', text: `<b>${t.stop}</b> (${t.abruptStopNotice})` }]
+            items: [{ name: nameA, tag: 'hip-tag-orig', text: `<b>${t.stop}</b>` }]
         });
         return steps;
     }
 
+    // Switch directo limpio (sin mensajes de "al día siguiente...")
     if (typePart === 'DIRECT') {
         steps.push({
             label: `${t.day} 1`,
             items: [
                 { name: nameA, tag: 'hip-tag-orig', text: `<b>${t.stop}</b>` },
-                { name: nameB, tag: 'hip-tag-dest', text: `<b>${t.take}</b> (${t.directSwitchNotice})` }
+                { name: nameB, tag: 'hip-tag-dest', text: `<b>${t.initiate}</b>` }
             ]
         });
         return steps;
     }
 
+    // Modalidades escalonadas semanales: CROSS o TAPER
     const aMap = parseTokensToMap(parts.find(p => p.startsWith('A:'))?.replace('A:', ''));
     const bMap = parseTokensToMap(parts.find(p => p.startsWith('B:'))?.replace('B:', ''));
 
@@ -370,7 +542,7 @@ function parseHipDSL(code, aDose, nameA, nameB) {
         const weekLabel = `${t.week} ${weekNum}`;
         const items = [];
 
-        // Fármaco A
+        // Fármaco A (Origen)
         if (aMap[wk] !== undefined) {
             const tokenA = aMap[wk];
             if (tokenA.endsWith('%')) {
@@ -386,17 +558,17 @@ function parseHipDSL(code, aDose, nameA, nameB) {
                 if (mg === 0) {
                     items.push({ name: nameA, tag: 'hip-tag-orig', text: `<b>${t.stop}</b>` });
                 } else {
-                    items.push({ name: nameA, tag: 'hip-tag-orig', text: `${t.take} <b>${mg} mg</b>` });
+                    items.push({ name: nameA, tag: 'hip-tag-orig', text: `${t.initiate} <b>${mg} mg</b>` });
                 }
             }
         }
 
-        // Fármaco B (en Cross-Taper)
+        // Fármaco B (Destino en Cross-Taper)
         if (bMap && bMap[wk] !== undefined) {
             const tokenB = bMap[wk];
             const mgB = parseFloat(tokenB);
-            let action = t.take;
-            if (idx === 0) action = t.take;
+            let action = t.initiate;
+            if (idx === 0) action = t.initiate;
             else if (mgB > parseFloat(bMap[`W${idx}`] || 0)) action = t.increase;
             else action = t.maintain;
 
@@ -476,7 +648,7 @@ window.copiarEstrategiaHip = function() {
     });
 };
 
-// Disparo si se abre como página HTML independiente
+// Carga directa si se abre como archivo .html independiente en ordenador
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if (!document.getElementById('modalData')) window.iniciarHipnoticosSwitch();
