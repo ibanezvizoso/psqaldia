@@ -1,14 +1,13 @@
 /**
- * hipnoticosSwitch.js - Motor de Conmutación y Deprescripción de Hipnóticos PSQALDÍA v2.3
- * Basado en: Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al.
- * Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia:
- * Results of European neuropsychopharmacology and sleep expert's consensus group.
- * Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025
+ * hipnoticosSwitch.js - Motor de Conmutación y Deprescripción de Hipnóticos PSQALDÍA v3.0
+ * Lectura ESTRICTA desde Cloudflare Worker -> Google Sheets ('Data_Hypnotics')
+ * Basado en: Palagini L, et al. Sleep Medicine. 2025;128:117-126.
  */
 
 const CONFIG_HIP = {
-    SHEET_NAME: 'Data_Hipnotics',
-    // Mapeo según la pestaña Data_Hipnotics (Worker solicita A2:Z500)
+    // CORRECCIÓN CLAVE: El nombre debe coincidir EXACTAMENTE con la pestaña de Sheets
+    SHEET_NAME: 'Data_Hypnotics',
+    // Mapeo según la pestaña Data_Hypnotics (Worker solicita A2:Z500)
     COL_A_KEY: 0,      // Drug_A_Key
     COL_A_ES: 1,       // Farmaco_A_ES
     COL_A_EN: 2,       // Farmaco_A_EN
@@ -23,7 +22,7 @@ const CONFIG_HIP = {
 
 window.currentLangHip = window.currentLangHip || 'es';
 window.hipCurrentMode = window.hipCurrentMode || 'SWITCH';
-window.dbHipnotics = []; // Origen exclusivo: Google Sheets vía Worker
+window.dbHipnotics = []; // Sin datos harcodeados. Único origen: Google Sheets.
 
 const i18nHip = {
     es: {
@@ -47,8 +46,8 @@ const i18nHip = {
         recHeader: "Recomendación clínica del consenso:",
         biblioHeader: "Referencia del consenso:",
         biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
-        loading: "Cargando datos del consenso desde Sheets...",
-        errorLoad: "No se pudieron obtener los datos de la hoja Data_Hipnotics."
+        loading: "Conectando con PSQ al día para cargar datos clínicos...",
+        errorLoad: "No se pudieron obtener los datos de la hoja."
     },
     en: {
         title: "Hypnotic Switching & Deprescribing",
@@ -71,8 +70,8 @@ const i18nHip = {
         recHeader: "Consensus recommendation:",
         biblioHeader: "Consensus reference:",
         biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
-        loading: "Loading consensus data from Sheets...",
-        errorLoad: "Unable to retrieve data from Data_Hipnotics sheet."
+        loading: "Connecting to PSQ al día to load clinical data...",
+        errorLoad: "Unable to retrieve data from the sheet."
     }
 };
 
@@ -90,227 +89,40 @@ window.iniciarHipnoticosSwitch = async function() {
         const styleTag = document.createElement('style');
         styleTag.id = 'hip-styles';
         styleTag.innerHTML = `
-            .hip-ui { 
-                padding: 1.25rem; 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.65rem; 
-                font-family: inherit; 
-                box-sizing: border-box; 
-            }
-            .hip-header { 
-                display: grid; 
-                grid-template-columns: 1fr auto; 
-                align-items: center; 
-                margin-bottom: 0.25rem; 
-                width: 100%; 
-                box-sizing: border-box; 
-                padding-right: 48px; /* Margen para no solapar botón X del modal */
-            }
-            .hip-title { 
-                margin: 0; 
-                font-weight: 800; 
-                font-size: 1.2rem; 
-                color: #1e3a8a; 
-                line-height: 1.25; 
-            }
-            .hip-lang-toggle { 
-                display: flex; 
-                background: #e2e8f0; 
-                border-radius: 0.65rem; 
-                padding: 2px; 
-                flex-shrink: 0; 
-            }
-            .hip-lang-btn { 
-                padding: 4px 10px; 
-                border-radius: 0.5rem; 
-                border: none; 
-                cursor: pointer; 
-                font-size: 0.72rem; 
-                font-weight: 800; 
-                color: #64748b; 
-                background: transparent; 
-                transition: all 0.2s; 
-            }
-            .hip-lang-btn.active { 
-                background: #ffffff; 
-                color: #1e3a8a; 
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-            }
-            .hip-mode-toggle { 
-                display: grid; 
-                grid-template-columns: 1fr 1fr; 
-                background: #f1f5f9; 
-                border-radius: 0.85rem; 
-                padding: 3px; 
-                margin-top: 0.4rem; 
-                gap: 4px; 
-            }
-            .hip-mode-btn { 
-                padding: 0.7rem; 
-                border: none; 
-                border-radius: 0.7rem; 
-                cursor: pointer; 
-                font-size: 0.82rem; 
-                font-weight: 800; 
-                color: #64748b; 
-                background: transparent; 
-                transition: all 0.2s; 
-                text-align: center; 
-            }
-            .hip-mode-btn.active { 
-                background: #ffffff; 
-                color: #2563eb; 
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-            }
-            .hip-field { 
-                display: flex; 
-                flex-direction: column; 
-                margin-top: 0.4rem; 
-            }
-            .hip-field label { 
-                font-size: 0.7rem; 
-                font-weight: 800; 
-                text-transform: uppercase; 
-                color: #64748b; 
-                margin-bottom: 0.35rem; 
-            }
-            .hip-field select, .hip-field input { 
-                width: 100%; 
-                padding: 0.8rem; 
-                border-radius: 0.8rem; 
-                border: 2px solid #e2e8f0; 
-                font-size: 0.95rem; 
-                outline: none; 
-                background: #fff; 
-                box-sizing: border-box; 
-            }
-            .hip-field select:focus, .hip-field input:focus { 
-                border-color: #3b82f6; 
-            }
-            .hip-field input:disabled { 
-                background: #f8fafc; 
-                color: #94a3b8; 
-                cursor: not-allowed; 
-            }
-            .hip-help-text { 
-                font-size: 0.68rem; 
-                color: #0284c7; 
-                margin-top: 4px; 
-                font-weight: 600; 
-            }
-            .btn-ejecutar-hip { 
-                margin-top: 0.9rem; 
-                padding: 0.95rem; 
-                background: #1e3a8a; 
-                color: white; 
-                border: none; 
-                border-radius: 0.9rem; 
-                cursor: pointer; 
-                font-weight: 900; 
-                font-size: 0.95rem; 
-                transition: background 0.2s; 
-            }
+            .hip-ui { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; font-family: inherit; box-sizing: border-box; }
+            .hip-header { display: grid; grid-template-columns: 1fr auto; align-items: center; margin-bottom: 0.25rem; width: 100%; box-sizing: border-box; padding-right: 48px; }
+            .hip-title { margin: 0; font-weight: 800; font-size: 1.2rem; color: #1e3a8a; line-height: 1.25; }
+            .hip-lang-toggle { display: flex; background: #e2e8f0; border-radius: 0.65rem; padding: 2px; flex-shrink: 0; }
+            .hip-lang-btn { padding: 4px 10px; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.72rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; }
+            .hip-lang-btn.active { background: #ffffff; color: #1e3a8a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+            .hip-mode-toggle { display: grid; grid-template-columns: 1fr 1fr; background: #f1f5f9; border-radius: 0.85rem; padding: 3px; margin-top: 0.4rem; gap: 4px; }
+            .hip-mode-btn { padding: 0.7rem; border: none; border-radius: 0.7rem; cursor: pointer; font-size: 0.82rem; font-weight: 800; color: #64748b; background: transparent; transition: all 0.2s; text-align: center; }
+            .hip-mode-btn.active { background: #ffffff; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .hip-field { display: flex; flex-direction: column; margin-top: 0.4rem; }
+            .hip-field label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 0.35rem; }
+            .hip-field select, .hip-field input { width: 100%; padding: 0.8rem; border-radius: 0.8rem; border: 2px solid #e2e8f0; font-size: 0.95rem; outline: none; background: #fff; box-sizing: border-box; }
+            .hip-field select:focus, .hip-field input:focus { border-color: #3b82f6; }
+            .hip-field input:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+            .hip-help-text { font-size: 0.68rem; color: #0284c7; margin-top: 4px; font-weight: 600; }
+            .btn-ejecutar-hip { margin-top: 0.9rem; padding: 0.95rem; background: #1e3a8a; color: white; border: none; border-radius: 0.9rem; cursor: pointer; font-weight: 900; font-size: 0.95rem; transition: background 0.2s; }
             .btn-ejecutar-hip:hover { background: #172554; }
-            .hip-res-container { 
-                margin-top: 1.25rem; 
-                border-radius: 1rem; 
-                display: none; 
-                border: 1px solid #e2e8f0; 
-                background: #fff; 
-                overflow: hidden; 
-                box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-            }
-            .hip-res-header { 
-                background: #f8fafc; 
-                border-bottom: 1px solid #e2e8f0; 
-                padding: 0.9rem 1.15rem; 
-                font-size: 0.82rem; 
-                color: #334155; 
-                line-height: 1.5; 
-            }
+            .hip-res-container { margin-top: 1.25rem; border-radius: 1rem; display: none; border: 1px solid #e2e8f0; background: #fff; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+            .hip-res-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0.9rem 1.15rem; font-size: 0.82rem; color: #334155; line-height: 1.5; }
             .hip-res-header b { color: #0f172a; }
             .hip-res-body { padding: 1.25rem 1.15rem; }
-            .hip-step { 
-                display: flex; 
-                gap: 0.9rem; 
-                margin-bottom: 1.1rem; 
-                position: relative; 
-            }
-            .hip-step:not(:last-child)::after { 
-                content: ''; 
-                position: absolute; 
-                left: 17px; 
-                top: 36px; 
-                bottom: -14px; 
-                width: 2px; 
-                background: #f1f5f9; 
-            }
-            .hip-step-idx { 
-                min-width: 36px; 
-                height: 36px; 
-                background: white; 
-                border: 2px solid #e2e8f0; 
-                border-radius: 50%; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                font-weight: 900; 
-                font-size: 0.72rem; 
-                color: #1e3a8a; 
-                z-index: 1; 
-                flex-shrink: 0; 
-            }
-            .hip-step-content { 
-                flex-grow: 1; 
-                display: flex; 
-                flex-direction: column; 
-                gap: 6px; 
-                justify-content: center; 
-            }
-            .hip-tag { 
-                font-weight: 800; 
-                font-size: 0.65rem; 
-                text-transform: uppercase; 
-                padding: 2px 7px; 
-                border-radius: 5px; 
-                display: inline-block; 
-                margin-right: 6px; 
-                vertical-align: middle; 
-            }
+            .hip-step { display: flex; gap: 0.9rem; margin-bottom: 1.1rem; position: relative; }
+            .hip-step:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 36px; bottom: -14px; width: 2px; background: #f1f5f9; }
+            .hip-step-idx { min-width: 36px; height: 36px; background: white; border: 2px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.72rem; color: #1e3a8a; z-index: 1; flex-shrink: 0; }
+            .hip-step-content { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+            .hip-tag { font-weight: 800; font-size: 0.65rem; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; display: inline-block; margin-right: 6px; vertical-align: middle; }
             .hip-tag-orig { background: #fee2e2; color: #b91c1c; }
             .hip-tag-dest { background: #dcfce7; color: #15803d; }
             .hip-dose-txt { font-size: 0.9rem; color: #1e293b; vertical-align: middle; }
-            .hip-biblio-box { 
-                font-size: 0.72rem; 
-                color: #475569; 
-                padding: 0.85rem 1.15rem; 
-                background: #f8fafc; 
-                border-top: 1px solid #e2e8f0; 
-                line-height: 1.45; 
-            }
+            .hip-biblio-box { font-size: 0.72rem; color: #475569; padding: 0.85rem 1.15rem; background: #f8fafc; border-top: 1px solid #e2e8f0; line-height: 1.45; }
             .hip-biblio-box b { color: #0f172a; }
-            .btn-copiar-hip { 
-                margin-top: 0.6rem; 
-                width: 100%; 
-                padding: 0.85rem; 
-                background: #f1f5f9; 
-                border-radius: 0.8rem; 
-                border: 1px solid #e2e8f0; 
-                cursor: pointer; 
-                font-weight: 800; 
-                font-size: 0.78rem; 
-                color: #475569; 
-                transition: all 0.2s; 
-            }
+            .btn-copiar-hip { margin-top: 0.6rem; width: 100%; padding: 0.85rem; background: #f1f5f9; border-radius: 0.8rem; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 800; font-size: 0.78rem; color: #475569; transition: all 0.2s; }
             .btn-copiar-hip:hover { background: #e2e8f0; color: #0f172a; }
-            .hip-loading-box { 
-                text-align: center; 
-                padding: 2.5rem 1rem; 
-                color: #64748b; 
-                font-size: 0.85rem; 
-                font-weight: 600; 
-            }
+            .hip-loading-box { text-align: center; padding: 2.5rem 1rem; color: #64748b; font-size: 0.85rem; font-weight: 600; line-height: 1.5; }
         `;
         document.head.appendChild(styleTag);
     }
@@ -319,14 +131,30 @@ window.iniciarHipnoticosSwitch = async function() {
     container.innerHTML = `<div class="hip-loading-box">${t.loading}</div>`;
 
     try {
+        // Enrutamiento seguro para que el Worker actúe desde local y producción
         const apiBase = window.location.origin.includes('psqaldia.com') ? '' : 'https://psqaldia.com';
+        
+        // Llamada fetch al Worker (Bloque 1), pasando el nombre EXACTO de la pestaña
         const response = await fetch(`${apiBase}/?sheet=${CONFIG_HIP.SHEET_NAME}`);
         
-        if (!response.ok) throw new Error("Error HTTP " + response.status);
+        if (!response.ok) {
+            throw new Error(`Fallo HTTP: ${response.status} ${response.statusText}`);
+        }
+        
         const data = await response.json();
-        const rawRows = (data && data.values) ? data.values : [];
+        
+        // Si el Worker devuelve error de API de Google (ej: hoja no encontrada)
+        if (data.error) {
+            throw new Error(`Error API Sheets: ${data.error.message || 'Desconocido'}`);
+        }
 
-        // Mapeo seguro celda por celda frente a celdas vacías (undefined)
+        const rawRows = (data && data.values) ? data.values : [];
+        if (rawRows.length === 0) {
+            throw new Error("La hoja está vacía o el rango A2:Z500 no devolvió datos.");
+        }
+
+        // Mapeo seguro: El Worker pide A2:Z500, la fila 0 de rawRows YA es el primer fármaco.
+        // Se gestionan los undefined (celdas vacías a la derecha) limpiamente con getCol.
         window.dbHipnotics = rawRows
             .filter(r => r && r[CONFIG_HIP.COL_A_KEY] && r[CONFIG_HIP.COL_A_KEY].toString().trim().toLowerCase() !== 'drug_a_key')
             .map(r => {
@@ -346,10 +174,21 @@ window.iniciarHipnoticosSwitch = async function() {
             })
             .filter(item => item.aKey && item.code);
 
-        renderInterfazHip();
+        if (window.dbHipnotics.length > 0) {
+            renderInterfazHip();
+        } else {
+            throw new Error("Se obtuvieron filas, pero ninguna con 'Código Algorítmico' válido.");
+        }
+
     } catch (e) {
         console.error("Error al cargar datos desde Sheets:", e);
-        container.innerHTML = `<div class="hip-loading-box" style="color:#b91c1c;">${t.errorLoad}</div>`;
+        // Mostrar mensaje explícito de error en pantalla para depuración si falla
+        container.innerHTML = `
+            <div class="hip-loading-box" style="color:#b91c1c;">
+                <b>${t.errorLoad}</b><br><br>
+                <small style="color:#475569;">Motivo: ${e.message}</small>
+            </div>
+        `;
     }
 };
 
@@ -378,7 +217,6 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
     const container = getHipContainer();
     if (!container) return;
 
-    // Extracción de lista única de fármaco origen según la modalidad activa
     const drugAMap = new Map();
     window.dbHipnotics.forEach(row => {
         if (window.hipCurrentMode === 'TAPER') {
@@ -440,7 +278,6 @@ function renderInterfazHip(prevSelectedA, prevSelectedB) {
         </div>
     `;
 
-    // Preservar selección previa si existe
     const aSelect = document.getElementById('hip_a_select');
     if (prevSelectedA && Array.from(aSelect.options).some(o => o.value === prevSelectedA)) {
         aSelect.value = prevSelectedA;
@@ -459,7 +296,6 @@ window.onDrugAChanged = function(prevSelectedB) {
     const bSelect = document.getElementById('hip_b_select');
     const isES = window.currentLangHip === 'es';
 
-    // Regla fija clínica: Melatonina 2 mg PR
     if (aKey === 'MELATONIN_PR') {
         doseInput.value = 2;
         doseInput.disabled = true;
@@ -511,7 +347,6 @@ function parseHipDSL(code, aDose, nameA, nameB) {
     const parts = (code || '').split('|').map(s => s.trim());
     const typePart = parts[0]?.replace('TYPE:', '').trim();
 
-    // Suspensión directa limpia (sin mensajes redundantes)
     if (typePart === 'ABRUPT') {
         steps.push({
             label: `${t.day} 1`,
@@ -520,7 +355,6 @@ function parseHipDSL(code, aDose, nameA, nameB) {
         return steps;
     }
 
-    // Switch directo limpio (sin mensajes de "al día siguiente...")
     if (typePart === 'DIRECT') {
         steps.push({
             label: `${t.day} 1`,
@@ -532,7 +366,6 @@ function parseHipDSL(code, aDose, nameA, nameB) {
         return steps;
     }
 
-    // Modalidades escalonadas semanales: CROSS o TAPER
     const aMap = parseTokensToMap(parts.find(p => p.startsWith('A:'))?.replace('A:', ''));
     const bMap = parseTokensToMap(parts.find(p => p.startsWith('B:'))?.replace('B:', ''));
 
@@ -542,7 +375,6 @@ function parseHipDSL(code, aDose, nameA, nameB) {
         const weekLabel = `${t.week} ${weekNum}`;
         const items = [];
 
-        // Fármaco A (Origen)
         if (aMap[wk] !== undefined) {
             const tokenA = aMap[wk];
             if (tokenA.endsWith('%')) {
@@ -563,7 +395,6 @@ function parseHipDSL(code, aDose, nameA, nameB) {
             }
         }
 
-        // Fármaco B (Destino en Cross-Taper)
         if (bMap && bMap[wk] !== undefined) {
             const tokenB = bMap[wk];
             const mgB = parseFloat(tokenB);
@@ -648,7 +479,6 @@ window.copiarEstrategiaHip = function() {
     });
 };
 
-// Carga directa si se abre como archivo .html independiente en ordenador
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if (!document.getElementById('modalData')) window.iniciarHipnoticosSwitch();
