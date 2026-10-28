@@ -50,7 +50,6 @@ window.dbHipnotics = window.dbHipnotics || FALLBACK_HIPNOTICS;
 const i18nHip = {
     es: {
         title: "Switch & Deprescripción de Hipnóticos",
-        subtitle: "Guía clínica europea de insomnio crónico (Palagini et al., Sleep Med 2025)",
         modeSwitch: "Cambio (Switch)",
         modeTaper: "Retirada (Taper)",
         fromDrug: "Fármaco Actual (Origen)",
@@ -72,11 +71,9 @@ const i18nHip = {
         recHeader: "Recomendación clínica del consenso:",
         biblioHeader: "Referencia bibliográfica:",
         biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
-        disclaimer: "Propuesta de transición basada en el consenso europeo de expertos (Palagini et al., 2025). Debe individualizarse y supervisarse según criterio clínico, comorbilidades y respuesta del paciente."
     },
     en: {
         title: "Hypnotic Switching & Deprescribing",
-        subtitle: "European Expert Consensus Guidelines (Palagini et al., Sleep Med 2025)",
         modeSwitch: "Switch Medication",
         modeTaper: "Deprescribe (Taper)",
         fromDrug: "Current Hypnotic (Origin)",
@@ -98,7 +95,6 @@ const i18nHip = {
         recHeader: "Consensus recommendation:",
         biblioHeader: "Bibliographic citation:",
         biblioCitation: "Palagini L, Brugnoli R, Dell'Osso BM, Di Nicola M, Maina G, Martinotti G, et al. Clinical practice guidelines for switching or deprescribing hypnotic medications for chronic insomnia: Results of European neuropsychopharmacology and sleep expert's consensus group. Sleep Medicine. 2025;128:117-126. doi:10.1016/j.sleep.2025.01.025",
-        disclaimer: "Transition proposed according to European expert consensus (Palagini et al., 2025). Always adapt and monitor according to clinical judgment, comorbidity, and patient response."
     }
 };
 
