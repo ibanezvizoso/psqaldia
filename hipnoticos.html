@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch de Hipnóticos: Cambio y Retirada | PSQALDÍA</title>
+    <meta name="description" content="Motor de cambio y retirada gradual de hipnóticos (BZD, fármacos Z, daridorexant y melatonina) según el consenso europeo de Palagini et al. (Sleep Med, 2025).">
+    <link rel="canonical" href="https://psqaldia.com/hipnoticos">
+    <link rel="icon" type="image/png" href="/Logo.png">
+    
+    <link rel="stylesheet" href="/css/all.min.css">
+   
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg: #fcfdfe;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+            --radius: 1.5rem;
+        }
+
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
+
+        .main-content { padding: 0 1.5rem 5rem; max-width: 1000px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
+
+        /* --- NUEVO GRID DE CARACTERÍSTICAS --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            margin-top: -1rem; /* Eleva ligeramente las tarjetas */
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            width: 60px; height: 60px;
+            border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
+        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+        /* Contenedor de la herramienta */
+        #modalData { 
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            min-height: 400px;
+            max-width: 800px; /* Mantenemos la herramienta centrada y no muy ancha */
+            margin: auto;
+        }
+
+        /* Sección de Info/Referencia */
+        .info-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-top: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .info-panel h2 { font-size: 1.1rem; margin-top: 0; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-panel i { color: var(--primary); }
+
+        /* Footer de navegación */
+        .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+        .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- NUEVO FOOTER SUTIL FINAL --- */
+        .site-bottom-info {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: #f8fafc; /* Un gris muy sutil */
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        .site-bottom-info img {
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 8px;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .nav-header { padding: 1rem; }
+            .features-grid { gap: 1rem; }
+            .feature-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-header">
+        <a href="https://psqaldia.com" class="logo"><i class="fas fa-moon"></i> PSQALDÍA</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Switch de Hipnóticos</h1>
+        <p>Motor de cambio y retirada gradual de hipnóticos: benzodiacepinas, fármacos Z, daridorexant y melatonina.</p>
+    </header>
+
+    <main class="main-content">
+        
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-random"></i></div>
+                <h3>Cambio o Retirada</h3>
+                <p>Dos modos: cambio entre hipnóticos (switch) o retirada gradual (taper), con la pauta generada a partir de la dosis actual.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-copy"></i></div>
+                <h3>Lista para la Historia</h3>
+                <p>Copia la pauta con un solo clic para pegarla directamente en la historia clínica del paciente.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-book-medical"></i></div>
+                <h3>Evidencia Actualizada</h3>
+                <p>Basado en el consenso europeo de <b>Palagini et al. (Sleep Medicine, 2025)</b> para el cambio y la deprescripción de hipnóticos.</p>
+            </div>
+        </section>
+
+        <div id="modalData">
+            <div style="padding:5rem; text-align:center;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i>
+                <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Cargando motor de hipnóticos...</p>
+            </div>
+        </div>
+
+        <section class="info-panel">
+            <h2><i class="fas fa-info-circle"></i> Base Científica y Uso</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">
+                El motor genera la pauta de cambio o retirada según el consenso europeo de Palagini et al. (2025). Esta herramienta es un asistente a la decisión clínica y no sustituye el juicio del profesional sanitario. Verifique siempre las interacciones potenciales y la situación clínica del paciente antes de iniciar un cambio.
+            </p>
+        </section>
+
+        <footer class="nav-footer">
+            <a href="https://psqaldia.com/herramientas" class="link-back">
+                <i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS
+            </a>
+        </footer>
+    </main>
+
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <span>&copy; 2026 PSQ AL DÍA - Herramientas de Ayuda a la Decisión Clínica</span>
+    </footer>
+
+    <script src="/hipnoticosSwitch.js"></script>
+    <script>
+        // Configuración de URL del Worker para PSQALDÍA
+        window.WORKER_URL = "https://psqaldia.com/"; 
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof window.iniciarHipnoticosSwitch === 'function') {
+                await window.iniciarHipnoticosSwitch();
+            }
+        });
+    </script>
+</body>
+</html>

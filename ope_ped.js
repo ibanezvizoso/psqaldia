@@ -100,7 +100,7 @@ async function iniciarExamenPed(año, esContinuacion = false) {
             const d20 = await res20.json();
             rows = [...(d22.values || []), ...(d20.values || [])];
         } else {
-            const response = await fetch(`${window.WORKER_URL}?sheet=Ope_Ped${año}`);
+            const response = await fetch(`/?sheet=Ope_Ped${año}`);
             const data = await response.json();
             rows = data.values || [];
         }
