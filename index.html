@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/Logo.png">
-    <link rel="apple-touch-icon" href="/Logo.png"> <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png"> <link rel="manifest" href="/manifest.json">
 
     <link rel="stylesheet" href="/css/all.min.css">
     <script>
@@ -11,11 +13,17 @@
         }
     </script>
     <meta name="google-site-verification" content="BpHCi544mGO8TaOecGzGZpkH4wzaltHrdY4VqNhBEp4" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSQALDÍA | Tu web/app para la psiquiatría clínica</title>
     <meta name="description" content="Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.">
     
+    <link rel="canonical" href="https://psqaldia.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PSQALDÍA">
+    <meta property="og:title" content="PSQALDÍA | Tu web/app para la psiquiatría clínica">
+    <meta property="og:description" content="Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.">
+    <meta property="og:url" content="https://psqaldia.com/">
+    <meta property="og:image" content="https://psqaldia.com/icon-512.png">
+    <meta name="twitter:card" content="summary">
     <meta name="theme-color" content="#4338ca">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -63,12 +71,14 @@ header {
     background: none; 
     border: none; 
     color: var(--text-main); 
-    font-size: 1.3rem; 
+    font-size: 1.4rem; 
     cursor: pointer; 
+    padding: 0.5rem; 
+    z-index: 110; 
     width: 40px; 
     display: flex; 
     align-items: center; 
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 /* Contenedor central de marca */
@@ -108,10 +118,6 @@ header.hide {
     .brand-text-modern { font-size: 1.1rem; }
     .logo-img-modern { height: 35px; }
 }
-        header.hide { transform: translateY(-100%); }
-        .menu-toggle { background: none; border: none; color: var(--text-main); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; z-index: 110; width: 40px; display: flex; align-items: center; justify-content: center; }
-        .logo-img { max-height: 80px; width: auto; display: block; margin: 0 auto; position: absolute; left: 50%; transform: translateX(-50%); }
-        .header-spacer { width: 40px; }
         .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .side-menu.open { left: 0; }
         .menu-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1999; display: none; }
@@ -218,6 +224,8 @@ header.hide {
     });
   }
   
+  const PLACEHOLDER_IMG = '/placeholder.svg';
+
   function slugify(text) {
       return text.toString().toLowerCase().trim()
           .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -324,7 +332,8 @@ async function compartirRecurso(e, id) {
     function parseDate(dateStr) {
         if (!dateStr) return new Date(0);
         const parts = dateStr.split(/[\/\s-]/);
-        return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr) || new Date(0);
+        const d = parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr);
+        return isNaN(d) ? new Date(0) : d;
     }
 
     async function loadData() {
@@ -362,7 +371,7 @@ async function compartirRecurso(e, id) {
         const shareText = item.accion !== '' ? `🛠️ *Herramienta*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}*: ${shareUrl}`;
         
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
-            <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" class="card-img" loading="lazy">
+            <img src="${item.imagen || PLACEHOLDER_IMG}" class="card-img" loading="lazy" alt="" onerror="this.onerror=null; this.src=PLACEHOLDER_IMG;">
             <div class="card-content">
                 <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
@@ -388,7 +397,7 @@ async function compartirRecurso(e, id) {
     }
 
     document.getElementById('modalData').innerHTML = `
-        <img src="${item.imagen || 'https://via.placeholder.com/400x200?text=PSQ'}" style="width:100%; height:250px; object-fit:cover;">
+        <img src="${item.imagen || PLACEHOLDER_IMG}" alt="" onerror="this.onerror=null; this.src=PLACEHOLDER_IMG;" style="width:100%; height:250px; object-fit:cover;">
         <div style="padding:2rem;">
             <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
             <h2 style="margin:1rem 0;">${item.titulo}</h2>
