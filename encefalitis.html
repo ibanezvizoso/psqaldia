@@ -138,11 +138,13 @@
             .features-grid { gap: 1rem; }
         }
     </style>
+    <link rel="stylesheet" href="/css/psq.css">
 </head>
-<body>
+<body class="psq-tool">
 
-    <nav class="nav-header">
-        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+    <nav class="nav-header psq-topbar">
+        <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>PSQ <b>AL DÍA</b></span></a>
+        <a href="/herramientas" class="psq-nav-link"><i class="fas fa-toolbox"></i><span>Herramientas</span></a>
     </nav>
 
     <header class="hero">
@@ -177,7 +179,7 @@
             <div class="legend-item"><div class="dot" style="background: #dbeafe; border-color: #93c5fd;"></div> Origen Inmunomediado / Autoinmune</div>
         </div>
 
-        <div id="modalData">
+        <div id="modalData" class="psq-light-island">
             <div style="padding:5rem; text-align:center;">
                 <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i>
                 <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Sincronizando base de datos clínica...</p>

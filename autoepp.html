@@ -106,12 +106,14 @@
             .grid-info { grid-template-columns: 1fr; }
         }
     </style>
+    <link rel="stylesheet" href="/css/psq.css">
 </head>
 <body>
 
-    <header>
-        <a href="/" class="logo-text">PSQ<span>al día</span></a>
-    </header>
+    <nav class="psq-topbar">
+    <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>PSQ <b>AL DÍA</b></span></a>
+    <a href="/herramientas" class="psq-nav-link"><i class="fas fa-toolbox"></i><span>Herramientas</span></a>
+</nav>
 
     <div class="container">
         <div class="hero">
@@ -143,7 +145,7 @@
         </div>
 
         <div id="tool-wrapper">
-            <div id="modalData">
+            <div id="modalData" class="psq-light-island">
                 <div style="padding:4rem; text-align:center;">
                     <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
                     <p style="margin-top:1rem; font-weight:600;">Sincronizando con base de datos...</p>

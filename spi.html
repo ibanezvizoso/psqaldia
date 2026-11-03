@@ -165,11 +165,13 @@
             #modalData .spi-radar-box { height: 280px !important; }
         }
     </style>
+    <link rel="stylesheet" href="/css/psq.css">
 </head>
-<body>
+<body class="psq-tool">
 
-    <nav class="nav-header">
-        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+    <nav class="nav-header psq-topbar">
+        <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>PSQ <b>AL DÍA</b></span></a>
+        <a href="/herramientas" class="psq-nav-link"><i class="fas fa-toolbox"></i><span>Herramientas</span></a>
     </nav>
 
     <header class="hero">
@@ -202,7 +204,7 @@
         </section>
 
         <!-- Contenedor de la herramienta -->
-        <div id="modalData">
+        <div id="modalData" class="psq-light-island">
             <div style="padding:10rem 2rem; text-align:center;">
                 <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--primary); opacity: 0.6;"></i>
                 <p style="margin-top:1.5rem; font-weight:700; color:var(--text-muted); font-size: 1.1rem;">Cargando matriz de síntomas...</p>
