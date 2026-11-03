@@ -132,14 +132,28 @@ header.hide {
         .filter-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 1rem; }
         .f-btn { padding: 0.6rem 1.2rem; border-radius: 50px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; transition: 0.3s; color: var(--text-muted); }
         .f-btn:hover { color: var(--brand); border-color: var(--brand); }
-        .f-btn.active { background: var(--btn-bg); color: var(--btn-text); border-color: var(--btn-bg); }
-        .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
+        .f-btn.active { background: var(--icon-grad); color: var(--btn-text); border-color: transparent; box-shadow: 0 6px 16px -8px rgba(47, 134, 196, .8); }
+        .home-hero { text-align: center; padding: 2.75rem 1rem .25rem; }
+        .home-hero h1 { margin: 0 0 .5rem; font-size: clamp(2rem, 6vw, 3.1rem); font-weight: 800; letter-spacing: -.04em; line-height: 1.05; }
+        .home-hero p { margin: 0 auto; max-width: 520px; color: var(--text-muted); font-size: 1.05rem; line-height: 1.5; }
+        .section-title { font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 2.25rem 0 1rem; letter-spacing: -.02em; display: none; }
+        .section-title i { color: var(--fav); font-size: 1.1rem; margin-right: .35rem; }
         #app, #favs-app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
         .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-sm); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
         .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-        .card-img { width: 100%; height: 180px; object-fit: cover; background: var(--border); }
+        .card-media { position: relative; overflow: hidden; background: var(--border); }
+        .card-media::after { content: ""; position: absolute; inset: auto 0 0 0; height: 55%; background: linear-gradient(to top, rgba(8, 15, 28, .45), transparent); pointer-events: none; }
+        .card-img { width: 100%; height: 190px; object-fit: cover; display: block; transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+        .card:hover .card-img { transform: scale(1.06); }
+        .card-media .tag { position: absolute; left: .9rem; bottom: .9rem; margin: 0; z-index: 2; -webkit-backdrop-filter: blur(8px) saturate(160%); backdrop-filter: blur(8px) saturate(160%); box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+        @media (min-width: 720px) {
+            .card.featured { grid-column: span 2; }
+            .card.featured .card-img { height: 320px; }
+            .card.featured .tit { font-size: 1.6rem; letter-spacing: -.025em; }
+            .card.featured .res { -webkit-line-clamp: 4; font-size: .98rem; }
+        }
         .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .fav-btn { position: absolute; top: 1rem; right: 1rem; background: var(--card); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; font-size: 1.1rem; color: #cbd5e1; transition: 0.2s; }
+        .fav-btn { position: absolute; top: 1rem; right: 1rem; background: color-mix(in srgb, var(--card) 85%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; font-size: 1.1rem; color: #cbd5e1; transition: 0.2s; }
         .fav-btn.is-fav { color: var(--fav); }
         .tag { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; }
         .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: var(--text-main); line-height: 1.2; }
@@ -147,7 +161,7 @@ header.hide {
         .card-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 5px; font-weight: 600; opacity: 0.8; }
         .card-actions { display: flex; gap: 0.75rem; margin-top: auto; }
         .btn { flex: 1; padding: 0.8rem; border-radius: 1rem; text-decoration: none; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-primary { background: var(--btn-bg); color: var(--btn-text); }
+        .btn-primary { background: var(--icon-grad); color: var(--btn-text); }
         .btn-primary:hover { background: var(--brand-strong); }
         .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 55px; font-size: 1.4rem; }
         .btn-share { background: var(--brand-soft); color: var(--brand); flex: 0 0 55px; font-size: 1.15rem; }
@@ -161,7 +175,12 @@ header.hide {
             #app, #favs-app { gap: 1rem; }
             .card { border-radius: 1.25rem; }
             .card:hover { transform: none; }
-            .card-img { height: 150px; }
+            .card-img { height: 160px; }
+            .card.featured .card-img { height: 210px; }
+            .card.featured .tit { font-size: 1.3rem; }
+            .home-hero { padding: 1.75rem .5rem 0; }
+            .home-hero p { font-size: .98rem; }
+            .section-title { font-size: 1.2rem; margin-top: 1.75rem; }
             .card-content { padding: 1.1rem 1.2rem 1.2rem; }
             .tag { margin-bottom: .7rem; }
             .tit { font-size: 1.12rem; margin-bottom: .45rem; }
@@ -173,7 +192,7 @@ header.hide {
         .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--card); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 20; }
     </style>
 </head>
-<body>
+<body class="psq-first-load">
 <header id="mainHeader">
     <button class="menu-toggle" onclick="toggleMenu()" aria-label="Abrir Menú">
         <i class="fas fa-bars"></i>
@@ -204,14 +223,18 @@ header.hide {
     </nav>
 </div>
 <div class="container">
+    <section class="home-hero psq-glow">
+        <h1 class="psq-grad-text">Psiquiatría clínica, al&nbsp;día</h1>
+        <p>Herramientas, guías y recursos para la práctica diaria.</p>
+    </section>
     <div class="search-area">
         <input type="text" id="search" placeholder="Buscar..." oninput="filter()">
         <div id="filterContainer" class="filter-buttons"></div>
     </div>
     <div id="favs-title" class="section-title"><i class="fas fa-star"></i> Mis Favoritos</div>
-    <div id="favs-app"></div>
+    <div id="favs-app" class="psq-stagger"></div>
     <div id="main-title" class="section-title">Todos los Recursos</div>
-    <div id="app"></div>
+    <div id="app" class="psq-stagger"></div>
 </div>
 <footer>
     <div style="margin-bottom: 1rem; font-weight: 800; opacity: 0.5; font-size: 0.8rem; letter-spacing: 1px;">PSQALDÍA © 2026</div>
@@ -337,11 +360,11 @@ async function compartirRecurso(e, id) {
         lastScrollY = window.scrollY;
     });
 
-    function getPasteColor(str) {
+    function getPasteColor(str, alpha = 1) {
     let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
     // Multiplicamos por 17 para dispersar los hashes y cambiar radicalmente la paleta
     const h = (Math.abs(hash) * 17) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return `background-color: hsl(${h}, 70%, ${isDark?25:92}%); color: hsl(${h}, 70%, ${isDark?90:25}%); border: 1px solid hsl(${h}, 70%, ${isDark?40:80}%);`;
+    return `background-color: hsla(${h}, 70%, ${isDark?25:92}%, ${alpha}); color: hsl(${h}, 70%, ${isDark?90:25}%); border: 1px solid hsl(${h}, 70%, ${isDark?40:80}%);`;
 }
 
     function parseDate(dateStr) {
@@ -365,6 +388,8 @@ async function compartirRecurso(e, id) {
             }
             db.sort((a, b) => parseDate(b.fecha) - parseDate(a.fecha));
             createFilterButtons(); renderAll(); checkSharedResource();
+            // La animación de entrada solo se ve en la primera carga (no al buscar o filtrar)
+            setTimeout(() => document.body.classList.remove('psq-first-load'), 1200);
         } catch (e) { 
             console.error("Error:", e); 
             document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos.</div>';
@@ -386,9 +411,11 @@ async function compartirRecurso(e, id) {
         const shareText = item.accion !== '' ? `🛠️ *Herramienta*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}*: ${shareUrl}`;
         
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
-            <img src="${item.imagen || PLACEHOLDER_IMG}" class="card-img" loading="lazy" alt="" onerror="this.onerror=null; this.src=PLACEHOLDER_IMG;">
+            <div class="card-media">
+                <img src="${item.imagen || PLACEHOLDER_IMG}" class="card-img" loading="lazy" alt="" onerror="this.onerror=null; this.src=PLACEHOLDER_IMG;">
+                <span class="tag" style="${getPasteColor(item.categoria, 0.88)}">${item.categoria}</span>
+            </div>
             <div class="card-content">
-                <span class="tag" style="${getPasteColor(item.categoria)}">${item.categoria}</span>
                 <div class="tit">${item.titulo}</div>
                 <div class="res">${item.resumen}</div>
                 <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
@@ -501,7 +528,12 @@ document.addEventListener('keydown', (e) => {
             favsList.forEach(i => favsApp.appendChild(createCard(i))); 
         } else { document.getElementById('favs-title').style.display = 'none'; }
         document.getElementById('main-title').style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
-        othersList.forEach(i => app.appendChild(createCard(i)));
+        othersList.forEach((i, idx) => {
+            const card = createCard(i);
+            // La entrada más reciente se destaca (solo si hay suficientes para que luzca)
+            if (idx === 0 && othersList.length >= 3) card.classList.add('featured');
+            app.appendChild(card);
+        });
     }
 
     function createFilterButtons() {

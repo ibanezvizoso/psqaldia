@@ -86,6 +86,68 @@
     color: var(--text-main);
 }
 
+/* ---------- Toques de color (títulos y brillo de fondo) ---------- */
+:root {
+    --title-grad: linear-gradient(120deg, #1f5486 0%, #2a74b8 55%, #1a7fa3 100%);
+    --glow-a: rgba(58, 134, 200, .20);
+    --glow-b: rgba(26, 160, 190, .14);
+    --icon-grad: linear-gradient(135deg, #256095 0%, #2f86c4 60%, #1f9bbd 100%);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not(.psq-light-only) {
+        --title-grad: linear-gradient(120deg, #b9d8f6 0%, #8cc0ef 50%, #6fd3e8 100%);
+        --glow-a: rgba(58, 134, 200, .28);
+        --glow-b: rgba(34, 190, 220, .16);
+        --icon-grad: linear-gradient(135deg, #2b6aa6 0%, #3a8fd0 60%, #23a6c6 100%);
+    }
+}
+
+/* Título grande con degradado (texto grande: contraste ≥ 3,9:1 en todo el degradado) */
+.psq-grad-text,
+.psq-hero h1,
+body.psq-tool .hero h1 {
+    background: var(--title-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--brand);
+}
+
+/* Títulos repartidos en líneas equilibradas (sin palabras sueltas al final) */
+h1, h2, .psq-hero h1 { text-wrap: balance; }
+
+/* Brillo difuminado detrás de la cabecera de cada página */
+.psq-glow { position: relative; isolation: isolate; }
+.psq-glow::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -40px 0 auto 0;
+    height: 420px;
+    pointer-events: none;
+    background:
+        radial-gradient(38% 60% at 30% 35%, var(--glow-a) 0%, transparent 70%),
+        radial-gradient(34% 55% at 72% 30%, var(--glow-b) 0%, transparent 70%);
+    filter: blur(10px);
+}
+
+/* Aparición suave solo en la primera carga (clase .psq-first-load en <body>) */
+@keyframes psqFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+}
+.psq-first-load .psq-stagger > * { animation: psqFadeUp .55s cubic-bezier(.2, .7, .2, 1) both; }
+.psq-first-load .psq-stagger > *:nth-child(2) { animation-delay: .05s; }
+.psq-first-load .psq-stagger > *:nth-child(3) { animation-delay: .10s; }
+.psq-first-load .psq-stagger > *:nth-child(4) { animation-delay: .15s; }
+.psq-first-load .psq-stagger > *:nth-child(5) { animation-delay: .20s; }
+.psq-first-load .psq-stagger > *:nth-child(6) { animation-delay: .25s; }
+.psq-first-load .psq-stagger > *:nth-child(n+7) { animation-delay: .30s; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
 /* ---------- Base ---------- */
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -153,16 +215,16 @@ body {
 /* ---------- Hero común ---------- */
 .psq-hero {
     text-align: center;
-    padding: 3.5rem 1.25rem 2.5rem;
-    background: radial-gradient(ellipse 70% 100% at 50% 0%, var(--brand-soft) 0%, transparent 70%);
+    padding: 3.75rem 1.25rem 2.75rem;
+    background: transparent;
     color: var(--text-main);
 }
 .psq-hero h1 {
-    margin: 0 0 .6rem;
-    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    margin: 0 0 .7rem;
+    font-size: clamp(2.1rem, 6vw, 3.25rem);
     font-weight: 800;
-    letter-spacing: -.035em;
-    line-height: 1.1;
+    letter-spacing: -.04em;
+    line-height: 1.05;
 }
 .psq-hero p {
     margin: 0 auto;
@@ -186,8 +248,8 @@ body {
     font-weight: 800;
     font-size: 1rem;
     color: var(--btn-text);
-    background: var(--brand-grad);
-    box-shadow: 0 10px 24px -10px rgba(37, 96, 149, .7);
+    background: var(--icon-grad);
+    box-shadow: 0 12px 30px -10px rgba(47, 134, 196, .75), inset 0 1px 0 rgba(255, 255, 255, .18);
     transition: transform .2s, box-shadow .2s;
 }
 .psq-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -12px rgba(37, 96, 149, .8); }
@@ -216,14 +278,13 @@ body {
    Páginas de herramienta con la plantilla común (body.psq-tool)
    ========================================================================== */
 body.psq-tool .hero {
-    padding: 3.25rem 1.25rem 2.75rem;
-    background: radial-gradient(ellipse 70% 100% at 50% 0%, var(--brand-soft) 0%, transparent 70%);
+    padding: 3.5rem 1.25rem 2.75rem;
+    background: transparent;
 }
 body.psq-tool .hero h1 {
-    font-size: clamp(1.9rem, 5vw, 2.8rem);
-    letter-spacing: -.035em;
-    line-height: 1.1;
-    color: var(--text-main);
+    font-size: clamp(2.1rem, 6vw, 3.25rem);
+    letter-spacing: -.04em;
+    line-height: 1.05;
 }
 body.psq-tool .hero p { color: var(--text-muted); }
 

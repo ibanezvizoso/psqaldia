@@ -36,8 +36,11 @@
         .tool-icon {
             flex: 0 0 48px; height: 48px; border-radius: 14px;
             display: inline-flex; align-items: center; justify-content: center;
-            background: var(--brand-soft); color: var(--brand); font-size: 1.3rem;
+            background: var(--icon-grad); color: #fff; font-size: 1.25rem;
+            box-shadow: 0 8px 18px -10px rgba(47, 134, 196, .8), inset 0 1px 0 rgba(255, 255, 255, .2);
+            transition: transform .25s;
         }
+        .tool-card:hover .tool-icon { transform: scale(1.06) rotate(-3deg); }
         .tool-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .3rem; }
         .tool-title { font-weight: 800; font-size: 1.08rem; letter-spacing: -.01em; color: var(--text-main); }
         .tool-desc {
@@ -58,14 +61,14 @@
         }
     </style>
 </head>
-<body>
+<body class="psq-first-load">
 
     <nav class="psq-topbar">
         <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>PSQ <b>AL DÍA</b></span></a>
         <a href="/opesergas" class="psq-nav-link"><i class="fas fa-graduation-cap"></i><span>Portal OPE</span></a>
     </nav>
 
-    <header class="psq-hero">
+    <header class="psq-hero psq-glow">
         <h1>Herramientas Clínicas</h1>
         <p>Utilidades interactivas para asistir en la toma de decisiones psiquiátricas.</p>
         <div class="search-wrap">
@@ -75,7 +78,7 @@
     </header>
 
     <main class="container">
-        <div class="tools" id="tools">
+        <div class="tools psq-stagger" id="tools">
             <a href="/hipnoticos" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-moon"></i></span>
                 <span class="tool-text">
@@ -206,6 +209,9 @@
     </footer>
 
     <script>
+        // La animación de entrada solo se ve al cargar (no al filtrar)
+        setTimeout(() => document.body.classList.remove('psq-first-load'), 1200);
+
         // Buscador: filtra por título y descripción, sin distinguir tildes ni mayúsculas
         (function () {
             const norm = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
