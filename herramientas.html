@@ -8,241 +8,221 @@
     <link rel="stylesheet" href="/css/all.min.css">
     <link rel="icon" type="image/png" href="/Logo.png">
     
+    <link rel="stylesheet" href="/css/psq.css">
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-light: #f4f7f6;
-            --white: #ffffff;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --text-muted: #7f8c8d;
-        }
+        body { margin: 0; line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; }
 
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: var(--bg-light); 
-            color: var(--primary-color); 
-            line-height: 1.6; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh; 
+        .search-wrap { max-width: 520px; margin: 1.5rem auto 0; position: relative; }
+        .search-wrap i { position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: .95rem; }
+        #toolSearch {
+            width: 100%; box-sizing: border-box; padding: .95rem 1.2rem .95rem 2.8rem;
+            border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
+            color: var(--text-main); font-size: 1rem; outline: none; box-shadow: var(--shadow-sm);
+            transition: border-color .2s, box-shadow .2s;
         }
+        #toolSearch:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
 
-        /* Navbar */
-        nav { background: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 999; }
-        .logo-container { display: flex; align-items: center; text-decoration: none; color: var(--primary-color); font-weight: bold; font-size: 1.2rem; }
-        .logo-container img { height: 40px; margin-right: 10px; }
+        .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; flex: 1; width: 100%; box-sizing: border-box; }
+        .tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
 
-        /* Hero */
-        .hero { padding: 4rem 2rem; text-align: center; background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%); color: white; }
-        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; letter-spacing: -1px; }
-        .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 1rem; opacity: 0.9; }
+        .tool-card {
+            display: flex; align-items: flex-start; gap: 1rem;
+            padding: 1.25rem; border-radius: var(--radius);
+            background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+            text-decoration: none; color: inherit;
+            transition: transform .2s, border-color .2s, box-shadow .2s;
+        }
+        .tool-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--brand) 45%, var(--border)); box-shadow: var(--shadow-md); }
+        .tool-icon {
+            flex: 0 0 48px; height: 48px; border-radius: 14px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--brand-soft); color: var(--brand); font-size: 1.3rem;
+        }
+        .tool-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .3rem; }
+        .tool-title { font-weight: 800; font-size: 1.08rem; letter-spacing: -.01em; color: var(--text-main); }
+        .tool-desc {
+            font-size: .92rem; color: var(--text-muted); line-height: 1.45;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .tool-arrow { align-self: center; color: var(--text-muted); opacity: .5; font-size: .85rem; transition: transform .2s, opacity .2s, color .2s; }
+        .tool-card:hover .tool-arrow { opacity: 1; color: var(--brand); transform: translateX(3px); }
 
-        /* Grid de Herramientas */
-        .container { 
-            max-width: 1100px; 
-            margin: -3rem auto 3rem; 
-            padding: 0 1rem; 
-            flex: 1;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .features { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 20px; 
-        }
-
-        .feature-card { 
-            background: var(--white); 
-            padding: 2rem; 
-            border-radius: 12px; 
-            box-shadow: var(--shadow); 
-            text-align: center; 
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid transparent;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent-color);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
-        }
-
-        .feature-card i { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1.5rem; }
-        .feature-card h3 { margin: 0 0 0.8rem 0; font-size: 1.3rem; font-weight: 700; }
-        .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0 0 1.5rem 0; flex-grow: 1; }
-
-        .btn-go {
-            font-weight: 700;
-            color: var(--accent-color);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        /* Footer */
-        .site-footer {
-            text-align: center;
-            padding: 2rem 1rem;
-            background: var(--white);
-            border-top: 1px solid #eee;
-            color: #888;
-            font-size: 0.9rem;
-        }
-        .site-footer img {
-            height: 20px;
-            vertical-align: middle;
-            margin-right: 8px;
-            opacity: 0.4;
-            filter: grayscale(100%);
-        }
-        .back-link { 
-            display: inline-block;
-            margin-bottom: 1rem;
-            color: var(--accent-color); 
-            text-decoration: none; 
-            font-weight: 600; 
-        }
+        .empty { display: none; text-align: center; color: var(--text-muted); padding: 2rem 1rem; }
 
         @media (max-width: 600px) {
-            .hero h1 { font-size: 1.8rem; }
-            .container { margin-top: -2rem; }
+            .tools { grid-template-columns: 1fr; gap: .75rem; }
+            .tool-card { padding: 1rem; gap: .85rem; }
+            .tool-icon { flex-basis: 44px; height: 44px; font-size: 1.15rem; border-radius: 12px; }
+            .tool-title { font-size: 1.02rem; }
+            .tool-desc { -webkit-line-clamp: 2; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="/" class="logo-container">
-            <img src="/Logo.png" alt="Logo">
-            <span>PSQ AL DÍA</span>
-        </a>
+    <nav class="psq-topbar">
+        <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>PSQ <b>AL DÍA</b></span></a>
+        <a href="/opesergas" class="psq-nav-link"><i class="fas fa-graduation-cap"></i><span>Portal OPE</span></a>
     </nav>
 
-    <header class="hero">
+    <header class="psq-hero">
         <h1>Herramientas Clínicas</h1>
         <p>Utilidades interactivas para asistir en la toma de decisiones psiquiátricas.</p>
+        <div class="search-wrap">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" id="toolSearch" placeholder="Buscar herramienta..." autocomplete="off" aria-label="Buscar herramienta">
+        </div>
     </header>
 
-    <div class="container">
-        <div class="features">
-<a href="/hipnoticos" class="feature-card">
-    <i class="fas fa-moon"></i>
-    <h3>Switch de Hipnóticos</h3>
-    <p>Motor de cambio y retirada gradual de hipnóticos (BZD, fármacos Z, daridorexant y melatonina) según el consenso europeo de Palagini et al. (Sleep Med, 2025).</p>
-    <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-</a>
-            <a href="/pupilas" class="feature-card">
-    <i class="fas fa-eye"></i>
-    <h3>Pupilas en Psiquiatría</h3>
-    <p>Guía rápida de semiología pupilar en psiquiatría.</p>
-    <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-</a>
-            <a href="/enceph-match" class="feature-card">
-    <i class="fas fa-brain"></i>
-    <h3>Enceph-Match</h3>
-    <p>Calculadora multidimensional de afinidad fenotípica para orientar el diagnóstico diferencial entre encefalitis infecciosas y autoinmunes según el Lancet Seminar 2026.</p>
-    <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-</a>
-            <a href="/spi" class="feature-card">
-    <i class="fas fa-microscope"></i>
-    <h3>Síntomas básicos</h3>
-    <p>Versión adaptada del Schizophrenia Proneness Instrument (adultos) para la detección de síntomas básicos y estados de riesgo de psicosis en la práctica clínica diaria.</p>
-    <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-</a>
-            
-            <a href="/alta-voluntaria" class="feature-card">
-    <i class="fas fa-user-check"></i>
-    <h3>Alta Voluntaria (IA)</h3>
-    <p>Redactor inteligente de evolutivos para altas voluntarias optimizado con IA. Incluye checklist de riesgos, exploración psicopatológica y plan de seguimiento.</p>
-    <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-</a>
-           <a href="/aes" class="feature-card">
-    <i class="fas fa-pills"></i>
-    <h3>Titulación de FAE</h3>
-    <p>Planificador dinámico para el inicio de fármacos antiepilépticos con escalada de dosis personalizada y calendario real.</p>
-    <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-</a>
-            <a href="/equivalencias" class="feature-card">
-                <i class="fas fa-exchange-alt"></i>
-                <h3>Equivalencias APS</h3>
-                <p>Calculadora de dosis equivalentes de antipsicóticos y estrategias de switch basadas en Maudsley e INTEGRATE.</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+    <main class="container">
+        <div class="tools" id="tools">
+            <a href="/hipnoticos" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-moon"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Switch de Hipnóticos</span>
+                    <span class="tool-desc">Motor de cambio y retirada gradual de hipnóticos (BZD, fármacos Z, daridorexant y melatonina) según el consenso europeo de Palagini et al. (Sleep Med, 2025).</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
-
-            <a href="/adswitch" class="feature-card">
-                <i class="fas fa-sync"></i>
-                <h3>AD Switch</h3>
-                <p>Motor dinámico de cambio de antidepresivos con pautas de cross-tapering según Maudsley 15ª Ed.</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            <a href="/pupilas" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-eye"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Pupilas en Psiquiatría</span>
+                    <span class="tool-desc">Guía rápida de semiología pupilar en psiquiatría.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
-
-            <a href="/farmacocinetica" class="feature-card">
-                <i class="fas fa-wave-square"></i>
-                <h3>Farmacocinética</h3>
-                <p>Simulador de niveles plasmáticos y escenarios tras cambios de dosis (Start, Stop & Switch).</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            <a href="/enceph-match" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-brain"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Enceph-Match</span>
+                    <span class="tool-desc">Calculadora multidimensional de afinidad fenotípica para orientar el diagnóstico diferencial entre encefalitis infecciosas y autoinmunes según el Lancet Seminar 2026.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
-<a href="/autoepp" class="feature-card">
-    <i class="fas fa-file-medical-alt"></i>
-    <h3>AutoEPP</h3>
-    <p>Generador inteligente de Exploración Psicopatológica con lógica condicional y adaptación de género.</p>
-    <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
-</a>
-            <a href="/catatonia" class="feature-card">
-                <i class="fas fa-brain"></i>
-                <h3>Exploración Catatonía</h3>
-                <p>Criterios diagnósticos y definiciones de Taylor & Fink, Lohr & Wisniewski y DSM-5.</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            <a href="/spi" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-microscope"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Síntomas básicos</span>
+                    <span class="tool-desc">Versión adaptada del Schizophrenia Proneness Instrument (adultos) para la detección de síntomas básicos y estados de riesgo de psicosis en la práctica clínica diaria.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
-
-            <a href="/ss-snm" class="feature-card">
-                <i class="fas fa-stethoscope"></i>
-                <h3>SS vs SNM</h3>
-                <p>Diferenciar Síndrome Serotoninérgico y Neuroléptico Maligno mediante criterios Hunter y Levenson.</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            <a href="/alta-voluntaria" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-user-check"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Alta Voluntaria (IA)</span>
+                    <span class="tool-desc">Redactor inteligente de evolutivos para altas voluntarias optimizado con IA. Incluye checklist de riesgos, exploración psicopatológica y plan de seguimiento.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
-
-            <a href="/clozapina" class="feature-card">
-                <i class="fas fa-calendar-check"></i>
-                <h3>Titulación Clozapina</h3>
-                <p>Planificador interactivo de inicio seguro ajustado por sexo y tabaco según Maudsley 15.</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            <a href="/aes" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-pills"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Titulación de FAE</span>
+                    <span class="tool-desc">Planificador dinámico para el inicio de fármacos antiepilépticos con escalada de dosis personalizada y calendario real.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
-
-            <a href="/psicosis-autoinmune" class="feature-card">
-                <i class="fas fa-shield-virus"></i>
-                <h3>Psicosis Autoinmune</h3>
-                <p>Algoritmo de sospecha y diagnóstico basado en los criterios internacionales de Pollak et al.</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            <a href="/equivalencias" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-exchange-alt"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Equivalencias APS</span>
+                    <span class="tool-desc">Calculadora de dosis equivalentes de antipsicóticos y estrategias de switch basadas en Maudsley e INTEGRATE.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
-
-            <a href="/deprescripcion" class="feature-card">
-                <i class="fas fa-chart-line"></i>
-                <h3>Deprescripción</h3>
-                <p>Planificador de reducción gradual hiperbólica basada en la ocupación de receptores.</p>
-                <div class="btn-go">Abrir herramienta <i class="fas fa-arrow-right"></i></div>
+            <a href="/adswitch" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-sync"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">AD Switch</span>
+                    <span class="tool-desc">Motor dinámico de cambio de antidepresivos con pautas de cross-tapering según Maudsley 15ª Ed.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="/farmacocinetica" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-wave-square"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Farmacocinética</span>
+                    <span class="tool-desc">Simulador de niveles plasmáticos y escenarios tras cambios de dosis (Start, Stop & Switch).</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="/autoepp" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-file-medical-alt"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">AutoEPP</span>
+                    <span class="tool-desc">Generador inteligente de Exploración Psicopatológica con lógica condicional y adaptación de género.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="/catatonia" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-brain"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Exploración Catatonía</span>
+                    <span class="tool-desc">Criterios diagnósticos y definiciones de Taylor & Fink, Lohr & Wisniewski y DSM-5.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="/ss-snm" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-stethoscope"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">SS vs SNM</span>
+                    <span class="tool-desc">Diferenciar Síndrome Serotoninérgico y Neuroléptico Maligno mediante criterios Hunter y Levenson.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="/clozapina" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-calendar-check"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Titulación Clozapina</span>
+                    <span class="tool-desc">Planificador interactivo de inicio seguro ajustado por sexo y tabaco según Maudsley 15.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="/psicosis-autoinmune" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-shield-virus"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Psicosis Autoinmune</span>
+                    <span class="tool-desc">Algoritmo de sospecha y diagnóstico basado en los criterios internacionales de Pollak et al.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="/deprescripcion" class="tool-card">
+                <span class="tool-icon"><i class="fas fa-chart-line"></i></span>
+                <span class="tool-text">
+                    <span class="tool-title">Deprescripción</span>
+                    <span class="tool-desc">Planificador de reducción gradual hiperbólica basada en la ocupación de receptores.</span>
+                </span>
+                <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
             </a>
         </div>
-    </div>
+        <p class="empty" id="emptyMsg">No hay ninguna herramienta con ese nombre.</p>
+    </main>
 
-    <footer class="site-footer">
-        <a href="/" class="back-link"><i class="fas fa-home"></i> Volver al inicio</a><br>
-        <img src="/Logo.png" alt="PSQ AL DÍA"> 
-        <span>&copy; 2026 PSQ AL DÍA - Herramientas Clínicas</span>
+    <footer class="psq-footer">
+        <a href="/"><i class="fas fa-home"></i> Volver al inicio</a>
+        <div style="margin-top:1rem;"><img src="/icon-192.png" alt=""><span>&copy; 2026 PSQ AL DÍA · Herramientas Clínicas</span></div>
     </footer>
 
+    <script>
+        // Buscador: filtra por título y descripción, sin distinguir tildes ni mayúsculas
+        (function () {
+            const norm = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const input = document.getElementById('toolSearch');
+            const cards = [...document.querySelectorAll('.tool-card')];
+            const empty = document.getElementById('emptyMsg');
+            input.addEventListener('input', () => {
+                const q = norm(input.value.trim());
+                let visibles = 0;
+                cards.forEach(c => {
+                    const ok = !q || norm(c.textContent).includes(q);
+                    c.style.display = ok ? '' : 'none';
+                    if (ok) visibles++;
+                });
+                empty.style.display = visibles ? 'none' : 'block';
+            });
+        })();
+    </script>
 </body>
 </html>

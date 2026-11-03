@@ -131,11 +131,13 @@
             .features-grid { gap: 1rem; }
         }
     </style>
+    <link rel="stylesheet" href="/css/psq.css">
 </head>
-<body>
+<body class="psq-tool">
 
-    <nav class="nav-header">
-        <a href="https://psqaldia.com" class="logo"><i class="fas fa-brain"></i> PSQALDÍA</a>
+    <nav class="nav-header psq-topbar">
+        <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>PSQ <b>AL DÍA</b></span></a>
+        <a href="/herramientas" class="psq-nav-link"><i class="fas fa-toolbox"></i><span>Herramientas</span></a>
     </nav>
 
     <header class="hero">
@@ -167,7 +169,7 @@
 
         <!-- Contenedor único donde monta pupilas.js -->
         <div id="modal">
-            <div id="modalData">
+            <div id="modalData" class="psq-light-island">
                 <div style="padding:4rem 2rem; text-align:center;">
                     <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--primary);"></i>
                     <p style="margin-top:1rem; font-weight:700; color:var(--text-muted); font-size:0.9rem;">Cargando semiología pupilar...</p>

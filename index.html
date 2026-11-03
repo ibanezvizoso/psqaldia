@@ -24,22 +24,16 @@
     <meta property="og:url" content="https://psqaldia.com/">
     <meta property="og:image" content="https://psqaldia.com/icon-512.png">
     <meta name="twitter:card" content="summary">
-    <meta name="theme-color" content="#4338ca">
+    <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     
     
+    <link rel="stylesheet" href="/css/psq.css">
     <style>
-        :root {
-            --bg: #f8fafc; --card: #ffffff; --primary: #4338ca; --whatsapp: #22c55e;
-            --text-main: #1e293b; --text-muted: #64748b; --fav: #f59e0b; --border: #e2e8f0;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a; --card: #1e293b; --primary: #818cf8;
-                --text-main: #f1f5f9; --text-muted: #94a3b8; --border: #334155;
-            }
-        }
+        /* Colores comunes en /css/psq.css; aquí solo los propios de la portada */
+        :root { --whatsapp: #22c55e; --fav: #f59e0b; }
         body { 
     /* Esta es la pila de fuentes del sistema moderno */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
@@ -52,7 +46,7 @@
     transition: background 0.3s; 
 }
 header { 
-    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
     backdrop-filter: blur(12px); /* Efecto cristal moderno */
     -webkit-backdrop-filter: blur(12px);
     padding: 0.7rem 1.5rem; 
@@ -92,17 +86,22 @@ header {
 }
 
 .logo-img-modern { 
-    height: 42px; /* Tamaño equilibrado */
-    width: auto; 
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    height: 38px; /* Tamaño equilibrado */
+    width: 38px; 
+    border-radius: 11px;
+    box-shadow: var(--shadow-sm);
 }
 
 .brand-text-modern {
     font-size: 1.4rem;
-    font-weight: 900;
-    color: var(--primary);
-    letter-spacing: -0.5px; /* Look más moderno y compacto */
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.02em; /* Look más moderno y compacto */
     text-transform: uppercase;
+}
+.brand-text-modern b {
+    color: var(--brand);
+    font-weight: 800;
 }
 
 .header-right-spacer {
@@ -116,7 +115,7 @@ header.hide {
 
 @media (max-width: 480px) {
     .brand-text-modern { font-size: 1.1rem; }
-    .logo-img-modern { height: 35px; }
+    .logo-img-modern { height: 34px; width: 34px; border-radius: 10px; }
 }
         .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .side-menu.open { left: 0; }
@@ -128,14 +127,16 @@ header.hide {
         .menu-link i { width: 20px; color: var(--text-muted); text-align: center; }
         .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; }
         .search-area { max-width: 600px; margin: 1rem auto 2.5rem; text-align: center; }
-        #search { width: 100%; padding: 1.1rem 1.5rem; border-radius: 50px; border: 2px solid var(--border); background: var(--card); color: var(--text-main); font-size: 1rem; outline: none; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        #search { width: 100%; box-sizing: border-box; padding: 1rem 1.4rem; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); font-size: 1rem; outline: none; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); transition: border-color .2s, box-shadow .2s; }
+        #search:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
         .filter-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 1rem; }
         .f-btn { padding: 0.6rem 1.2rem; border-radius: 50px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; transition: 0.3s; color: var(--text-muted); }
-        .f-btn.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
+        .f-btn:hover { color: var(--brand); border-color: var(--brand); }
+        .f-btn.active { background: var(--btn-bg); color: var(--btn-text); border-color: var(--btn-bg); }
         .section-title { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; display: none; }
-        #app, #favs-app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        #app, #favs-app { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .card { background: var(--card); border-radius: 1.5rem; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-sm); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative; }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
         .card-img { width: 100%; height: 180px; object-fit: cover; background: var(--border); }
         .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
         .fav-btn { position: absolute; top: 1rem; right: 1rem; background: var(--card); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; font-size: 1.1rem; color: #cbd5e1; transition: 0.2s; }
@@ -146,14 +147,28 @@ header.hide {
         .card-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 5px; font-weight: 600; opacity: 0.8; }
         .card-actions { display: flex; gap: 0.75rem; margin-top: auto; }
         .btn { flex: 1; padding: 0.8rem; border-radius: 1rem; text-decoration: none; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary { background: var(--btn-bg); color: var(--btn-text); }
+        .btn-primary:hover { background: var(--brand-strong); }
         .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 55px; font-size: 1.4rem; }
-        .btn-share { background: #64748b; color: white; flex: 0 0 55px; font-size: 1.2rem; }
+        .btn-share { background: var(--brand-soft); color: var(--brand); flex: 0 0 55px; font-size: 1.15rem; }
         footer { margin-top: 5rem; padding: 3rem 1rem; border-top: 1px solid var(--border); text-align: center; }
         #installBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none; align-items: center; gap: 10px; }
         #iosAlert { position: fixed; bottom: 20px; left: 10px; right: 10px; background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1001; display: none; align-items: center; gap: 12px; animation: slideUp 0.5s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        @media (max-width: 600px) {
+            .search-area { margin: .75rem auto 1.5rem; }
+            #app, #favs-app { gap: 1rem; }
+            .card { border-radius: 1.25rem; }
+            .card:hover { transform: none; }
+            .card-img { height: 150px; }
+            .card-content { padding: 1.1rem 1.2rem 1.2rem; }
+            .tag { margin-bottom: .7rem; }
+            .tit { font-size: 1.12rem; margin-bottom: .45rem; }
+            .res { -webkit-line-clamp: 2; margin-bottom: .7rem; }
+            .card-date { margin-bottom: .9rem; }
+            .btn { padding: .75rem; }
+        }
         .modal-content { background: var(--card); color: var(--text-main); width: 100%; max-width: 600px; border-radius: 2rem; position: relative; overflow-y: auto; max-height: 90vh; }
         .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--card); border-radius: 50%; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 20; }
     </style>
@@ -165,8 +180,8 @@ header.hide {
     </button>
     
     <div class="brand-central" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-        <img src="Logo.png" alt="Logo PSQALDÍA" class="logo-img-modern">
-        <span class="brand-text-modern">PSQ AL DÍA</span>
+        <img src="/icon-192.png" alt="Logo PSQALDÍA" class="logo-img-modern" width="38" height="38">
+        <span class="brand-text-modern">PSQ <b>AL DÍA</b></span>
     </div>
 
     <!-- Espaciador para mantener el equilibrio visual con el botón de la izquierda -->
@@ -224,7 +239,7 @@ header.hide {
     });
   }
   
-  const PLACEHOLDER_IMG = '/placeholder.svg';
+  const PLACEHOLDER_IMG = '/placeholder.svg?v=2';
 
   function slugify(text) {
       return text.toString().toLowerCase().trim()
@@ -390,6 +405,7 @@ async function compartirRecurso(e, id) {
    function openModal(id) {
     const item = db.find(i => i.id === id); 
     if (!item) return;
+    document.querySelector('#modal .modal-content').classList.remove('psq-light-island');
     
     let accessBtn = `<a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a>`;
     if (item.accion && item.accion !== '') {
@@ -416,6 +432,7 @@ async function compartirRecurso(e, id) {
 
     async function ejecutarAccion(id) {
         const item = db.find(i => i.id === id); if (!item) return;
+        document.querySelector('#modal .modal-content').classList.add('psq-light-island');
         document.getElementById('modalData').innerHTML = '<div style="padding:4rem; text-align:center;"><i class="fas fa-sync fa-spin fa-2x"></i><p style="margin-top:1rem;">Iniciando...</p></div>';
         if (item.script && item.script !== "" && item.script !== "#") {
             try { await cargarScript(item.script); } catch (e) { alert("Error al cargar módulo."); openModal(id); return; }
@@ -430,6 +447,7 @@ async function compartirRecurso(e, id) {
     // Oculta el modal sin tocar el historial
 function ocultarModal() {
     document.getElementById('modal').style.display = 'none';
+    document.querySelector('#modal .modal-content').classList.remove('psq-light-island');
     document.body.style.overflow = 'auto';
 }
 

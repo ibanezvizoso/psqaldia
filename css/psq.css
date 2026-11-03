@@ -1,0 +1,297 @@
+/* ==========================================================================
+   PSQ AL DÍA · Estilos comunes
+   Se carga DESPUÉS del <style> de cada página, así que manda sobre él.
+   - Colores de marca y modo oscuro en un solo sitio.
+   - .psq-light-island: zona que se mantiene SIEMPRE clara (paneles de las
+     herramientas), porque sus scripts usan colores fijos pensados para fondo claro.
+   - Para una página sin modo oscuro: <html class="psq-light-only">
+   ========================================================================== */
+
+/* ---------- Colores (modo claro) ---------- */
+:root,
+.psq-light-island {
+    --brand: #256095;           /* azul del logo */
+    --brand-strong: #1b4a76;
+    --brand-soft: #eaf2fa;
+    --brand-grad: linear-gradient(135deg, #256095 0%, #3a86c8 100%);
+    --btn-bg: #256095;
+    --btn-text: #ffffff;
+
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface-2: #f0f3f7;
+    --text-main: #0f1b2d;
+    --text-muted: #52627a;
+    --border: #e3e8ef;
+
+    --shadow-sm: 0 1px 2px rgba(15, 27, 45, .04), 0 4px 14px rgba(15, 27, 45, .05);
+    --shadow-md: 0 18px 40px -18px rgba(15, 27, 45, .25);
+
+    /* Nombres antiguos que usan las páginas y los scripts de las herramientas */
+    --primary: var(--brand);
+    --primary-light: var(--brand-soft);
+    --card: var(--surface);
+    --card-bg: var(--surface);
+    --bg-alt: var(--surface-2);
+    --bg-main: var(--bg);
+    --text: var(--text-main);
+    --white: var(--surface);
+    --primary-color: var(--text-main);
+    --accent-color: var(--brand);
+    --bg-light: var(--bg);
+    --radius: 1.25rem;
+}
+
+:root { color-scheme: light dark; }
+:root.psq-light-only { color-scheme: light; }
+
+/* ---------- Colores (modo oscuro) ---------- */
+@media (prefers-color-scheme: dark) {
+    :root:not(.psq-light-only) {
+        --brand: #7db3e8;
+        --brand-strong: #a9cdf1;
+        --brand-soft: rgba(125, 179, 232, .12);
+        --brand-grad: linear-gradient(135deg, #2b6aa6 0%, #4b8fd0 100%);
+        --btn-bg: #2b6aa6;
+        --btn-text: #ffffff;
+
+        --bg: #0b1220;
+        --surface: #121b2b;
+        --surface-2: #18233a;
+        --text-main: #e7edf5;
+        --text-muted: #9aa9be;
+        --border: #22304a;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+        --shadow-md: 0 18px 40px -18px rgba(0, 0, 0, .6);
+
+        --primary: var(--brand);
+        --primary-light: var(--brand-soft);
+        --card: var(--surface);
+        --card-bg: var(--surface);
+        --bg-alt: var(--surface-2);
+        --bg-main: var(--bg);
+        --text: var(--text-main);
+        --white: var(--surface);
+        --primary-color: var(--text-main);
+        --accent-color: var(--brand);
+        --bg-light: var(--bg);
+    }
+}
+
+/* Paneles de herramienta: siempre claros y legibles */
+.psq-light-island {
+    color-scheme: light;
+    background: var(--surface) !important;
+    color: var(--text-main);
+}
+
+/* ---------- Base ---------- */
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Barra superior común ---------- */
+.psq-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: none;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: .7rem max(1rem, calc((100% - 1100px) / 2));
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+}
+
+.psq-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -.01em;
+}
+.psq-brand img {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: block;
+    box-shadow: var(--shadow-sm);
+}
+.psq-brand span b { color: var(--brand); font-weight: 800; }
+
+.psq-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .5rem .9rem;
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: .85rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: color .2s, border-color .2s;
+}
+.psq-nav-link:hover { color: var(--brand); border-color: var(--brand); }
+
+/* ---------- Hero común ---------- */
+.psq-hero {
+    text-align: center;
+    padding: 3.5rem 1.25rem 2.5rem;
+    background: radial-gradient(ellipse 70% 100% at 50% 0%, var(--brand-soft) 0%, transparent 70%);
+    color: var(--text-main);
+}
+.psq-hero h1 {
+    margin: 0 0 .6rem;
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.1;
+}
+.psq-hero p {
+    margin: 0 auto;
+    max-width: 620px;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.55;
+}
+
+/* ---------- Botón principal ---------- */
+.psq-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    padding: .9rem 1.6rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--btn-text);
+    background: var(--brand-grad);
+    box-shadow: 0 10px 24px -10px rgba(37, 96, 149, .7);
+    transition: transform .2s, box-shadow .2s;
+}
+.psq-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -12px rgba(37, 96, 149, .8); }
+
+/* ---------- Pie común ---------- */
+.psq-footer {
+    text-align: center;
+    padding: 2rem 1rem 2.5rem;
+    border-top: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: .85rem;
+}
+.psq-footer a { color: var(--brand); font-weight: 700; text-decoration: none; }
+.psq-footer img {
+    height: 20px;
+    width: 20px;
+    border-radius: 6px;
+    vertical-align: middle;
+    margin-right: 8px;
+    opacity: .7;
+    filter: none;
+}
+
+/* ==========================================================================
+   Páginas de herramienta con la plantilla común (body.psq-tool)
+   ========================================================================== */
+body.psq-tool .hero {
+    padding: 3.25rem 1.25rem 2.75rem;
+    background: radial-gradient(ellipse 70% 100% at 50% 0%, var(--brand-soft) 0%, transparent 70%);
+}
+body.psq-tool .hero h1 {
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    letter-spacing: -.035em;
+    line-height: 1.1;
+    color: var(--text-main);
+}
+body.psq-tool .hero p { color: var(--text-muted); }
+
+body.psq-tool .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius);
+}
+body.psq-tool .feature-card h3 { color: var(--text-main); }
+body.psq-tool .feature-card p { color: var(--text-muted); }
+body.psq-tool .feature-icon { color: var(--brand); background: var(--brand-soft); }
+
+body.psq-tool #modalData {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+}
+
+body.psq-tool .info-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+}
+body.psq-tool .info-panel h2 { color: var(--text-main); }
+body.psq-tool .info-panel i { color: var(--brand); }
+
+body.psq-tool .nav-footer { border-top: 1px solid var(--border); }
+body.psq-tool .link-back { color: var(--brand); }
+
+body.psq-tool .site-bottom-info {
+    background: transparent;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+}
+body.psq-tool .site-bottom-info img {
+    border-radius: 5px;
+    opacity: .7;
+    filter: none;
+}
+
+@media (max-width: 600px) {
+    .psq-brand { font-size: 1rem; }
+    .psq-brand img { width: 32px; height: 32px; }
+    .psq-nav-link span { display: none; }
+    .psq-nav-link { padding: .55rem .7rem; }
+    body.psq-tool .hero { padding: 2.25rem 1rem 2rem; }
+
+    /* Tarjetas de presentación en filas compactas: la herramienta queda más arriba */
+    body.psq-tool .features-grid { gap: .75rem; margin-top: 0; margin-bottom: 1.75rem; }
+    body.psq-tool .features-grid .feature-card {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        column-gap: .9rem;
+        row-gap: .2rem;
+        align-items: start;
+        text-align: left;
+        padding: 1rem 1.1rem;
+    }
+    body.psq-tool .features-grid .feature-card:hover { transform: none; }
+    body.psq-tool .features-grid .feature-icon {
+        grid-row: span 2;
+        width: 44px;
+        height: 44px;
+        margin: 0;
+        border-radius: 12px;
+        font-size: 1.15rem;
+    }
+    body.psq-tool .features-grid .feature-card h3 { margin: 0; font-size: 1.02rem; }
+    body.psq-tool .features-grid .feature-card p { margin: 0; font-size: .9rem; line-height: 1.45; }
+}
