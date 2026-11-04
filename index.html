@@ -37,6 +37,7 @@
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"psq al día","alternateName":["PSQ al día","PSQALDÍA"],"url":"https://psqaldia.com/","inLanguage":"es","description":"Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.","publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"}},{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"}]}</script>
     <link rel="stylesheet" href="/css/psq.css">
     <script src="/js/tema.js"></script>
+    <script src="/js/qr.js" defer></script>
     <style>
         /* Colores comunes en /css/psq.css; aquí solo los propios de la portada */
         :root { --whatsapp: #22c55e; --fav: #f59e0b; }
@@ -269,6 +270,7 @@ header.hide {
         <div class="menu-sep" role="separator"></div>
         <a href="https://forms.gle/ugCJGaTksJ4g5eUr7" target="_blank" rel="noopener" class="menu-link"><span class="menu-ico"><i class="fas fa-lightbulb"></i></span> Sugiere contenidos <i class="fas fa-arrow-up-right-from-square menu-ext" aria-label="(abre otra web)"></i></a>
         <button type="button" class="menu-link" onclick="recomendarWeb()"><span class="menu-ico"><i class="fas fa-user-plus"></i></span> Recomendar a un compañero</button>
+        <button type="button" class="menu-link" data-psq-qr="/" onclick="toggleMenu(false)"><span class="menu-ico"><i class="fas fa-qrcode"></i></span> Código QR de la web</button>
         <button type="button" class="menu-link" onclick="openSettings()"><span class="menu-ico"><i class="fas fa-cog"></i></span> Ajustes</button>
         <button type="button" class="menu-link" onclick="openAbout()"><span class="menu-ico"><i class="fas fa-info-circle"></i></span> Sobre el proyecto</button>
     </nav>

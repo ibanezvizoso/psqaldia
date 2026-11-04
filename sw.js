@@ -1,5 +1,5 @@
 // Cambia este nombre cada vez que quieras forzar la renovación de la caché en los móviles
-const CACHE_NAME = 'psq-v14';
+const CACHE_NAME = 'psq-v15';
 
 // Páginas y recursos que se guardan al instalar la app.
 // IMPORTANTE: usar las URLs "limpias" (sin .html), que son las que se enlazan en la web.
@@ -21,6 +21,8 @@ const ASSETS = [
   '/hipnoticos',
   '/hipnoticosSwitch.js',
   '/js/tema.js',
+  '/js/qr.js',
+  '/js/vendor/qrcode.js',
   '/Logo.png',
   '/placeholder.svg',
   '/icon-192.png'
