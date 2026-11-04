@@ -177,7 +177,8 @@
         <div class="col-lg-6">
             <div class="card shadow-sm p-4 sticky-top" style="top: 20px;">
                 <label class="form-label text-primary fw-bold">Propuesta de redacción (HC):</label>
-                <div id="resultadoIA" class="form-control p-3 mb-3">Los resultados aparecerán aquí...</div>
+                <div id="resultadoIA" class="form-control p-3 mb-2">Los resultados aparecerán aquí...</div>
+                <p class="small text-muted mb-3"><i class="fas fa-pen me-1"></i> Por privacidad, el nombre no se envía a la IA: sustituye <b>[NOMBRE DEL PACIENTE]</b> por el nombre al pegar el texto en la historia clínica.</p>
                 <button class="btn btn-outline-secondary btn-sm" onclick="copyResult()">
                     <i class="fas fa-copy me-1"></i> Copiar al portapapeles
                 </button>
@@ -242,8 +243,8 @@ async function redactarEvolutivo() {
     const generoSel = document.querySelector('input[name="genero"]:checked');
 
     const datos = {
-        // Nunca se envía el nombre del paciente al servicio de IA
-        nombre: "el paciente",
+        // El nombre nunca se envía al servicio de IA: se deja un hueco para rellenarlo a mano
+        nombre: "[NOMBRE DEL PACIENTE]",
         fecha: document.getElementById('fecha').value,
         hora: document.getElementById('hora').value,
         genero: generoSel ? generoSel.value : "N/S",
