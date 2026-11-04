@@ -13,13 +13,13 @@
         }
     </script>
     <meta name="google-site-verification" content="BpHCi544mGO8TaOecGzGZpkH4wzaltHrdY4VqNhBEp4" />
-    <title>PSQALDÍA | Tu web/app para la psiquiatría clínica</title>
+    <title>psq al día · Herramientas y recursos de psiquiatría clínica</title>
     <meta name="description" content="Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.">
     
     <link rel="canonical" href="https://psqaldia.com/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="PSQALDÍA">
-    <meta property="og:title" content="PSQALDÍA | Tu web/app para la psiquiatría clínica">
+    <meta property="og:title" content="psq al día · Herramientas y recursos de psiquiatría clínica">
     <meta property="og:description" content="Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.">
     <meta property="og:url" content="https://psqaldia.com/">
     <meta property="og:image" content="https://psqaldia.com/og-psq.png">
@@ -33,6 +33,8 @@
 
     
     
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"psq al día","alternateName":["PSQ al día","PSQALDÍA"],"url":"https://psqaldia.com/","inLanguage":"es","description":"Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.","publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"}},{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"}]}</script>
     <link rel="stylesheet" href="/css/psq.css">
     <script src="/js/tema.js"></script>
     <style>
@@ -198,6 +200,11 @@ header.hide {
         .fav-btn { position: absolute; top: 1rem; right: 1rem; background: color-mix(in srgb, var(--card) 85%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; font-size: 1.1rem; color: #cbd5e1; transition: 0.2s; }
         .fav-btn.is-fav { color: var(--fav); }
         .tag { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.7rem; font-weight: 800; margin-bottom: 1rem; width: fit-content; text-transform: uppercase; }
+        .card-link { display: block; text-decoration: none; }
+        .card-link::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+        .card-link:focus-visible { outline: none; }
+        .card:has(.card-link:focus-visible) { outline: 3px solid var(--brand); outline-offset: 3px; }
+        .btn-share { position: relative; z-index: 2; }
         .tit { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.7rem; color: var(--text-main); line-height: 1.2; }
         .res { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .card-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 5px; font-weight: 600; opacity: 0.8; }
@@ -514,7 +521,7 @@ async function compartirRecurso(e, id) {
         let textoBoton = "ACCEDER"; 
 
         // Al hacer clic, abre el modal al instante (sin preguntar contraseña)
-                card.onclick = () => abrirEntrada(item.id);
+                // Toda la tarjeta es un enlace real (/nombre-entrada) que Google puede seguir; ver .card-link
 
         
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
@@ -523,7 +530,7 @@ async function compartirRecurso(e, id) {
                 <span class="tag" style="${getPasteColor(item.categoria, 0.88)}">${item.categoria}</span>
             </div>
             <div class="card-content">
-                <div class="tit">${item.titulo}</div>
+                <a class="tit card-link" href="/${item.id}" onclick="return clickEntrada(event, '${item.id}')">${item.titulo}</a>
                 <div class="res">${item.resumen}</div>
                 <div class="card-date"><i class="far fa-calendar-alt"></i> ${item.fecha || 'Reciente'}</div>
                 <div class="card-actions">
@@ -595,6 +602,14 @@ function closeModal() {
         ocultarModal();
         if (location.pathname !== '/') history.replaceState(null, '', '/');
     }
+}
+
+// Clic en una tarjeta: abre la ventana de la entrada (Ctrl/Cmd o clic central: pestaña nueva)
+function clickEntrada(e, id) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return true;
+    e.preventDefault();
+    abrirEntrada(id);
+    return false;
 }
 
 // Abrir una entrada añadiendo un paso al historial

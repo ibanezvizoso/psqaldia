@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herramientas Clínicas para Psiquiatría | PSQ AL DÍA</title>
+    <title>Herramientas clínicas para psiquiatría | psq al día</title>
     <meta name="description" content="Calculadoras y utilidades diagnósticas avanzadas para la práctica psiquiátrica: Equivalencias, Catatonía, Farmacocinética y más.">
     <link rel="stylesheet" href="/css/all.min.css">
     <link rel="icon" type="image/png" href="/Logo.png">
     
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"Herramientas clínicas para psiquiatría","url":"https://psqaldia.com/herramientas","inLanguage":"es","publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"},"mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://psqaldia.com/hipnoticos","name":"Cambio y retirada de hipnóticos"},{"@type":"ListItem","position":2,"url":"https://psqaldia.com/pupilas","name":"Semiología pupilar en urgencias psiquiátricas"},{"@type":"ListItem","position":3,"url":"https://psqaldia.com/enceph-match","name":"Encefalitis autoinmune o infecciosa: diagnóstico diferencial"},{"@type":"ListItem","position":4,"url":"https://psqaldia.com/spi","name":"Síntomas básicos (SPI-A) y estados de riesgo de psicosis"},{"@type":"ListItem","position":5,"url":"https://psqaldia.com/alta-voluntaria","name":"Alta voluntaria: redactor de evolutivo con IA"},{"@type":"ListItem","position":6,"url":"https://psqaldia.com/aes","name":"Titulación de antiepilépticos (FAE)"},{"@type":"ListItem","position":7,"url":"https://psqaldia.com/equivalencias","name":"Equivalencias y cambio entre antipsicóticos"},{"@type":"ListItem","position":8,"url":"https://psqaldia.com/adswitch","name":"Cambio de antidepresivos (switch y cross-tapering)"},{"@type":"ListItem","position":9,"url":"https://psqaldia.com/farmacocinetica","name":"Simulador de niveles plasmáticos de psicofármacos"},{"@type":"ListItem","position":10,"url":"https://psqaldia.com/autoepp","name":"Generador de exploración psicopatológica (EPP)"},{"@type":"ListItem","position":11,"url":"https://psqaldia.com/catatonia","name":"Exploración y criterios de la catatonía"},{"@type":"ListItem","position":12,"url":"https://psqaldia.com/ss-snm","name":"Síndrome serotoninérgico vs. neuroléptico maligno"},{"@type":"ListItem","position":13,"url":"https://psqaldia.com/clozapina","name":"Titulación de clozapina: calendario de inicio"},{"@type":"ListItem","position":14,"url":"https://psqaldia.com/psicosis-autoinmune","name":"Psicosis autoinmune: sospecha y algoritmo diagnóstico"},{"@type":"ListItem","position":15,"url":"https://psqaldia.com/deprescripcion","name":"Deprescripción hiperbólica de psicofármacos"}]}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Herramientas","item":"https://psqaldia.com/herramientas"}]}]}</script>
     <link rel="stylesheet" href="/css/psq.css">
     <script src="/js/tema.js"></script>
     <style>
@@ -43,6 +45,7 @@
         }
         .tool-card:hover .tool-icon { transform: scale(1.06) rotate(-3deg); }
         .tool-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .3rem; }
+        .tool-eyebrow { font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--brand); }
         .tool-title { font-weight: 800; font-size: 1.08rem; letter-spacing: -.01em; color: var(--text-main); }
         .tool-desc {
             font-size: .92rem; color: var(--text-muted); line-height: 1.45;
@@ -83,7 +86,8 @@
             <a href="/hipnoticos" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-moon"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Switch de Hipnóticos</span>
+                    <span class="tool-eyebrow">Switch de Hipnóticos</span>
+                    <span class="tool-title">Cambio y retirada de hipnóticos</span>
                     <span class="tool-desc">Motor de cambio y retirada gradual de hipnóticos (BZD, fármacos Z, daridorexant y melatonina) según el consenso europeo de Palagini et al. (Sleep Med, 2025).</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -91,7 +95,8 @@
             <a href="/pupilas" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-eye"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Pupilas en Psiquiatría</span>
+                    <span class="tool-eyebrow">Pupilas en Psiquiatría</span>
+                    <span class="tool-title">Semiología pupilar en urgencias psiquiátricas</span>
                     <span class="tool-desc">Guía rápida de semiología pupilar en psiquiatría.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -99,7 +104,8 @@
             <a href="/enceph-match" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-brain"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Enceph-Match</span>
+                    <span class="tool-eyebrow">Enceph-Match</span>
+                    <span class="tool-title">Encefalitis autoinmune o infecciosa: diagnóstico diferencial</span>
                     <span class="tool-desc">Calculadora multidimensional de afinidad fenotípica para orientar el diagnóstico diferencial entre encefalitis infecciosas y autoinmunes según el Lancet Seminar 2026.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -107,7 +113,8 @@
             <a href="/spi" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-microscope"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Síntomas básicos</span>
+                    <span class="tool-eyebrow">Síntomas básicos</span>
+                    <span class="tool-title">Síntomas básicos (SPI-A) y estados de riesgo de psicosis</span>
                     <span class="tool-desc">Versión adaptada del Schizophrenia Proneness Instrument (adultos) para la detección de síntomas básicos y estados de riesgo de psicosis en la práctica clínica diaria.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -115,7 +122,8 @@
             <a href="/alta-voluntaria" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-user-check"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Alta Voluntaria (IA)</span>
+                    <span class="tool-eyebrow">Alta Voluntaria (IA)</span>
+                    <span class="tool-title">Alta voluntaria: redactor de evolutivo con IA</span>
                     <span class="tool-desc">Redactor inteligente de evolutivos para altas voluntarias optimizado con IA. Incluye checklist de riesgos, exploración psicopatológica y plan de seguimiento.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -123,7 +131,8 @@
             <a href="/aes" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-pills"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Titulación de FAE</span>
+                    <span class="tool-eyebrow">Titulación de FAE</span>
+                    <span class="tool-title">Titulación de antiepilépticos (FAE)</span>
                     <span class="tool-desc">Planificador dinámico para el inicio de fármacos antiepilépticos con escalada de dosis personalizada y calendario real.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -131,7 +140,8 @@
             <a href="/equivalencias" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-exchange-alt"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Equivalencias APS</span>
+                    <span class="tool-eyebrow">Equivalencias APS</span>
+                    <span class="tool-title">Equivalencias y cambio entre antipsicóticos</span>
                     <span class="tool-desc">Calculadora de dosis equivalentes de antipsicóticos y estrategias de switch basadas en Maudsley e INTEGRATE.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -139,7 +149,8 @@
             <a href="/adswitch" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-sync"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">AD Switch</span>
+                    <span class="tool-eyebrow">AD Switch</span>
+                    <span class="tool-title">Cambio de antidepresivos (switch y cross-tapering)</span>
                     <span class="tool-desc">Motor dinámico de cambio de antidepresivos con pautas de cross-tapering según Maudsley 15ª Ed.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -147,7 +158,8 @@
             <a href="/farmacocinetica" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-wave-square"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Farmacocinética</span>
+                    <span class="tool-eyebrow">Farmacocinética</span>
+                    <span class="tool-title">Simulador de niveles plasmáticos de psicofármacos</span>
                     <span class="tool-desc">Simulador de niveles plasmáticos y escenarios tras cambios de dosis (Start, Stop & Switch).</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -155,7 +167,8 @@
             <a href="/autoepp" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-file-medical-alt"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">AutoEPP</span>
+                    <span class="tool-eyebrow">AutoEPP</span>
+                    <span class="tool-title">Generador de exploración psicopatológica (EPP)</span>
                     <span class="tool-desc">Generador inteligente de Exploración Psicopatológica con lógica condicional y adaptación de género.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -163,7 +176,8 @@
             <a href="/catatonia" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-brain"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Exploración Catatonía</span>
+                    <span class="tool-eyebrow">Exploración Catatonía</span>
+                    <span class="tool-title">Exploración y criterios de la catatonía</span>
                     <span class="tool-desc">Criterios diagnósticos y definiciones de Taylor & Fink, Lohr & Wisniewski y DSM-5.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -171,7 +185,8 @@
             <a href="/ss-snm" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-stethoscope"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">SS vs SNM</span>
+                    <span class="tool-eyebrow">SS vs SNM</span>
+                    <span class="tool-title">Síndrome serotoninérgico vs. neuroléptico maligno</span>
                     <span class="tool-desc">Diferenciar Síndrome Serotoninérgico y Neuroléptico Maligno mediante criterios Hunter y Levenson.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -179,7 +194,8 @@
             <a href="/clozapina" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-calendar-check"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Titulación Clozapina</span>
+                    <span class="tool-eyebrow">Titulación Clozapina</span>
+                    <span class="tool-title">Titulación de clozapina: calendario de inicio</span>
                     <span class="tool-desc">Planificador interactivo de inicio seguro ajustado por sexo y tabaco según Maudsley 15.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -187,7 +203,8 @@
             <a href="/psicosis-autoinmune" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-shield-virus"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Psicosis Autoinmune</span>
+                    <span class="tool-eyebrow">Psicosis Autoinmune</span>
+                    <span class="tool-title">Psicosis autoinmune: sospecha y algoritmo diagnóstico</span>
                     <span class="tool-desc">Algoritmo de sospecha y diagnóstico basado en los criterios internacionales de Pollak et al.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
@@ -195,7 +212,8 @@
             <a href="/deprescripcion" class="tool-card">
                 <span class="tool-icon"><i class="fas fa-chart-line"></i></span>
                 <span class="tool-text">
-                    <span class="tool-title">Deprescripción</span>
+                    <span class="tool-eyebrow">Deprescripción</span>
+                    <span class="tool-title">Deprescripción hiperbólica de psicofármacos</span>
                     <span class="tool-desc">Planificador de reducción gradual hiperbólica basada en la ocupación de receptores.</span>
                 </span>
                 <i class="fas fa-chevron-right tool-arrow" aria-hidden="true"></i>
