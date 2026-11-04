@@ -43,11 +43,13 @@
 }
 
 :root { color-scheme: light dark; }
-:root.psq-light-only { color-scheme: light; }
+:root[data-theme="light"], :root.psq-light-only { color-scheme: light; }
+:root[data-theme="dark"]:not(.psq-light-only) { color-scheme: dark; }
 
 /* ---------- Colores (modo oscuro) ---------- */
+/* Oscuro: automático (según el móvil) salvo que se haya elegido "claro" en Ajustes */
 @media (prefers-color-scheme: dark) {
-    :root:not(.psq-light-only) {
+    :root:not(.psq-light-only):not([data-theme="light"]) {
         --brand: #7db3e8;
         --brand-strong: #a9cdf1;
         --brand-soft: rgba(125, 179, 232, .12);
@@ -78,6 +80,37 @@
         --bg-light: var(--bg);
     }
 }
+/* Oscuro elegido a mano en Ajustes (mismos valores) */
+:root[data-theme="dark"]:not(.psq-light-only) {
+    --brand: #7db3e8;
+    --brand-strong: #a9cdf1;
+    --brand-soft: rgba(125, 179, 232, .12);
+    --brand-grad: linear-gradient(135deg, #2b6aa6 0%, #4b8fd0 100%);
+    --btn-bg: #2b6aa6;
+    --btn-text: #ffffff;
+
+    --bg: #0b1220;
+    --surface: #121b2b;
+    --surface-2: #18233a;
+    --text-main: #e7edf5;
+    --text-muted: #9aa9be;
+    --border: #22304a;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+    --shadow-md: 0 18px 40px -18px rgba(0, 0, 0, .6);
+
+    --primary: var(--brand);
+    --primary-light: var(--brand-soft);
+    --card: var(--surface);
+    --card-bg: var(--surface);
+    --bg-alt: var(--surface-2);
+    --bg-main: var(--bg);
+    --text: var(--text-main);
+    --white: var(--surface);
+    --primary-color: var(--text-main);
+    --accent-color: var(--brand);
+    --bg-light: var(--bg);
+}
 
 /* Paneles de herramienta: siempre claros y legibles */
 .psq-light-island {
@@ -93,13 +126,21 @@
     --glow-b: rgba(26, 160, 190, .14);
     --icon-grad: linear-gradient(135deg, #256095 0%, #2f86c4 60%, #1f9bbd 100%);
 }
+/* Oscuro: automático (según el móvil) salvo que se haya elegido "claro" en Ajustes */
 @media (prefers-color-scheme: dark) {
-    :root:not(.psq-light-only) {
+    :root:not(.psq-light-only):not([data-theme="light"]) {
         --title-grad: linear-gradient(120deg, #b9d8f6 0%, #8cc0ef 50%, #6fd3e8 100%);
         --glow-a: rgba(58, 134, 200, .28);
         --glow-b: rgba(34, 190, 220, .16);
         --icon-grad: linear-gradient(135deg, #2b6aa6 0%, #3a8fd0 60%, #23a6c6 100%);
     }
+}
+/* Oscuro elegido a mano en Ajustes (mismos valores) */
+:root[data-theme="dark"]:not(.psq-light-only) {
+    --title-grad: linear-gradient(120deg, #b9d8f6 0%, #8cc0ef 50%, #6fd3e8 100%);
+    --glow-a: rgba(58, 134, 200, .28);
+    --glow-b: rgba(34, 190, 220, .16);
+    --icon-grad: linear-gradient(135deg, #2b6aa6 0%, #3a8fd0 60%, #23a6c6 100%);
 }
 
 /* Título grande con degradado (texto grande: contraste ≥ 3,9:1 en todo el degradado) */
