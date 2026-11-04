@@ -34,6 +34,7 @@
     
     
     <link rel="stylesheet" href="/css/psq.css">
+    <script src="/js/tema.js"></script>
     <style>
         /* Colores comunes en /css/psq.css; aquí solo los propios de la portada */
         :root { --whatsapp: #22c55e; --fav: #f59e0b; }
@@ -119,14 +120,53 @@ header.hide {
     .brand-text-modern { font-size: 1.1rem; }
     .logo-img-modern { height: 34px; width: 34px; }
 }
-        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .side-menu.open { left: 0; }
-        .menu-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1999; display: none; }
-        .menu-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .menu-nav { display: flex; flex-direction: column; padding: 1rem 0; }
-        .menu-link { padding: 1rem 1.5rem; display: flex; align-items: center; gap: 15px; text-decoration: none; color: var(--text-main); font-weight: 700; transition: 0.2s; border-left: 4px solid transparent; }
-        .menu-link:hover { background: var(--bg); border-left-color: var(--primary); }
-        .menu-link i { width: 20px; color: var(--text-muted); text-align: center; }
+        /* ---------- Menú lateral ---------- */
+        .side-menu {
+            position: fixed; top: 0; left: 0; z-index: 2000;
+            width: min(300px, 86vw); height: 100%; height: 100dvh; overflow-y: auto;
+            background: var(--card); box-shadow: var(--shadow-md); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            transform: translateX(-105%); visibility: hidden;
+            transition: transform .32s cubic-bezier(.4, 0, .2, 1), visibility 0s linear .32s;
+        }
+        .side-menu.open { transform: none; visibility: visible; transition: transform .32s cubic-bezier(.4, 0, .2, 1); }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(8, 15, 28, .45); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); z-index: 1999; display: none; }
+        .menu-header { padding: 1rem 1rem 1rem 1.15rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .menu-close { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--surface-2); color: var(--text-main); font-size: 1.05rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+        .menu-nav { display: flex; flex-direction: column; gap: 2px; padding: .65rem; }
+        .menu-link { display: flex; align-items: center; gap: .85rem; padding: .62rem .7rem; border-radius: 14px; text-decoration: none; color: var(--text-main); font-weight: 700; font-size: .98rem; transition: background .2s, color .2s; background: none; border: none; width: 100%; text-align: left; cursor: pointer; font-family: inherit; }
+        .menu-link:hover { background: var(--surface-2); }
+        .menu-link.active { background: var(--brand-soft); color: var(--brand); }
+        .menu-ico { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; background: var(--brand-soft); color: var(--brand); font-size: 1rem; }
+        .menu-link.active .menu-ico { background: var(--icon-grad); color: #fff; }
+        .menu-ext { margin-left: auto; font-size: .72rem; color: var(--text-muted); opacity: .8; }
+        .menu-sep { height: 1px; background: var(--border); margin: .55rem .7rem; }
+        .menu-footer { margin-top: auto; padding: 1rem 1.15rem calc(1.1rem + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: .8rem; }
+        .menu-install { width: 100%; }
+        .menu-install[hidden] { display: none; }
+        .menu-legal { font-size: .78rem; color: var(--text-muted); text-align: center; }
+        .menu-legal a { color: var(--text-muted); }
+
+        /* ---------- Ajustes ---------- */
+        .settings { padding: 2rem 1.6rem 1.8rem; }
+        .settings h2 { margin: 0 0 1.4rem; font-size: 1.5rem; letter-spacing: -.02em; }
+        .set-block { padding: 1.1rem 0; border-top: 1px solid var(--border); }
+        .set-label { font-weight: 800; margin-bottom: .7rem; }
+        .set-hint { margin: .6rem 0 0; font-size: .85rem; color: var(--text-muted); line-height: 1.45; }
+        .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); }
+        .seg button { border: none; background: none; padding: .7rem .4rem; border-radius: 10px; font: inherit; font-weight: 700; font-size: .88rem; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+        .seg button.on { background: var(--card); color: var(--brand); box-shadow: var(--shadow-sm); }
+        .btn-danger-soft { width: 100%; background: rgba(239, 68, 68, .1); color: #dc2626; font-family: inherit; }
+        .btn-danger-soft:disabled { opacity: .45; cursor: default; }
+
+        /* ---------- Estados de la lista ---------- */
+        .list-state { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .list-state i { font-size: 1.8rem; color: var(--brand); opacity: .7; margin-bottom: .8rem; display: block; }
+        .list-state p { margin: 0 0 1rem; }
+        .list-state .btn { display: inline-flex; flex: none; padding: .7rem 1.4rem; background: var(--brand-soft); color: var(--brand); font-family: inherit; }
+        .list-state .btn i { display: inline; font-size: 1rem; margin: 0; opacity: 1; }
+        .skeleton { height: 360px; border-radius: 1.5rem; border: 1px solid var(--border); background: linear-gradient(100deg, var(--card) 30%, var(--surface-2) 50%, var(--card) 70%); background-size: 300% 100%; animation: shimmer 1.4s linear infinite; }
+        @keyframes shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
         .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; }
         .search-area { max-width: 600px; margin: 1rem auto 2.5rem; text-align: center; }
         #search { width: 100%; box-sizing: border-box; padding: 1rem 1.4rem; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); font-size: 1rem; outline: none; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); transition: border-color .2s, box-shadow .2s; }
@@ -168,7 +208,7 @@ header.hide {
         .btn-wa { background: var(--whatsapp); color: white; flex: 0 0 55px; font-size: 1.4rem; }
         .btn-share { background: var(--brand-soft); color: var(--brand); flex: 0 0 55px; font-size: 1.15rem; }
         footer { margin-top: 5rem; padding: 3rem 1rem; border-top: 1px solid var(--border); text-align: center; }
-        #installBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none; align-items: center; gap: 10px; }
+        #installBtn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--icon-grad); color: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.2); z-index: 999; display: none; align-items: center; gap: 10px; }
         #iosAlert { position: fixed; bottom: 20px; left: 10px; right: 10px; background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1001; display: none; align-items: center; gap: 12px; animation: slideUp 0.5s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
@@ -196,7 +236,7 @@ header.hide {
 </head>
 <body class="psq-first-load">
 <header id="mainHeader">
-    <button class="menu-toggle" onclick="toggleMenu()" aria-label="Abrir Menú">
+    <button class="menu-toggle" onclick="toggleMenu(true)" aria-label="Abrir menú" aria-expanded="false" aria-controls="sideMenu">
         <i class="fas fa-bars"></i>
     </button>
     
@@ -208,38 +248,44 @@ header.hide {
     <!-- Espaciador para mantener el equilibrio visual con el botón de la izquierda -->
     <div class="header-right-spacer"></div>
 </header>
-<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
-<div id="sideMenu" class="side-menu">
+<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu(false)"></div>
+<aside id="sideMenu" class="side-menu" aria-label="Menú" aria-hidden="true">
     <div class="menu-header">
-        <span style="font-weight: 900; color: var(--primary); letter-spacing: 1px;">PSQALDÍA</span>
-        <button class="menu-toggle" onclick="toggleMenu()" aria-label="Cerrar Menú"><i class="fas fa-times"></i></button>
+        <a href="/" class="psq-brand" onclick="toggleMenu(false); window.scrollTo({top: 0, behavior: 'smooth'}); return false;"><img src="/icon-192.png" alt="" width="34" height="34"><span>psq <b>al día</b></span></a>
+        <button class="menu-close" onclick="toggleMenu(false)" aria-label="Cerrar menú"><i class="fas fa-times"></i></button>
     </div>
     <nav class="menu-nav">
-        <a href="#" class="menu-link" onclick="toggleMenu(); window.scrollTo({top: 0, behavior: 'smooth'}); return false;"><i class="fas fa-home"></i> Inicio</a>
-        <a href="/herramientas" class="menu-link"><i class="fas fa-toolbox"></i> Herramientas</a>
-        <a href="/opesergas" class="menu-link"><i class="fas fa-graduation-cap"></i> Portal OPE</a>
-        <a href="/recursos" class="menu-link"><i class="fas fa-map-marked-alt"></i> Mapa</a>
-        <a href="https://forms.gle/ugCJGaTksJ4g5eUr7" target="_blank" class="menu-link"><i class="fas fa-lightbulb"></i> Sugiere contenidos</a>
-        <a href="#" class="menu-link" onclick="openSettings(); return false;"><i class="fas fa-cog"></i> Ajustes</a>
-        <a href="#" class="menu-link" onclick="openAbout(); return false;"><i class="fas fa-info-circle"></i> Sobre el proyecto</a>
+        <a href="/" class="menu-link active" aria-current="page" onclick="toggleMenu(false); window.scrollTo({top: 0, behavior: 'smooth'}); return false;"><span class="menu-ico"><i class="fas fa-home"></i></span> Inicio</a>
+        <a href="/herramientas" class="menu-link"><span class="menu-ico"><i class="fas fa-toolbox"></i></span> Herramientas</a>
+        <a href="/opesergas" class="menu-link"><span class="menu-ico"><i class="fas fa-graduation-cap"></i></span> Portal OPE</a>
+        <a href="/recursos" class="menu-link"><span class="menu-ico"><i class="fas fa-map-marked-alt"></i></span> Mapa de recursos</a>
+        <div class="menu-sep" role="separator"></div>
+        <a href="https://forms.gle/ugCJGaTksJ4g5eUr7" target="_blank" rel="noopener" class="menu-link"><span class="menu-ico"><i class="fas fa-lightbulb"></i></span> Sugiere contenidos <i class="fas fa-arrow-up-right-from-square menu-ext" aria-label="(abre otra web)"></i></a>
+        <button type="button" class="menu-link" onclick="recomendarWeb()"><span class="menu-ico"><i class="fas fa-user-plus"></i></span> Recomendar a un compañero</button>
+        <button type="button" class="menu-link" onclick="openSettings()"><span class="menu-ico"><i class="fas fa-cog"></i></span> Ajustes</button>
+        <button type="button" class="menu-link" onclick="openAbout()"><span class="menu-ico"><i class="fas fa-info-circle"></i></span> Sobre el proyecto</button>
     </nav>
-</div>
+    <div class="menu-footer">
+        <button type="button" id="menuInstall" class="psq-btn menu-install" hidden><i class="fas fa-download"></i> Instalar la app</button>
+        <div class="menu-legal"><a href="#" onclick="toggleMenu(false); openLegal(); return false;">Aviso legal</a> · © 2026 psq al día</div>
+    </div>
+</aside>
 <div class="container">
     <section class="home-hero psq-glow">
         <h1 class="psq-grad-text">Psiquiatría clínica, al&nbsp;día</h1>
         <p>Herramientas, guías y recursos para la práctica diaria.</p>
     </section>
     <div class="search-area">
-        <input type="text" id="search" placeholder="Buscar..." oninput="filter()">
+        <input type="search" id="search" placeholder="Buscar entradas..." aria-label="Buscar entradas" autocomplete="off" oninput="filter()">
         <div id="filterContainer" class="filter-buttons"></div>
     </div>
     <div id="favs-title" class="section-title"><i class="fas fa-star"></i> Mis Favoritos</div>
     <div id="favs-app" class="psq-stagger"></div>
     <div id="main-title" class="section-title">Todos los Recursos</div>
-    <div id="app" class="psq-stagger"></div>
+    <div id="app" class="psq-stagger"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
 </div>
 <footer>
-    <div style="margin-bottom: 1rem; font-weight: 800; opacity: 0.5; font-size: 0.8rem; letter-spacing: 1px;">PSQALDÍA © 2026</div>
+    <div style="margin-bottom: 1rem; font-weight: 800; opacity: 0.6; font-size: 0.85rem;">psq al día © 2026</div>
     <a href="#" onclick="openLegal(); return false;" style="color: var(--text-muted); font-size: 0.7rem; text-decoration: underline;">Ver Aviso Legal y Responsabilidad</a>
 </footer>
 <button id="installBtn"><i class="fas fa-download"></i> INSTALAR APP</button>
@@ -264,6 +310,7 @@ header.hide {
     });
   }
   
+  const TITULO_PORTADA = document.title;
   const PLACEHOLDER_IMG = '/placeholder.svg?v=3';
 
   function slugify(text) {
@@ -317,17 +364,45 @@ async function compartirRecurso(e, id) {
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`, '_blank');
     }
 }
-    function toggleMenu() {
+    // Abre (true), cierra (false) o alterna (sin argumento) el menú lateral
+    function toggleMenu(force) {
         const menu = document.getElementById('sideMenu'), overlay = document.getElementById('menuOverlay');
-        const isOpen = menu.classList.contains('open');
-        menu.classList.toggle('open');
-        overlay.style.display = isOpen ? 'none' : 'block';
-        document.body.style.overflow = isOpen ? 'auto' : 'hidden';
+        const opener = document.querySelector('#mainHeader .menu-toggle');
+        const open = typeof force === 'boolean' ? force : !menu.classList.contains('open');
+        if (open === menu.classList.contains('open')) return;
+        menu.classList.toggle('open', open);
+        menu.setAttribute('aria-hidden', String(!open));
+        opener.setAttribute('aria-expanded', String(open));
+        overlay.style.display = open ? 'block' : 'none';
+        document.body.style.overflow = open ? 'hidden' : '';
+        if (open) menu.querySelector('.menu-close').focus({ preventScroll: true });
+        else if (menu.contains(document.activeElement)) opener.focus({ preventScroll: true });
+    }
+
+    // Cerrar el menú deslizando el dedo hacia la izquierda
+    (function () {
+        const menu = document.getElementById('sideMenu');
+        let x0 = null, y0 = null;
+        menu.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+        menu.addEventListener('touchmove', e => {
+            if (x0 === null) return;
+            const dx = e.touches[0].clientX - x0, dy = e.touches[0].clientY - y0;
+            if (dx < -60 && Math.abs(dx) > Math.abs(dy) * 1.5) { x0 = null; toggleMenu(false); }
+        }, { passive: true });
+        menu.addEventListener('touchend', () => { x0 = null; }, { passive: true });
+    })();
+
+    // Recomendar la web (no una entrada concreta)
+    async function recomendarWeb() {
+        toggleMenu(false);
+        const data = { title: 'psq al día', text: 'Herramientas y recursos para la psiquiatría clínica', url: 'https://psqaldia.com' };
+        if (navigator.share) { try { await navigator.share(data); } catch (e) { /* cancelado */ } }
+        else window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(data.text + ': ' + data.url)}`, '_blank');
     }
 
     async function openAbout() {
        history.pushState({ modal: 'panel' }, '', location.pathname);
-        toggleMenu();
+        toggleMenu(false);
         const modalData = document.getElementById('modalData');
         modalData.innerHTML = '<div style="padding:2.5rem;">Cargando...</div>';
         document.getElementById('modal').style.display = 'flex';
@@ -350,12 +425,37 @@ async function compartirRecurso(e, id) {
 
     function openSettings() {
       history.pushState({ modal: 'panel' }, '', location.pathname);
-        toggleMenu();
-        document.getElementById('modalData').innerHTML = `<div style="padding:2.5rem;"><h2>Ajustes</h2><button class="btn" style="background:#ef4444; color:white; width:100%;" onclick="clearFavs()">BORRAR FAVORITOS</button></div>`;
+        toggleMenu(false);
+        const tema = window.psqTema ? psqTema.actual() : 'auto';
+        const opc = [['auto', 'fa-circle-half-stroke', 'Automático'], ['claro', 'fa-sun', 'Claro'], ['oscuro', 'fa-moon', 'Oscuro']];
+        const n = favorites.length;
+        document.getElementById('modalData').innerHTML = `<div class="settings">
+            <h2>Ajustes</h2>
+            <div class="set-block">
+                <div class="set-label">Tema</div>
+                <div class="seg" role="radiogroup" aria-label="Tema">${opc.map(([v, ic, t]) =>
+                    `<button type="button" role="radio" aria-checked="${v === tema}" class="${v === tema ? 'on' : ''}" onclick="elegirTema('${v}', this)"><i class="fas ${ic}"></i>${t}</button>`).join('')}</div>
+                <p class="set-hint">"Automático" sigue el modo de tu móvil. El panel de cada herramienta se muestra siempre en claro para que se lea bien.</p>
+            </div>
+            <div class="set-block">
+                <div class="set-label">Favoritos</div>
+                <p class="set-hint" style="margin:0 0 .8rem;">${n ? `Tienes ${n} ${n === 1 ? 'favorito guardado' : 'favoritos guardados'} en este dispositivo.` : 'Aún no tienes favoritos. Pulsa la estrella de una entrada para guardarla.'}</p>
+                <button type="button" class="btn btn-danger-soft" onclick="clearFavs()" ${n ? '' : 'disabled'}><i class="fas fa-trash-alt"></i>&nbsp; Borrar favoritos</button>
+            </div>
+        </div>`;
         document.getElementById('modal').style.display = 'flex';
     }
 
-    function clearFavs() { if(confirm("¿Seguro?")) { favorites = []; localStorage.setItem('psq_favs', '[]'); filter(); closeModal(); } }
+    function elegirTema(tema, btn) {
+        if (!window.psqTema) return;
+        psqTema.cambiar(tema);
+        btn.parentElement.querySelectorAll('button').forEach(b => { const on = b === btn; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); });
+    }
+
+    // Al cambiar de tema se repintan las tarjetas (los colores de categoría dependen del tema)
+    document.addEventListener('psq:tema', () => { if (db.length) filter(); });
+
+    function clearFavs() { if (confirm("¿Borrar todos tus favoritos?")) { favorites = []; localStorage.setItem('psq_favs', '[]'); filter(); closeModal(); } }
 
     window.addEventListener('scroll', () => {
         const header = document.getElementById('mainHeader');
@@ -367,7 +467,7 @@ async function compartirRecurso(e, id) {
     function getPasteColor(str, alpha = 1) {
     let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
     // Multiplicamos por 17 para dispersar los hashes y cambiar radicalmente la paleta
-    const h = (Math.abs(hash) * 17) % 360, isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const h = (Math.abs(hash) * 17) % 360, isDark = window.psqTema ? psqTema.esOscuro() : window.matchMedia('(prefers-color-scheme: dark)').matches;
     return `background-color: hsla(${h}, 70%, ${isDark?25:92}%, ${alpha}); color: hsl(${h}, 70%, ${isDark?90:25}%); border: 1px solid hsl(${h}, 70%, ${isDark?40:80}%);`;
 }
 
@@ -376,6 +476,11 @@ async function compartirRecurso(e, id) {
         const parts = dateStr.split(/[\/\s-]/);
         const d = parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(dateStr);
         return isNaN(d) ? new Date(0) : d;
+    }
+
+    function reintentarCarga() {
+        document.getElementById('app').innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+        loadData();
     }
 
     async function loadData() {
@@ -396,7 +501,7 @@ async function compartirRecurso(e, id) {
             setTimeout(() => document.body.classList.remove('psq-first-load'), 1200);
         } catch (e) { 
             console.error("Error:", e); 
-            document.getElementById('app').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; opacity:0.6;">Error al cargar datos.</div>';
+            document.getElementById('app').innerHTML = `<div class="list-state"><i class="fas fa-wifi"></i><p>No se han podido cargar las entradas. Puede ser la conexión o la red del hospital.</p><button class="btn" onclick="reintentarCarga()"><i class="fas fa-rotate-right"></i>&nbsp; Reintentar</button></div>`;
         }
     }
 
@@ -435,6 +540,7 @@ async function compartirRecurso(e, id) {
     const item = db.find(i => i.id === id); 
     if (!item) return;
     document.querySelector('#modal .modal-content').classList.remove('psq-light-island');
+    document.title = `${item.titulo} | psq al día`;
     
     let accessBtn = `<a href="${item.link}" target="_blank" class="btn btn-primary">ACCEDER</a>`;
     if (item.accion && item.accion !== '') {
@@ -476,6 +582,7 @@ async function compartirRecurso(e, id) {
     // Oculta el modal sin tocar el historial
 function ocultarModal() {
     document.getElementById('modal').style.display = 'none';
+    document.title = TITULO_PORTADA;
     document.querySelector('#modal .modal-content').classList.remove('psq-light-island');
     document.body.style.overflow = 'auto';
 }
@@ -505,7 +612,9 @@ window.addEventListener('popstate', (e) => {
 
 // Cerrar con Escape
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('modal').style.display === 'flex') closeModal();
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('sideMenu').classList.contains('open')) toggleMenu(false);
+    else if (document.getElementById('modal').style.display === 'flex') closeModal();
 });
     
     function toggleFavorite(e, id) { 
@@ -515,10 +624,20 @@ document.addEventListener('keydown', (e) => {
         filter(); 
     }
 
+    const normalizar = t => (t || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // Búsqueda sin distinguir tildes ni mayúsculas; busca también en la categoría
     function filter() {
-        const q = document.getElementById('search').value.toLowerCase().trim();
-        const filtered = db.filter(i => (i.titulo.toLowerCase().includes(q) || i.resumen.toLowerCase().includes(q)) && (currentCategory === 'TODOS' || i.categoria === currentCategory));
+        const q = normalizar(document.getElementById('search').value.trim());
+        const filtered = db.filter(i => (!q || normalizar(i.titulo + ' ' + i.resumen + ' ' + i.categoria).includes(q)) && (currentCategory === 'TODOS' || i.categoria === currentCategory));
         renderAll(filtered);
+    }
+
+    function limpiarBusqueda() {
+        document.getElementById('search').value = '';
+        currentCategory = 'TODOS';
+        document.querySelectorAll('.f-btn').forEach(b => b.classList.toggle('active', b.textContent === 'TODOS'));
+        filter();
     }
 
     function renderAll(dataToRender = db) {
@@ -530,6 +649,10 @@ document.addEventListener('keydown', (e) => {
             favsList.forEach(i => favsApp.appendChild(createCard(i))); 
         } else { document.getElementById('favs-title').style.display = 'none'; }
         document.getElementById('main-title').style.display = (favsList.length > 0 && currentCategory === 'TODOS') ? 'block' : 'none';
+        if (!dataToRender.length && db.length) {
+            app.innerHTML = `<div class="list-state"><i class="fas fa-search"></i><p>No hay entradas que coincidan con tu búsqueda.</p><button class="btn" onclick="limpiarBusqueda()">Ver todas</button></div>`;
+            return;
+        }
         othersList.forEach((i, idx) => {
             const card = createCard(i);
             // La entrada más reciente se destaca (solo si hay suficientes para que luzca)
@@ -562,8 +685,19 @@ document.addEventListener('keydown', (e) => {
     }
 
     window.addEventListener('load', () => { if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !navigator.standalone) document.getElementById('iosAlert').style.display = 'flex'; });
-    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; });
-    document.getElementById('installBtn').addEventListener('click', () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
+    // Instalar la app: botón en el menú (Android y escritorio) o instrucciones (iPhone)
+    const esApp = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const esIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+    const menuInstall = document.getElementById('menuInstall');
+    function instalar() {
+        if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; document.getElementById('installBtn').style.display = 'none'; menuInstall.hidden = true; }
+        else if (esIOS) { toggleMenu(false); document.getElementById('iosAlert').style.display = 'flex'; }
+    }
+    if (esIOS && !esApp) menuInstall.hidden = false;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'flex'; menuInstall.hidden = false; });
+    window.addEventListener('appinstalled', () => { deferredPrompt = null; document.getElementById('installBtn').style.display = 'none'; menuInstall.hidden = true; });
+    document.getElementById('installBtn').addEventListener('click', instalar);
+    menuInstall.addEventListener('click', instalar);
     
     loadData();
 </script>

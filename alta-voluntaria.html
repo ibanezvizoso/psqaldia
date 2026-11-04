@@ -44,6 +44,7 @@
         .site-bottom-info img { height: 18px; vertical-align: middle; margin-right: 8px; opacity: 0.4; filter: grayscale(100%); }
     </style>
     <link rel="stylesheet" href="/css/psq.css">
+    <script src="/js/tema.js"></script>
 </head>
 <body class="psq-tool">
 
@@ -57,11 +58,6 @@
         <div class="col-lg-6">
             <div class="card shadow-sm p-4 mb-4">
                 <form id="altaForm">
-                    <div class="mb-3">
-                        <label class="form-label">Nombre del Paciente (opcional)</label>
-                        <input type="text" id="nombrePaciente" class="form-control" placeholder="Nombre completo o iniciales">
-                    </div>
-
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="form-label">Fecha</label>
@@ -170,6 +166,7 @@
                         <textarea id="planAltaLibre" class="form-control mt-2" rows="2" placeholder="Otros detalles del plan..."></textarea>
                     </div>
 
+                    <p class="small text-muted mb-2"><i class="fas fa-shield-alt me-1"></i> El texto se envía a un servicio de IA para redactarlo. No escribas nombres ni otros datos que identifiquen al paciente.</p>
                     <button type="button" onclick="redactarEvolutivo()" class="btn btn-psq w-100 p-3 shadow">
                         <i class="fas fa-magic me-2"></i> REDACTAR CON IA (repetir click si error)
                     </button>
@@ -245,7 +242,8 @@ async function redactarEvolutivo() {
     const generoSel = document.querySelector('input[name="genero"]:checked');
 
     const datos = {
-        nombre: document.getElementById('nombrePaciente').value || "el paciente",
+        // Nunca se envía el nombre del paciente al servicio de IA
+        nombre: "el paciente",
         fecha: document.getElementById('fecha').value,
         hora: document.getElementById('hora').value,
         genero: generoSel ? generoSel.value : "N/S",
