@@ -22,7 +22,10 @@
     <meta property="og:title" content="PSQALDÍA | Tu web/app para la psiquiatría clínica">
     <meta property="og:description" content="Plataforma con recursos actualizados para la psiquiatría clínica. Recopilación de materiales y creación de herramientas útiles para el día a día.">
     <meta property="og:url" content="https://psqaldia.com/">
-    <meta property="og:image" content="https://psqaldia.com/icon-512.png">
+    <meta property="og:image" content="https://psqaldia.com/icon-maskable-512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:image:alt" content="Logo de PSQ AL DÍA">
     <meta name="twitter:card" content="summary">
     <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
@@ -88,7 +91,7 @@ header {
 .logo-img-modern { 
     height: 38px; /* Tamaño equilibrado */
     width: 38px; 
-    border-radius: 11px;
+    border-radius: 50%;
     box-shadow: var(--shadow-sm);
 }
 
@@ -96,8 +99,7 @@ header {
     font-size: 1.4rem;
     font-weight: 800;
     color: var(--text-main);
-    letter-spacing: -0.02em; /* Look más moderno y compacto */
-    text-transform: uppercase;
+    letter-spacing: -0.03em; /* Look más moderno y compacto, en minúsculas como el logo */
 }
 .brand-text-modern b {
     color: var(--brand);
@@ -115,7 +117,7 @@ header.hide {
 
 @media (max-width: 480px) {
     .brand-text-modern { font-size: 1.1rem; }
-    .logo-img-modern { height: 34px; width: 34px; border-radius: 10px; }
+    .logo-img-modern { height: 34px; width: 34px; }
 }
         .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .side-menu.open { left: 0; }
@@ -200,7 +202,7 @@ header.hide {
     
     <div class="brand-central" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
         <img src="/icon-192.png" alt="Logo PSQALDÍA" class="logo-img-modern" width="38" height="38">
-        <span class="brand-text-modern">PSQ <b>AL DÍA</b></span>
+        <span class="brand-text-modern">psq <b>al día</b></span>
     </div>
 
     <!-- Espaciador para mantener el equilibrio visual con el botón de la izquierda -->
@@ -262,7 +264,7 @@ header.hide {
     });
   }
   
-  const PLACEHOLDER_IMG = '/placeholder.svg?v=2';
+  const PLACEHOLDER_IMG = '/placeholder.svg?v=3';
 
   function slugify(text) {
       return text.toString().toLowerCase().trim()

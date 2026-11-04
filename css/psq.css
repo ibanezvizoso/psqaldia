@@ -184,13 +184,13 @@ body {
     text-decoration: none;
     color: var(--text-main);
     font-weight: 800;
-    font-size: 1.05rem;
-    letter-spacing: -.01em;
+    font-size: 1.18rem;
+    letter-spacing: -.03em;
 }
 .psq-brand img {
     width: 34px;
     height: 34px;
-    border-radius: 10px;
+    border-radius: 50%;
     display: block;
     box-shadow: var(--shadow-sm);
 }
@@ -267,7 +267,7 @@ body {
 .psq-footer img {
     height: 20px;
     width: 20px;
-    border-radius: 6px;
+    border-radius: 50%;
     vertical-align: middle;
     margin-right: 8px;
     opacity: .7;
@@ -327,7 +327,7 @@ body.psq-tool .site-bottom-info img {
 }
 
 @media (max-width: 600px) {
-    .psq-brand { font-size: 1rem; }
+    .psq-brand { font-size: 1.1rem; }
     .psq-brand img { width: 32px; height: 32px; }
     .psq-nav-link span { display: none; }
     .psq-nav-link { padding: .55rem .7rem; }
