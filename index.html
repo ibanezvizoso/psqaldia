@@ -299,9 +299,11 @@ async function compartirRecurso(e, id) {
 
     if (navigator.share) {
         try {
+            // Solo el título: la vista previa (imagen y resumen) la genera WhatsApp
+            // a partir del enlace, y así el enlace no queda escondido al final.
             await navigator.share({
                 title: shareTitle,
-                text: `${item.titulo}: ${item.resumen}`,
+                text: item.titulo,
                 url: shareUrl
             });
         } catch (err) {
@@ -407,8 +409,6 @@ async function compartirRecurso(e, id) {
         // Al hacer clic, abre el modal al instante (sin preguntar contraseña)
                 card.onclick = () => abrirEntrada(item.id);
 
-        const shareUrl = window.location.origin + '/' + item.id;
-        const shareText = item.accion !== '' ? `🛠️ *Herramienta*: ${item.titulo}\n${shareUrl}` : `*${item.titulo}*: ${shareUrl}`;
         
         card.innerHTML = `<button class="fav-btn ${isFav?'is-fav':''}" onclick="toggleFavorite(event,'${item.id}')"><i class="fa${isFav?'s':'r'} fa-star"></i></button>
             <div class="card-media">
