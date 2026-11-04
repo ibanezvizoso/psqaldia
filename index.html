@@ -99,8 +99,7 @@ header {
     font-size: 1.4rem;
     font-weight: 800;
     color: var(--text-main);
-    letter-spacing: -0.02em; /* Look más moderno y compacto */
-    text-transform: uppercase;
+    letter-spacing: -0.03em; /* Look más moderno y compacto, en minúsculas como el logo */
 }
 .brand-text-modern b {
     color: var(--brand);
@@ -203,7 +202,7 @@ header.hide {
     
     <div class="brand-central" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
         <img src="/icon-192.png" alt="Logo PSQALDÍA" class="logo-img-modern" width="38" height="38">
-        <span class="brand-text-modern">PSQ <b>AL DÍA</b></span>
+        <span class="brand-text-modern">psq <b>al día</b></span>
     </div>
 
     <!-- Espaciador para mantener el equilibrio visual con el botón de la izquierda -->
@@ -265,7 +264,7 @@ header.hide {
     });
   }
   
-  const PLACEHOLDER_IMG = '/placeholder.svg?v=2';
+  const PLACEHOLDER_IMG = '/placeholder.svg?v=3';
 
   function slugify(text) {
       return text.toString().toLowerCase().trim()
