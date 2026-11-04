@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juegos de psiquiatría | psq al día</title>
+    <meta name="description" content="Minijuegos de psq al día para aprender psicofarmacología jugando: partidas cortas, en el móvil y sin conexión.">
+    <link rel="canonical" href="https://psqaldia.com/juegos">
+    <link rel="icon" type="image/png" href="/Logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="psq al día">
+    <meta property="og:title" content="Juegos · psq al día">
+    <meta property="og:description" content="Minijuegos para aprender psicofarmacología jugando.">
+    <meta property="og:url" content="https://psqaldia.com/juegos">
+    <meta property="og:image" content="https://psqaldia.com/juegos/ventana-terapeutica.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"Juegos de psq al día","url":"https://psqaldia.com/juegos","inLanguage":"es","mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://psqaldia.com/juegos/ventana-terapeutica","name":"Ventana terapéutica"}]}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"}]}]}</script>
+    <link rel="stylesheet" href="/css/all.min.css">
+    <link rel="stylesheet" href="/css/psq.css">
+    <script src="/js/tema.js"></script>
+    <script src="/js/qr.js" defer></script>
+    <style>
+        body { margin: 0; line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1rem; flex: 1; width: 100%; box-sizing: border-box; }
+        .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+
+        /* Cada juego: tarjeta oscura tipo monitor, también en tema claro (es su mundo visual) */
+        .game {
+            display: flex; flex-direction: column; border-radius: 1.5rem; overflow: hidden; text-decoration: none;
+            background: #060d18; color: #e6f1fb; border: 1px solid rgba(127, 227, 255, .18);
+            box-shadow: var(--shadow-md); transition: transform .25s, box-shadow .25s;
+        }
+        .game:hover { transform: translateY(-4px); }
+        .game:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+        .game img { width: 100%; height: auto; aspect-ratio: 1200 / 630; object-fit: cover; display: block; }
+        .game-body { padding: 1.2rem 1.3rem 1.4rem; display: flex; flex-direction: column; gap: .55rem; }
+        .game-tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+        .game-tags span { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: .28rem .6rem; border-radius: 7px; background: rgba(45, 212, 191, .14); color: #2dd4bf; }
+        .game h2 { margin: 0; font-size: 1.35rem; letter-spacing: -.01em; }
+        .game p { margin: 0; color: #b9c8d8; font-size: .95rem; }
+        .game .play { margin-top: .5rem; align-self: flex-start; display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1.2rem; border-radius: 999px; background: #2dd4bf; color: #032621; font-weight: 800; font-size: .92rem; }
+        .soon { border: 1px dashed var(--border); border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; color: var(--text-muted); min-height: 160px; }
+        .soon i { display: block; font-size: 1.5rem; margin-bottom: .6rem; color: var(--brand); opacity: .7; }
+        @media (max-width: 600px) { .games { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <nav class="psq-topbar">
+        <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>psq <b>al día</b></span></a>
+        <a href="/herramientas" class="psq-nav-link"><i class="fas fa-toolbox"></i><span>Herramientas</span></a>
+    </nav>
+
+    <header class="psq-hero psq-glow">
+        <h1>Juegos</h1>
+        <p>Psicofarmacología para jugar en una pausa: partidas cortas, en el móvil y también sin conexión.</p>
+    </header>
+
+    <main class="container">
+        <div class="games">
+            <a class="game" href="/juegos/ventana-terapeutica">
+                <img src="/juegos/ventana-terapeutica.png" alt="Monitor con la curva de nivel en sangre dentro de la ventana terapéutica" width="1200" height="630">
+                <div class="game-body">
+                    <div class="game-tags"><span>Arcade</span><span>Farmacocinética</span></div>
+                    <h2>Ventana terapéutica</h2>
+                    <p>Cada toque, una dosis. Mantén la curva en la franja mientras cambian los fármacos y llegan las interacciones.</p>
+                    <span class="play"><i class="fas fa-play"></i> Jugar</span>
+                </div>
+            </a>
+            <div class="soon"><div><i class="fas fa-gamepad"></i>Pronto, más juegos.</div></div>
+        </div>
+    </main>
+
+    <footer class="psq-footer">
+        <a href="/"><i class="fas fa-home"></i> Volver al inicio</a>
+        <div style="margin-top:1rem;"><img src="/icon-192.png" alt=""><span>&copy; 2026 psq al día · Juegos</span></div>
+    </footer>
+</body>
+</html>
