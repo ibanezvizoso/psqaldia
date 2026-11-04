@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ventana terapéutica: minijuego de psicofármacos | psq al día</title>
+<meta name="description" content="Minijuego de psq al día: cada toque es una dosis; mantén la curva dentro de la ventana terapéutica mientras cambian los fármacos.">
+<link rel="canonical" href="https://psqaldia.com/juegos/ventana-terapeutica">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#060d18">
+<link rel="icon" href="/Logo.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="psq al día">
+<meta property="og:title" content="Ventana terapéutica · minijuego de psq al día">
+<meta property="og:description" content="Cada toque, una dosis. Mantén la curva en la franja mientras cambian los fármacos y llegan las interacciones.">
+<meta property="og:url" content="https://psqaldia.com/juegos/ventana-terapeutica">
+<meta property="og:image" content="https://psqaldia.com/juegos/ventana-terapeutica.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoGame","name":"Ventana terapéutica","description":"Minijuego arcade: mantén el nivel del fármaco dentro de la ventana terapéutica mientras cambian los fármacos y aparecen interacciones.","url":"https://psqaldia.com/juegos/ventana-terapeutica","inLanguage":"es","genre":"Arcade","gamePlatform":"Web","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"},{"@type":"ListItem","position":3,"name":"Ventana terapéutica","item":"https://psqaldia.com/juegos/ventana-terapeutica"}]}]}</script>
+<style>
+@font-face { font-family: "Chakra Petch"; font-weight: 500 600; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-600.woff2") format("woff2"); }
+@font-face { font-family: "Chakra Petch"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-700.woff2") format("woff2"); }
+/* Un único mundo visual: la pantalla de un monitor de constantes convertida en arcade.
+   Rejilla de papel milimetrado, curva en fósforo cian, ventana terapéutica en verde, alarmas en rojo y ámbar. */
+:root {
+    --bg: #060d18;
+    --panel: #0c1726;
+    --ink: #e6f1fb;
+    --muted: #8397ae;
+    --curve: #7fe3ff;
+    --band: #2dd4bf;
+    --toxic: #ff4d6d;
+    --low: #f4b860;
+    --f-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --f-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+    background: var(--bg); color: var(--ink); font-family: var(--f-body);
+    -webkit-font-smoothing: antialiased; overflow: hidden;
+    touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.app {
+    height: 100%; max-width: 560px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 10px;
+    padding: max(12px, env(safe-area-inset-top)) 16px max(14px, env(safe-area-inset-bottom));
+}
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.brand { font-family: var(--f-display); font-weight: 700; color: var(--muted); font-size: .9rem; text-decoration: none; }
+.brand b { color: var(--curve); }
+.icons { display: flex; gap: 6px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(127, 227, 255, .18); background: var(--panel); color: var(--ink); font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.icon-btn:focus-visible, .btn:focus-visible { outline: 2px solid var(--curve); outline-offset: 2px; }
+
+/* ---------- Marcador ---------- */
+.hud { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 12px; }
+.app.in-menu .hud { visibility: hidden; }
+.drug { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.drug-name { font-family: var(--f-display); font-weight: 700; font-size: 1.5rem; letter-spacing: .02em; text-transform: uppercase; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .4s; }
+.lives { display: flex; gap: 5px; }
+.life { width: 20px; height: 9px; border-radius: 99px; background: linear-gradient(90deg, var(--band) 50%, var(--ink) 50%); box-shadow: 0 0 8px rgba(45, 212, 191, .5); transition: opacity .3s, transform .3s; }
+.life.off { opacity: .15; transform: scale(.8); box-shadow: none; }
+.score { text-align: right; font-family: var(--f-display); }
+.score-val { font-size: 2.4rem; font-weight: 700; line-height: .95; font-variant-numeric: tabular-nums; }
+.mult { display: inline-block; margin-right: 6px; padding: 2px 7px; border-radius: 6px; font-size: .9rem; vertical-align: middle; background: rgba(45, 212, 191, .15); color: var(--band); opacity: 0; transition: opacity .2s; }
+.mult.on { opacity: 1; }
+
+/* ---------- Monitor ---------- */
+.screen {
+    position: relative; flex: 1; min-height: 0; border-radius: 22px; overflow: hidden; cursor: pointer;
+    background: radial-gradient(120% 90% at 50% 40%, #0b1c2f 0%, #060d18 70%);
+    border: 1px solid rgba(127, 227, 255, .16);
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, .6), 0 20px 50px -25px rgba(0, 0, 0, .9);
+}
+.screen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 3px); }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.effect {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis;
+    padding: 6px 12px; border-radius: 99px; font-family: var(--f-display); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase;
+    background: rgba(12, 23, 38, .9); border: 1px solid currentColor; pointer-events: none; white-space: nowrap; transition: opacity .25s;
+}
+.effect[hidden] { display: block; opacity: 0; }
+.pop {
+    position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+    font-family: var(--f-display); font-weight: 700; font-size: clamp(2.2rem, 10vw, 3.2rem); letter-spacing: .04em; text-transform: uppercase;
+    pointer-events: none; opacity: 0; text-align: center; white-space: nowrap; text-shadow: 0 0 24px currentColor;
+}
+.pop small { display: block; font-size: .36em; letter-spacing: .14em; margin-top: .35em; opacity: .9; }
+.pop.show { animation: pop 1.1s cubic-bezier(.2, .8, .2, 1) forwards; }
+@keyframes pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); } 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -62%) scale(1); } }
+.hint { position: absolute; left: 0; right: 0; bottom: 34px; text-align: center; font-family: var(--f-display); letter-spacing: .12em; text-transform: uppercase; font-size: .9rem; color: var(--curve); pointer-events: none; animation: blink 1.2s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+
+/* ---------- Capas ---------- */
+.layer {
+    position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; gap: 18px;
+    padding: 22px 18px; overflow-y: auto; cursor: default;
+    background: linear-gradient(180deg, rgba(6, 13, 24, .35) 0%, rgba(6, 13, 24, .9) 60%);
+}
+.layer[hidden] { display: none; }
+.layer > :first-child { margin-top: auto; }
+.layer > :last-child { margin-bottom: auto; }
+.title { font-family: var(--f-display); font-weight: 700; font-size: clamp(2.4rem, 11.5vw, 3.6rem); line-height: .9; text-transform: uppercase; margin: 0; text-wrap: balance; }
+.title em { font-style: normal; color: var(--band); text-shadow: 0 0 26px rgba(45, 212, 191, .55); }
+.lead { margin: 0; color: #c7d6e6; font-size: 1.05rem; line-height: 1.4; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+    flex: 1 1 140px; border: none; border-radius: 14px; padding: 15px 16px; cursor: pointer;
+    font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink); background: rgba(127, 227, 255, .1);
+}
+.btn.primary { background: var(--band); color: #032621; box-shadow: 0 0 34px rgba(45, 212, 191, .4); }
+.eyebrow { font-family: var(--f-display); font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.best { font-family: var(--f-display); color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
+.best b { color: var(--ink); font-size: 1.2rem; letter-spacing: 0; font-variant-numeric: tabular-nums; margin-left: 6px; }
+.cast { display: flex; gap: 6px; flex-wrap: wrap; }
+.cast span { font-family: var(--f-display); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; padding: 4px 9px; border-radius: 7px; border: 1px solid currentColor; opacity: .9; }
+.fine { color: var(--muted); font-size: .74rem; margin: 0; }
+.big { font-family: var(--f-display); font-weight: 700; font-size: 4.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.badge { display: inline-block; font-family: var(--f-display); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; padding: 4px 9px; border-radius: 7px; background: rgba(244, 184, 96, .15); color: var(--low); }
+.reached { font-family: var(--f-display); font-size: 1.05rem; color: #c7d6e6; letter-spacing: .03em; white-space: pre-line; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .pop.show { animation-duration: .01s; } .hint { animation: none; } }
+</style>
+</head>
+<body>
+<div class="app in-menu">
+    <div class="bar">
+        <a class="brand" href="/">psq <b>al día</b></a>
+        <div class="icons">
+            <button class="icon-btn" id="btnSound" type="button" aria-label="Silenciar">🔊</button>
+            <button class="icon-btn" id="btnPause" type="button" aria-label="Pausa">❚❚</button>
+        </div>
+    </div>
+
+    <div class="hud">
+        <div class="drug">
+            <div class="drug-name" id="drugName">Fluoxetina</div>
+            <div class="lives" id="lives" role="img"></div>
+        </div>
+        <div class="score"><div class="score-val"><span class="mult" id="mult">x2</span><span id="score">0</span></div></div>
+    </div>
+
+    <div class="screen" id="screen" aria-label="Monitor: toca para dar una dosis">
+        <canvas id="cv"></canvas>
+        <div class="effect" id="effect" hidden></div>
+        <div class="pop" id="pop"></div>
+        <div class="hint" id="hint" hidden>Toca para la primera dosis</div>
+
+        <div class="layer" id="menu">
+            <div>
+                <div class="eyebrow">psq al día</div>
+                <h1 class="title">Ventana <em>terapéutica</em></h1>
+            </div>
+            <p class="lead">Cada toque, una dosis. Mantén la curva en la franja verde.</p>
+            <div class="cast" aria-label="Fármacos">
+                <span style="color:#b9a3ff">Fluoxetina</span><span style="color:#b6f36b">Quetiapina</span><span style="color:#e8eef5">Litio</span><span style="color:#ff9fc8">Clozapina</span>
+            </div>
+            <div class="row"><button class="btn primary" type="button" id="btnPlay">Jugar</button></div>
+            <div class="best">Récord <b id="bestMenu">—</b></div>
+            <a class="fine" href="/juegos" style="color:var(--curve); text-decoration:none;">← Todos los juegos</a>
+            <p class="fine">Las interacciones son reales; su intensidad y los niveles, de juego.</p>
+        </div>
+
+        <div class="layer" id="pause" hidden>
+            <h2 class="title" style="font-size:2.6rem;">Pausa</h2>
+            <div class="row"><button class="btn primary" type="button" id="btnResume">Seguir</button></div>
+        </div>
+
+        <div class="layer" id="over" hidden role="status" aria-live="polite">
+            <div>
+                <div class="eyebrow">Fin de la partida</div>
+                <div class="big" id="overScore">0</div>
+                <div class="row" style="align-items:center; margin-top:8px;"><span class="best">puntos</span><span class="badge" id="overRecord" hidden>Nuevo récord</span></div>
+            </div>
+            <div class="reached" id="overReached"></div>
+            <div class="row"><button class="btn primary" type="button" id="btnAgain">Otra</button></div>
+            <div class="best">Récord <b id="bestOver">—</b></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    // ---------------- Fármacos (valores de juego, no clínicos) ----------------
+    // half: vida media (s) · absorb: lo que tarda en notarse la dosis (s) · dose: subida por toque · lo/hi: franja (0-100)
+    const DRUGS = {
+        fluoxetina: { name: 'Fluoxetina', hint: 'lenta: anticípate', color: '#b9a3ff', half: 3.8, absorb: 1.15, dose: 15, lo: 38, hi: 68, evRate: 1 },   // lenta: hay que anticiparse
+        quetiapina: { name: 'Quetiapina', hint: 'rápida', color: '#b6f36b', half: 0.9, absorb: 0.07, dose: 20, lo: 40, hi: 68, evRate: 1 },   // rápida
+        litio:      { name: 'Litio',      hint: 'franja estrecha', color: '#e8eef5', half: 2.2, absorb: 0.3,  dose: 7,  lo: 50, hi: 61, evRate: 1 },   // franja estrecha
+        clozapina:  { name: 'Clozapina',  hint: 'ojo a las interacciones', color: '#ff9fc8', half: 2.0, absorb: 0.45, dose: 14, lo: 44, hi: 64, evRate: 1.7 }, // sensible a interacciones
+    };
+    const ORDER = ['fluoxetina', 'quetiapina', 'litio', 'clozapina'];
+    // Interacciones reales de cada fármaco (la intensidad es de juego). kMul: cambia la eliminación durante dur s; jump: cambio brusco del nivel
+    const EVENTS = {
+        fluoxetina: [
+            { icon: '💊', label: 'Bupropión', note: 'inhibe CYP2D6', up: true, kMul: 0.35, dur: 4 },
+            { icon: '🤢', label: 'Vómito', note: 'se pierde la dosis', up: false, jump: -0.15, clear: true },
+        ],
+        quetiapina: [
+            { icon: '🍊', label: 'Pomelo', note: 'inhibe CYP3A4', up: true, kMul: 0.4, dur: 4 },
+            { icon: '💊', label: 'Claritromicina', note: 'inhibe CYP3A4', up: true, kMul: 0.3, dur: 4 },
+            { icon: '💊', label: 'Carbamazepina', note: 'induce CYP3A4', up: false, kMul: 2.2, dur: 4 },
+            { icon: '🌿', label: 'Hipérico', note: 'induce CYP3A4', up: false, kMul: 1.8, dur: 4 },
+        ],
+        litio: [
+            { icon: '🔥', label: 'Ola de calor', note: 'deshidratación', up: true, jump: 0.22 },
+            { icon: '💊', label: 'Ibuprofeno', note: 'menos eliminación renal', up: true, kMul: 0.4, dur: 4 },
+            { icon: '💧', label: 'Tiazida', note: 'menos eliminación renal', up: true, kMul: 0.45, dur: 4 },
+            { icon: '🧂', label: 'Mucha sal', note: 'más eliminación renal', up: false, kMul: 1.7, dur: 4 },
+        ],
+        clozapina: [
+            { icon: '🚬', label: 'Tabaco', note: 'induce CYP1A2', up: false, kMul: 2.0, dur: 4 },
+            { icon: '🚭', label: 'Deja de fumar', note: 'fin de la inducción', up: true, kMul: 0.45, dur: 4.5 },
+            { icon: '💊', label: 'Fluvoxamina', note: 'inhibe CYP1A2', up: true, kMul: 0.3, dur: 4 },
+            { icon: '☕', label: 'Cafeína', note: 'inhibe CYP1A2', up: true, kMul: 0.6, dur: 3.5 },
+            { icon: '🤒', label: 'Infección', note: 'frena su metabolismo', up: true, kMul: 0.5, dur: 4 },
+        ],
+    };
+    const LIVES = 3, OUT_LIMIT = 0.7, WINDOW_S = 6.2, LEAD = 3.2;
+    const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const $ = id => document.getElementById(id);
+    const store = {
+        get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+        set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
+    };
+    let best = store.get('psq_vt_best', 0);
+    let muted = store.get('psq_vt_muted', false);
+    const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+    // ---------------- Sonido de monitor ----------------
+    let ac = null;
+    function audio() {
+        if (muted) return null;
+        try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) { ac = null; }
+        return ac;
+    }
+    function beep(f, dur, type, vol, when) {
+        const a = audio(); if (!a) return;
+        const t = a.currentTime + (when || 0), o = a.createOscillator(), g = a.createGain();
+        o.type = type || 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.07, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+    }
+    const sDose = () => beep(1046, 0.06, 'sine', 0.055);
+    const sAlarm = high => { beep(high ? 988 : 330, 0.16, 'square', 0.05); beep(high ? 740 : 247, 0.18, 'square', 0.05, 0.17); };
+    const sGood = () => { beep(784, 0.08, 'triangle', 0.06); beep(1175, 0.12, 'triangle', 0.06, 0.08); };
+    const sEvent = () => { beep(520, 0.09, 'sawtooth', 0.035); beep(390, 0.12, 'sawtooth', 0.035, 0.09); };
+    const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) { /* no disponible */ } };
+
+    // ---------------- Estado ----------------
+    const cv = $('cv'), cx = cv.getContext('2d');
+    let W = 0, H = 0;
+    const S = {};
+    function resize() {
+        const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        W = r.width; H = r.height; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+        cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    new ResizeObserver(resize).observe(cv);
+
+    function reset(attract) {
+        Object.assign(S, {
+            screen: attract ? 'menu' : 'play', attract, started: attract,
+            t: 0, L: 53, pend: [], hist: [], doses: [], events: [], active: null,
+            lives: LIVES, outT: 0, freeze: 0, grace: 0,
+            pts: 0, streak: 0, mult: 1, speed: 1, drift: 0, alive: 0, pillUntil: 0,
+            nextSwitch: 12, nextEvent: 2.5, shake: 0, flash: null, lastEv: null, cause: null,
+        });
+        setDrug(attract ? 'clozapina' : 'fluoxetina', false);
+        S.L = (S.d.lo + S.d.hi) / 2;
+        renderLives(); $('score').textContent = '0'; $('mult').classList.remove('on'); showEffect(null);
+    }
+    function setDrug(key, animate) {
+        S.key = key; S.d = DRUGS[key];
+        $('drugName').textContent = S.d.name; $('drugName').style.color = S.d.color;
+        if (!animate) S.band = { lo: S.d.lo, hi: S.d.hi };
+    }
+    function renderLives() { $('lives').setAttribute('aria-label', S.lives === 1 ? '1 vida' : S.lives + ' vidas'); $('lives').innerHTML = Array.from({ length: LIVES }, (_, i) => `<i class="life ${i < S.lives ? '' : 'off'}"></i>`).join(''); }
+    function showEffect(ev) {
+        const el = $('effect');
+        if (!ev) { el.hidden = true; return; }
+        el.textContent = `${ev.icon} ${ev.label} · ${ev.note} ${ev.up ? '↑' : '↓'}`;
+        el.style.color = ev.up ? 'var(--toxic)' : 'var(--low)'; el.hidden = false;
+    }
+    function pop(text, color, sub) {
+        const p = $('pop'); p.textContent = text; p.style.color = color;
+        if (sub) { const sm = document.createElement('small'); sm.textContent = sub; p.appendChild(sm); }
+        p.classList.remove('show'); void p.offsetWidth; p.classList.add('show');
+    }
+
+    // ---------------- Acciones ----------------
+    function dose() {
+        if (S.screen !== 'play' || S.freeze > 0) return;
+        if (!S.started) { S.started = true; $('hint').hidden = true; }
+        S.pend.push({ left: S.d.dose, rate: S.d.dose / S.d.absorb });
+        S.doses.push(S.t); sDose(); buzz(8);
+    }
+    function strike(kind) {
+        S.lives--; renderLives();
+        S.cause = S.lastEv && S.t - S.lastEv.t < 4.5 ? S.lastEv.ev : null;
+        const high = kind === 'toxico';
+        pop(high ? '¡Tóxico!' : 'Recaída', high ? 'var(--toxic)' : 'var(--low)');
+        sAlarm(high); buzz(high ? [60, 40, 60] : 120);
+        if (!REDUCED) { S.shake = 0.45; S.flash = { c: high ? '255,77,109' : '244,184,96', a: 0.35 }; }
+        S.streak = 0; S.mult = 1; $('mult').classList.remove('on');
+        if (S.lives <= 0) { S.freeze = 99; setTimeout(gameOver, 950); return; }
+        S.freeze = 0.75; S.grace = 1.3; S.outT = 0; S.pend = []; S.active = null; showEffect(null);
+        S.L = (S.band.lo + S.band.hi) / 2;
+    }
+
+    // ---------------- Simulación ----------------
+    function step(dt) {
+        const A = S.attract;
+        if (!S.started) return;              // el tiempo no corre hasta la primera dosis
+        S.t += dt;
+        if (S.freeze > 0) { S.freeze -= dt; S.hist.push({ t: S.t, L: S.L, s: 3 }); return; }
+        if (!A) S.alive += dt;               // tiempo jugado de verdad, sin las pausas tras cada fallo
+
+        // La velocidad sube sin parar: el fármaco se elimina cada vez antes
+        S.speed = A ? 1 : Math.min(2.5, 1 + S.t / 125);
+        let k = Math.LN2 / S.d.half * S.speed;
+        if (S.active && S.active.kMul) k *= S.active.kMul;
+
+        for (const p of S.pend) { const a = Math.min(p.left, p.rate * dt); S.L += a; p.left -= a; }
+        S.pend = S.pend.filter(p => p.left > 0.001);
+        S.L *= Math.exp(-k * dt);
+
+        // La franja empieza a moverse a los 40 s
+        if (!A && S.t > 40) S.drift = Math.min(10, (S.t - 40) / 8) * Math.sin(S.t * 0.6);
+        const goal = { lo: S.d.lo + S.drift, hi: S.d.hi + S.drift };
+        S.band.lo += (goal.lo - S.band.lo) * Math.min(1, dt * 4);
+        S.band.hi += (goal.hi - S.band.hi) * Math.min(1, dt * 4);
+        const { lo, hi } = S.band, width = hi - lo;
+
+        if (A) { // jugador automático de la pantalla de inicio
+            const coming = S.pend.reduce((a, p) => a + p.left, 0);
+            if (S.L + coming < lo + width * 0.34) { S.pend.push({ left: S.d.dose, rate: S.d.dose / S.d.absorb }); S.doses.push(S.t); }
+        }
+
+        // Interacciones: aparecen por la derecha y actúan al llegar a la curva
+        if (!A) {
+            if (S.t >= S.nextEvent) {
+                if (S.t + LEAD + 0.4 < S.nextSwitch) {
+                    const list = EVENTS[S.key], ev = list[Math.floor(Math.random() * list.length)];
+                    S.events.push({ ev, at: S.t + LEAD, done: false });
+                }
+                S.nextEvent = S.t + (Math.max(2.2, 4.8 - S.t / 30) + Math.random() * 1.5) / S.d.evRate;
+            }
+            for (const e of S.events) {
+                if (!e.done && S.t >= e.at) {
+                    e.done = true; const ev = e.ev; sEvent(); S.lastEv = { ev, t: S.t };
+                    if (ev.clear) S.pend = [];
+                    if (ev.jump) { S.L *= 1 + ev.jump; if (!REDUCED) S.shake = 0.2; }
+                    if (ev.kMul) S.active = { ...ev, until: S.t + ev.dur };
+                    showEffect(ev); S.pillUntil = ev.kMul ? 0 : S.t + 1.8;
+                }
+            }
+            S.events = S.events.filter(e => !e.done || S.t - e.at < 1.5);
+            if (S.active && S.t >= S.active.until) { S.active = null; showEffect(null); }
+            if (!S.active && S.pillUntil && S.t >= S.pillUntil) { S.pillUntil = 0; showEffect(null); }
+        }
+
+        let st = 0;
+        if (S.L > hi) st = 1; else if (S.L < lo) st = 2;
+        if (S.grace > 0) S.grace -= dt;
+
+        if (!A) {
+            if (S.grace <= 0) {
+                if (S.L > hi + width * 0.95) { S.hist.push({ t: S.t, L: S.L, s: 1 }); strike('toxico'); return; }
+                if (st) S.outT += dt; else S.outT = Math.max(0, S.outT - dt * 2);
+                if (S.outT > OUT_LIMIT) { S.hist.push({ t: S.t, L: S.L, s: st }); strike(st === 1 ? 'toxico' : 'recaida'); return; }
+            }
+            if (!st) {
+                S.streak += dt;
+                const m = S.streak >= 16 ? 3 : S.streak >= 8 ? 2 : 1;
+                if (m > S.mult) { S.mult = m; $('mult').textContent = 'x' + m; $('mult').classList.add('on'); pop('x' + m, 'var(--band)'); sGood(); }
+                S.pts += dt * 10 * S.mult * S.speed;
+            } else if (S.streak > 0) { S.streak = 0; if (S.mult > 1) { S.mult = 1; $('mult').classList.remove('on'); } }
+
+            // Cambio de fármaco, cada vez antes
+            if (S.t >= S.nextSwitch) {
+                const options = ORDER.filter(x => x !== S.key), next = options[Math.floor(Math.random() * options.length)];
+                setDrug(next, true);
+                S.events = S.events.filter(e => e.done); S.active = null; S.lastEv = null; showEffect(null);
+                S.nextSwitch = S.t + Math.max(7, 12 - S.t / 30); S.grace = 1.4; S.outT = 0;
+                pop(S.d.name, S.d.color, S.d.hint); beep(660, 0.1, 'triangle', 0.06); beep(880, 0.12, 'triangle', 0.06, 0.1);
+            }
+            $('score').textContent = Math.floor(S.pts);
+        }
+        S.hist.push({ t: S.t, L: S.L, s: st });
+    }
+
+    // ---------------- Dibujo ----------------
+    const yOf = L => H - 26 - (Math.max(0, Math.min(108, L)) / 108) * (H - 52);
+    function rr(x, y, w, h, r) { cx.beginPath(); cx.moveTo(x + r, y); cx.arcTo(x + w, y, x + w, y + h, r); cx.arcTo(x + w, y + h, x, y + h, r); cx.arcTo(x, y + h, x, y, r); cx.arcTo(x, y, x + w, y, r); cx.closePath(); }
+
+    function draw() {
+        cx.save(); cx.clearRect(0, 0, W, H);
+        if (S.shake > 0) { const m = S.shake * 14; cx.translate((Math.random() - .5) * m, (Math.random() - .5) * m); }
+        const headX = W * 0.62, pps = headX / WINDOW_S, now = S.t, xOf = t => headX - (now - t) * pps;
+        const { lo, hi } = S.band, yLo = yOf(lo), yHi = yOf(hi);
+
+        cx.fillStyle = 'rgba(255,77,109,.07)'; cx.fillRect(0, 0, W, yHi);
+        cx.fillStyle = 'rgba(244,184,96,.045)'; cx.fillRect(0, yLo, W, H - yLo);
+
+        // papel milimetrado que avanza
+        cx.lineWidth = 1;
+        const t0 = now - WINDOW_S - 0.5, t1 = now + (W - headX) / pps + 0.5;
+        for (let tt = Math.ceil(t0 / 0.2) * 0.2; tt < t1; tt += 0.2) {
+            const major = Math.abs(tt - Math.round(tt)) < 0.01;
+            cx.strokeStyle = major ? 'rgba(127,227,255,.12)' : 'rgba(127,227,255,.045)';
+            const x = Math.round(xOf(tt)) + .5; cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, H); cx.stroke();
+        }
+        for (let v = 0; v <= 100; v += 5) {
+            const y = Math.round(yOf(v)) + .5;
+            cx.strokeStyle = v % 25 === 0 ? 'rgba(127,227,255,.12)' : 'rgba(127,227,255,.04)';
+            cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke();
+        }
+
+        // franja terapéutica
+        const warn = S.screen === 'play' ? Math.min(1, S.outT / OUT_LIMIT) : 0;
+        const g = cx.createLinearGradient(0, yHi, 0, yLo);
+        g.addColorStop(0, 'rgba(45,212,191,.22)'); g.addColorStop(.5, 'rgba(45,212,191,.10)'); g.addColorStop(1, 'rgba(45,212,191,.22)');
+        cx.fillStyle = g; cx.fillRect(0, yHi, W, yLo - yHi);
+        const pulse = warn > 0 ? (0.5 + 0.5 * Math.sin(now * 22)) * warn : 0;
+        cx.setLineDash([6, 6]); cx.lineWidth = 1.5;
+        cx.strokeStyle = pulse > 0.05 ? `rgba(255,255,255,${0.5 + pulse * 0.5})` : 'rgba(45,212,191,.6)';
+        cx.beginPath(); cx.moveTo(0, yHi + .5); cx.lineTo(W, yHi + .5); cx.moveTo(0, yLo + .5); cx.lineTo(W, yLo + .5); cx.stroke();
+        cx.setLineDash([]);
+
+        // interacciones que se acercan por la derecha
+        cx.textAlign = 'center'; cx.textBaseline = 'middle';
+        for (const e of S.events) {
+            const ev = e.ev, x = xOf(e.at), evColor = ev.up ? '#ff4d6d' : '#f4b860';
+            if (x < -40 || x > W + 40) continue;
+            const age = e.done ? (S.t - e.at) / 1.5 : 0, alpha = e.done ? Math.max(0, 1 - age) : 1;
+            cx.globalAlpha = alpha;
+            cx.strokeStyle = evColor; cx.lineWidth = 1.5; cx.setLineDash([3, 5]);
+            cx.beginPath(); cx.moveTo(x + .5, 44); cx.lineTo(x + .5, H - 26); cx.stroke(); cx.setLineDash([]);
+            cx.font = '700 12px "Chakra Petch", system-ui, sans-serif';
+            const tw = cx.measureText(ev.label.toUpperCase()).width, bw = tw + 40, bx = Math.min(W - bw - 6, Math.max(6, x - bw / 2)), by = 12 - (e.done ? age * 10 : 0);
+            cx.fillStyle = 'rgba(12,23,38,.94)'; rr(bx, by, bw, 30, 10); cx.fill();
+            cx.strokeStyle = evColor; cx.lineWidth = 1.5; rr(bx, by, bw, 30, 10); cx.stroke();
+            cx.textAlign = 'left'; cx.fillStyle = evColor; cx.fillText(ev.label.toUpperCase(), bx + 32, by + 16);
+            cx.font = '16px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; cx.fillStyle = '#fff';
+            cx.fillText(ev.icon, bx + 10, by + 16); cx.textAlign = 'center';
+            cx.globalAlpha = 1;
+        }
+
+        // dosis (cápsulas en la base)
+        for (const td of S.doses) {
+            const x = xOf(td); if (x < -10 || x > W + 10) continue;
+            cx.fillStyle = 'rgba(230,241,251,.75)'; rr(x - 5, H - 17, 10, 5, 2.5); cx.fill();
+            cx.fillStyle = S.d.color; rr(x - 5, H - 17, 5, 5, 2.5); cx.fill();
+        }
+
+        // curva con brillo de fósforo; tramos en rojo (tóxico) o ámbar (bajo)
+        const col = ['#7fe3ff', '#ff4d6d', '#f4b860', 'rgba(127,227,255,.35)'];
+        const pts = S.hist, from = Math.max(1, pts.length - Math.ceil((WINDOW_S + 0.5) * 125));
+        cx.lineJoin = 'round'; cx.lineCap = 'round';
+        for (const pass of [{ w: 7, a: .16 }, { w: 2.5, a: 1 }]) {
+            cx.lineWidth = pass.w; cx.globalAlpha = pass.a;
+            let seg = null;
+            for (let i = from; i < pts.length; i++) {
+                const p = pts[i], q = pts[i - 1], c = col[p.s];
+                if (seg !== c) { if (seg) cx.stroke(); seg = c; cx.strokeStyle = c; cx.beginPath(); cx.moveTo(xOf(q.t), yOf(q.L)); }
+                cx.lineTo(xOf(p.t), yOf(p.L));
+            }
+            if (seg) cx.stroke();
+        }
+        cx.globalAlpha = 1;
+
+        // cabeza y barrido
+        const hy = yOf(S.L), lastS = pts.length ? pts[pts.length - 1].s : 0;
+        const sw = cx.createLinearGradient(headX - 60, 0, headX + 6, 0);
+        sw.addColorStop(0, 'rgba(127,227,255,0)'); sw.addColorStop(1, 'rgba(127,227,255,.10)');
+        cx.fillStyle = sw; cx.fillRect(headX - 60, 0, 66, H);
+        cx.fillStyle = col[lastS] || col[0]; cx.shadowColor = cx.fillStyle; cx.shadowBlur = 18;
+        cx.beginPath(); cx.arc(headX, hy, 5 + Math.sin(now * 8) * 1.2, 0, Math.PI * 2); cx.fill(); cx.shadowBlur = 0;
+        if (warn > 0.05) {
+            cx.strokeStyle = lastS === 1 ? `rgba(255,77,109,${warn})` : `rgba(244,184,96,${warn})`;
+            cx.lineWidth = 2; cx.beginPath(); cx.arc(headX, hy, 10 + warn * 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * warn); cx.stroke();
+        }
+        if (S.flash && S.flash.a > 0) { cx.fillStyle = `rgba(${S.flash.c},${S.flash.a})`; cx.fillRect(-20, -20, W + 40, H + 40); }
+        cx.restore();
+    }
+
+    // ---------------- Pantallas ----------------
+    function show(id) {
+        for (const l of ['menu', 'pause', 'over']) $(l).hidden = l !== id;
+        document.querySelector('.app').classList.toggle('in-menu', id === 'menu');
+    }
+    function toMenu() { reset(true); $('bestMenu').textContent = best || '—'; show('menu'); $('hint').hidden = true; }
+    function play() { audio(); reset(false); show(null); setPauseIcon(false); $('hint').hidden = false; }
+    function setPauseIcon(p) { $('btnPause').textContent = p ? '▶' : '❚❚'; $('btnPause').setAttribute('aria-label', p ? 'Seguir' : 'Pausa'); }
+    function pause() { if (S.screen !== 'play' || S.lives <= 0) return; S.screen = 'pause'; show('pause'); setPauseIcon(true); }
+    function resume() { if (S.screen !== 'pause') return; S.screen = 'play'; show(null); setPauseIcon(false); last = performance.now(); }
+    function gameOver() {
+        S.screen = 'over';
+        const pts = Math.floor(S.pts), isRec = pts > best;
+        if (isRec) { best = pts; store.set('psq_vt_best', best); }
+        $('overScore').textContent = pts; $('overRecord').hidden = !isRec; $('bestOver').textContent = best || '—';
+        $('overReached').textContent = `Aguantaste ${mmss(S.alive)}` + (S.cause ? `\nTe tumbó: ${S.cause.icon} ${S.cause.label} · ${S.cause.note}` : '');
+        show('over');
+        if (isRec) { beep(784, .1, 'triangle', .06); beep(988, .1, 'triangle', .06, .1); beep(1318, .2, 'triangle', .06, .2); }
+    }
+    // ---------------- Controles ----------------
+    $('screen').addEventListener('pointerdown', e => { if (e.target.closest('.layer')) return; e.preventDefault(); dose(); });
+    document.addEventListener('keydown', e => {
+        if (e.code === 'Space' || e.code === 'Enter') { if (S.screen === 'play') { e.preventDefault(); dose(); } }
+        else if (e.key === 'Escape' || e.key === 'p') { S.screen === 'play' ? pause() : resume(); }
+    });
+    $('btnPlay').addEventListener('click', play);
+    $('btnAgain').addEventListener('click', play);
+    $('btnResume').addEventListener('click', resume);
+    $('btnPause').addEventListener('click', () => (S.screen === 'pause' ? resume() : pause()));
+    function syncSound() { $('btnSound').textContent = muted ? '🔇' : '🔊'; $('btnSound').setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar'); }
+    $('btnSound').addEventListener('click', () => { muted = !muted; store.set('psq_vt_muted', muted); syncSound(); if (!muted) sDose(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+
+    // ---------------- Bucle ----------------
+    let last = performance.now();
+    function frame(now) {
+        const dt = Math.min(0.05, (now - last) / 1000); last = now;
+        if (S.screen === 'play' || S.screen === 'menu') {
+            const n = Math.ceil(dt / (1 / 120)); for (let i = 0; i < n; i++) step(dt / n);
+            if (S.hist.length > 3000) S.hist.splice(0, S.hist.length - 1800);
+            if (S.doses.length > 80) S.doses.splice(0, S.doses.length - 60);
+        }
+        if (S.shake > 0) S.shake = Math.max(0, S.shake - dt);
+        if (S.flash) S.flash.a = Math.max(0, S.flash.a - dt * 1.2);
+        if (W > 0) draw();
+        requestAnimationFrame(frame);
+    }
+    function start() { syncSound(); resize(); toMenu(); requestAnimationFrame(t => { last = t; frame(t); }); }
+    start();
+})();
+</script>
+</body>
+</html>
