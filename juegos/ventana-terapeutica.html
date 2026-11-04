@@ -113,6 +113,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .08em; text-transform: uppercase;
     color: var(--ink); background: rgba(127, 227, 255, .1);
 }
+.btn.ghost { flex: none; background: transparent; border: 1px solid rgba(127, 227, 255, .18); color: var(--muted); }
 .btn.primary { background: var(--band); color: #032621; box-shadow: 0 0 34px rgba(45, 212, 191, .4); }
 .eyebrow { font-family: var(--f-display); font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
 .best { font-family: var(--f-display); color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
@@ -133,6 +134,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
         <div class="icons">
             <button class="icon-btn" id="btnSound" type="button" aria-label="Silenciar">🔊</button>
             <button class="icon-btn" id="btnPause" type="button" aria-label="Pausa">❚❚</button>
+            <button class="icon-btn" id="btnExit" type="button" aria-label="Salir del juego">✕</button>
         </div>
     </div>
 
@@ -167,7 +169,10 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 
         <div class="layer" id="pause" hidden>
             <h2 class="title" style="font-size:2.6rem;">Pausa</h2>
-            <div class="row"><button class="btn primary" type="button" id="btnResume">Seguir</button></div>
+            <div class="row">
+                <button class="btn primary" type="button" id="btnResume">Seguir</button>
+                <button class="btn" type="button" data-exit>Salir</button>
+            </div>
         </div>
 
         <div class="layer" id="over" hidden role="status" aria-live="polite">
@@ -177,7 +182,11 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
                 <div class="row" style="align-items:center; margin-top:8px;"><span class="best">puntos</span><span class="badge" id="overRecord" hidden>Nuevo récord</span></div>
             </div>
             <div class="reached" id="overReached"></div>
-            <div class="row"><button class="btn primary" type="button" id="btnAgain">Otra</button></div>
+            <div class="row">
+                <button class="btn primary" type="button" id="btnAgain">Otra</button>
+                <button class="btn" type="button" id="btnShare">Compartir</button>
+            </div>
+            <button class="btn ghost" type="button" data-exit>Salir</button>
             <div class="best">Récord <b id="bestOver">—</b></div>
         </div>
     </div>
@@ -503,12 +512,25 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     function gameOver() {
         S.screen = 'over';
         const pts = Math.floor(S.pts), isRec = pts > best;
+        S.lastRecord = isRec;
         if (isRec) { best = pts; store.set('psq_vt_best', best); }
         $('overScore').textContent = pts; $('overRecord').hidden = !isRec; $('bestOver').textContent = best || '—';
         $('overReached').textContent = `Aguantaste ${mmss(S.alive)}` + (S.cause ? `\nTe tumbó: ${S.cause.icon} ${S.cause.label} · ${S.cause.note}` : '');
         show('over');
         if (isRec) { beep(784, .1, 'triangle', .06); beep(988, .1, 'triangle', .06, .1); beep(1318, .2, 'triangle', .06, .2); }
     }
+    // Salir: a mitad de partida primero se pausa (para no perderla por un toque sin querer)
+    function salir() { location.href = '/juegos'; }
+    function pulsarSalir() { if (S.screen === 'play' && S.lives > 0) pause(); else if (S.screen !== 'play') salir(); }
+
+    // Compartir el resultado (menú de compartir del móvil; si no hay, WhatsApp)
+    async function compartir() {
+        const pts = Math.floor(S.pts), url = 'https://psqaldia.com/juegos/ventana-terapeutica';
+        const text = (S.lastRecord ? '¡Nuevo récord! ' : '') + `He aguantado ${mmss(S.alive)} (${pts} puntos) en Ventana terapéutica. ¿Me superas?`;
+        if (navigator.share) { try { await navigator.share({ title: 'Ventana terapéutica', text, url }); } catch (e) { /* cancelado */ } return; }
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
+    }
+
     // ---------------- Controles ----------------
     $('screen').addEventListener('pointerdown', e => { if (e.target.closest('.layer')) return; e.preventDefault(); dose(); });
     document.addEventListener('keydown', e => {
@@ -517,6 +539,9 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     });
     $('btnPlay').addEventListener('click', play);
     $('btnAgain').addEventListener('click', play);
+    $('btnShare').addEventListener('click', compartir);
+    $('btnExit').addEventListener('click', pulsarSalir);
+    document.querySelectorAll('[data-exit]').forEach(b => b.addEventListener('click', salir));
     $('btnResume').addEventListener('click', resume);
     $('btnPause').addEventListener('click', () => (S.screen === 'pause' ? resume() : pause()));
     function syncSound() { $('btnSound').textContent = muted ? '🔇' : '🔊'; $('btnSound').setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar'); }
