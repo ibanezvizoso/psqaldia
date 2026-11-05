@@ -140,7 +140,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 
     <div class="hud">
         <div class="drug">
-            <div class="drug-name" id="drugName">Fluoxetina</div>
+            <div class="drug-name" id="drugName">Cariprazina</div>
             <div class="lives" id="lives" role="img"></div>
         </div>
         <div class="score"><div class="score-val"><span class="mult" id="mult">x2</span><span id="score">0</span></div></div>
@@ -159,7 +159,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
             </div>
             <p class="lead">Cada toque, una dosis. Mantén la curva en la franja verde.</p>
             <div class="cast" aria-label="Fármacos">
-                <span style="color:#b9a3ff">Fluoxetina</span><span style="color:#b6f36b">Quetiapina</span><span style="color:#e8eef5">Litio</span><span style="color:#ff9fc8">Clozapina</span>
+                <span style="color:#b9a3ff">Cariprazina</span><span style="color:#b6f36b">Quetiapina</span><span style="color:#e8eef5">Litio</span><span style="color:#ff9fc8">Clozapina</span>
             </div>
             <div class="row"><button class="btn primary" type="button" id="btnPlay">Jugar</button></div>
             <div class="best">Récord <b id="bestMenu">—</b></div>
@@ -197,21 +197,24 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     // ---------------- Fármacos (valores de juego, no clínicos) ----------------
     // half: vida media (s) · absorb: lo que tarda en notarse la dosis (s) · dose: subida por toque · lo/hi: franja (0-100)
     const DRUGS = {
-        fluoxetina: { name: 'Fluoxetina', hint: 'lenta: anticípate', color: '#b9a3ff', half: 3.8, absorb: 1.15, dose: 15, lo: 38, hi: 68, evRate: 1 },   // lenta: hay que anticiparse
+        cariprazina: { name: 'Cariprazina', hint: 'lenta: anticípate', color: '#b9a3ff', half: 3.8, absorb: 1.15, dose: 15, lo: 38, hi: 68, evRate: 1 },  // lenta: hay que anticiparse
         quetiapina: { name: 'Quetiapina', hint: 'rápida', color: '#b6f36b', half: 0.9, absorb: 0.07, dose: 20, lo: 40, hi: 68, evRate: 1 },   // rápida
         litio:      { name: 'Litio',      hint: 'franja estrecha', color: '#e8eef5', half: 2.2, absorb: 0.3,  dose: 7,  lo: 50, hi: 61, evRate: 1 },   // franja estrecha
         clozapina:  { name: 'Clozapina',  hint: 'ojo a las interacciones', color: '#ff9fc8', half: 2.0, absorb: 0.45, dose: 14, lo: 44, hi: 64, evRate: 1.7 }, // sensible a interacciones
     };
-    const ORDER = ['fluoxetina', 'quetiapina', 'litio', 'clozapina'];
+    const ORDER = ['cariprazina', 'quetiapina', 'litio', 'clozapina'];
     // Interacciones reales de cada fármaco (la intensidad es de juego). kMul: cambia la eliminación durante dur s; jump: cambio brusco del nivel
     const EVENTS = {
-        fluoxetina: [
-            { icon: '💊', label: 'Bupropión', note: 'inhibe CYP2D6', up: true, kMul: 0.35, dur: 4 },
-            { icon: '🤢', label: 'Vómito', note: 'se pierde la dosis', up: false, jump: -0.15, clear: true },
+        // Cariprazina: se elimina muy despacio, así que sus interacciones se notan despacio pero duran más
+        cariprazina: [
+            { icon: '💊', label: 'Itraconazol', note: 'inhibe CYP3A4', up: true, kMul: 0.3, dur: 6 },
+            { icon: '🍊', label: 'Pomelo', note: 'inhibe CYP3A4', up: true, kMul: 0.4, dur: 6 },
+            { icon: '💊', label: 'Rifampicina', note: 'induce CYP3A4', up: false, kMul: 2.6, dur: 6 },
+            { icon: '💊', label: 'Fenitoína', note: 'induce CYP3A4', up: false, kMul: 2.2, dur: 6 },
         ],
         quetiapina: [
-            { icon: '🍊', label: 'Pomelo', note: 'inhibe CYP3A4', up: true, kMul: 0.4, dur: 4 },
             { icon: '💊', label: 'Claritromicina', note: 'inhibe CYP3A4', up: true, kMul: 0.3, dur: 4 },
+            { icon: '💊', label: 'Ketoconazol', note: 'inhibe CYP3A4', up: true, kMul: 0.3, dur: 4 },
             { icon: '💊', label: 'Carbamazepina', note: 'induce CYP3A4', up: false, kMul: 2.2, dur: 4 },
             { icon: '🌿', label: 'Hipérico', note: 'induce CYP3A4', up: false, kMul: 1.8, dur: 4 },
         ],
@@ -280,7 +283,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
             pts: 0, streak: 0, mult: 1, speed: 1, drift: 0, alive: 0, pillUntil: 0,
             nextSwitch: 12, nextEvent: 2.5, shake: 0, flash: null, lastEv: null, cause: null,
         });
-        setDrug(attract ? 'clozapina' : 'fluoxetina', false);
+        setDrug(attract ? 'clozapina' : 'cariprazina', false);
         S.L = (S.d.lo + S.d.hi) / 2;
         renderLives(); $('score').textContent = '0'; $('mult').classList.remove('on'); showEffect(null);
     }
