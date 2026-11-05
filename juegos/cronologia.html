@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cronología: minijuego de historia de la psiquiatría | psq al día</title>
+<meta name="description" content="Boceto de minijuego de psq al día: coloca cada hito de la historia de la psiquiatría en su lugar de la línea del tiempo.">
+<link rel="canonical" href="https://psqaldia.com/juegos/cronologia">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0a1120">
+<link rel="icon" href="/Logo.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="psq al día">
+<meta property="og:title" content="Cronología · minijuego de psq al día">
+<meta property="og:description" content="Coloca cada hito de la historia de la psiquiatría en su lugar de la línea del tiempo. ¿Cuántos aciertas?">
+<meta property="og:url" content="https://psqaldia.com/juegos/cronologia">
+<meta property="og:image" content="https://psqaldia.com/juegos/cronologia.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoGame","name":"Cronología de la psiquiatría","description":"Minijuego: ordena en una línea del tiempo los hitos de la historia de la psiquiatría, con fechas verificadas.","url":"https://psqaldia.com/juegos/cronologia","inLanguage":"es","genre":"Puzle","gamePlatform":"Web","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"},{"@type":"ListItem","position":3,"name":"Cronología","item":"https://psqaldia.com/juegos/cronologia"}]}]}</script>
+<style>
+@font-face { font-family: "Chakra Petch"; font-weight: 500 600; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-600.woff2") format("woff2"); }
+@font-face { font-family: "Chakra Petch"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-700.woff2") format("woff2"); }
+/* Familia de juegos de psq al día (tipografía de monitor, fondo nocturno), con un giro de archivo:
+   las tarjetas son fichas de papel marfil y la línea del tiempo es un hilo dorado. */
+:root {
+    --bg: #0a1120;
+    --panel: #111b30;
+    --paper: #f6efe0;
+    --paper-ink: #2a2218;
+    --gold: #e3b45c;
+    --ok: #2dd4bf;
+    --bad: #ff5d6c;
+    --ink: #e8eef8;
+    --muted: #8a9bb8;
+    --f-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --f-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -webkit-font-smoothing: antialiased; }
+.app { height: 100%; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; padding: max(12px, env(safe-area-inset-top)) 16px max(14px, env(safe-area-inset-bottom)); gap: 12px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.brand { font-family: var(--f-display); font-weight: 700; color: var(--muted); font-size: .9rem; }
+.brand b { color: var(--gold); }
+.stats { display: flex; gap: 14px; align-items: center; font-family: var(--f-display); font-weight: 700; }
+.lives { display: flex; gap: 5px; }
+.life { width: 18px; height: 18px; border-radius: 4px; background: var(--paper); transform: rotate(-4deg); box-shadow: 0 0 10px rgba(227, 180, 92, .45); transition: opacity .3s, transform .3s; }
+.life.off { opacity: .15; box-shadow: none; transform: rotate(-4deg) scale(.8); }
+.icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .05); color: #fff; font-size: .95rem; cursor: pointer; }
+.icon-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.score { font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.score small { font-size: .7rem; color: var(--muted); letter-spacing: .1em; margin-left: 4px; }
+
+/* Tarjeta en juego */
+.current { position: relative; background: var(--paper); color: var(--paper-ink); border-radius: 16px; padding: 14px 16px 16px; box-shadow: 0 16px 40px -18px #000, inset 0 0 0 1px rgba(42, 34, 24, .1); }
+.current .q { font-family: var(--f-display); font-weight: 700; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: #9a7a3c; }
+.current .t { font-size: 1.12rem; font-weight: 650; line-height: 1.35; margin-top: 4px; text-wrap: balance; }
+.current .hint { margin-top: 8px; font-size: .84rem; color: #6b5a40; }
+.current .res { font-family: var(--f-display); font-weight: 700; font-size: 1rem; margin-top: 8px; }
+.current .res.ok { color: #138a72; } .current .res.bad { color: #c0392b; }
+.current .btn[hidden] { display: none; }
+.current.flash-ok { animation: okf .5s; } .current.flash-bad { animation: badf .5s; }
+@keyframes okf { 50% { box-shadow: 0 0 0 4px var(--ok); } }
+@keyframes badf { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } 50% { box-shadow: 0 0 0 4px var(--bad); } }
+
+/* Línea del tiempo */
+.line { flex: 1; min-height: 0; overflow-y: auto; position: relative; padding: 4px 2px 20px; scroll-behavior: smooth; }
+.line::before { content: ""; position: absolute; left: 38px; top: 0; bottom: 0; width: 2px; background: linear-gradient(var(--gold), rgba(227, 180, 92, .2)); }
+.slot { display: block; width: 100%; margin: 4px 0; padding: 10px 12px 10px 64px; border-radius: 12px; border: 1.5px dashed rgba(227, 180, 92, .45); background: rgba(227, 180, 92, .06); color: var(--gold); text-align: left; font-family: var(--f-display); font-weight: 700; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; position: relative; transition: background .15s, transform .15s; }
+.slot::before { content: "+"; position: absolute; left: 28px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 2px solid var(--gold); display: grid; place-items: center; font-size: .9rem; line-height: 1; }
+.slot:hover, .slot:focus-visible { background: rgba(227, 180, 92, .16); outline: none; transform: scale(1.01); }
+.slot[disabled] { opacity: .35; cursor: default; transform: none; }
+.item { position: relative; display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; padding: 10px 10px 10px 0; }
+.item .yr { font-family: var(--f-display); font-weight: 700; font-size: .95rem; color: var(--gold); text-align: right; padding-top: 10px; position: relative; z-index: 1; font-variant-numeric: tabular-nums; }
+.item .card { background: var(--panel); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 10px 12px; cursor: pointer; text-align: left; color: var(--ink); font: inherit; width: 100%; }
+.item .card b { display: block; font-size: .95rem; font-weight: 650; line-height: 1.3; }
+.item .card span { display: block; margin-top: 6px; font-size: .82rem; color: var(--muted); line-height: 1.4; }
+.item .card span[hidden] { display: none; }
+.item.new .card { animation: inn .5s cubic-bezier(.2, .8, .2, 1); }
+.item.new.ok .card { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok); }
+.item.new.bad .card { border-color: var(--bad); box-shadow: 0 0 0 1px var(--bad); }
+@keyframes inn { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
+
+/* Capas */
+.layer { position: fixed; inset: 0; z-index: 10; display: flex; justify-content: center; background: rgba(10, 17, 32, .94); overflow-y: auto; }
+.layer[hidden] { display: none; }
+.layer .inner { width: 100%; max-width: 560px; padding: 28px 20px; display: flex; flex-direction: column; gap: 16px; }
+.layer .inner > :first-child { margin-top: auto; } .layer .inner > :last-child { margin-bottom: auto; }
+.eyebrow { font-family: var(--f-display); font-weight: 600; font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.title { font-family: var(--f-display); font-weight: 700; font-size: clamp(2.2rem, 10vw, 3.2rem); line-height: .92; text-transform: uppercase; margin: 0; text-wrap: balance; }
+.title em { font-style: normal; color: var(--gold); }
+.lead { margin: 0; font-size: 1.05rem; line-height: 1.45; color: #c9d4e6; }
+.btn { border: none; border-radius: 14px; padding: 15px 16px; cursor: pointer; font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .08em; text-transform: uppercase; background: rgba(255, 255, 255, .08); color: var(--ink); width: 100%; }
+.btn.primary { background: var(--gold); color: #2a1d06; box-shadow: 0 0 30px rgba(227, 180, 92, .3); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.best { font-family: var(--f-display); font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
+.best b { color: var(--ink); font-size: 1.2rem; letter-spacing: 0; margin-left: 6px; }
+.big { font-family: var(--f-display); font-weight: 700; font-size: 4rem; line-height: 1; }
+.badge { display: inline-block; font-family: var(--f-display); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; padding: 4px 9px; border-radius: 7px; background: rgba(227, 180, 92, .16); color: var(--gold); }
+.badge[hidden] { display: none; }
+.fine { color: var(--muted); font-size: .76rem; margin: 0; line-height: 1.45; }
+.toast { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(520px, calc(100% - 32px)); background: var(--paper); color: var(--paper-ink); border-radius: 14px; padding: 12px 14px; font-size: .9rem; line-height: 1.4; box-shadow: 0 16px 40px -12px #000; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 20; }
+.toast.show { opacity: 1; transform: translate(-50%, -6px); }
+.toast b { font-family: var(--f-display); }
+.toast.bad b { color: #c0392b; } .toast.ok b { color: #138a72; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .line { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="top">
+        <a class="brand" href="/" style="text-decoration:none;">psq <b>al día</b></a>
+        <div class="stats">
+            <button class="icon-btn" id="btnSound" type="button" aria-label="Silenciar">🔊</button>
+            <a class="icon-btn" id="btnExit" href="/juegos" aria-label="Salir a la lista de juegos" style="display:inline-grid; place-items:center; text-decoration:none;">✕</a>
+            <div class="lives" id="lives" role="img" aria-label="3 vidas"></div>
+            <div class="score"><span id="score">0</span><small>HITOS</small></div>
+        </div>
+    </div>
+
+    <div class="current" id="current" aria-live="polite">
+        <div class="q">¿Dónde va este hito?</div>
+        <div class="t" id="curText">—</div>
+        <div class="hint" id="curHint">Toca el hueco de la línea del tiempo donde encaja.</div>
+        <button class="btn primary" type="button" id="btnRestart" hidden style="margin-top:12px;">Otra partida</button>
+    </div>
+
+    <div class="line" id="line"></div>
+</div>
+
+
+
+<div class="layer" id="menu">
+    <div class="inner">
+        <div>
+            <div class="eyebrow">psq al día · boceto</div>
+            <h1 class="title">Crono<em>logía</em></h1>
+        </div>
+        <p class="lead">Coloca cada hito de la historia de la psiquiatría en su sitio de la línea del tiempo. Tres fallos y se acaba.</p>
+        <button class="btn primary" type="button" id="btnPlay">Empezar</button>
+        <div class="best">Récord <b id="bestMenu">—</b></div>
+        <a class="fine" href="/juegos" style="color:var(--gold); text-decoration:none;">← Todos los juegos</a>
+        <p class="fine">Todas las fechas están verificadas con fuentes. Cuando un hito tiene matiz (publicación frente a descubrimiento, fecha aproximada), lo explica su tarjeta.</p>
+    </div>
+</div>
+
+<div class="layer" id="over" hidden>
+    <div class="inner" role="status" aria-live="polite">
+        <div>
+            <div class="eyebrow" id="overEyebrow">Fin de la partida</div>
+            <div class="big" id="overScore">0</div>
+            <div style="margin-top:8px;"><span class="eyebrow">hitos colocados</span> <span class="badge" id="overRecord" hidden>Nuevo récord</span></div>
+        </div>
+        <p class="lead" id="overDetail"></p>
+        <button class="btn primary" type="button" id="btnAgain">Otra partida</button>
+        <button class="btn" type="button" id="btnShare">Compartir</button>
+        <button class="btn" type="button" id="btnReview">Ver mi línea del tiempo</button>
+        <a class="btn" href="/juegos" style="text-align:center; text-decoration:none; background:transparent; border:1px solid rgba(255,255,255,.16);">Salir</a>
+        <div class="best">Récord <b id="bestOver">—</b></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    // ---------------- Hitos verificados ----------------
+    // y: año usado para ordenar (negativo = a.C.) · show: cómo se muestra · t: hito · n: matiz (opcional)
+    const HITOS = [
+        { y: -400, show: 'c. 400 a.C.', t: 'Los médicos hipocráticos explican la locura por causas naturales (teoría humoral)', n: 'Fecha aproximada: Hipócrates vivió c. 460–377 a.C.' },
+        { y: 1025, t: 'Avicena termina El canon de medicina' },
+        { y: 1409, t: 'Fray Gilabert Jofré impulsa en Valencia el Hospital dels Ignocents, Folls e Orats', n: 'Su sermón es del 24 de febrero de 1409; el hospital abrió el 1 de junio de 1410.' },
+        { y: 1566, t: 'Bernardino Álvarez funda el Hospital de San Hipólito en México', n: 'La licencia es de 1566; la placa dice 1577 y la sede definitiva se fecha en 1567.' },
+        { y: 1656, t: 'Se crea el Hôpital Général de París', n: 'Cartas patentes del 27 de abril de 1656.' },
+        { y: 1796, t: 'Abre el York Retreat de William Tuke', n: 'Es el año de apertura; algunas fuentes sitúan su fundación en 1792.' },
+        { y: 1808, t: 'Reil acuña el término «psiquiatría» (Psychiaterie)' },
+        { y: 1817, t: 'James Parkinson publica «An Essay on the Shaking Palsy»' },
+        { y: 1838, t: 'Francia aprueba su ley de alienados', n: 'Votada el 30 de junio de 1838.' },
+        { y: 1845, t: 'Griesinger publica «Patología y terapia de las enfermedades psíquicas»' },
+        { y: 1848, t: 'Accidente de Phineas Gage', n: '13 de septiembre de 1848.' },
+        { y: 1854, t: 'Falret publica su memoria sobre la «folie circulaire»', n: 'Un primer artículo es de 1851; la memoria completa, de 1854.' },
+        { y: 1857, t: 'Morel publica el «Tratado de las degeneraciones»' },
+        { y: 1883, t: 'Kraepelin publica la 1.ª edición de su Compendio de psiquiatría' },
+        { y: 1895, t: 'Breuer y Freud publican «Estudios sobre la histeria»', n: 'Su «Comunicación preliminar» es de 1893.' },
+        { y: 1899, t: 'La 6.ª edición de Kraepelin separa la demencia precoz de la psicosis maníaco-depresiva', n: 'Ya había introducido el término «demencia precoz» en la 4.ª edición (1893).' },
+        { y: 1899, t: 'Freud publica «La interpretación de los sueños»', n: 'Salió el 4 de noviembre de 1899, aunque la portada dice 1900.' },
+        { y: 1906, t: 'Alzheimer presenta el caso de Auguste Deter', n: 'En Tubinga, el 3 de noviembre de 1906. Lo publicó en 1907.' },
+        { y: 1908, t: 'Bleuler usa por primera vez el término «esquizofrenia»', n: 'En una conferencia en Berlín (24 de abril de 1908); la monografía es de 1911.' },
+        { y: 1913, t: 'Jaspers publica «Psicopatología general»' },
+        { y: 1917, t: 'Wagner-Jauregg inicia la malarioterapia de la neurosífilis', n: 'Inoculó paludismo a nueve pacientes.' },
+        { y: 1927, t: 'Wagner-Jauregg recibe el Premio Nobel por la malarioterapia' },
+        { y: 1933, t: 'Sakel publica el coma insulínico', n: 'Sus observaciones con morfinómanos venían de 1927.' },
+        { y: 1934, t: 'Meduna induce por primera vez convulsiones terapéuticas', n: 'Con alcanfor, el 23 de enero de 1934; después usó cardiazol y publicó en 1935.' },
+        { y: 1935, t: 'Egas Moniz realiza la primera leucotomía prefrontal', n: '12 de noviembre de 1935. Lo publicó en 1936.' },
+        { y: 1938, t: 'Cerletti y Bini realizan la primera terapia electroconvulsiva', n: 'En abril de 1938; el día varía según la fuente.' },
+        { y: 1943, t: 'Hofmann descubre los efectos del LSD', n: 'Lo había sintetizado en 1938; descubrió sus efectos el 16 de abril de 1943.' },
+        { y: 1943, t: 'Kanner describe el autismo en «Nervous Child»' },
+        { y: 1944, t: 'Asperger describe la «psicopatía autista»', n: 'Sin conocer el trabajo de Kanner.' },
+        { y: 1949, t: 'Cade publica el uso del litio en la manía', n: 'El descubrimiento se fecha en 1948.' },
+        { y: 1949, t: 'Egas Moniz recibe el Premio Nobel' },
+        { y: 1952, t: 'Delay y Deniker publican la clorpromazina en la psicosis', n: 'En mayo de 1952; Hamon y colaboradores lo habían publicado en marzo.' },
+        { y: 1952, t: 'La APA publica el DSM-I' },
+        { y: 1957, t: 'Kuhn publica el efecto antidepresivo de la imipramina', n: 'Artículo del 31 de agosto de 1957; probaba el compuesto desde 1955.' },
+        { y: 1957, t: 'Loomer, Saunders y Kline publican la iproniazida como antidepresivo' },
+        { y: 1958, t: 'El equipo de Janssen sintetiza el haloperidol', n: '11 de febrero de 1958; llegó al mercado belga en octubre de 1959.' },
+        { y: 1960, t: 'La FDA aprueba el clordiazepóxido (Librium)', n: 'En febrero de 1960; salió a la venta un mes después.' },
+        { y: 1961, t: 'Szasz, Foucault y Goffman publican «El mito de la enfermedad mental», «Historia de la locura» e «Internados»' },
+        { y: 1963, t: 'Kennedy firma la Community Mental Health Act', n: '31 de octubre de 1963.' },
+        { y: 1967, t: 'Beck describe en detalle su modelo cognitivo de la depresión' },
+        { y: 1970, t: 'La FDA aprueba el litio para la manía aguda', n: 'Para el tratamiento de mantenimiento, en 1974.' },
+        { y: 1973, t: 'La junta de la APA retira la homosexualidad del DSM', n: '15 de diciembre de 1973; el conjunto de la APA lo ratificó al año siguiente.' },
+        { y: 1975, t: 'Se retira la clozapina tras muertes por agranulocitosis en Finlandia', n: 'Las muertes ocurrieron en julio de 1975.' },
+        { y: 1978, t: 'Italia aprueba la Ley 180 (Ley Basaglia)', n: '13 de mayo de 1978.' },
+        { y: 1980, t: 'Se publica el DSM-III' },
+        { y: 1986, t: 'La Ley General de Sanidad integra la salud mental en el sistema sanitario español', n: 'Ley 14/1986, de 25 de abril, artículo 20.' },
+        { y: 1987, t: 'La FDA aprueba la fluoxetina', n: '29 de diciembre de 1987.' },
+        { y: 1989, t: 'La FDA aprueba la clozapina para la esquizofrenia resistente' },
+        { y: 1990, t: 'EE. UU. proclama la «Década del Cerebro»', n: 'Proclamación 6158, de julio de 1990.' },
+        { y: 1990, t: 'La Asamblea Mundial de la Salud aprueba la CIE-10', n: 'En mayo de 1990; en uso desde 1994.' },
+        { y: 1994, t: 'Se publica el DSM-IV' },
+        { y: 2000, t: 'Carlsson, Greengard y Kandel reciben el Premio Nobel', n: 'Por la transducción de señales en el sistema nervioso.' },
+        { y: 2013, t: 'Se publica el DSM-5', n: '18 de mayo de 2013.' },
+        { y: 2019, t: 'La FDA aprueba la esketamina intranasal', n: '5 de marzo de 2019.' },
+        { y: 2022, t: 'Entra en vigor la CIE-11', n: 'El 1 de enero de 2022; la Asamblea Mundial de la Salud la aprobó en 2019.' },
+    ].map((h, i) => ({ ...h, id: i, show: h.show || String(h.y) }));
+
+    const LIVES = 3;
+    const $ = id => document.getElementById(id);
+    const store = {
+        get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+        set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
+    };
+    let best = store.get('psq_crono_best', 0);
+    const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+    let ac = null, muted = store.get('psq_crono_muted', false);
+    function beep(f, d, type, vol, when) {
+        if (muted) return;
+        try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) { return; }
+        const t = ac.currentTime + (when || 0), o = ac.createOscillator(), g = ac.createGain();
+        o.type = type || 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.05, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + 0.02);
+    }
+
+    const S = { deck: [], line: [], cur: null, lives: LIVES, placed: 0, busy: false, lastNew: null };
+
+    function renderLives() {
+        $('lives').innerHTML = Array.from({ length: LIVES }, (_, i) => `<i class="life ${i < S.lives ? '' : 'off'}"></i>`).join('');
+        $('lives').setAttribute('aria-label', S.lives === 1 ? '1 vida' : S.lives + ' vidas');
+    }
+    function renderLine(disabled) {
+        const el = $('line'); el.innerHTML = '';
+        const slot = i => {
+            const b = document.createElement('button'); b.className = 'slot'; b.type = 'button';
+            const before = S.line[i - 1], after = S.line[i];
+            b.textContent = !before ? 'Antes de ' + after.show : !after ? 'Después de ' + before.show : 'Entre ' + before.show + ' y ' + after.show;
+            b.disabled = !!disabled; b.addEventListener('click', () => place(i)); return b;
+        };
+        S.line.forEach((h, i) => {
+            el.appendChild(slot(i));
+            const it = document.createElement('div'); it.className = 'item' + (S.lastNew && S.lastNew.id === h.id ? ' new ' + S.lastNew.res : '');
+            it.innerHTML = `<div class="yr">${h.show}</div>`;
+            const c = document.createElement('button'); c.type = 'button'; c.className = 'card';
+            const b = document.createElement('b'); b.textContent = h.t; c.appendChild(b);
+            if (h.n) { const sp = document.createElement('span'); sp.textContent = h.n; sp.hidden = !(S.lastNew && S.lastNew.id === h.id); c.appendChild(sp); c.addEventListener('click', () => { sp.hidden = !sp.hidden; }); c.setAttribute('aria-label', h.show + ': ' + h.t + '. Toca para ver el matiz.'); }
+            it.appendChild(c); el.appendChild(it);
+        });
+        el.appendChild(slot(S.line.length));
+    }
+    function showCurrent() {
+        $('curText').textContent = S.cur ? S.cur.t : '—';
+        const hint = $('curHint'); hint.className = 'hint'; hint.textContent = 'Toca el hueco de la línea del tiempo donde encaja.';
+    }
+
+    function start() {
+        const deck = shuffle(HITOS.slice());
+        S.line = [deck.pop()]; S.deck = deck; S.cur = S.deck.pop(); S.lives = LIVES; S.placed = 0; S.busy = false; S.lastNew = null;
+        $('score').textContent = 0; renderLives(); showCurrent(); renderLine(false);
+        $('menu').hidden = true; $('over').hidden = true; $('btnRestart').hidden = true;
+    }
+
+    function place(i) {
+        if (S.busy || !S.cur) return;
+        const h = S.cur, before = S.line[i - 1], after = S.line[i];
+        // vale cualquier hueco compatible: los años repetidos pueden ir en cualquier orden entre ellos
+        const ok = (!before || before.y <= h.y) && (!after || h.y <= after.y);
+        let pos = i;
+        if (!ok) { pos = S.line.findIndex(x => x.y > h.y); if (pos < 0) pos = S.line.length; }
+        S.line.splice(pos, 0, h);
+        S.lastNew = { id: h.id, res: ok ? 'ok' : 'bad' };
+        const box = $('current');
+        box.classList.remove('flash-ok', 'flash-bad'); void box.offsetWidth; box.classList.add(ok ? 'flash-ok' : 'flash-bad');
+        const hint = $('curHint');
+        if (ok) { S.placed++; $('score').textContent = S.placed; beep(784, .08); beep(1175, .12, 'triangle', .05, .08); hint.className = 'res ok'; hint.textContent = '✓ ' + h.show; }
+        else { S.lives--; renderLives(); beep(240, .16, 'square', .045); beep(180, .2, 'square', .045, .14); hint.className = 'res bad'; hint.textContent = '✗ Era ' + h.show; try { navigator.vibrate && navigator.vibrate(90); } catch (e) { /* no disponible */ } }
+        S.busy = true; renderLine(true);
+        requestAnimationFrame(() => { const n = document.querySelector('.item.new'); if (n) n.scrollIntoView({ block: 'center', behavior: 'smooth' }); });
+        setTimeout(() => {
+            S.busy = false;
+            if (S.lives <= 0) return end(false);
+            S.cur = S.deck.pop() || null;
+            if (!S.cur) return end(true);
+            showCurrent(); renderLine(false);
+        }, 1100);
+    }
+
+    function end(all) {
+        const isRec = S.placed > best; if (isRec) { best = S.placed; store.set('psq_crono_best', best); }
+        $('overEyebrow').textContent = all ? '¡Línea del tiempo completa!' : 'Fin de la partida';
+        $('overScore').textContent = S.placed; $('overRecord').hidden = !isRec; $('bestOver').textContent = best || '—';
+        $('overDetail').textContent = all ? `Has colocado los ${HITOS.length} hitos de la historia de la psiquiatría.` : `Tu línea del tiempo tiene ${S.line.length} hitos, de ${S.line[0].show} a ${S.line[S.line.length - 1].show}.`;
+        $('over').hidden = false; $('btnAgain').focus();
+    }
+
+    async function compartir() {
+        const text = `He colocado ${S.placed} hitos de la historia de la psiquiatría en Cronología. ¿Me superas?`, url = 'https://psqaldia.com/juegos/cronologia';
+        if (navigator.share) { try { await navigator.share({ title: 'Cronología de la psiquiatría', text, url }); } catch (e) { /* cancelado */ } return; }
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
+    }
+    $('btnShare').addEventListener('click', compartir);
+    function syncSound() { $('btnSound').textContent = muted ? '🔇' : '🔊'; $('btnSound').setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar'); }
+    $('btnSound').addEventListener('click', () => { muted = !muted; store.set('psq_crono_muted', muted); syncSound(); if (!muted) beep(784, .08); });
+    syncSound();
+    $('btnPlay').addEventListener('click', start);
+    $('btnAgain').addEventListener('click', start);
+    $('btnReview').addEventListener('click', () => {
+        $('over').hidden = true; S.cur = null; S.lastNew = null;
+        $('curText').textContent = 'Tu línea del tiempo';
+        const hint = $('curHint'); hint.className = 'hint'; hint.textContent = 'Toca una tarjeta para ver su matiz.';
+        $('btnRestart').hidden = false; renderLine(true);
+    });
+    $('btnRestart').addEventListener('click', start);
+    $('bestMenu').textContent = best || '—';
+    // pantalla de inicio con una línea de ejemplo de fondo
+    S.line = [HITOS[2], HITOS[16], HITOS[31], HITOS[46]]; S.cur = HITOS[24]; renderLives(); showCurrent(); renderLine(true);
+})();
+</script>
+</body>
+</html>
