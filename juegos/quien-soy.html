@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>¿Quién soy?: adivina el antipsicótico por su perfil | psq al día</title>
+<meta name="description" content="Boceto de minijuego de psq al día: adivina el antipsicótico a partir de su perfil de eficacia y efectos adversos.">
+<link rel="canonical" href="https://psqaldia.com/juegos/quien-soy">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0a1020">
+<link rel="icon" href="/Logo.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="psq al día">
+<meta property="og:title" content="¿Quién soy? · minijuego de psq al día">
+<meta property="og:description" content="Mira el perfil de eficacia y efectos adversos y adivina de qué antipsicótico se trata.">
+<meta property="og:url" content="https://psqaldia.com/juegos/quien-soy">
+<meta property="og:image" content="https://psqaldia.com/juegos/quien-soy.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoGame","name":"¿Quién soy? Antipsicóticos","description":"Minijuego: adivina el antipsicótico a partir de su perfil de eficacia y efectos adversos.","url":"https://psqaldia.com/juegos/quien-soy","inLanguage":"es","genre":"Puzle","gamePlatform":"Web","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"},{"@type":"ListItem","position":3,"name":"¿Quién soy?","item":"https://psqaldia.com/juegos/quien-soy"}]}]}</script>
+<style>
+@font-face { font-family: "Chakra Petch"; font-weight: 500 600; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-600.woff2") format("woff2"); }
+@font-face { font-family: "Chakra Petch"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-700.woff2") format("woff2"); }
+/* Familia de juegos de psq al día. Aquí, una "ficha policial" del fármaco:
+   siete rasgos como una huella dactilar sobre fondo nocturno. */
+:root {
+    --bg: #0a1020;
+    --panel: #111a2e;
+    --ink: #e8eef8;
+    --muted: #8a9bb8;
+    --accent: #7dd3fc;
+    --good: #2dd4bf;
+    --mid: #f4c460;
+    --bad: #ff6b7d;
+    --f-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --f-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -webkit-font-smoothing: antialiased; }
+.app { min-height: 100%; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; padding: max(12px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)); }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.brand { font-family: var(--f-display); font-weight: 700; color: var(--muted); font-size: .9rem; }
+.brand b { color: var(--accent); }
+.stats { display: flex; gap: 10px; align-items: center; font-family: var(--f-display); font-weight: 700; }
+.lives { display: flex; gap: 5px; }
+.life { width: 20px; height: 9px; border-radius: 99px; background: linear-gradient(90deg, var(--accent) 50%, var(--ink) 50%); box-shadow: 0 0 8px rgba(125, 211, 252, .5); transition: opacity .3s, transform .3s; }
+.life.off { opacity: .15; transform: scale(.8); box-shadow: none; }
+.score { font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.score small { font-size: .68rem; color: var(--muted); letter-spacing: .1em; margin-left: 3px; }
+.icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .05); color: #fff; font-size: .95rem; cursor: pointer; }
+.icon-btn:focus-visible, .btn:focus-visible, .opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Ficha del fármaco */
+.card { background: var(--panel); border: 1px solid rgba(125, 211, 252, .18); border-radius: 20px; padding: 16px 16px 14px; box-shadow: 0 18px 44px -24px #000; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.who { font-family: var(--f-display); font-weight: 700; font-size: 1.5rem; letter-spacing: .02em; text-transform: uppercase; }
+.who.reveal { color: var(--accent); }
+.tag { font-family: var(--f-display); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.rows { display: grid; gap: 9px; }
+.row { display: grid; grid-template-columns: 7.6rem 1fr 4.2rem; gap: 10px; align-items: center; }
+.row .lbl { font-size: .86rem; color: #c9d4e6; line-height: 1.2; }
+.row .lbl small { display: block; color: var(--muted); font-size: .72rem; }
+.track { height: 12px; border-radius: 99px; background: rgba(255, 255, 255, .07); overflow: hidden; position: relative; }
+.track i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; transition: width .5s cubic-bezier(.2, .8, .2, 1); }
+.row .lvl { font-family: var(--f-display); font-weight: 700; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; text-align: right; }
+.lvl.good { color: var(--good); } .lvl.mid { color: var(--mid); } .lvl.bad { color: var(--bad); } .lvl.na { color: var(--muted); }
+.legend { margin-top: 12px; font-size: .74rem; color: var(--muted); line-height: 1.4; }
+
+/* Opciones */
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.opt { border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .05); color: var(--ink); border-radius: 14px; padding: 14px 10px; font-family: var(--f-display); font-weight: 700; font-size: 1rem; letter-spacing: .02em; cursor: pointer; min-height: 56px; transition: background .15s, border-color .15s, transform .15s; }
+.opt:hover:not([disabled]) { background: rgba(125, 211, 252, .1); border-color: var(--accent); }
+.opt:active:not([disabled]) { transform: scale(.98); }
+.opt[disabled] { cursor: default; }
+.opt.right { background: rgba(45, 212, 191, .18); border-color: var(--good); color: #b8fff1; }
+.opt.wrong { background: rgba(255, 107, 125, .16); border-color: var(--bad); color: #ffd0d6; }
+.opt.gone { opacity: .25; }
+.helpers { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.helper { border: 1px dashed rgba(125, 211, 252, .45); background: transparent; color: var(--accent); border-radius: 99px; padding: 8px 12px; font-family: var(--f-display); font-weight: 700; font-size: .8rem; letter-spacing: .06em; cursor: pointer; }
+.helper[disabled] { opacity: .3; cursor: default; }
+.famhint { font-family: var(--f-display); font-weight: 700; font-size: .95rem; color: var(--accent); background: rgba(125, 211, 252, .08); border: 1px solid rgba(125, 211, 252, .3); border-radius: 12px; padding: 10px 12px; }
+.famhint[hidden] { display: none; }
+.feedback { min-height: 3.2em; font-size: .95rem; line-height: 1.45; color: #c9d4e6; }
+.feedback b { font-family: var(--f-display); }
+.feedback .fam { display: block; margin-top: 4px; font-size: .8rem; color: var(--muted); font-family: var(--f-display); letter-spacing: .04em; }
+.feedback .ok { color: var(--good); } .feedback .no { color: var(--bad); }
+.next { display: none; }
+.next.show { display: block; }
+
+/* Capas */
+.layer { position: fixed; inset: 0; z-index: 10; display: flex; justify-content: center; background: rgba(10, 16, 32, .95); overflow-y: auto; }
+.layer[hidden] { display: none; }
+.layer .inner { width: 100%; max-width: 560px; padding: 28px 20px; display: flex; flex-direction: column; gap: 16px; }
+.layer .inner > :first-child { margin-top: auto; } .layer .inner > :last-child { margin-bottom: auto; }
+.eyebrow { font-family: var(--f-display); font-weight: 600; font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.title { font-family: var(--f-display); font-weight: 700; font-size: clamp(2.4rem, 11vw, 3.4rem); line-height: .92; text-transform: uppercase; margin: 0; text-wrap: balance; }
+.title em { font-style: normal; color: var(--accent); }
+.lead { margin: 0; font-size: 1.05rem; line-height: 1.45; color: #c9d4e6; }
+.btn { border: none; border-radius: 14px; padding: 15px 16px; cursor: pointer; font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .08em; text-transform: uppercase; background: rgba(255, 255, 255, .08); color: var(--ink); width: 100%; }
+.btn.primary { background: var(--accent); color: #062030; box-shadow: 0 0 30px rgba(125, 211, 252, .3); }
+.best { font-family: var(--f-display); font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
+.best b { color: var(--ink); font-size: 1.2rem; letter-spacing: 0; margin-left: 6px; }
+.big { font-family: var(--f-display); font-weight: 700; font-size: 4rem; line-height: 1; }
+.badge { display: inline-block; font-family: var(--f-display); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; padding: 4px 9px; border-radius: 7px; background: rgba(125, 211, 252, .16); color: var(--accent); }
+.badge[hidden] { display: none; }
+.fine { color: var(--muted); font-size: .74rem; margin: 0; line-height: 1.45; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (max-width: 380px) { .row { grid-template-columns: 6.4rem 1fr 3.8rem; } .opt { font-size: .92rem; } }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="top">
+        <a class="brand" href="/" style="text-decoration:none;">psq <b>al día</b></a>
+        <div class="stats">
+            <button class="icon-btn" id="btnSound" type="button" aria-label="Silenciar">🔊</button>
+            <a class="icon-btn" href="/juegos" aria-label="Salir a la lista de juegos" style="display:inline-grid; place-items:center; text-decoration:none;">✕</a>
+            <div class="lives" id="lives" role="img" aria-label="3 vidas"></div>
+            <div class="score"><span id="score">0</span><small>ACIERTOS</small></div>
+        </div>
+    </div>
+
+    <div class="card" aria-live="polite">
+        <div class="card-head">
+            <div class="who" id="who">¿Quién soy?</div>
+            <div class="tag" id="round">Ronda 1</div>
+        </div>
+        <div class="rows" id="rows"></div>
+        <div class="legend">Comparado con los demás antipsicóticos. La barra mide lo que dice la etiqueta; el color dice si es bueno (<span style="color:var(--good)">verde</span>), intermedio (<span style="color:var(--mid)">ámbar</span>) o malo (<span style="color:var(--bad)">rojo</span>).</div>
+    </div>
+
+    <div class="helpers">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="helper" id="btnHalf" type="button">50 / 50</button>
+            <button class="helper" id="btnFam" type="button">🧪 Familia química</button>
+        </div>
+        <span class="tag" id="streak"></span>
+    </div>
+    <div class="opts" id="opts"></div>
+    <div class="famhint" id="famhint" hidden></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn primary next" type="button" id="btnNext">Siguiente</button>
+</div>
+
+<div class="layer" id="menu">
+    <div class="inner">
+        <div>
+            <div class="eyebrow">psq al día · minijuego</div>
+            <h1 class="title">¿Quién <em>soy?</em></h1>
+        </div>
+        <p class="lead">Cada antipsicótico tiene su huella: eficacia, peso, extrapiramidales, sedación, prolactina y QTc. Mira el perfil y adivina de quién es. Tres fallos y se acaba.</p>
+        <button class="btn primary" type="button" id="btnPlay">Empezar</button>
+        <div class="best">Récord <b id="bestMenu">—</b></div>
+        <a class="fine" href="/juegos" style="color:var(--accent); text-decoration:none;">← Todos los juegos</a>
+        <p class="fine">Datos: figura 5 de Nature Reviews Disease Primers (2025) 11:83, adaptada de un metaanálisis en red (CC BY 4.0). El juego muestra la posición de cada fármaco frente a los demás, no los valores. Los datos de la xanomelina-trospio son preliminares (metaanálisis aparte frente a placebo); la clozapina bajó la prolactina por debajo del placebo.</p>
+    </div>
+</div>
+
+<div class="layer" id="over" hidden>
+    <div class="inner" role="status" aria-live="polite">
+        <div>
+            <div class="eyebrow">Fin de la partida</div>
+            <div class="big" id="overScore">0</div>
+            <div style="margin-top:8px;"><span class="eyebrow">antipsicóticos reconocidos</span> <span class="badge" id="overRecord" hidden>Nuevo récord</span></div>
+        </div>
+        <p class="lead" id="overDetail"></p>
+        <button class="btn primary" type="button" id="btnAgain">Otra partida</button>
+        <button class="btn" type="button" id="btnShare">Compartir</button>
+        <a class="btn" href="/juegos" style="text-align:center; text-decoration:none; background:transparent; border:1px solid rgba(255,255,255,.16);">Salir</a>
+        <div class="best">Récord <b id="bestOver">—</b></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    // ---------------- Datos ----------------
+    // Orden de cada columna de la figura, de mejor a peor (transcrito; pendiente de verificar).
+    const NAMES = {
+        AMI: 'Amisulprida', RIS: 'Risperidona', CLO: 'Clozapina', XAN: 'Xanomelina-trospio', OLA: 'Olanzapina', PAL: 'Paliperidona',
+        CPZ: 'Clorpromazina', HAL: 'Haloperidol', ASE: 'Asenapina', PER: 'Perfenazina', ZIP: 'Ziprasidona', SER: 'Sertindol',
+        QUE: 'Quetiapina', ARI: 'Aripiprazol', LUR: 'Lurasidona', CAR: 'Cariprazina', ILO: 'Iloperidona', BRE: 'Brexpiprazol',
+    };
+    const DIMS = [
+        { key: 'pos', label: 'Síntomas positivos', sub: 'eficacia', eff: true, order: ['AMI', 'RIS', 'CLO', 'XAN', 'OLA', 'PAL', 'CPZ', 'HAL', 'ASE', 'PER', 'ZIP', 'SER', 'QUE', 'ARI', 'LUR', 'CAR', 'ILO', 'BRE'] },
+        { key: 'neg', label: 'Síntomas negativos', sub: 'eficacia', eff: true, order: ['CLO', 'AMI', 'OLA', 'ASE', 'PER', 'RIS', 'PAL', 'SER', 'XAN', 'CPZ', 'ZIP', 'ARI', 'CAR', 'QUE', 'LUR', 'HAL', 'BRE', 'ILO'] },
+        { key: 'peso', label: 'Aumento de peso', sub: 'efecto adverso', order: ['XAN', 'ZIP', 'LUR', 'ARI', 'HAL', 'BRE', 'CAR', 'AMI', 'ASE', 'RIS', 'PAL', 'CLO', 'QUE', 'ILO', 'CPZ', 'SER', 'OLA'] },
+        { key: 'eps', label: 'Extrapiramidales', sub: 'efecto adverso', order: ['CLO', 'SER', 'OLA', 'QUE', 'XAN', 'ASE', 'ARI', 'AMI', 'ILO', 'BRE', 'PAL', 'ZIP', 'RIS', 'LUR', 'CAR', 'CPZ', 'PER', 'HAL'] },
+        { key: 'sed', label: 'Sedación', sub: 'efecto adverso', order: ['PER', 'CAR', 'XAN', 'PAL', 'ILO', 'SER', 'ARI', 'AMI', 'BRE', 'LUR', 'RIS', 'HAL', 'ASE', 'OLA', 'ZIP', 'QUE', 'CPZ', 'CLO'] },
+        { key: 'prl', label: 'Prolactina', sub: 'efecto adverso', order: ['CLO', 'ARI', 'CAR', 'QUE', 'XAN', 'BRE', 'ZIP', 'OLA', 'ILO', 'ASE', 'CPZ', 'LUR', 'SER', 'HAL', 'AMI', 'RIS', 'PAL'] },
+        { key: 'qtc', label: 'QTc', sub: 'efecto adverso', order: ['LUR', 'XAN', 'BRE', 'CAR', 'ARI', 'PAL', 'HAL', 'QUE', 'OLA', 'RIS', 'ASE', 'ILO', 'ZIP', 'AMI', 'SER'] },
+    ];
+    const FAMILY = {
+        AMI: 'Benzamida', RIS: 'Benzisoxazol', PAL: 'Benzisoxazol', ILO: 'Benzisoxazol', CLO: 'Dibenzodiazepina', OLA: 'Tienobenzodiazepina',
+        QUE: 'Dibenzotiazepina', ASE: 'Dibenzo-oxepino pirrol', CPZ: 'Fenotiazina', PER: 'Fenotiazina', HAL: 'Butirofenona',
+        ZIP: 'Benzisotiazol', LUR: 'Benzisotiazol', SER: 'Fenilindol', ARI: 'Quinolinona', BRE: 'Quinolinona', CAR: 'Fenilpiperazina con urea ciclohexílica',
+        XAN: 'Agonista muscarínico M1/M4 + antagonista periférico (sin familia química dopaminérgica)',
+    };
+    // versión corta para el desvelado (la larga queda para la pista)
+    const SHORT = { CAR: 'Fenilpiperazina', XAN: 'Agonista muscarínico M1/M4', ASE: 'Dibenzo-oxepino pirrol' };
+    const famShort = code => SHORT[code] || FAMILY[code];
+    // la xanomelina-trospio se describe por su mecanismo: no tiene una familia química comparable
+    const famLabel = code => code === 'XAN' ? 'Mecanismo' : 'Familia química';
+    const NOTES = { XAN: 'Datos preliminares, de un metaanálisis aparte frente a placebo.', CLO: 'En la figura original, la clozapina bajó la prolactina por debajo del placebo.' };
+    // perfil de cada fármaco: posición 0 (mejor) a 1 (peor) en cada rasgo; null si no hay dato
+    const DRUGS = Object.keys(NAMES).map(code => {
+        const prof = DIMS.map(d => { const i = d.order.indexOf(code); return i < 0 ? null : i / (d.order.length - 1); });
+        return { code, name: NAMES[code], prof };
+    });
+    const level = v => v === null ? 'na' : v <= 1 / 3 ? 'good' : v < 2 / 3 ? 'mid' : 'bad';
+    const LVL_TXT = { good: 'Bajo', mid: 'Medio', bad: 'Alto', na: 'Sin datos' };
+    const EFF_TXT = { good: 'Alta', mid: 'Media', bad: 'Baja', na: 'Sin datos' };
+    const COLOR = { good: 'var(--good)', mid: 'var(--mid)', bad: 'var(--bad)', na: 'transparent' };
+    function dist(a, b) { // parecido entre perfiles (solo rasgos con dato en ambos)
+        let s = 0, n = 0; a.prof.forEach((v, i) => { const w = b.prof[i]; if (v !== null && w !== null) { s += (v - w) ** 2; n++; } });
+        return n ? Math.sqrt(s / n) : 1;
+    }
+
+    // ---------------- Utilidades ----------------
+    const $ = id => document.getElementById(id);
+    const store = {
+        get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+        set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
+    };
+    const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    let best = store.get('psq_qs_best', 0), muted = store.get('psq_qs_muted', false), ac = null;
+    function beep(f, d, type, vol, when) {
+        if (muted) return;
+        try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) { return; }
+        const t = ac.currentTime + (when || 0), o = ac.createOscillator(), g = ac.createGain();
+        o.type = type || 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.05, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + 0.02);
+    }
+
+    // ---------------- Estado ----------------
+    const S = { lives: 3, score: 0, round: 0, streak: 0, half: 1, fam: 1, bag: [], cur: null, opts: [], done: false, missed: [] };
+
+    function renderLives() {
+        $('lives').innerHTML = Array.from({ length: 3 }, (_, i) => `<i class="life ${i < S.lives ? '' : 'off'}"></i>`).join('');
+        $('lives').setAttribute('aria-label', S.lives === 1 ? '1 vida' : S.lives + ' vidas');
+    }
+    function renderProfile(d) {
+        $('rows').innerHTML = DIMS.map((dim, i) => {
+            const v = d.prof[i], lv = level(v);
+            const txt = dim.eff ? EFF_TXT[lv] : LVL_TXT[lv];
+            // la longitud mide lo que dice la etiqueta: en eficacia, más larga = más eficaz;
+            // en efectos adversos, más larga = más efecto
+            const w = v === null ? 0 : 12 + (dim.eff ? 1 - v : v) * 88;
+            return `<div class="row"><div class="lbl">${dim.label}<small>${dim.sub}</small></div>
+                <div class="track" aria-hidden="true"><i style="width:${w}%; background:${COLOR[lv]}"></i></div>
+                <div class="lvl ${lv}">${txt}</div></div>`;
+        }).join('');
+    }
+    function pickRound() {
+        if (!S.bag.length) S.bag = shuffle(DRUGS.slice());
+        const cur = S.bag.pop();
+        // cuanto más avanzas, más parecidos son los distractores
+        const others = DRUGS.filter(x => x.code !== cur.code).sort((a, b) => dist(cur, a) - dist(cur, b));
+        const pool = S.round < 4 ? shuffle(others.slice()) : S.round < 9 ? others.slice(0, 9) : others.slice(0, 5);
+        const opts = shuffle([cur, ...shuffle(pool.slice()).slice(0, 3)]);
+        return { cur, opts };
+    }
+    function newRound() {
+        S.round++; S.done = false;
+        const r = pickRound(); S.cur = r.cur; S.opts = r.opts;
+        $('who').textContent = '¿Quién soy?'; $('who').classList.remove('reveal');
+        $('round').textContent = 'Ronda ' + S.round;
+        renderProfile(S.cur);
+        $('opts').innerHTML = '';
+        S.opts.forEach(o => {
+            const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.textContent = o.name; b.dataset.code = o.code;
+            b.addEventListener('click', () => answer(o.code, b)); $('opts').appendChild(b);
+        });
+        $('feedback').innerHTML = ''; $('btnNext').classList.remove('show');
+        $('btnHalf').disabled = S.half <= 0; $('btnFam').disabled = S.fam <= 0; $('famhint').hidden = true;
+        $('streak').textContent = S.streak >= 3 ? `🔥 Racha de ${S.streak}` : '';
+    }
+    // lo que más delata al fármaco: su rasgo más extremo
+    function clue(d) {
+        let bi = -1, bd = -1;
+        d.prof.forEach((v, i) => { if (v !== null && Math.abs(v - 0.5) > bd) { bd = Math.abs(v - 0.5); bi = i; } });
+        const dim = DIMS[bi], v = d.prof[bi], good = v <= 0.5;
+        if (level(v) === 'mid') return 'Le delata: un perfil intermedio en casi todo.';
+        const word = dim.eff ? (good ? 'de los más eficaces en ' : 'de los menos eficaces en ') + dim.label.toLowerCase()
+                             : (good ? 'de los que menos ' : 'de los que más ') + ({ peso: 'peso suben', eps: 'extrapiramidales dan', sed: 'sedan', prl: 'prolactina suben', qtc: 'alargan el QTc' })[dim.key];
+        return `Le delata: es ${word}.`;
+    }
+    function answer(code, btn) {
+        if (S.done) return; S.done = true;
+        const ok = code === S.cur.code;
+        document.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.dataset.code === S.cur.code) b.classList.add('right'); });
+        $('who').textContent = S.cur.name; $('who').classList.add('reveal');
+        const note = '<span class="fam">' + famShort(S.cur.code) + '</span>';
+        if (ok) {
+            S.score++; S.streak++; $('score').textContent = S.score;
+            beep(784, .08); beep(1175, .12, 'triangle', .05, .08);
+            $('feedback').innerHTML = `<b class="ok">¡Exacto!</b> ${clue(S.cur)}${note}`;
+        } else {
+            btn.classList.add('wrong'); S.lives--; S.streak = 0; renderLives(); S.missed.push(S.cur.name);
+            beep(240, .16, 'square', .045); beep(180, .2, 'square', .045, .14);
+            try { navigator.vibrate && navigator.vibrate(90); } catch (e) { /* no disponible */ }
+            $('feedback').innerHTML = `<b class="no">Era ${S.cur.name}.</b> ${clue(S.cur)}${note}`;
+        }
+        $('btnNext').textContent = S.lives > 0 ? 'Siguiente' : 'Ver resultado';
+        $('btnNext').classList.add('show'); $('btnNext').focus({ preventScroll: true });
+    }
+    function useHalf() {
+        if (S.done || S.half <= 0) return; S.half--; $('btnHalf').disabled = true;
+        const wrong = shuffle([...document.querySelectorAll('.opt')].filter(b => b.dataset.code !== S.cur.code)).slice(0, 2);
+        wrong.forEach(b => { b.disabled = true; b.classList.add('gone'); });
+    }
+    function useFam() {
+        if (S.done || S.fam <= 0) return; S.fam--; $('btnFam').disabled = true;
+        $('famhint').textContent = '🧪 ' + famLabel(S.cur.code) + ': ' + FAMILY[S.cur.code]; $('famhint').hidden = false;
+    }
+    function next() { if (S.lives <= 0) return end(); newRound(); }
+    function start() {
+        Object.assign(S, { lives: 3, score: 0, round: 0, streak: 0, half: 1, fam: 1, bag: [], missed: [] });
+        $('score').textContent = 0; renderLives(); $('menu').hidden = true; $('over').hidden = true; newRound();
+    }
+    function end() {
+        const isRec = S.score > best; if (isRec) { best = S.score; store.set('psq_qs_best', best); }
+        $('overScore').textContent = S.score; $('overRecord').hidden = !isRec; $('bestOver').textContent = best || '—';
+        $('overDetail').textContent = S.missed.length ? 'Se te resistieron: ' + S.missed.join(', ') + '.' : '';
+        $('over').hidden = false; $('btnAgain').focus();
+    }
+
+    async function compartir() {
+        const text = `He reconocido ${S.score} antipsicóticos por su perfil en ¿Quién soy? ¿Me superas?`, url = 'https://psqaldia.com/juegos/quien-soy';
+        if (navigator.share) { try { await navigator.share({ title: '¿Quién soy? Antipsicóticos', text, url }); } catch (e) { /* cancelado */ } return; }
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
+    }
+    $('btnShare').addEventListener('click', compartir);
+    $('btnPlay').addEventListener('click', start);
+    $('btnAgain').addEventListener('click', start);
+    $('btnNext').addEventListener('click', next);
+    $('btnHalf').addEventListener('click', useHalf);
+    $('btnFam').addEventListener('click', useFam);
+    function syncSound() { $('btnSound').textContent = muted ? '🔇' : '🔊'; $('btnSound').setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar'); }
+    $('btnSound').addEventListener('click', () => { muted = !muted; store.set('psq_qs_muted', muted); syncSound(); if (!muted) beep(784, .08); });
+    syncSound(); renderLives(); $('bestMenu').textContent = best || '—';
+    renderProfile(DRUGS.find(d => d.code === 'OLA')); // ficha de ejemplo detrás del menú
+})();
+</script>
+</body>
+</html>
