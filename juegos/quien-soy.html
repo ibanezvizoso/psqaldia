@@ -77,6 +77,19 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .row .val { text-align: right; font-family: var(--f-display); font-weight: 700; font-size: .86rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .row .val small { display: block; font-size: .62rem; font-weight: 600; color: var(--muted); letter-spacing: .02em; white-space: nowrap; }
 .legend { margin-top: 12px; font-size: .74rem; color: var(--muted); line-height: 1.4; }
+.legend p { margin: 6px 0 0; } .legend p[hidden] { display: none; }
+.legend summary { cursor: pointer; font-family: var(--f-display); font-weight: 700; letter-spacing: .04em; color: #c9d4e6; list-style: none; }
+.legend summary::-webkit-details-marker { display: none; }
+.legend summary::before { content: '▸ '; color: var(--accent); } .legend[open] summary::before { content: '▾ '; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; margin: -2px 0 12px; border-radius: 11px; background: rgba(255, 255, 255, .05); }
+.tab { border: 0; border-radius: 8px; padding: 7px 6px; background: transparent; color: var(--muted); font-family: var(--f-display); font-weight: 700; font-size: .76rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.tab[aria-selected="true"] { background: rgba(125, 211, 252, .16); color: var(--accent); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Ranking: un punto por cada fármaco con datos en el estudio; el resaltado es el de la ficha */
+.rk { position: relative; height: 18px; }
+.rk i { position: absolute; top: 50%; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: rgba(232, 238, 248, .28); transform: translateY(-50%); }
+.rk i.me { width: 11px; height: 11px; margin-left: -5.5px; background: var(--accent); box-shadow: 0 0 0 2px var(--panel), 0 0 10px rgba(125, 211, 252, .5); z-index: 1; }
+.eff2 { color: var(--accent); }
 
 /* Opciones */
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -120,7 +133,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 @media (max-width: 380px) { .row { grid-template-columns: 6.6rem 1fr 3.9rem; gap: 8px; } .opt { font-size: .92rem; } }
 @media (max-width: 380px) { .score small { display: none; } .stats { gap: 8px; } }
 /* Pantallas bajas (la mayoría de Android): que las opciones quepan sin desplazar */
-@media (max-height: 600px) { .legend { display: none; } .row .lbl { font-size: .78rem; } }
+@media (max-height: 600px) { .row .lbl { font-size: .78rem; } }
 @media (max-height: 780px) {
     .app { gap: 10px; }
     .card { padding: 12px 14px 10px; }
@@ -132,6 +145,9 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     .rows { gap: 5px; }
     .fp { height: 16px; }
     .legend { margin-top: 6px; font-size: .68rem; }
+    .tabs { margin-bottom: 8px; }
+    .tab { padding: 6px; font-size: .72rem; }
+    .fp, .rk { height: 15px; }
     .opt { min-height: 48px; padding: 11px 8px; }
     .helper { padding: 6px 11px; }
 }
@@ -154,8 +170,15 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
             <div class="who" id="who">¿Quién soy?</div>
             <div class="tag" id="round">Ronda 1</div>
         </div>
-        <div class="rows" id="rows"></div>
-        <div class="legend">Línea vertical: placebo. Punto: efecto; trazo: IC 95 %; hueco: no se distingue del placebo. A la derecha, más mejoría o más efecto adverso. Extrapiramidales: uso de antiparkinsonianos. DME: diferencia de medias estandarizada; RR: riesgo relativo.</div>
+        <div class="tabs" role="tablist" aria-label="Vista de la ficha">
+            <button class="tab" type="button" role="tab" id="tabPbo" aria-controls="rows">Frente a placebo</button>
+            <button class="tab" type="button" role="tab" id="tabRank" aria-controls="rows">Ranking</button>
+        </div>
+        <div class="rows" id="rows" role="tabpanel"></div>
+        <details class="legend" id="howto"><summary>¿Cómo se lee?</summary>
+        <p id="legRank" hidden>Puesto en la clasificación SUCRA del artículo, entre todos sus antipsicóticos con datos (hasta 32). A la derecha, más eficacia o más efecto adverso. Entre puestos vecinos no suele haber diferencias significativas.</p>
+        <p id="legPbo">Línea vertical: placebo. Punto: efecto; trazo: IC 95 %; hueco: no se distingue del placebo. A la derecha, más mejoría o más efecto adverso. Extrapiramidales: uso de antiparkinsonianos. DME: diferencia de medias estandarizada.</p>
+        </details>
     </div>
 
     <div class="helpers">
@@ -177,7 +200,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
             <div class="eyebrow">psq al día · minijuego</div>
             <h1 class="title">¿Quién <em>soy?</em></h1>
         </div>
-        <p class="lead">Cada antipsicótico tiene su huella: eficacia, peso, extrapiramidales, acatisia, sedación, prolactina y QTc, con sus valores reales frente a placebo. Mira el perfil y adivina de quién es. Tres fallos y se acaba.</p>
+        <p class="lead">Cada antipsicótico tiene su huella: eficacia, peso, extrapiramidales, acatisia, sedación, prolactina y QTc, con sus valores reales frente a placebo. Míralo frente a placebo o en el ranking del estudio y adivina de quién es. Tres fallos y se acaba.</p>
         <button class="btn primary" type="button" id="btnPlay">Empezar</button>
         <div class="best">Récord <b id="bestMenu">—</b></div>
         <a class="fine" href="/juegos" style="color:var(--accent); text-decoration:none;">← Todos los juegos</a>
@@ -209,6 +232,9 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     // (versión corregida, figuras 2 y 4). CC BY 4.0.
     // Cada valor es [estimación, IC 95 % inferior, IC 95 % superior] frente a placebo; «n» son los pacientes con el fármaco
     // en el análisis principal (cambio global de síntomas). Los valores se extrajeron del texto del artículo, no de la imagen.
+    // Puesto de cada fármaco en la clasificación SUCRA de cada figura (orden en que el artículo los presenta), entre todos los
+    // fármacos con datos en esa fila; «of» es cuántos hay.
+    const RANK = {"global":{"CLO":1,"AMI":2,"ZOT":3,"THIOT":4,"OLA":5,"RIS":6,"PERPH":7,"THIOR":8,"ZUC":9,"PAL":10,"HAL":11,"SUL":12,"LOX":13,"CPZ":14,"FPX":15,"CPX":16,"MOL":17,"PEN":18,"QUE":19,"ARI":20,"ZIP":21,"SER":22,"ASE":23,"LUR":24,"PIM":25,"PERA":26,"CAR":27,"ILO":28,"FLU":29,"TRIFLU":30,"BRE":31,"LEV":32},"negativos":{"CLO":1,"ZOT":2,"AMI":3,"OLA":4,"ASE":5,"PERPH":6,"RIS":7,"PAL":8,"SER":9,"CPZ":10,"ZIP":11,"ARI":12,"CAR":13,"QUE":14,"LUR":15,"HAL":16,"ZUC":17,"BRE":18,"LEV":19,"ILO":20,"FPX":21},"peso":{"ZIP":1,"LUR":2,"ARI":3,"HAL":4,"BRE":5,"CAR":6,"CPX":7,"AMI":8,"ZUC":9,"FPX":10,"PERA":11,"MOL":12,"LOX":13,"ASE":14,"SUL":15,"LEV":16,"RIS":17,"TRIFLU":18,"PAL":19,"CLO":20,"QUE":21,"ILO":22,"CPZ":23,"SER":24,"OLA":25,"ZOT":26},"eps":{"CLO":1,"PERA":2,"SER":3,"OLA":4,"QUE":5,"ASE":6,"LEV":7,"ARI":8,"THIOR":9,"AMI":10,"ILO":11,"BRE":12,"PAL":13,"ZIP":14,"RIS":15,"LUR":16,"ZOT":17,"CAR":18,"CPZ":19,"SUL":20,"PERPH":21,"MOL":22,"ZUC":23,"TRIFLU":24,"FPX":25,"PEN":26,"LOX":27,"FLU":28,"HAL":29,"THIOT":30,"CPX":31,"PIM":32},"acatisia":{"CLO":1,"PERA":2,"SER":3,"ILO":4,"OLA":5,"QUE":6,"BRE":7,"ZOT":8,"PAL":9,"ARI":10,"ZIP":11,"THIOR":12,"ASE":13,"AMI":14,"CPZ":15,"RIS":16,"THIOT":17,"CAR":18,"PERPH":19,"LOX":20,"HAL":21,"LUR":22,"TRIFLU":23,"SUL":24,"MOL":25,"PEN":26,"PIM":27,"FLU":28,"ZUC":29,"FPX":30},"sedacion":{"PIM":1,"PERPH":2,"FLU":3,"CAR":4,"LEV":5,"PEN":6,"PAL":7,"ILO":8,"MOL":9,"SER":10,"ARI":11,"AMI":12,"TRIFLU":13,"BRE":14,"LUR":15,"RIS":16,"FPX":17,"HAL":18,"THIOR":19,"ASE":20,"LOX":21,"OLA":22,"THIOT":23,"ZIP":24,"QUE":25,"PERA":26,"CPZ":27,"SUL":28,"ZOT":29,"CPX":30,"CLO":31,"ZUC":32},"prolactina":{"CLO":1,"ZOT":2,"ARI":3,"FPX":4,"PERA":5,"CAR":6,"QUE":7,"BRE":8,"PIM":9,"ZIP":10,"OLA":11,"ILO":12,"ASE":13,"CPZ":14,"LUR":15,"SER":16,"HAL":17,"AMI":18,"RIS":19,"PAL":20},"qtc":{"LUR":1,"BRE":2,"CAR":3,"ARI":4,"PAL":5,"HAL":6,"QUE":7,"OLA":8,"RIS":9,"ASE":10,"ILO":11,"ZIP":12,"AMI":13,"SER":14},"of":{"global":32,"negativos":21,"peso":26,"eps":32,"acatisia":30,"sedacion":32,"prolactina":20,"qtc":14}};
     const D = {"global":{"AMI":[-0.73,-0.89,-0.58],"RIS":[-0.55,-0.62,-0.48],"CLO":[-0.89,-1.08,-0.71],"OLA":[-0.56,-0.62,-0.5],"PAL":[-0.49,-0.59,-0.38],"CPZ":[-0.44,-0.57,-0.31],"HAL":[-0.47,-0.53,-0.41],"ASE":[-0.39,-0.52,-0.26],"PERPH":[-0.56,-0.75,-0.38],"ZIP":[-0.41,-0.52,-0.3],"SER":[-0.4,-0.54,-0.26],"QUE":[-0.42,-0.5,-0.33],"ARI":[-0.41,-0.5,-0.32],"LUR":[-0.36,-0.48,-0.24],"CAR":[-0.34,-0.49,-0.2],"ILO":[-0.33,-0.44,-0.22],"BRE":[-0.26,-0.39,-0.12],"ZUC":[-0.51,-0.75,-0.27],"SUL":[-0.48,-0.87,-0.09],"LEV":[-0.03,-0.59,0.52],"FLU":[-0.24,-0.62,0.13],"PIM":[-0.3,-0.75,0.14]},"negativos":{"AMI":[-0.5,-0.64,-0.37],"RIS":[-0.37,-0.43,-0.31],"CLO":[-0.62,-0.84,-0.39],"OLA":[-0.45,-0.51,-0.39],"PAL":[-0.37,-0.47,-0.28],"CPZ":[-0.35,-0.51,-0.18],"HAL":[-0.29,-0.35,-0.23],"ASE":[-0.42,-0.55,-0.29],"PERPH":[-0.42,-0.59,-0.25],"ZIP":[-0.33,-0.43,-0.23],"SER":[-0.37,-0.48,-0.25],"QUE":[-0.31,-0.38,-0.24],"ARI":[-0.33,-0.41,-0.24],"LUR":[-0.29,-0.39,-0.18],"CAR":[-0.32,-0.44,-0.2],"ILO":[-0.22,-0.33,-0.11],"BRE":[-0.25,-0.36,-0.14],"ZUC":[-0.17,-0.59,0.23],"LEV":[-0.09,-0.57,0.4]},"peso":{"AMI":[0.84,0.14,1.53],"RIS":[1.44,1.05,1.83],"CLO":[1.89,0.36,3.43],"OLA":[2.78,2.44,3.13],"PAL":[1.49,0.98,2.0],"CPZ":[2.37,1.43,3.32],"HAL":[0.54,0.15,0.95],"ASE":[1.21,0.47,1.93],"ZIP":[-0.16,-0.73,0.4],"SER":[2.47,1.68,3.26],"QUE":[1.94,1.42,2.45],"ARI":[0.48,-0.05,1.01],"LUR":[0.32,-0.22,0.87],"CAR":[0.73,-0.06,1.52],"ILO":[2.18,1.47,2.89],"BRE":[0.7,-0.05,1.45],"ZUC":[0.53,-5.54,6.71],"SUL":[2.04,-8.17,12.67],"LEV":[1.57,-1.58,4.74]},"eps":{"AMI":[1.46,0.96,2.04],"RIS":[1.8,1.4,2.38],"CLO":[0.46,0.19,0.88],"OLA":[1.02,0.79,1.3],"PAL":[1.61,1.17,2.1],"CPZ":[2.17,1.48,2.91],"HAL":[3.12,2.74,3.5],"ASE":[1.21,0.66,1.91],"PERPH":[2.64,1.32,3.92],"ZIP":[1.7,1.23,2.46],"SER":[0.92,0.64,1.41],"QUE":[1.05,0.78,1.48],"ARI":[1.32,0.9,1.82],"LUR":[1.94,1.42,2.48],"CAR":[2.21,1.18,3.37],"ILO":[1.53,0.69,2.63],"BRE":[1.6,0.8,2.63],"ZUC":[3.06,1.6,6.9],"SUL":[2.38,1.07,7.35],"LEV":[1.45,0.23,3.25],"FLU":[3.99,1.27,5.65],"PIM":[6.14,4.81,6.55]},"acatisia":{"AMI":[2.5,1.21,4.34],"RIS":[2.73,2.0,3.98],"CLO":[0.17,0.0,1.34],"OLA":[0.99,0.7,1.34],"PAL":[1.47,0.9,2.25],"CPZ":[2.58,1.3,4.3],"HAL":[3.76,2.99,4.61],"ASE":[2.38,1.25,3.9],"PERPH":[4.41,0.89,8.94],"ZIP":[2.11,1.49,3.15],"SER":[0.72,0.45,1.23],"QUE":[1.01,0.68,1.58],"ARI":[1.95,1.3,2.74],"LUR":[3.93,2.7,5.38],"CAR":[3.16,2.02,4.56],"ILO":[0.73,0.16,1.94],"BRE":[1.35,0.8,2.08],"ZUC":[23.81,7.41,142.86],"SUL":[4.95,1.91,18.18],"FLU":[12.16,1.47,14.44],"PIM":[9.43,2.16,13.19]},"sedacion":{"AMI":[1.56,0.91,2.23],"RIS":[2.03,1.67,2.51],"CLO":[3.02,2.52,3.37],"OLA":[2.17,1.93,2.4],"PAL":[1.33,1.0,1.68],"CPZ":[2.55,2.16,2.9],"HAL":[1.92,1.68,2.15],"ASE":[2.17,1.59,2.68],"PERPH":[1.11,0.59,1.69],"ZIP":[2.91,2.27,3.89],"SER":[1.38,0.98,2.07],"QUE":[3.27,2.61,4.22],"ARI":[1.46,1.11,1.83],"LUR":[1.75,1.38,2.11],"CAR":[1.12,0.7,1.59],"ILO":[1.36,0.84,1.93],"BRE":[1.64,0.91,2.38],"ZUC":[10.2,4.72,29.41],"SUL":[4.08,2.04,10.1],"LEV":[1.2,0.41,2.13],"FLU":[1.09,0.31,2.09],"PIM":[0.92,0.17,2.03]},"prolactina":{"AMI":[26.87,15.63,38.19],"RIS":[37.98,34.64,41.38],"CLO":[-77.05,-120.23,-33.54],"OLA":[4.47,1.6,7.38],"PAL":[48.51,43.52,53.51],"CPZ":[8.7,-8.16,25.75],"HAL":[18.49,15.6,21.39],"ASE":[5.05,0.01,10.14],"ZIP":[2.75,-2.14,7.66],"SER":[10.12,4.52,15.63],"QUE":[-1.17,-4.52,2.27],"ARI":[-7.1,-11.17,-3.09],"LUR":[7.04,3.03,11.05],"CAR":[-3.19,-9.21,2.8],"ILO":[4.79,-1.05,10.66],"BRE":[0.95,-3.64,5.62],"PIM":[-3.91,-89.56,82.66]},"qtc":{"AMI":[14.1,7.71,20.45],"RIS":[4.77,2.68,6.87],"OLA":[4.29,1.91,6.68],"PAL":[1.21,-2.89,5.31],"HAL":[1.69,-0.23,3.64],"ASE":[5.6,-0.94,12.0],"ZIP":[9.7,7.43,12.04],"SER":[23.9,20.56,27.33],"QUE":[3.43,0.94,6.0],"ARI":[-0.43,-3.62,2.77],"LUR":[-2.21,-4.54,0.15],"CAR":[-1.45,-6.2,3.2],"ILO":[6.93,4.49,9.36],"BRE":[-1.46,-4.71,1.81]},"n":{"AMI":705,"RIS":3827,"CLO":270,"OLA":5602,"PAL":1584,"CPZ":741,"HAL":4400,"ASE":1027,"PERPH":378,"ZIP":1228,"SER":868,"QUE":3002,"ARI":1926,"LUR":1363,"CAR":999,"ILO":2157,"BRE":1180,"ZUC":178,"SUL":66,"LEV":21,"FLU":53,"PIM":44}};
     const NAMES = {
         AMI: 'Amisulprida', RIS: 'Risperidona', CLO: 'Clozapina', OLA: 'Olanzapina', PAL: 'Paliperidona', CPZ: 'Clorpromazina',
@@ -285,7 +311,29 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     }
 
     // ---------------- Ficha: un mini forest plot por fila ----------------
+    let view = store.get('psq_qs_view', 'pbo'), shown = null;
+    function setView(v) {
+        view = v; store.set('psq_qs_view', v);
+        $('tabPbo').setAttribute('aria-selected', v === 'pbo'); $('tabRank').setAttribute('aria-selected', v === 'rank');
+        $('legPbo').hidden = v !== 'pbo'; $('legRank').hidden = v !== 'rank';
+        if (shown) renderProfile(shown.d, shown.reveal);
+    }
+    function renderRank(d) {
+        $('rows').innerHTML = DIMS.map((dim, i) => {
+            const r = RANK[dim.key][d.code], N = RANK.of[dim.key];
+            if (!r) return `<div class="row"><div class="lbl">${dim.label}<small class="na">sin datos</small></div><div class="rk" aria-hidden="true"></div><div class="val na">—</div></div>`;
+            // a la derecha, más eficacia o más efecto adverso (igual que en la otra vista)
+            const x = k => (dim.eff ? 1 - (k - 1) / (N - 1) : (k - 1) / (N - 1)) * 100;
+            const dots = Array.from({ length: N }, (_, k) => k + 1 === r ? '' : `<i style="left:${x(k + 1)}%"></i>`).join('') + `<i class="me" style="left:${x(r)}%"></i>`;
+            const sub = dim.eff ? '1.º = el más eficaz' : '1.º = el que menos';
+            return `<div class="row"><div class="lbl">${dim.label}<small class="eff2">${sub}</small></div>
+                <div class="rk" role="img" aria-label="${dim.label}: puesto ${r} de ${N} en el estudio (${sub})">${dots}</div>
+                <div class="val">${r}.º<small>de ${N}</small></div></div>`;
+        }).join('');
+    }
     function renderProfile(d, reveal) {
+        shown = { d, reveal };
+        if (view === 'rank') return renderRank(d);
         $('rows').innerHTML = DIMS.map((dim, i) => {
             const v = d.vals[i];
             if (!v) return `<div class="row"><div class="lbl">${dim.label}<small class="na">sin datos</small></div><div class="fp na" aria-hidden="true"></div><div class="val na">—</div></div>`;
@@ -417,6 +465,8 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     document.addEventListener('keydown', e => {
         if ($('menu').hidden && $('over').hidden && !S.done && /^[1-4]$/.test(e.key)) { const b = document.querySelectorAll('.opt')[+e.key - 1]; if (b && !b.disabled) b.click(); }
     });
+    $('tabPbo').addEventListener('click', () => setView('pbo'));
+    $('tabRank').addEventListener('click', () => setView('rank'));
     $('btnShare').addEventListener('click', compartir);
     $('btnPlay').addEventListener('click', start);
     $('btnAgain').addEventListener('click', start);
@@ -426,6 +476,8 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     function syncSound() { $('btnSound').textContent = muted ? '🔇' : '🔊'; $('btnSound').setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar'); }
     $('btnSound').addEventListener('click', () => { muted = !muted; store.set('psq_qs_muted', muted); syncSound(); if (!muted) beep(784, .08); });
     syncSound(); renderLives(); $('bestMenu').textContent = best || '—';
+    setView(view);
+    $('howto').open = innerHeight > 800;
     renderProfile(DRUGS.find(d => d.code === 'OLA'), false); // ficha de ejemplo detrás del menú
 })();
 </script>
