@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>¿Quién soy?: adivina el antipsicótico por su perfil | psq al día</title>
-<meta name="description" content="Minijuego de psq al día: adivina el antipsicótico a partir de su perfil de eficacia y efectos adversos.">
+<meta name="description" content="Minijuego de psq al día: adivina el antipsicótico por su perfil real de eficacia y efectos adversos frente a placebo (metaanálisis en red de Huhn et al., Lancet 2019).">
 <link rel="canonical" href="https://psqaldia.com/juegos/quien-soy">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0a1020">
@@ -18,7 +18,7 @@
 <meta property="og:url" content="https://psqaldia.com/juegos/quien-soy">
 <meta property="og:image" content="https://psqaldia.com/juegos/quien-soy.png">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoGame","name":"¿Quién soy? Antipsicóticos","description":"Minijuego: adivina el antipsicótico a partir de su perfil de eficacia y efectos adversos.","url":"https://psqaldia.com/juegos/quien-soy","inLanguage":"es","genre":"Puzle","gamePlatform":"Web","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"},{"@type":"ListItem","position":3,"name":"¿Quién soy?","item":"https://psqaldia.com/juegos/quien-soy"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoGame","name":"¿Quién soy? Antipsicóticos","description":"Minijuego: adivina el antipsicótico por su perfil de eficacia y efectos adversos frente a placebo, con datos de un metaanálisis en red de 402 ensayos.","url":"https://psqaldia.com/juegos/quien-soy","inLanguage":"es","genre":"Puzle","gamePlatform":"Web","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"},{"@type":"ListItem","position":3,"name":"¿Quién soy?","item":"https://psqaldia.com/juegos/quien-soy"}]}]}</script>
 <style>
 @font-face { font-family: "Chakra Petch"; font-weight: 500 600; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-600.woff2") format("woff2"); }
 @font-face { font-family: "Chakra Petch"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-700.woff2") format("woff2"); }
@@ -59,14 +59,23 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .who { font-family: var(--f-display); font-weight: 700; font-size: 1.5rem; letter-spacing: .02em; text-transform: uppercase; }
 .who.reveal { color: var(--accent); }
 .tag { font-family: var(--f-display); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-.rows { display: grid; gap: 9px; }
-.row { display: grid; grid-template-columns: 9.2rem 1fr; gap: 12px; align-items: center; }
-.row .lbl { font-size: .86rem; color: #c9d4e6; line-height: 1.2; }
-.row .lbl small { display: block; color: var(--muted); font-size: .72rem; font-family: var(--f-display); font-weight: 600; letter-spacing: .02em; }
-.row .lbl small.good { color: var(--good); } .row .lbl small.bad { color: var(--bad); } .row .lbl small.eff { color: var(--accent); }
-.track { height: 12px; border-radius: 99px; background: rgba(255, 255, 255, .07); overflow: hidden; position: relative; }
-.track i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; transition: width .5s cubic-bezier(.2, .8, .2, 1); }
-.track i.good { background: var(--good); } .track i.bad { background: var(--bad); } .track i.eff { background: var(--accent); }
+.rows { display: grid; gap: 8px; }
+.row { display: grid; grid-template-columns: 8.4rem 1fr 4.2rem; gap: 10px; align-items: center; }
+.row .lbl { font-size: .84rem; color: #c9d4e6; line-height: 1.2; }
+.row .lbl small { display: block; font-size: .7rem; font-family: var(--f-display); font-weight: 600; letter-spacing: .02em; }
+.good { color: var(--good); } .bad { color: var(--bad); } .same { color: #9fb0c8; } .na { color: var(--muted); }
+/* Mini forest plot: línea vertical = placebo; punto = estimación; trazo = IC 95 %; punto hueco = no se distingue del placebo */
+.fp { position: relative; height: 18px; }
+.fp::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%); background: rgba(255, 255, 255, .07); border-radius: 2px; }
+.fp .z { position: absolute; top: 1px; bottom: 1px; width: 1.5px; margin-left: -.75px; background: rgba(232, 238, 248, .5); }
+.fp .ci { position: absolute; top: 50%; height: 4px; transform: translateY(-50%); background: currentColor; opacity: .55; border-radius: 2px; min-width: 2px; }
+.fp .ci.cl::before, .fp .ci.cr::after { content: ""; position: absolute; top: 50%; transform: translateY(-50%); border: 4px solid transparent; }
+.fp .ci.cl::before { left: -6px; border-right-color: currentColor; }
+.fp .ci.cr::after { right: -6px; border-left-color: currentColor; }
+.fp .pt { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; transform: translate(-50%, -50%); background: currentColor; border: 2px solid currentColor; box-shadow: 0 0 0 2px var(--panel); }
+.fp .pt.hollow { background: var(--panel); }
+.row .val { text-align: right; font-family: var(--f-display); font-weight: 700; font-size: .86rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.row .val small { display: block; font-size: .62rem; font-weight: 600; color: var(--muted); letter-spacing: .02em; white-space: nowrap; }
 .legend { margin-top: 12px; font-size: .74rem; color: var(--muted); line-height: 1.4; }
 
 /* Opciones */
@@ -108,7 +117,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .badge[hidden] { display: none; }
 .fine { color: var(--muted); font-size: .74rem; margin: 0; line-height: 1.45; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-@media (max-width: 380px) { .row { grid-template-columns: 8.2rem 1fr; } .opt { font-size: .92rem; } }
+@media (max-width: 380px) { .row { grid-template-columns: 6.6rem 1fr 3.9rem; gap: 8px; } .opt { font-size: .92rem; } }
 @media (max-width: 380px) { .score small { display: none; } .stats { gap: 8px; } }
 /* Pantallas bajas (la mayoría de Android): que las opciones quepan sin desplazar */
 @media (max-height: 600px) { .legend { display: none; } .row .lbl { font-size: .78rem; } }
@@ -119,9 +128,9 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     .who { font-size: 1.3rem; }
     .rows { gap: 6px; }
     .row .lbl { font-size: .82rem; }
-    .row .lbl small { font-size: .66rem; }
+    .row .lbl small { font-size: .64rem; }
     .rows { gap: 5px; }
-    .track { height: 10px; }
+    .fp { height: 16px; }
     .legend { margin-top: 6px; font-size: .68rem; }
     .opt { min-height: 48px; padding: 11px 8px; }
     .helper { padding: 6px 11px; }
@@ -146,7 +155,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
             <div class="tag" id="round">Ronda 1</div>
         </div>
         <div class="rows" id="rows"></div>
-        <div class="legend">Debajo de cada rasgo, cómo está frente a placebo (IC 95 %). La barra lo compara con los demás fármacos del estudio, que no son todos: más larga, más eficacia o más efecto adverso.</div>
+        <div class="legend">Línea vertical: placebo. Punto: efecto; trazo: IC 95 %; hueco: no se distingue del placebo. A la derecha, más mejoría o más efecto adverso. Extrapiramidales: uso de antiparkinsonianos. DME: diferencia de medias estandarizada; RR: riesgo relativo.</div>
     </div>
 
     <div class="helpers">
@@ -168,11 +177,11 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
             <div class="eyebrow">psq al día · minijuego</div>
             <h1 class="title">¿Quién <em>soy?</em></h1>
         </div>
-        <p class="lead">Cada antipsicótico tiene su huella: eficacia, peso, extrapiramidales, sedación, prolactina y QTc. Mira el perfil y adivina de quién es. Tres fallos y se acaba.</p>
+        <p class="lead">Cada antipsicótico tiene su huella: eficacia, peso, extrapiramidales, acatisia, sedación, prolactina y QTc, con sus valores reales frente a placebo. Mira el perfil y adivina de quién es. Tres fallos y se acaba.</p>
         <button class="btn primary" type="button" id="btnPlay">Empezar</button>
         <div class="best">Récord <b id="bestMenu">—</b></div>
         <a class="fine" href="/juegos" style="color:var(--accent); text-decoration:none;">← Todos los juegos</a>
-        <p class="fine">Datos: figura 5 de Nature Reviews Disease Primers (2025) 11:83, adaptada de un metaanálisis en red (CC BY 4.0). El juego indica si cada efecto adverso se distingue del placebo y el puesto del fármaco entre los de la figura (no están todos los antipsicóticos); no muestra los valores. Los datos de la xanomelina-trospio son preliminares (metaanálisis aparte frente a placebo); la clozapina bajó la prolactina por debajo del placebo.</p>
+        <p class="fine">Datos: Huhn et al., <i>Lancet</i> 2019; 394: 939–51 (versión corregida), metaanálisis en red de 402 ensayos y 53 463 pacientes adultos con esquizofrenia en fase aguda, de 3 a 13 semanas (CC BY 4.0). 22 de sus 32 antipsicóticos. Son ensayos cortos: el aumento de peso a largo plazo suele ser mayor. La confianza en la evidencia fue a menudo baja o muy baja, sobre todo en los fármacos antiguos, con pocos pacientes. La xanomelina-trospio no está: es posterior al estudio.</p>
     </div>
 </div>
 
@@ -193,58 +202,69 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 
 <script>
 (function () {
+    'use strict';
     // ---------------- Datos ----------------
-    // Orden de cada columna de la figura 5, de mejor a peor (transcrito y revisado; ver la nota de la portada).
+    // Huhn M, et al. Comparative efficacy and tolerability of 32 oral antipsychotics for the acute treatment of adults
+    // with multi-episode schizophrenia: a systematic review and network meta-analysis. Lancet 2019; 394: 939–51
+    // (versión corregida, figuras 2 y 4). CC BY 4.0.
+    // Cada valor es [estimación, IC 95 % inferior, IC 95 % superior] frente a placebo; «n» son los pacientes con el fármaco
+    // en el análisis principal (cambio global de síntomas). Los valores se extrajeron del texto del artículo, no de la imagen.
+    const D = {"global":{"AMI":[-0.73,-0.89,-0.58],"RIS":[-0.55,-0.62,-0.48],"CLO":[-0.89,-1.08,-0.71],"OLA":[-0.56,-0.62,-0.5],"PAL":[-0.49,-0.59,-0.38],"CPZ":[-0.44,-0.57,-0.31],"HAL":[-0.47,-0.53,-0.41],"ASE":[-0.39,-0.52,-0.26],"PERPH":[-0.56,-0.75,-0.38],"ZIP":[-0.41,-0.52,-0.3],"SER":[-0.4,-0.54,-0.26],"QUE":[-0.42,-0.5,-0.33],"ARI":[-0.41,-0.5,-0.32],"LUR":[-0.36,-0.48,-0.24],"CAR":[-0.34,-0.49,-0.2],"ILO":[-0.33,-0.44,-0.22],"BRE":[-0.26,-0.39,-0.12],"ZUC":[-0.51,-0.75,-0.27],"SUL":[-0.48,-0.87,-0.09],"LEV":[-0.03,-0.59,0.52],"FLU":[-0.24,-0.62,0.13],"PIM":[-0.3,-0.75,0.14]},"negativos":{"AMI":[-0.5,-0.64,-0.37],"RIS":[-0.37,-0.43,-0.31],"CLO":[-0.62,-0.84,-0.39],"OLA":[-0.45,-0.51,-0.39],"PAL":[-0.37,-0.47,-0.28],"CPZ":[-0.35,-0.51,-0.18],"HAL":[-0.29,-0.35,-0.23],"ASE":[-0.42,-0.55,-0.29],"PERPH":[-0.42,-0.59,-0.25],"ZIP":[-0.33,-0.43,-0.23],"SER":[-0.37,-0.48,-0.25],"QUE":[-0.31,-0.38,-0.24],"ARI":[-0.33,-0.41,-0.24],"LUR":[-0.29,-0.39,-0.18],"CAR":[-0.32,-0.44,-0.2],"ILO":[-0.22,-0.33,-0.11],"BRE":[-0.25,-0.36,-0.14],"ZUC":[-0.17,-0.59,0.23],"LEV":[-0.09,-0.57,0.4]},"peso":{"AMI":[0.84,0.14,1.53],"RIS":[1.44,1.05,1.83],"CLO":[1.89,0.36,3.43],"OLA":[2.78,2.44,3.13],"PAL":[1.49,0.98,2.0],"CPZ":[2.37,1.43,3.32],"HAL":[0.54,0.15,0.95],"ASE":[1.21,0.47,1.93],"ZIP":[-0.16,-0.73,0.4],"SER":[2.47,1.68,3.26],"QUE":[1.94,1.42,2.45],"ARI":[0.48,-0.05,1.01],"LUR":[0.32,-0.22,0.87],"CAR":[0.73,-0.06,1.52],"ILO":[2.18,1.47,2.89],"BRE":[0.7,-0.05,1.45],"ZUC":[0.53,-5.54,6.71],"SUL":[2.04,-8.17,12.67],"LEV":[1.57,-1.58,4.74]},"eps":{"AMI":[1.46,0.96,2.04],"RIS":[1.8,1.4,2.38],"CLO":[0.46,0.19,0.88],"OLA":[1.02,0.79,1.3],"PAL":[1.61,1.17,2.1],"CPZ":[2.17,1.48,2.91],"HAL":[3.12,2.74,3.5],"ASE":[1.21,0.66,1.91],"PERPH":[2.64,1.32,3.92],"ZIP":[1.7,1.23,2.46],"SER":[0.92,0.64,1.41],"QUE":[1.05,0.78,1.48],"ARI":[1.32,0.9,1.82],"LUR":[1.94,1.42,2.48],"CAR":[2.21,1.18,3.37],"ILO":[1.53,0.69,2.63],"BRE":[1.6,0.8,2.63],"ZUC":[3.06,1.6,6.9],"SUL":[2.38,1.07,7.35],"LEV":[1.45,0.23,3.25],"FLU":[3.99,1.27,5.65],"PIM":[6.14,4.81,6.55]},"acatisia":{"AMI":[2.5,1.21,4.34],"RIS":[2.73,2.0,3.98],"CLO":[0.17,0.0,1.34],"OLA":[0.99,0.7,1.34],"PAL":[1.47,0.9,2.25],"CPZ":[2.58,1.3,4.3],"HAL":[3.76,2.99,4.61],"ASE":[2.38,1.25,3.9],"PERPH":[4.41,0.89,8.94],"ZIP":[2.11,1.49,3.15],"SER":[0.72,0.45,1.23],"QUE":[1.01,0.68,1.58],"ARI":[1.95,1.3,2.74],"LUR":[3.93,2.7,5.38],"CAR":[3.16,2.02,4.56],"ILO":[0.73,0.16,1.94],"BRE":[1.35,0.8,2.08],"ZUC":[23.81,7.41,142.86],"SUL":[4.95,1.91,18.18],"FLU":[12.16,1.47,14.44],"PIM":[9.43,2.16,13.19]},"sedacion":{"AMI":[1.56,0.91,2.23],"RIS":[2.03,1.67,2.51],"CLO":[3.02,2.52,3.37],"OLA":[2.17,1.93,2.4],"PAL":[1.33,1.0,1.68],"CPZ":[2.55,2.16,2.9],"HAL":[1.92,1.68,2.15],"ASE":[2.17,1.59,2.68],"PERPH":[1.11,0.59,1.69],"ZIP":[2.91,2.27,3.89],"SER":[1.38,0.98,2.07],"QUE":[3.27,2.61,4.22],"ARI":[1.46,1.11,1.83],"LUR":[1.75,1.38,2.11],"CAR":[1.12,0.7,1.59],"ILO":[1.36,0.84,1.93],"BRE":[1.64,0.91,2.38],"ZUC":[10.2,4.72,29.41],"SUL":[4.08,2.04,10.1],"LEV":[1.2,0.41,2.13],"FLU":[1.09,0.31,2.09],"PIM":[0.92,0.17,2.03]},"prolactina":{"AMI":[26.87,15.63,38.19],"RIS":[37.98,34.64,41.38],"CLO":[-77.05,-120.23,-33.54],"OLA":[4.47,1.6,7.38],"PAL":[48.51,43.52,53.51],"CPZ":[8.7,-8.16,25.75],"HAL":[18.49,15.6,21.39],"ASE":[5.05,0.01,10.14],"ZIP":[2.75,-2.14,7.66],"SER":[10.12,4.52,15.63],"QUE":[-1.17,-4.52,2.27],"ARI":[-7.1,-11.17,-3.09],"LUR":[7.04,3.03,11.05],"CAR":[-3.19,-9.21,2.8],"ILO":[4.79,-1.05,10.66],"BRE":[0.95,-3.64,5.62],"PIM":[-3.91,-89.56,82.66]},"qtc":{"AMI":[14.1,7.71,20.45],"RIS":[4.77,2.68,6.87],"OLA":[4.29,1.91,6.68],"PAL":[1.21,-2.89,5.31],"HAL":[1.69,-0.23,3.64],"ASE":[5.6,-0.94,12.0],"ZIP":[9.7,7.43,12.04],"SER":[23.9,20.56,27.33],"QUE":[3.43,0.94,6.0],"ARI":[-0.43,-3.62,2.77],"LUR":[-2.21,-4.54,0.15],"CAR":[-1.45,-6.2,3.2],"ILO":[6.93,4.49,9.36],"BRE":[-1.46,-4.71,1.81]},"n":{"AMI":705,"RIS":3827,"CLO":270,"OLA":5602,"PAL":1584,"CPZ":741,"HAL":4400,"ASE":1027,"PERPH":378,"ZIP":1228,"SER":868,"QUE":3002,"ARI":1926,"LUR":1363,"CAR":999,"ILO":2157,"BRE":1180,"ZUC":178,"SUL":66,"LEV":21,"FLU":53,"PIM":44}};
     const NAMES = {
-        AMI: 'Amisulprida', RIS: 'Risperidona', CLO: 'Clozapina', XAN: 'Xanomelina-trospio', OLA: 'Olanzapina', PAL: 'Paliperidona',
-        CPZ: 'Clorpromazina', HAL: 'Haloperidol', ASE: 'Asenapina', PER: 'Perfenazina', ZIP: 'Ziprasidona', SER: 'Sertindol',
-        QUE: 'Quetiapina', ARI: 'Aripiprazol', LUR: 'Lurasidona', CAR: 'Cariprazina', ILO: 'Iloperidona', BRE: 'Brexpiprazol',
+        AMI: 'Amisulprida', RIS: 'Risperidona', CLO: 'Clozapina', OLA: 'Olanzapina', PAL: 'Paliperidona', CPZ: 'Clorpromazina',
+        HAL: 'Haloperidol', ASE: 'Asenapina', PERPH: 'Perfenazina', ZIP: 'Ziprasidona', SER: 'Sertindol', QUE: 'Quetiapina',
+        ARI: 'Aripiprazol', LUR: 'Lurasidona', CAR: 'Cariprazina', ILO: 'Iloperidona', BRE: 'Brexpiprazol',
+        ZUC: 'Zuclopentixol', SUL: 'Sulpirida', LEV: 'Levomepromazina', FLU: 'Flufenazina', PIM: 'Pimozida',
     };
+    // Escala de cada fila: «lo» y «hi» son los extremos del eje (en eficacia el eje va al revés: a la derecha, más mejoría).
+    // Los extremos izquierdos están calculados para que el placebo caiga siempre al 25 % del ancho, en todas las filas.
+    // Los riesgos relativos (RR) se dibujan en escala logarítmica, como en el artículo.
     const DIMS = [
-        { key: 'pos', label: 'Síntomas positivos', sub: 'eficacia', eff: true, order: ['AMI', 'RIS', 'CLO', 'XAN', 'OLA', 'PAL', 'CPZ', 'HAL', 'ASE', 'PER', 'ZIP', 'SER', 'QUE', 'ARI', 'LUR', 'CAR', 'ILO', 'BRE'] },
-        { key: 'neg', label: 'Síntomas negativos', sub: 'eficacia', eff: true, order: ['CLO', 'AMI', 'OLA', 'ASE', 'PER', 'RIS', 'PAL', 'SER', 'XAN', 'CPZ', 'ZIP', 'ARI', 'CAR', 'QUE', 'LUR', 'HAL', 'BRE', 'ILO'] },
-        { key: 'peso', label: 'Aumento de peso', sub: 'efecto adverso', order: ['XAN', 'ZIP', 'LUR', 'ARI', 'HAL', 'BRE', 'CAR', 'AMI', 'ASE', 'RIS', 'PAL', 'CLO', 'QUE', 'ILO', 'CPZ', 'SER', 'OLA'] },
-        { key: 'eps', label: 'Extrapiramidales', sub: 'efecto adverso', order: ['CLO', 'SER', 'OLA', 'QUE', 'XAN', 'ASE', 'ARI', 'AMI', 'ILO', 'BRE', 'PAL', 'ZIP', 'RIS', 'LUR', 'CAR', 'CPZ', 'PER', 'HAL'] },
-        { key: 'sed', label: 'Sedación', sub: 'efecto adverso', order: ['PER', 'CAR', 'XAN', 'PAL', 'ILO', 'SER', 'ARI', 'AMI', 'BRE', 'LUR', 'RIS', 'HAL', 'ASE', 'OLA', 'ZIP', 'QUE', 'CPZ', 'CLO'] },
-        { key: 'prl', label: 'Prolactina', sub: 'efecto adverso', order: ['CLO', 'ARI', 'CAR', 'QUE', 'XAN', 'BRE', 'ZIP', 'OLA', 'ILO', 'ASE', 'CPZ', 'LUR', 'SER', 'HAL', 'AMI', 'RIS', 'PAL'] },
-        { key: 'qtc', label: 'QTc', sub: 'efecto adverso', order: ['LUR', 'XAN', 'BRE', 'CAR', 'ARI', 'PAL', 'HAL', 'QUE', 'OLA', 'RIS', 'ASE', 'ILO', 'ZIP', 'AMI', 'SER'] },
+        { key: 'global', label: 'Mejoría global', unit: 'DME', eff: true, lo: 0.37, hi: -1.1, dec: 2 },
+        { key: 'negativos', label: 'Síntomas negativos', unit: 'DME', eff: true, lo: 0.3, hi: -0.9, dec: 2 },
+        { key: 'peso', label: 'Peso', unit: 'kg', lo: -1.33, hi: 4, dec: 1, sign: true },
+        { key: 'eps', label: 'Extrapiramidales', unit: 'RR', log: true, lo: 0.5, hi: 8, dec: 2 },
+        { key: 'acatisia', label: 'Acatisia', unit: 'RR', log: true, lo: 0.397, hi: 16, dec: 2 },
+        { key: 'sedacion', label: 'Sedación', unit: 'RR', log: true, lo: 0.437, hi: 12, dec: 2 },
+        { key: 'prolactina', label: 'Prolactina', unit: 'ng/mL', lo: -18.33, hi: 55, dec: 1, sign: true },
+        { key: 'qtc', label: 'QTc', unit: 'ms', lo: -8.67, hi: 26, dec: 1, sign: true },
     ];
-    // Frente a placebo, según la figura: punto hueco = su intervalo de credibilidad del 95 % se solapa con el placebo
-    // («como placebo»); punto relleno = diferencia clara. Los que no aparecen en «open» ni en «below» están por encima del placebo.
-    // En eficacia todos los fármacos superan al placebo (todos los puntos están rellenos).
-    const PLACEBO = {
-        peso: { open: ['XAN', 'ZIP', 'LUR', 'ARI', 'BRE', 'CAR'] },
-        eps: { open: ['SER', 'OLA', 'QUE', 'XAN', 'ASE', 'ARI', 'AMI', 'ILO', 'BRE'], below: ['CLO'] },
-        sed: { open: ['PER', 'CAR', 'XAN', 'PAL', 'ILO', 'SER', 'AMI', 'BRE'] },
-        prl: { open: ['CAR', 'QUE', 'XAN', 'BRE', 'ZIP', 'ILO', 'CPZ'], below: ['CLO', 'ARI'] },
-        qtc: { open: ['LUR', 'XAN', 'BRE', 'CAR', 'ARI', 'PAL', 'HAL', 'ASE'] },
-    };
-    const vsPlacebo = (dim, code) => { const P = PLACEBO[dim.key]; if (!P) return 'better'; return (P.below || []).includes(code) ? 'below' : P.open.includes(code) ? 'same' : 'above'; };
     const FAMILY = {
-        AMI: 'Benzamida', RIS: 'Benzisoxazol', PAL: 'Benzisoxazol', ILO: 'Benzisoxazol', CLO: 'Dibenzodiazepina', OLA: 'Tienobenzodiazepina',
-        QUE: 'Dibenzotiazepina', ASE: 'Dibenzo-oxepino pirrol', CPZ: 'Fenotiazina', PER: 'Fenotiazina', HAL: 'Butirofenona',
-        ZIP: 'Benzisotiazol', LUR: 'Benzisotiazol', SER: 'Fenilindol', ARI: 'Quinolinona', BRE: 'Quinolinona', CAR: 'Fenilpiperazina con urea ciclohexílica',
-        XAN: 'Agonista muscarínico M1/M4 + antagonista periférico (sin familia química dopaminérgica)',
+        AMI: 'Benzamida', SUL: 'Benzamida', RIS: 'Benzisoxazol', PAL: 'Benzisoxazol', ILO: 'Benzisoxazol', CLO: 'Dibenzodiazepina',
+        OLA: 'Tienobenzodiazepina', QUE: 'Dibenzotiazepina', ASE: 'Dibenzo-oxepino pirrol', CPZ: 'Fenotiazina alifática', PERPH: 'Fenotiazina piperazínica',
+        LEV: 'Fenotiazina alifática', FLU: 'Fenotiazina piperazínica', HAL: 'Butirofenona', ZIP: 'Benzisotiazol', LUR: 'Benzisotiazol', SER: 'Fenilindol',
+        ARI: 'Quinolinona', BRE: 'Quinolinona', CAR: 'Fenilpiperazina con urea ciclohexílica', ZUC: 'Tioxanteno', PIM: 'Difenilbutilpiperidina',
     };
-    // versión corta para el desvelado (la larga queda para la pista)
-    const SHORT = { CAR: 'Fenilpiperazina', XAN: 'Agonista muscarínico M1/M4', ASE: 'Dibenzo-oxepino pirrol' };
-    const famShort = code => SHORT[code] || FAMILY[code];
-    // la xanomelina-trospio se describe por su mecanismo: no tiene una familia química comparable
-    const famLabel = code => code === 'XAN' ? 'Mecanismo' : 'Familia química';
-    const NOTES = { XAN: 'Datos preliminares, de un metaanálisis aparte frente a placebo.', CLO: 'En la figura original, la clozapina bajó la prolactina por debajo del placebo.' };
-    // perfil de cada fármaco: posición 0 (mejor) a 1 (peor) en cada rasgo; null si no hay dato
-    const DRUGS = Object.keys(NAMES).map(code => {
-        const prof = DIMS.map(d => { const i = d.order.indexOf(code); return i < 0 ? null : i / (d.order.length - 1); });
-        const rank = DIMS.map(d => { const i = d.order.indexOf(code); return i < 0 ? null : { pos: i + 1, of: d.order.length }; });
-        const plac = DIMS.map(d => d.order.includes(code) ? vsPlacebo(d, code) : null);
-        return { code, name: NAMES[code], prof, rank, plac };
-    });
-    // el tercio solo se usa para redactar la pista («de los que más…»), nunca se enseña como etiqueta
-    const level = v => v === null ? 'na' : v <= 1 / 3 ? 'good' : v < 2 / 3 ? 'mid' : 'bad';
-    const PLAC_TXT = { below: 'menos que placebo', same: 'como placebo', above: 'más que placebo', better: 'mejor que placebo' };
-    const PLAC_CLS = { below: 'good', same: 'good', above: 'bad', better: 'eff' };
-    function dist(a, b) { // parecido entre perfiles (solo rasgos con dato en ambos)
-        let s = 0, n = 0; a.prof.forEach((v, i) => { const w = b.prof[i]; if (v !== null && w !== null) { s += (v - w) ** 2; n++; } });
+    const SHORT = { CAR: 'Fenilpiperazina' };
+    // Advertencias que el propio artículo hace sobre algunos resultados
+    const NOTES = {
+        AMI: 'Ojo: no había ensayos de amisulprida frente a placebo; su comparación es enteramente indirecta.',
+        CLO: 'Ojo: los ensayos de clozapina suelen hacerse en resistentes, que aquí se excluyeron, así que hay pocos pacientes; su descenso de prolactina podría ser un artefacto de dos ensayos pequeños.',
+    };
+
+    const DRUGS = Object.keys(NAMES).map(code => ({ code, name: NAMES[code], vals: DIMS.map(d => D[d.key][code] || null), n: D.n[code] }));
+
+    // ---------------- Escalas y formato ----------------
+    const nul = dim => dim.log ? 1 : 0;
+    const pos = (dim, v) => { // 0 (izquierda) a 1 (derecha); fuera de escala se recorta
+        const t = dim.log ? (Math.log(v) - Math.log(dim.lo)) / (Math.log(dim.hi) - Math.log(dim.lo)) : (v - dim.lo) / (dim.hi - dim.lo);
+        return Math.max(0, Math.min(1, t));
+    };
+    const num = (v, dec, sign) => (v > 0 && sign ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(dec).replace('.', ',');
+    // frente a placebo: 'better' (mejor), 'worse' (peor) o 'same' (el IC 95 % incluye el valor del placebo)
+    function vsPlacebo(dim, val) {
+        const [, lo, hi] = val, z = nul(dim);
+        if (lo > z) return 'worse';
+        if (hi < z) return 'better';
+        return 'same';
+    }
+    const STATUS = {
+        eff: { better: 'mejor que placebo', same: 'como placebo', worse: 'peor que placebo' },
+        ae: { better: 'menos que placebo', same: 'como placebo', worse: 'más que placebo' },
+    };
+    function dist(a, b) { // parecido entre perfiles (solo filas con dato en ambos)
+        let s = 0, n = 0;
+        a.vals.forEach((v, i) => { const w = b.vals[i]; if (v && w) { s += (pos(DIMS[i], v[0]) - pos(DIMS[i], w[0])) ** 2; n++; } });
         return n ? Math.sqrt(s / n) : 1;
     }
 
@@ -264,41 +284,47 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + 0.02);
     }
 
+    // ---------------- Ficha: un mini forest plot por fila ----------------
+    function renderProfile(d, reveal) {
+        $('rows').innerHTML = DIMS.map((dim, i) => {
+            const v = d.vals[i];
+            if (!v) return `<div class="row"><div class="lbl">${dim.label}<small class="na">sin datos</small></div><div class="fp na" aria-hidden="true"></div><div class="val na">—</div></div>`;
+            const st = vsPlacebo(dim, v), cls = st === 'same' ? 'same' : st === 'better' ? 'good' : 'bad';
+            const txt = STATUS[dim.eff ? 'eff' : 'ae'][st];
+            const p = pos(dim, v[0]), a = pos(dim, v[1]), b = pos(dim, v[2]), z = pos(dim, nul(dim));
+            const left = Math.min(a, b), right = Math.max(a, b);
+            // si el intervalo se sale del eje, se marca con una flecha en ese extremo
+            const cutL = Math.min(a, b) <= 0, cutR = Math.max(a, b) >= 1;
+            const ci = `${num(v[1], dim.dec, dim.sign)} a ${num(v[2], dim.dec, dim.sign)}`;
+            const aria = `${dim.label}: ${num(v[0], dim.dec, dim.sign)} ${dim.unit} frente a placebo (IC 95 % ${ci}), ${txt}`;
+            return `<div class="row"><div class="lbl">${dim.label}<small class="${cls}">${txt}</small></div>
+                <div class="fp ${cls}" role="img" aria-label="${aria}"><span class="z" style="left:${z * 100}%"></span>
+                <span class="ci${cutL ? ' cl' : ''}${cutR ? ' cr' : ''}" style="left:${left * 100}%; width:${(right - left) * 100}%"></span>
+                <span class="pt${st === 'same' ? ' hollow' : ''}" style="left:${p * 100}%"></span></div>
+                <div class="val">${num(v[0], dim.dec, dim.sign)}<small>${reveal ? ci : dim.unit}</small></div></div>`;
+        }).join('');
+    }
+
     // ---------------- Estado ----------------
     const S = { lives: 3, score: 0, round: 0, streak: 0, half: 1, fam: 1, bag: [], cur: null, opts: [], done: false, missed: [] };
-
     function renderLives() {
         $('lives').innerHTML = Array.from({ length: 3 }, (_, i) => `<i class="life ${i < S.lives ? '' : 'off'}"></i>`).join('');
         $('lives').setAttribute('aria-label', S.lives === 1 ? '1 vida' : S.lives + ' vidas');
-    }
-    function renderProfile(d) {
-        $('rows').innerHTML = DIMS.map((dim, i) => {
-            const v = d.prof[i], pl = d.plac[i];
-            // Misma estructura en todas las filas:
-            //  · debajo del rasgo, cómo está frente a placebo (dato absoluto de la figura)
-            //  · la barra, su posición frente a los demás fármacos del estudio (más larga = más eficacia o más efecto)
-            if (v === null) return `<div class="row"><div class="lbl">${dim.label}<small class="na">sin datos</small></div>
-                <div class="track" aria-hidden="true"></div></div>`;
-            const w = 8 + (dim.eff ? 1 - v : v) * 92, cls = PLAC_CLS[pl];
-            return `<div class="row"><div class="lbl">${dim.label}<small class="${cls}">${PLAC_TXT[pl]}</small></div>
-                <div class="track" role="img" aria-label="${dim.eff ? 'eficacia' : 'efecto'} ${Math.round((dim.eff ? 1 - v : v) * 100)} sobre 100 frente a los demás"><i class="${cls}" style="width:${w}%"></i></div></div>`;
-        }).join('');
     }
     function pickRound() {
         if (!S.bag.length) S.bag = shuffle(DRUGS.slice());
         const cur = S.bag.pop();
         // cuanto más avanzas, más parecidos son los distractores
         const others = DRUGS.filter(x => x.code !== cur.code).sort((a, b) => dist(cur, a) - dist(cur, b));
-        const pool = S.round < 4 ? shuffle(others.slice()) : S.round < 9 ? others.slice(0, 9) : others.slice(0, 5);
-        const opts = shuffle([cur, ...shuffle(pool.slice()).slice(0, 3)]);
-        return { cur, opts };
+        const pool = S.round < 4 ? shuffle(others.slice()) : S.round < 9 ? others.slice(0, 10) : others.slice(0, 6);
+        return { cur, opts: shuffle([cur, ...shuffle(pool.slice()).slice(0, 3)]) };
     }
     function newRound() {
         S.round++; S.done = false;
         const r = pickRound(); S.cur = r.cur; S.opts = r.opts;
         $('who').textContent = '¿Quién soy?'; $('who').classList.remove('reveal');
         $('round').textContent = 'Ronda ' + S.round;
-        renderProfile(S.cur);
+        renderProfile(S.cur, false);
         $('opts').innerHTML = '';
         S.opts.forEach(o => {
             const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.textContent = o.name; b.dataset.code = o.code;
@@ -308,34 +334,59 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         $('btnHalf').disabled = S.half <= 0; $('btnFam').disabled = S.fam <= 0; $('famhint').hidden = true;
         $('streak').textContent = S.streak >= 3 ? `🔥 Racha de ${S.streak}` : '';
     }
-    // lo que más delata al fármaco: su rasgo más extremo
+    // Lo que más le delata: la fila en la que más se aparta del resto, contada con su valor real
+    const CLUE = {
+        global: ['mejora mucho los síntomas', 'mejora poco los síntomas'],
+        negativos: ['mejora mucho los síntomas negativos', 'mejora poco los síntomas negativos'],
+        peso: ['sube mucho de peso', 'apenas sube de peso'],
+        eps: ['da muchos extrapiramidales', 'casi no da extrapiramidales'],
+        acatisia: ['da mucha acatisia', 'casi no da acatisia'],
+        sedacion: ['seda mucho', 'apenas seda'],
+        prolactina: ['dispara la prolactina', 'no sube la prolactina'],
+        qtc: ['alarga el QTc', 'apenas toca el QTc'],
+    };
+    const STATS = DIMS.map((dim, i) => {
+        const xs = DRUGS.map(d => d.vals[i]).filter(Boolean).map(v => pos(dim, v[0]));
+        const m = xs.reduce((a, b) => a + b, 0) / xs.length, sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / xs.length) || 1;
+        return { m, sd };
+    });
     function clue(d) {
-        let bi = -1, bd = -1;
-        d.prof.forEach((v, i) => { if (v !== null && Math.abs(v - 0.5) > bd) { bd = Math.abs(v - 0.5); bi = i; } });
-        const dim = DIMS[bi], v = d.prof[bi], good = v <= 0.5;
-        if (level(v) === 'mid') return 'Le delata: un perfil intermedio en casi todo.';
-        const word = dim.eff ? (good ? 'de los más eficaces en ' : 'de los menos eficaces en ') + dim.label.toLowerCase()
-                             : (good ? 'de los que menos ' : 'de los que más ') + ({ peso: 'peso suben', eps: 'extrapiramidales dan', sed: 'sedan', prl: 'prolactina suben', qtc: 'alargan el QTc' })[dim.key];
-        return `Le delata: es ${word} entre los del estudio.`;
+        let bi = -1, bz = 0;
+        d.vals.forEach((v, i) => {
+            if (!v) return;
+            const z = (pos(DIMS[i], v[0]) - STATS[i].m) / STATS[i].sd;
+            if (z > 0 && vsPlacebo(DIMS[i], v) === 'same') return; // «mucho» solo si se distingue del placebo
+            if (Math.abs(z) > Math.abs(bz)) { bz = z; bi = i; }
+        });
+        if (bi < 0) return '';
+        const dim = DIMS[bi], v = d.vals[bi];
+        let what = CLUE[dim.key][bz > 0 ? 0 : 1];
+        if (dim.eff && vsPlacebo(dim, v) === 'same') what = `no se distingue del placebo en ${dim.label.toLowerCase()}`;
+        const val = ['RR', 'DME'].includes(dim.unit) ? `${dim.unit} ${num(v[0], dim.dec, dim.sign)}` : `${num(v[0], dim.dec, dim.sign)} ${dim.unit}`;
+        return `Le delata: ${what} (${val} frente a placebo).`;
     }
     function answer(code, btn) {
         if (S.done) return; S.done = true;
         const ok = code === S.cur.code;
         document.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.dataset.code === S.cur.code) b.classList.add('right'); });
         $('who').textContent = S.cur.name; $('who').classList.add('reveal');
-        const note = '<span class="fam">' + famShort(S.cur.code) + '</span>';
+        renderProfile(S.cur, true); // al desvelar, cada fila enseña su IC 95 %
+        const fam = '<span class="fam">' + (SHORT[S.cur.code] || FAMILY[S.cur.code]) + '</span>';
+        const few = S.cur.n < 100 ? `<span class="fam">Pocos datos: ${S.cur.n} pacientes en el análisis principal, de ahí los intervalos tan anchos.</span>` : '';
+        const note = NOTES[S.cur.code] ? `<span class="fam">${NOTES[S.cur.code]}</span>` : '';
         if (ok) {
             S.score++; S.streak++; $('score').textContent = S.score;
             beep(784, .08); beep(1175, .12, 'triangle', .05, .08);
-            $('feedback').innerHTML = `<b class="ok">¡Exacto!</b> ${clue(S.cur)}${note}`;
+            $('feedback').innerHTML = `<b class="ok">¡Exacto!</b> ${clue(S.cur)}${fam}${note}${few}`;
         } else {
             btn.classList.add('wrong'); S.lives--; S.streak = 0; renderLives(); S.missed.push(S.cur.name);
             beep(240, .16, 'square', .045); beep(180, .2, 'square', .045, .14);
             try { navigator.vibrate && navigator.vibrate(90); } catch (e) { /* no disponible */ }
-            $('feedback').innerHTML = `<b class="no">Era ${S.cur.name}.</b> ${clue(S.cur)}${note}`;
+            $('feedback').innerHTML = `<b class="no">Era ${S.cur.name}.</b> ${clue(S.cur)}${fam}${note}${few}`;
         }
         $('btnNext').textContent = S.lives > 0 ? 'Siguiente' : 'Ver resultado';
         $('btnNext').classList.add('show'); $('btnNext').focus({ preventScroll: true });
+        requestAnimationFrame(() => $('btnNext').scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
     }
     function useHalf() {
         if (S.done || S.half <= 0) return; S.half--; $('btnHalf').disabled = true;
@@ -344,9 +395,9 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     }
     function useFam() {
         if (S.done || S.fam <= 0) return; S.fam--; $('btnFam').disabled = true;
-        $('famhint').textContent = '🧪 ' + famLabel(S.cur.code) + ': ' + FAMILY[S.cur.code]; $('famhint').hidden = false;
+        $('famhint').textContent = '🧪 Familia química: ' + FAMILY[S.cur.code]; $('famhint').hidden = false;
     }
-    function next() { if (S.lives <= 0) return end(); newRound(); }
+    function next() { if (S.lives <= 0) return end(); window.scrollTo(0, 0); newRound(); }
     function start() {
         Object.assign(S, { lives: 3, score: 0, round: 0, streak: 0, half: 1, fam: 1, bag: [], missed: [] });
         $('score').textContent = 0; renderLives(); $('menu').hidden = true; $('over').hidden = true; newRound();
@@ -363,6 +414,9 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         if (navigator.share) { try { await navigator.share({ title: '¿Quién soy? Antipsicóticos', text, url }); } catch (e) { /* cancelado */ } return; }
         window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
     }
+    document.addEventListener('keydown', e => {
+        if ($('menu').hidden && $('over').hidden && !S.done && /^[1-4]$/.test(e.key)) { const b = document.querySelectorAll('.opt')[+e.key - 1]; if (b && !b.disabled) b.click(); }
+    });
     $('btnShare').addEventListener('click', compartir);
     $('btnPlay').addEventListener('click', start);
     $('btnAgain').addEventListener('click', start);
@@ -372,7 +426,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     function syncSound() { $('btnSound').textContent = muted ? '🔇' : '🔊'; $('btnSound').setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar'); }
     $('btnSound').addEventListener('click', () => { muted = !muted; store.set('psq_qs_muted', muted); syncSound(); if (!muted) beep(784, .08); });
     syncSound(); renderLives(); $('bestMenu').textContent = best || '—';
-    renderProfile(DRUGS.find(d => d.code === 'OLA')); // ficha de ejemplo detrás del menú
+    renderProfile(DRUGS.find(d => d.code === 'OLA'), false); // ficha de ejemplo detrás del menú
 })();
 </script>
 </body>
