@@ -60,13 +60,14 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .who.reveal { color: var(--accent); }
 .tag { font-family: var(--f-display); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .rows { display: grid; gap: 9px; }
-.row { display: grid; grid-template-columns: 7.6rem 1fr 4.2rem; gap: 10px; align-items: center; }
+.row { display: grid; grid-template-columns: 7.6rem 1fr 5.4rem; gap: 10px; align-items: center; }
 .row .lbl { font-size: .86rem; color: #c9d4e6; line-height: 1.2; }
 .row .lbl small { display: block; color: var(--muted); font-size: .72rem; }
 .track { height: 12px; border-radius: 99px; background: rgba(255, 255, 255, .07); overflow: hidden; position: relative; }
 .track i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; transition: width .5s cubic-bezier(.2, .8, .2, 1); }
-.row .lvl { font-family: var(--f-display); font-weight: 700; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; text-align: right; }
-.lvl.good { color: var(--good); } .lvl.mid { color: var(--mid); } .lvl.bad { color: var(--bad); } .lvl.na { color: var(--muted); }
+.row .lvl { font-family: var(--f-display); font-weight: 700; font-size: .74rem; letter-spacing: .04em; text-transform: uppercase; text-align: right; line-height: 1.15; }
+.lvl.good { color: var(--good); } .lvl.bad { color: var(--bad); } .lvl.eff { color: var(--accent); } .lvl.na { color: var(--muted); }
+.track i.good { background: var(--good); } .track i.bad { background: var(--bad); } .track i.eff { background: var(--accent); }
 .legend { margin-top: 12px; font-size: .74rem; color: var(--muted); line-height: 1.4; }
 
 /* Opciones */
@@ -108,9 +109,10 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .badge[hidden] { display: none; }
 .fine { color: var(--muted); font-size: .74rem; margin: 0; line-height: 1.45; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-@media (max-width: 380px) { .row { grid-template-columns: 6.4rem 1fr 3.8rem; } .opt { font-size: .92rem; } }
+@media (max-width: 380px) { .row { grid-template-columns: 6.2rem 1fr 4.9rem; } .opt { font-size: .92rem; } }
 @media (max-width: 380px) { .score small { display: none; } .stats { gap: 8px; } }
 /* Pantallas bajas (la mayoría de Android): que las opciones quepan sin desplazar */
+@media (max-height: 600px) { .row .lbl small { display: none; } .legend { display: none; } }
 @media (max-height: 780px) {
     .app { gap: 10px; }
     .card { padding: 12px 14px 10px; }
@@ -118,9 +120,10 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     .who { font-size: 1.3rem; }
     .rows { gap: 6px; }
     .row .lbl { font-size: .82rem; }
-    .row .lbl small { display: none; }
+    .row .lbl small { font-size: .66rem; }
+    .rows { gap: 5px; }
     .track { height: 10px; }
-    .legend { margin-top: 8px; font-size: .7rem; }
+    .legend { margin-top: 6px; font-size: .68rem; }
     .opt { min-height: 48px; padding: 11px 8px; }
     .helper { padding: 6px 11px; }
 }
@@ -144,7 +147,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
             <div class="tag" id="round">Ronda 1</div>
         </div>
         <div class="rows" id="rows"></div>
-        <div class="legend">Comparado con los demás antipsicóticos. La barra mide lo que dice la etiqueta; el color dice si es bueno (<span style="color:var(--good)">verde</span>), intermedio (<span style="color:var(--mid)">ámbar</span>) o malo (<span style="color:var(--bad)">rojo</span>).</div>
+        <div class="legend">Efectos adversos frente a placebo (IC 95 %). En eficacia, todos superan al placebo. La barra es su puesto entre los fármacos del estudio, que no son todos.</div>
     </div>
 
     <div class="helpers">
@@ -170,7 +173,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         <button class="btn primary" type="button" id="btnPlay">Empezar</button>
         <div class="best">Récord <b id="bestMenu">—</b></div>
         <a class="fine" href="/juegos" style="color:var(--accent); text-decoration:none;">← Todos los juegos</a>
-        <p class="fine">Datos: figura 5 de Nature Reviews Disease Primers (2025) 11:83, adaptada de un metaanálisis en red (CC BY 4.0). El juego muestra la posición de cada fármaco frente a los demás, no los valores. Los datos de la xanomelina-trospio son preliminares (metaanálisis aparte frente a placebo); la clozapina bajó la prolactina por debajo del placebo.</p>
+        <p class="fine">Datos: figura 5 de Nature Reviews Disease Primers (2025) 11:83, adaptada de un metaanálisis en red (CC BY 4.0). El juego indica si cada efecto adverso se distingue del placebo y el puesto del fármaco entre los de la figura (no están todos los antipsicóticos); no muestra los valores. Los datos de la xanomelina-trospio son preliminares (metaanálisis aparte frente a placebo); la clozapina bajó la prolactina por debajo del placebo.</p>
     </div>
 </div>
 
@@ -207,6 +210,17 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         { key: 'prl', label: 'Prolactina', sub: 'efecto adverso', order: ['CLO', 'ARI', 'CAR', 'QUE', 'XAN', 'BRE', 'ZIP', 'OLA', 'ILO', 'ASE', 'CPZ', 'LUR', 'SER', 'HAL', 'AMI', 'RIS', 'PAL'] },
         { key: 'qtc', label: 'QTc', sub: 'efecto adverso', order: ['LUR', 'XAN', 'BRE', 'CAR', 'ARI', 'PAL', 'HAL', 'QUE', 'OLA', 'RIS', 'ASE', 'ILO', 'ZIP', 'AMI', 'SER'] },
     ];
+    // Frente a placebo, según la figura: punto hueco = su intervalo de credibilidad del 95 % se solapa con el placebo
+    // («como placebo»); punto relleno = diferencia clara. Los que no aparecen en «open» ni en «below» están por encima del placebo.
+    // En eficacia todos los fármacos superan al placebo (todos los puntos están rellenos).
+    const PLACEBO = {
+        peso: { open: ['XAN', 'ZIP', 'LUR', 'ARI', 'BRE', 'CAR'] },
+        eps: { open: ['SER', 'OLA', 'QUE', 'XAN', 'ASE', 'ARI', 'AMI', 'ILO', 'BRE'], below: ['CLO'] },
+        sed: { open: ['PER', 'CAR', 'XAN', 'PAL', 'ILO', 'SER', 'AMI', 'BRE'] },
+        prl: { open: ['CAR', 'QUE', 'XAN', 'BRE', 'ZIP', 'ILO', 'CPZ'], below: ['CLO', 'ARI'] },
+        qtc: { open: ['LUR', 'XAN', 'BRE', 'CAR', 'ARI', 'PAL', 'HAL', 'ASE'] },
+    };
+    const vsPlacebo = (dim, code) => { const P = PLACEBO[dim.key]; if (!P) return 'better'; return (P.below || []).includes(code) ? 'below' : P.open.includes(code) ? 'same' : 'above'; };
     const FAMILY = {
         AMI: 'Benzamida', RIS: 'Benzisoxazol', PAL: 'Benzisoxazol', ILO: 'Benzisoxazol', CLO: 'Dibenzodiazepina', OLA: 'Tienobenzodiazepina',
         QUE: 'Dibenzotiazepina', ASE: 'Dibenzo-oxepino pirrol', CPZ: 'Fenotiazina', PER: 'Fenotiazina', HAL: 'Butirofenona',
@@ -222,12 +236,14 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     // perfil de cada fármaco: posición 0 (mejor) a 1 (peor) en cada rasgo; null si no hay dato
     const DRUGS = Object.keys(NAMES).map(code => {
         const prof = DIMS.map(d => { const i = d.order.indexOf(code); return i < 0 ? null : i / (d.order.length - 1); });
-        return { code, name: NAMES[code], prof };
+        const rank = DIMS.map(d => { const i = d.order.indexOf(code); return i < 0 ? null : { pos: i + 1, of: d.order.length }; });
+        const plac = DIMS.map(d => d.order.includes(code) ? vsPlacebo(d, code) : null);
+        return { code, name: NAMES[code], prof, rank, plac };
     });
+    // el tercio solo se usa para redactar la pista («de los que más…»), nunca se enseña como etiqueta
     const level = v => v === null ? 'na' : v <= 1 / 3 ? 'good' : v < 2 / 3 ? 'mid' : 'bad';
-    const LVL_TXT = { good: 'Bajo', mid: 'Medio', bad: 'Alto', na: 'Sin datos' };
-    const EFF_TXT = { good: 'Alta', mid: 'Media', bad: 'Baja', na: 'Sin datos' };
-    const COLOR = { good: 'var(--good)', mid: 'var(--mid)', bad: 'var(--bad)', na: 'transparent' };
+    const PLAC_TXT = { below: 'Menos que placebo', same: 'Como placebo', above: 'Más que placebo' };
+    const PLAC_CLS = { below: 'good', same: 'good', above: 'bad', better: 'eff' };
     function dist(a, b) { // parecido entre perfiles (solo rasgos con dato en ambos)
         let s = 0, n = 0; a.prof.forEach((v, i) => { const w = b.prof[i]; if (v !== null && w !== null) { s += (v - w) ** 2; n++; } });
         return n ? Math.sqrt(s / n) : 1;
@@ -258,14 +274,17 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     }
     function renderProfile(d) {
         $('rows').innerHTML = DIMS.map((dim, i) => {
-            const v = d.prof[i], lv = level(v);
-            const txt = dim.eff ? EFF_TXT[lv] : LVL_TXT[lv];
-            // la longitud mide lo que dice la etiqueta: en eficacia, más larga = más eficaz;
+            const v = d.prof[i], r = d.rank[i], pl = d.plac[i];
+            if (v === null) return `<div class="row"><div class="lbl">${dim.label}<small>${dim.sub}</small></div>
+                <div class="track" aria-hidden="true"></div><div class="lvl na">Sin datos</div></div>`;
+            // la barra es su puesto entre los fármacos de la figura: en eficacia, más larga = más eficaz;
             // en efectos adversos, más larga = más efecto
-            const w = v === null ? 0 : 12 + (dim.eff ? 1 - v : v) * 88;
-            return `<div class="row"><div class="lbl">${dim.label}<small>${dim.sub}</small></div>
-                <div class="track" aria-hidden="true"><i style="width:${w}%; background:${COLOR[lv]}"></i></div>
-                <div class="lvl ${lv}">${txt}</div></div>`;
+            const w = 12 + (dim.eff ? 1 - v : v) * 88, cls = PLAC_CLS[pl];
+            const txt = dim.eff ? `${r.pos}.º de ${r.of}` : PLAC_TXT[pl];
+            const sub = dim.eff ? 'eficacia' : `puesto ${r.pos} de ${r.of}`;
+            return `<div class="row"><div class="lbl">${dim.label}<small>${sub}</small></div>
+                <div class="track" aria-hidden="true"><i class="${cls}" style="width:${w}%"></i></div>
+                <div class="lvl ${cls}">${txt}</div></div>`;
         }).join('');
     }
     function pickRound() {
@@ -300,7 +319,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         if (level(v) === 'mid') return 'Le delata: un perfil intermedio en casi todo.';
         const word = dim.eff ? (good ? 'de los más eficaces en ' : 'de los menos eficaces en ') + dim.label.toLowerCase()
                              : (good ? 'de los que menos ' : 'de los que más ') + ({ peso: 'peso suben', eps: 'extrapiramidales dan', sed: 'sedan', prl: 'prolactina suben', qtc: 'alargan el QTc' })[dim.key];
-        return `Le delata: es ${word}.`;
+        return `Le delata: es ${word} entre los del estudio.`;
     }
     function answer(code, btn) {
         if (S.done) return; S.done = true;
