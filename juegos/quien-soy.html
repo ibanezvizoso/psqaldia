@@ -60,13 +60,12 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .who.reveal { color: var(--accent); }
 .tag { font-family: var(--f-display); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .rows { display: grid; gap: 9px; }
-.row { display: grid; grid-template-columns: 7.6rem 1fr 5.4rem; gap: 10px; align-items: center; }
+.row { display: grid; grid-template-columns: 9.2rem 1fr; gap: 12px; align-items: center; }
 .row .lbl { font-size: .86rem; color: #c9d4e6; line-height: 1.2; }
-.row .lbl small { display: block; color: var(--muted); font-size: .72rem; }
+.row .lbl small { display: block; color: var(--muted); font-size: .72rem; font-family: var(--f-display); font-weight: 600; letter-spacing: .02em; }
+.row .lbl small.good { color: var(--good); } .row .lbl small.bad { color: var(--bad); } .row .lbl small.eff { color: var(--accent); }
 .track { height: 12px; border-radius: 99px; background: rgba(255, 255, 255, .07); overflow: hidden; position: relative; }
 .track i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; transition: width .5s cubic-bezier(.2, .8, .2, 1); }
-.row .lvl { font-family: var(--f-display); font-weight: 700; font-size: .74rem; letter-spacing: .04em; text-transform: uppercase; text-align: right; line-height: 1.15; }
-.lvl.good { color: var(--good); } .lvl.bad { color: var(--bad); } .lvl.eff { color: var(--accent); } .lvl.na { color: var(--muted); }
 .track i.good { background: var(--good); } .track i.bad { background: var(--bad); } .track i.eff { background: var(--accent); }
 .legend { margin-top: 12px; font-size: .74rem; color: var(--muted); line-height: 1.4; }
 
@@ -109,10 +108,10 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .badge[hidden] { display: none; }
 .fine { color: var(--muted); font-size: .74rem; margin: 0; line-height: 1.45; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-@media (max-width: 380px) { .row { grid-template-columns: 6.2rem 1fr 4.9rem; } .opt { font-size: .92rem; } }
+@media (max-width: 380px) { .row { grid-template-columns: 8.2rem 1fr; } .opt { font-size: .92rem; } }
 @media (max-width: 380px) { .score small { display: none; } .stats { gap: 8px; } }
 /* Pantallas bajas (la mayoría de Android): que las opciones quepan sin desplazar */
-@media (max-height: 600px) { .row .lbl small { display: none; } .legend { display: none; } }
+@media (max-height: 600px) { .legend { display: none; } .row .lbl { font-size: .78rem; } }
 @media (max-height: 780px) {
     .app { gap: 10px; }
     .card { padding: 12px 14px 10px; }
@@ -147,7 +146,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
             <div class="tag" id="round">Ronda 1</div>
         </div>
         <div class="rows" id="rows"></div>
-        <div class="legend">Efectos adversos frente a placebo (IC 95 %). En eficacia, todos superan al placebo. La barra es su puesto entre los fármacos del estudio, que no son todos.</div>
+        <div class="legend">Debajo de cada rasgo, cómo está frente a placebo (IC 95 %). La barra lo compara con los demás fármacos del estudio, que no son todos: más larga, más eficacia o más efecto adverso.</div>
     </div>
 
     <div class="helpers">
@@ -242,7 +241,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     });
     // el tercio solo se usa para redactar la pista («de los que más…»), nunca se enseña como etiqueta
     const level = v => v === null ? 'na' : v <= 1 / 3 ? 'good' : v < 2 / 3 ? 'mid' : 'bad';
-    const PLAC_TXT = { below: 'Menos que placebo', same: 'Como placebo', above: 'Más que placebo' };
+    const PLAC_TXT = { below: 'menos que placebo', same: 'como placebo', above: 'más que placebo', better: 'mejor que placebo' };
     const PLAC_CLS = { below: 'good', same: 'good', above: 'bad', better: 'eff' };
     function dist(a, b) { // parecido entre perfiles (solo rasgos con dato en ambos)
         let s = 0, n = 0; a.prof.forEach((v, i) => { const w = b.prof[i]; if (v !== null && w !== null) { s += (v - w) ** 2; n++; } });
@@ -274,17 +273,15 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
     }
     function renderProfile(d) {
         $('rows').innerHTML = DIMS.map((dim, i) => {
-            const v = d.prof[i], r = d.rank[i], pl = d.plac[i];
-            if (v === null) return `<div class="row"><div class="lbl">${dim.label}<small>${dim.sub}</small></div>
-                <div class="track" aria-hidden="true"></div><div class="lvl na">Sin datos</div></div>`;
-            // la barra es su puesto entre los fármacos de la figura: en eficacia, más larga = más eficaz;
-            // en efectos adversos, más larga = más efecto
-            const w = 12 + (dim.eff ? 1 - v : v) * 88, cls = PLAC_CLS[pl];
-            const txt = dim.eff ? `${r.pos}.º de ${r.of}` : PLAC_TXT[pl];
-            const sub = dim.eff ? 'eficacia' : `puesto ${r.pos} de ${r.of}`;
-            return `<div class="row"><div class="lbl">${dim.label}<small>${sub}</small></div>
-                <div class="track" aria-hidden="true"><i class="${cls}" style="width:${w}%"></i></div>
-                <div class="lvl ${cls}">${txt}</div></div>`;
+            const v = d.prof[i], pl = d.plac[i];
+            // Misma estructura en todas las filas:
+            //  · debajo del rasgo, cómo está frente a placebo (dato absoluto de la figura)
+            //  · la barra, su posición frente a los demás fármacos del estudio (más larga = más eficacia o más efecto)
+            if (v === null) return `<div class="row"><div class="lbl">${dim.label}<small class="na">sin datos</small></div>
+                <div class="track" aria-hidden="true"></div></div>`;
+            const w = 8 + (dim.eff ? 1 - v : v) * 92, cls = PLAC_CLS[pl];
+            return `<div class="row"><div class="lbl">${dim.label}<small class="${cls}">${PLAC_TXT[pl]}</small></div>
+                <div class="track" role="img" aria-label="${dim.eff ? 'eficacia' : 'efecto'} ${Math.round((dim.eff ? 1 - v : v) * 100)} sobre 100 frente a los demás"><i class="${cls}" style="width:${w}%"></i></div></div>`;
         }).join('');
     }
     function pickRound() {
