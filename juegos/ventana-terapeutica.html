@@ -80,8 +80,8 @@ body {
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .effect {
     position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis;
-    padding: 6px 12px; border-radius: 99px; font-family: var(--f-display); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase;
-    background: rgba(12, 23, 38, .9); border: 1px solid currentColor; pointer-events: none; white-space: nowrap; transition: opacity .25s;
+    padding: 6px 12px; border-radius: 16px; font-family: var(--f-display); font-weight: 700; font-size: clamp(.78rem, 3.6vw, .9rem); letter-spacing: .05em; text-transform: uppercase;
+    background: rgba(12, 23, 38, .9); border: 1px solid currentColor; pointer-events: none; text-align: center; width: max-content; transition: opacity .25s;
 }
 .effect[hidden] { display: block; opacity: 0; }
 .pop {
@@ -297,7 +297,8 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     function showEffect(ev) {
         const el = $('effect');
         if (!ev) { el.hidden = true; return; }
-        el.textContent = `${ev.icon} ${ev.label} · ${ev.note} ${ev.up ? '↑' : '↓'}`;
+        // la flecha va delante: es lo que importa y nunca debe quedar cortada
+        el.textContent = `${ev.up ? '↑' : '↓'} ${ev.icon} ${ev.label} · ${ev.note}`;
         el.style.color = ev.up ? 'var(--toxic)' : 'var(--low)'; el.hidden = false;
     }
     function pop(text, color, sub) {
@@ -315,8 +316,9 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     }
     function strike(kind) {
         S.lives--; renderLives();
-        S.cause = S.lastEv && S.t - S.lastEv.t < 4.5 ? S.lastEv.ev : null;
         const high = kind === 'toxico';
+        // solo se culpa a la interacción si empujaba en la misma dirección que el fallo
+        S.cause = S.lastEv && S.t - S.lastEv.t < 4.5 && S.lastEv.ev.up === high ? S.lastEv.ev : null;
         pop(high ? '¡Tóxico!' : 'Recaída', high ? 'var(--toxic)' : 'var(--low)');
         sAlarm(high); buzz(high ? [60, 40, 60] : 120);
         if (!REDUCED) { S.shake = 0.45; S.flash = { c: high ? '255,77,109' : '244,184,96', a: 0.35 }; }
@@ -538,7 +540,8 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     // ---------------- Controles ----------------
     $('screen').addEventListener('pointerdown', e => { if (e.target.closest('.layer')) return; e.preventDefault(); dose(); });
     document.addEventListener('keydown', e => {
-        if (e.code === 'Space' || e.code === 'Enter') { if (S.screen === 'play') { e.preventDefault(); dose(); } }
+        // con un botón enfocado, Espacio/Intro son para ese botón (no dan además una dosis)
+        if (e.code === 'Space' || e.code === 'Enter') { if (S.screen === 'play' && !e.target.closest('button, a')) { e.preventDefault(); dose(); } }
         else if (e.key === 'Escape' || e.key === 'p') { S.screen === 'play' ? pause() : resume(); }
     });
     $('btnPlay').addEventListener('click', play);

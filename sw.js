@@ -1,5 +1,5 @@
 // Cambia este nombre cada vez que quieras forzar la renovación de la caché en los móviles
-const CACHE_NAME = 'psq-v18';
+const CACHE_NAME = 'psq-v19';
 
 // Páginas y recursos que se guardan al instalar la app.
 // IMPORTANTE: usar las URLs "limpias" (sin .html), que son las que se enlazan en la web.
@@ -24,6 +24,7 @@ const ASSETS = [
   '/juegos/ventana-terapeutica',
   '/juegos/cronologia',
   '/juegos/quien-soy',
+  '/juegos/mas-o-menos-genetico',
   '/js/tema.js',
   '/js/qr.js',
   '/js/vendor/qrcode.js',
