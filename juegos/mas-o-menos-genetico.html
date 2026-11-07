@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Más o menos: juego de genética psiquiátrica | psq al día</title>
+<title>Más o menos genético: juego sobre trastornos psiquiátricos | psq al día</title>
 <meta name="description" content="Minijuego de psq al día con datos reales de 14 trastornos psiquiátricos: ¿qué pareja comparte más genética, cuál es más heredable, a qué familia pertenece cada uno?">
-<link rel="canonical" href="https://psqaldia.com/juegos/mas-o-menos">
+<link rel="canonical" href="https://psqaldia.com/juegos/mas-o-menos-genetico">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0b0f1f">
 <link rel="icon" href="/Logo.png">
@@ -13,12 +13,12 @@
 <link rel="manifest" href="/manifest.json">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="psq al día">
-<meta property="og:title" content="Más o menos · minijuego de genética psiquiátrica">
+<meta property="og:title" content="Más o menos genético · minijuego de psq al día">
 <meta property="og:description" content="¿El TDAH comparte más genética con el TEPT o la esquizofrenia con el bipolar? Datos reales de 14 trastornos.">
-<meta property="og:url" content="https://psqaldia.com/juegos/mas-o-menos">
-<meta property="og:image" content="https://psqaldia.com/juegos/mas-o-menos.png">
+<meta property="og:url" content="https://psqaldia.com/juegos/mas-o-menos-genetico">
+<meta property="og:image" content="https://psqaldia.com/juegos/mas-o-menos-genetico.png">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoGame","name":"Más o menos: genética psiquiátrica","description":"Minijuego con datos reales del Psychiatric Genomics Consortium: correlaciones genéticas, heredabilidad, loci y factores de 14 trastornos psiquiátricos.","url":"https://psqaldia.com/juegos/mas-o-menos","inLanguage":"es","genre":"Puzle","gamePlatform":"Web","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"},{"@type":"ListItem","position":3,"name":"Más o menos","item":"https://psqaldia.com/juegos/mas-o-menos"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VideoGame","name":"Más o menos genético","description":"Minijuego con datos reales del Psychiatric Genomics Consortium: correlaciones genéticas, heredabilidad, loci y factores de 14 trastornos psiquiátricos.","url":"https://psqaldia.com/juegos/mas-o-menos-genetico","inLanguage":"es","genre":"Puzle","gamePlatform":"Web","isAccessibleForFree":true,"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Juegos","item":"https://psqaldia.com/juegos"},{"@type":"ListItem","position":3,"name":"Más o menos genético","item":"https://psqaldia.com/juegos/mas-o-menos-genetico"}]}]}</script>
 <style>
 @font-face { font-family: "Chakra Petch"; font-weight: 500 600; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-600.woff2") format("woff2"); }
 @font-face { font-family: "Chakra Petch"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/chakra-petch-700.woff2") format("woff2"); }
@@ -180,7 +180,7 @@ details.gloss summary { cursor: pointer; font-weight: 650; color: #c9d0e8; }
     <div class="inner">
         <div>
             <div class="eyebrow">psq al día · minijuego</div>
-            <h1 class="title">Más o <em>menos</em></h1>
+            <h1 class="title">Más o menos <em>genético</em></h1>
         </div>
         <p class="lead">Genética psiquiátrica con datos reales de 14 trastornos y más de un millón de casos. ¿Quién comparte más, quién es más heredable, a qué familia pertenece cada uno?</p>
         <button class="btn primary" type="button" id="btnPlay">Clásico<small>Preguntas variadas, cada vez más finas. Tres fallos y se acaba.</small></button>
@@ -512,8 +512,8 @@ details.gloss summary { cursor: pointer; font-weight: 650; color: #c9d0e8; }
     $('btnMenu').addEventListener('click', toMenu);
     async function compartir() {
         const modo = S.lastMode === 'rush' ? ' en contrarreloj' : '';
-        const text = `He hecho ${S.score} puntos${modo} en Más o menos, el juego de genética psiquiátrica. ¿Me superas?`, url = 'https://psqaldia.com/juegos/mas-o-menos';
-        if (navigator.share) { try { await navigator.share({ title: 'Más o menos · genética psiquiátrica', text, url }); } catch (e) { /* cancelado */ } return; }
+        const text = `He hecho ${S.score} puntos${modo} en Más o menos genético. ¿Me superas?`, url = 'https://psqaldia.com/juegos/mas-o-menos-genetico';
+        if (navigator.share) { try { await navigator.share({ title: 'Más o menos genético', text, url }); } catch (e) { /* cancelado */ } return; }
         window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
     }
     $('btnShare').addEventListener('click', compartir);

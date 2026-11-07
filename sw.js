@@ -24,7 +24,7 @@ const ASSETS = [
   '/juegos/ventana-terapeutica',
   '/juegos/cronologia',
   '/juegos/quien-soy',
-  '/juegos/mas-o-menos',
+  '/juegos/mas-o-menos-genetico',
   '/js/tema.js',
   '/js/qr.js',
   '/js/vendor/qrcode.js',
