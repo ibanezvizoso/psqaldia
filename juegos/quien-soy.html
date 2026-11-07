@@ -87,8 +87,15 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* Ranking: un punto por cada fármaco con datos en el estudio; el resaltado es el de la ficha */
 .rk { position: relative; height: 18px; }
-.rk i { position: absolute; top: 50%; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: rgba(232, 238, 248, .28); transform: translateY(-50%); }
-.rk i.me { width: 11px; height: 11px; margin-left: -5.5px; background: var(--accent); box-shadow: 0 0 0 2px var(--panel), 0 0 10px rgba(125, 211, 252, .5); z-index: 1; }
+.rk::before { content: ""; position: absolute; left: -4px; right: -4px; top: 50%; height: 8px; transform: translateY(-50%); border-radius: 99px;
+    background: linear-gradient(90deg, rgba(255, 107, 125, .30), rgba(244, 196, 96, .16) 50%, rgba(45, 212, 191, .30)); }
+.rk-head { display: grid; grid-template-columns: 8.4rem 1fr 4.2rem; gap: 10px; margin-bottom: -2px; }
+.rk-head span { grid-column: 2; display: flex; justify-content: space-between; font-family: var(--f-display); font-weight: 700; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; }
+.rk-head b { font-weight: 700; } .rk-head b:first-child { color: var(--bad); } .rk-head b:last-child { color: var(--good); }
+.row.solo .lbl { align-self: center; }
+.rk.na::before { background: rgba(255, 255, 255, .05); }
+.rk i { position: absolute; top: 50%; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: rgba(232, 238, 248, .45); transform: translateY(-50%); }
+.rk i.me { width: 13px; height: 13px; margin-left: -6.5px; background: #fff; box-shadow: 0 0 0 3px var(--panel), 0 0 12px rgba(255, 255, 255, .45); z-index: 1; }
 .eff2 { color: var(--accent); }
 
 /* Opciones */
@@ -130,7 +137,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
 .badge[hidden] { display: none; }
 .fine { color: var(--muted); font-size: .74rem; margin: 0; line-height: 1.45; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-@media (max-width: 380px) { .row { grid-template-columns: 6.6rem 1fr 3.9rem; gap: 8px; } .opt { font-size: .92rem; } }
+@media (max-width: 380px) { .row, .rk-head { grid-template-columns: 6.6rem 1fr 3.9rem; gap: 8px; } .opt { font-size: .92rem; } }
 @media (max-width: 380px) { .score small { display: none; } .stats { gap: 8px; } }
 /* Pantallas bajas (la mayoría de Android): que las opciones quepan sin desplazar */
 @media (max-height: 600px) { .row .lbl { font-size: .78rem; } }
@@ -176,7 +183,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         </div>
         <div class="rows" id="rows" role="tabpanel"></div>
         <details class="legend" id="howto"><summary>¿Cómo se lee?</summary>
-        <p id="legRank" hidden>Puesto en la clasificación SUCRA del artículo, entre todos sus antipsicóticos con datos (hasta 32). A la derecha, más eficacia o más efecto adverso. Entre puestos vecinos no suele haber diferencias significativas.</p>
+        <p id="legRank" hidden>Puesto en la clasificación SUCRA del artículo, entre todos sus antipsicóticos con datos (hasta 32). A la derecha, mejor puesto: más eficaz o con menos efecto adverso. Entre puestos vecinos no suele haber diferencias significativas.</p>
         <p id="legPbo">Línea vertical: placebo. Punto: efecto; trazo: IC 95 %; hueco: no se distingue del placebo. A la derecha, más mejoría o más efecto adverso. Extrapiramidales: uso de antiparkinsonianos. DME: diferencia de medias estandarizada.</p>
         </details>
     </div>
@@ -319,15 +326,16 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); -we
         if (shown) renderProfile(shown.d, shown.reveal);
     }
     function renderRank(d) {
-        $('rows').innerHTML = DIMS.map((dim, i) => {
+        // En el ranking todas las filas van en la misma dirección: a la derecha, mejor puesto
+        // (más eficaz o con menos efecto adverso). El 1.º del artículo queda en el extremo derecho.
+        const head = '<div class="rk-head" aria-hidden="true"><span><b>◂ peor</b><b>mejor ▸</b></span></div>';
+        $('rows').innerHTML = head + DIMS.map((dim, i) => {
             const r = RANK[dim.key][d.code], N = RANK.of[dim.key];
-            if (!r) return `<div class="row"><div class="lbl">${dim.label}<small class="na">sin datos</small></div><div class="rk" aria-hidden="true"></div><div class="val na">—</div></div>`;
-            // a la derecha, más eficacia o más efecto adverso (igual que en la otra vista)
-            const x = k => (dim.eff ? 1 - (k - 1) / (N - 1) : (k - 1) / (N - 1)) * 100;
+            if (!r) return `<div class="row solo"><div class="lbl">${dim.label}</div><div class="rk na" aria-hidden="true"></div><div class="val na">—</div></div>`;
+            const x = k => (N - k) / (N - 1) * 100;
             const dots = Array.from({ length: N }, (_, k) => k + 1 === r ? '' : `<i style="left:${x(k + 1)}%"></i>`).join('') + `<i class="me" style="left:${x(r)}%"></i>`;
-            const sub = dim.eff ? '1.º = el más eficaz' : '1.º = el que menos';
-            return `<div class="row"><div class="lbl">${dim.label}<small class="eff2">${sub}</small></div>
-                <div class="rk" role="img" aria-label="${dim.label}: puesto ${r} de ${N} en el estudio (${sub})">${dots}</div>
+            return `<div class="row solo"><div class="lbl">${dim.label}</div>
+                <div class="rk" role="img" aria-label="${dim.label}: puesto ${r} de ${N} en el estudio">${dots}</div>
                 <div class="val">${r}.º<small>de ${N}</small></div></div>`;
         }).join('');
     }
