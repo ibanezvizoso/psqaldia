@@ -11,6 +11,9 @@
         if (window.location.hostname.includes("pages.dev")) {
             window.location.replace("https://psqaldia.com" + window.location.pathname + window.location.search);
         }
+        // La app instalada se abre en /app (manifest.json → start_url) para poder contar esas aperturas en las estadísticas;
+        // la dirección se limpia al momento para que no se compartan enlaces con /app.
+        else if (window.location.pathname === '/app') history.replaceState(null, '', '/' + window.location.search);
     </script>
     <meta name="google-site-verification" content="BpHCi544mGO8TaOecGzGZpkH4wzaltHrdY4VqNhBEp4" />
     <title>psq al día · Herramientas y recursos de psiquiatría clínica</title>
