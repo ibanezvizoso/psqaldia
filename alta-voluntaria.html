@@ -247,7 +247,7 @@ async function redactarEvolutivo() {
 
     const datos = {
         // Nunca se envía el nombre del paciente al servicio de IA
-        nombre: "el paciente",
+        nombre: (generoSel && generoSel.value === 'M') ? "la paciente" : "el paciente",
         fecha: document.getElementById('fecha').value,
         hora: document.getElementById('hora').value,
         genero: generoSel ? generoSel.value : "N/S",

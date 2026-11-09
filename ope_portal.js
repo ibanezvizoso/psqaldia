@@ -3,6 +3,34 @@
  * Incluye: Psiquiatría, Anestesia, Pediatría, Ginecología y Parte Común.
  */
 
+/**
+ * Utilidades comunes de los bancos de la OPE (las usan todos los scripts de especialidad).
+ * - anulada(p): la hoja marca las preguntas anuladas con «NULA»; no puntúan ni como acierto ni como fallo.
+ * - limpiar(s): algunos textos traen notación LaTeX ($PaCO_2$, $\geq 60$…) que no se interpreta en la web.
+ */
+window.OPE = {
+    anulada(p) { return !/^[ABCD]$/.test(String(p && p.correcta || '').trim()); },
+    etiqueta(p) { return this.anulada(p) ? 'PREGUNTA ANULADA (no puntúa)' : 'CORRECTA: ' + p.correcta; },
+    limpiar(s) {
+        s = (s == null ? '' : String(s)).trim();
+        if (s.indexOf('$') < 0) return s;
+        return s.replace(/\$([^$]{1,60})\$/g, (_, m) => m
+            .replace(/\\text\{([^}]*)\}/g, '$1')
+            .replace(/\\(?:geq|ge)(?![a-z])/g, '≥')
+            .replace(/\\(?:leq|le)(?![a-z])/g, '≤')
+            .replace(/\\times(?![a-z])/g, '×')
+            .replace(/\\alpha(?![a-z])/g, 'α')
+            .replace(/\\beta(?![a-z])/g, 'β')
+            .replace(/_\{([^}]*)\}|_(\w)/g, (_, a, b) => '<sub>' + (a || b) + '</sub>')
+            .replace(/\^\{([^}]*)\}|\^(\S)/g, (_, a, b) => '<sup>' + (a || b) + '</sup>')
+            .replace(/\s+/g, ' ').trim());
+    },
+    resumen(aciertos, evaluadas, anuladas) {
+        return `Aciertos: ${aciertos} de ${evaluadas}` + (anuladas ? `\n(${anuladas} ${anuladas === 1 ? 'pregunta anulada no puntúa' : 'preguntas anuladas no puntúan'})` : '');
+    }
+};
+
+
 function abrirPortalExamenes() {
     const modalData = document.getElementById('modalData');
     const modal = document.getElementById('modal');
