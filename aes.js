@@ -33,6 +33,43 @@ const i18nAES = {
     }
 };
 
+// Avisos que dependen del fármaco y no de la hoja. Lamotrigina: ficha técnica (Lamictal).
+const AVISOS_AES = [
+    {
+        re: /lamotrig/i,
+        es: {
+            tit: 'Lamotrigina: esta pauta es SIN valproato y SIN inductores',
+            items: [
+                '<b>Con valproato</b> (duplica sus niveles): la mitad de dosis y de ritmo. 25 mg a días alternos las semanas 1-2, 25 mg/día las semanas 3-4, 50 mg/día la semana 5 y 100 mg/día la semana 6.',
+                '<b>Con inductores</b> (carbamazepina, fenitoína, fenobarbital, primidona, rifampicina): el doble. 50 mg/día las semanas 1-2, 100 mg/día las semanas 3-4 y después subir hasta 300-400 mg/día.',
+                'Los anticonceptivos con estrógenos bajan sus niveles.',
+                'Si se interrumpe más de 5 semividas (unos 5 días), hay que volver a titular desde el principio.',
+                'Ante cualquier exantema, suspender y valorar: el riesgo de Stevens-Johnson aumenta si se sube más rápido de lo indicado.'
+            ]
+        },
+        en: {
+            tit: 'Lamotrigine: this schedule is WITHOUT valproate and WITHOUT inducers',
+            items: [
+                '<b>With valproate</b> (doubles its levels): half the dose and pace. 25 mg every other day in weeks 1-2, 25 mg/day in weeks 3-4, 50 mg/day in week 5 and 100 mg/day in week 6.',
+                '<b>With inducers</b> (carbamazepine, phenytoin, phenobarbital, primidone, rifampicin): double. 50 mg/day in weeks 1-2, 100 mg/day in weeks 3-4, then up to 300-400 mg/day.',
+                'Oestrogen-containing contraceptives lower its levels.',
+                'If stopped for more than 5 half-lives (about 5 days), re-titrate from the start.',
+                'Stop and assess at any rash: the risk of Stevens-Johnson syndrome rises if titrated faster than recommended.'
+            ]
+        }
+    }
+];
+
+function avisoAES(nombre) {
+    const a = AVISOS_AES.find(x => x.re.test(nombre || ''));
+    return a ? a[window.aesLang] || a.es : null;
+}
+
+// Suma de una pauta "m-md-n"
+function totalPautaAES(pauta) {
+    return String(pauta || '').split('-').reduce((acc, d) => acc + (parseFloat(String(d).replace(',', '.')) || 0), 0);
+}
+
 window.iniciarAES = async function() {
     const container = document.getElementById('modalData');
     if (!container) return;
@@ -93,6 +130,9 @@ window.iniciarAES = async function() {
             .dose-val { display: block; font-weight: 900; font-size: 1rem; }
             .dose-lab { display: block; font-size: 0.6rem; text-transform: uppercase; font-weight: 700; opacity: 0.7; margin-bottom: 2px; }
             
+            .aes-aviso { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.5); border-left: 4px solid #f59e0b; border-radius: 1rem; padding: 1rem 1.1rem; margin-bottom: 1.2rem; font-size: 0.85rem; line-height: 1.5; color: var(--text-main); }
+            .aes-aviso b.tit { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; margin-bottom: 0.4rem; }
+            .aes-aviso ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
             .aes-disclaimer { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 2rem; line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 1rem; }
             
             .btn-copiar { 
@@ -155,6 +195,7 @@ function renderInterfazAES() {
             </div>
 
             <div id="aes-res-box" style="display:none;">
+                <div id="aes-res-aviso"></div>
                 <div id="aes-res-pauta" class="aes-timeline"></div>
                 <button class="btn-copiar" style="width:100%; margin-top:1rem;" onclick="copiarCalendarioAES()">
                     <i class="far fa-copy"></i> ${t.copy}
@@ -174,11 +215,12 @@ window.actualizarDosisObjetivo = function() {
 
     const row = window.dbAES[drugIdx];
     for (let i = 1; i < row.length; i += 3) {
-        const targetVal = row[i+1];
-        if (targetVal) {
+        // Se muestra la suma real de la pauta de ese paso (no la columna "target", que puede no coincidir)
+        const total = totalPautaAES(row[i]);
+        if (row[i] && total > 0) {
             let opt = document.createElement('option');
             opt.value = i;
-            opt.textContent = `${targetVal} mg/día`;
+            opt.textContent = `${total} mg/día`;
             targetSelect.appendChild(opt);
         }
     }
@@ -194,7 +236,9 @@ window.generarCalendarioAES = function() {
     if (!drugIdx || isNaN(targetIdx) || !startInput) return;
 
     const row = window.dbAES[drugIdx];
-    const startDate = new Date(startInput);
+    const startDate = new Date(startInput + 'T00:00:00');
+    const aviso = avisoAES(row[0]);
+    document.getElementById('aes-res-aviso').innerHTML = aviso ? `<div class="aes-aviso"><b class="tit">${aviso.tit}</b><ul>${aviso.items.map(x => `<li>${x}</li>`).join('')}</ul></div>` : '';
     let html = '';
     let diasAcumulados = 0;
     let stepCount = 1;
@@ -249,6 +293,8 @@ window.copiarCalendarioAES = function() {
     const t = i18nAES[window.aesLang];
     const drugName = window.dbAES[document.getElementById('aes_drug').value][0];
     let txt = `📋 TITULACIÓN: ${drugName.toUpperCase()}\n--------------------------\n`;
+    const aviso = avisoAES(drugName);
+    if (aviso) txt += `⚠️ ${aviso.tit}\n${aviso.items.map(x => '- ' + x.replace(/<[^>]+>/g, '')).join('\n')}\n--------------------------\n`;
     document.querySelectorAll('.aes-card').forEach(c => {
         const step = c.querySelector('.aes-step-badge').innerText;
         const fecha = c.querySelector('.aes-date-label').innerText;

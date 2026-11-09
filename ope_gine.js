@@ -89,10 +89,10 @@ async function iniciarExamenGine(año, esContinuacion = false) {
         preguntasGine = rows
             .filter(row => row[0] && row[0].trim() !== "")
             .map(row => ({
-                pregunta: (row[0] || "").trim(),
-                opciones: [(row[1] || "").trim(), (row[2] || "").trim(), (row[3] || "").trim(), (row[4] || "").trim()],
+                pregunta: OPE.limpiar(row[0]),
+                opciones: [row[1], row[2], row[3], row[4]].map(x => OPE.limpiar(x)),
                 correcta: (row[5] || "").trim().toUpperCase(),
-                explicacion: (row[6] || "No hay explicación disponible.").trim()
+                explicacion: OPE.limpiar(row[6]) || "No hay explicación disponible."
             }));
 
         if (año === 'snack') {
@@ -151,7 +151,7 @@ function generarBloqueGine(inicio, fin) {
             <div id="bloque-gine-${realIndex}" style="margin-bottom:2.5rem; padding:1.5rem; background:var(--bg); border-radius:1.5rem; border:1px solid var(--border);">
                 <p style="font-weight:700; font-size:1.05rem; line-height:1.4; margin-bottom:1.5rem; color:var(--text-main);">${p.pregunta}</p>
                 <div style="display:flex; flex-direction:column; gap:10px;">
-                    ${['A', 'B', 'C', 'D'].map((letra, idx) => `
+                    ${['A', 'B', 'C', 'D'].map((letra, idx) => !p.opciones[idx] ? '' : `
                         <label style="display:flex; align-items:center; gap:12px; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text-main);">
                             <input type="radio" name="preg-gine-${realIndex}" value="${letra}" ${resPrevia === letra ? 'checked' : ''} onclick="respuestasGine[${realIndex}] = '${letra}'; guardarEstadoGine();">
                             <span style="font-size:0.95rem;">${p.opciones[idx]}</span>
@@ -160,7 +160,7 @@ function generarBloqueGine(inicio, fin) {
                 </div>
                 <button onclick="revelarIndividualGine(${realIndex})" style="margin-top:1.5rem; background:none; border:none; color:var(--text-muted); font-weight:800; font-size:0.7rem; cursor:pointer;"><i class="fas fa-lightbulb"></i> Ver explicación</button>
                 <div id="feedback-gine-${realIndex}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid #db2777; border-radius:12px;">
-                    <strong style="color:#db2777; display:block; margin-bottom:8px;">CORRECTA: ${p.correcta}</strong>
+                    <strong style="color:#db2777; display:block; margin-bottom:8px;">${OPE.etiqueta(p)}</strong>
                     <div style="font-size:0.9rem; opacity:0.9;">${p.explicacion}</div>
                 </div>
             </div>`;
@@ -183,7 +183,7 @@ function revelarIndividualGine(idx) {
 }
 
 function corregirExamenGine() {
-    let aciertos = 0;
+    let aciertos = 0, evaluadas = 0, anuladas = 0;
     let fallosIndices = [];
 
     preguntasGine.forEach((p, idx) => {
@@ -191,6 +191,8 @@ function corregirExamenGine() {
         const feedback = document.getElementById(`feedback-gine-${idx}`);
         if (bloque && feedback) {
             feedback.style.display = 'block';
+            if (OPE.anulada(p)) { anuladas++; bloque.style.borderColor = '#94a3b8'; return; }
+            evaluadas++;
             if (respuestasGine[idx] === p.correcta) {
                 aciertos++;
                 bloque.style.borderColor = '#22c55e';
@@ -214,7 +216,7 @@ function corregirExamenGine() {
             </button>`;
     }
 
-    alert(`Examen finalizado.\nAciertos: ${aciertos} de ${preguntasGine.length}`);
+    alert(`Examen finalizado.\n${OPE.resumen(aciertos, evaluadas, anuladas)}`);
     document.querySelector('.modal-content').scrollTo({top: 0, behavior: 'smooth'});
 }
 

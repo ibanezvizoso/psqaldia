@@ -94,10 +94,10 @@ async function iniciarExamenComun(año, esContinuacion = false) {
         let todasLasPreguntas = data.values
             .filter(row => row[0] && row[0].trim() !== "")
             .map(row => ({
-                pregunta: (row[0] || "").trim(),
-                opciones: [(row[1] || "").trim(), (row[2] || "").trim(), (row[3] || "").trim(), (row[4] || "").trim()],
+                pregunta: OPE.limpiar(row[0]),
+                opciones: [row[1], row[2], row[3], row[4]].map(x => OPE.limpiar(x)),
                 correcta: (row[5] || "").trim().toUpperCase(),
-                explicacion: (row[6] || "No hay explicación disponible.").trim(),
+                explicacion: OPE.limpiar(row[6]) || "No hay explicación disponible.",
                 añoRow: (row[7] || "").trim() // Columna H (Año)
             }));
 
@@ -141,7 +141,7 @@ function renderizarExamenComun() {
             <div id="bloque-comun-${index}" style="margin-bottom:2rem; padding:1.5rem; background:var(--bg); border-radius:1.5rem; border:1px solid var(--border); transition: 0.3s;">
                 <p style="font-weight:700; font-size:1.05rem; line-height:1.4; margin-bottom:1.5rem; color:var(--text-main);">${p.pregunta}</p>
                 <div style="display:flex; flex-direction:column; gap:10px;">
-                    ${['A', 'B', 'C', 'D'].map((letra, i) => `
+                    ${['A', 'B', 'C', 'D'].map((letra, i) => !p.opciones[i] ? '' : `
                         <label style="display:flex; align-items:center; gap:12px; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text-main);">
                             <input type="radio" name="preg-comun-${index}" value="${letra}" ${resPrevia === letra ? 'checked' : ''} 
                                 onclick="respuestasComun[${index}] = '${letra}'; guardarEstadoComun();">
@@ -153,7 +153,7 @@ function renderizarExamenComun() {
                     <i class="fas fa-lightbulb"></i> Ver explicación
                 </button>
                 <div id="feedback-comun-${index}" style="display:none; margin-top:1.2rem; padding:1.2rem; background:var(--card); border-left:4px solid var(--primary); border-radius:12px; font-size:0.9rem; color:var(--text-main);">
-                    <strong style="color:var(--primary); display:block; margin-bottom:8px; font-weight:900;">CORRECTA: ${p.correcta}</strong>
+                    <strong style="color:var(--primary); display:block; margin-bottom:8px; font-weight:900;">${OPE.etiqueta(p)}</strong>
                     <div style="opacity:0.9;">${p.explicacion}</div>
                 </div>
             </div>`;
@@ -176,7 +176,7 @@ function revelarIndividualComun(idx) {
 }
 
 function corregirExamenComun() {
-    let aciertos = 0;
+    let aciertos = 0, evaluadas = 0, anuladas = 0;
     let fallosIndices = [];
 
     preguntasComun.forEach((p, idx) => {
@@ -184,6 +184,8 @@ function corregirExamenComun() {
         const feedback = document.getElementById(`feedback-comun-${idx}`);
         feedback.style.display = 'block';
 
+        if (OPE.anulada(p)) { anuladas++; bloque.style.borderColor = '#94a3b8'; return; }
+        evaluadas++;
         if (respuestasComun[idx] === p.correcta) {
             aciertos++;
             bloque.style.borderColor = '#22c55e';
@@ -209,7 +211,7 @@ function corregirExamenComun() {
             </button>`;
     }
     
-    alert(`Has completado el examen común.\n\nAciertos: ${aciertos} de ${preguntasComun.length}`);
+    alert(`Has completado el examen común.\n\n${OPE.resumen(aciertos, evaluadas, anuladas)}`);
     document.querySelector('.modal-content').scrollTo({top: 0, behavior: 'smooth'});
 }
 

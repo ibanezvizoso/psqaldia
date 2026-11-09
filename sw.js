@@ -1,5 +1,5 @@
 // Cambia este nombre cada vez que quieras forzar la renovación de la caché en los móviles
-const CACHE_NAME = 'psq-v20';
+const CACHE_NAME = 'psq-v21';
 
 // Páginas y recursos que se guardan al instalar la app.
 // IMPORTANTE: usar las URLs "limpias" (sin .html), que son las que se enlazan en la web.
