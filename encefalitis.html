@@ -161,20 +161,20 @@
         <section class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-calculator"></i></div>
-                <h3>Análisis Vectorial</h3>
-                <p>Implementa un algoritmo matemático (elaborado por IA) de Similitud de Coseno ponderado por variables epidemiológicas (edad, sexo).</p>
+                <h3>Dos pasos, como el Seminar</h3>
+                <p>Primero, las señales que orientan a infecciosa o autoinmune (velocidad de inicio, fiebre, RM, LCR, PCR). Después, qué causa encaja mejor dentro de cada grupo.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-vials"></i></div>
-                <h3>Diferencial Inmune vs Viral</h3>
-                <p>Estratifica de manera inmediata la afinidad fenotípica del paciente frente a perfiles tanto infecciosos como autoinmunes.</p>
+                <h3>Cada grupo con sus datos</h3>
+                <p>Los cinco virus se comparan entre sí con la figura 2C y los cuatro autoanticuerpos con la 3B, por similitud de coseno ajustada por edad y sexo. Las pruebas no realizadas no cuentan.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-bell"></i></div>
                 <h3>Alertas</h3>
-                <p>Inyección dinámica de alertas críticas automáticas según edad, mimetismos post-virales y cribados oncológicos recomendados.</p>
+                <p>Aciclovir empírico y estudio en paralelo siempre visibles, y avisos según el perfil: cribado tumoral, RM normal, LCR sin células, patrón de GAD65, VZV con PCR negativa.</p>
             </div>
         </section>
 
@@ -251,7 +251,7 @@
                     if (ejecutarInicializacion() || intentos > 60) {
                         clearInterval(intervalo);
                         if (intentos > 60 && typeof window.iniciarEncephMatch !== 'function') {
-                            console.error("Error: No se detectó el script /encefalitis.js tras 3 segundos.");
+                            console.error("Error: no se cargó /enceph-match-predictor.js tras 3 segundos.");
                         }
                     }
                 }, 50);
