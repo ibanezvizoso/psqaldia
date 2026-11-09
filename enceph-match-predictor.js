@@ -32,7 +32,6 @@
  *     (no marcarlo no garantiza que falte) y ×0,3 si es una prueba explícitamente normal.
  *  7. Aviso permanente: punción lumbar urgente, aciclovir IV empírico y estudio en paralelo de
  *     causas infecciosas y autoinmunes (Fig. 2A).
- *  8. Si la hoja no responde, se usan los datos de respaldo de este archivo (misma hoja, nov 2026).
  * Se mantienen de la v3.2: similitud de coseno, factor de sexo amortiguado, refuerzos de FBDS
  * (Anti-LGI1 ×2,5) y de nervio periférico (Anti-CASPR2 ×2,0), descripciones y alertas.
  * GAD65 sigue fuera del ranking (el Seminar no da una fila cuantitativa), pero su patrón de
@@ -51,18 +50,6 @@
         TRAST_MOVIMIENTO: 19, ALT_SUENO: 20, HIPONATREMIA: 21, RMN_PATOLOGICA: 22,
         LCR_PATOLOGICO: 23, EEG_PATOLOGICO: 24,
     };
-    // Respaldo: copia de la hoja (nov 2026). Solo se usa si el Worker no responde.
-    const RESPALDO = [
-        ['JEV', 'Infeccioso', '44', '53', '', '96', '48', '51', '83', '59', '31', '8', '', '', '0', '', '', '', '', '', '', '', '90', '75', ''],
-        ['HSV-1', 'Infeccioso', '56', '51', '', '80', '50', '30', '8', '63', '38', '31', '23', '2', '0', '', '', '', '', '', '', '', '94', '95', '91'],
-        ['WNV', 'Infeccioso', '60', '70', '', '81', '47', '35', '19', '51', '8', '20', '48', '19', '0', '', '', '', '', '', '', '', '55', '100', ''],
-        ['Enterovirus', 'Infeccioso', '2', '55', '', '85', '33', '20', '44', '71', '3', '18', '37', '25', '0', '', '', '', '', '', '', '', '48', '75', ''],
-        ['VZV', 'Infeccioso', '57', '61', '', '57', '56', '56', '3', '38', '16', '20', '34', '61', '0', '', '', '', '', '', '', '', '16', '94', '51'],
-        ['Anti-LGI1', 'Autoinmune', '64', '62', '79', '', '', '', '', '49', '86', '', '', '', '54', '87', '19', '14', '5', '43', '36', '53', '60', '14', '51'],
-        ['Anti-CASPR2', 'Autoinmune', '65', '82', '80', '', '', '', '', '36', '57', '', '', '', '0', '62', '54', '44', '5', '30', '50', '9', '35', '24', '46'],
-        ['Anti-NMDAR', 'Autoinmune', '24', '34', '19', '', '', '', '', '84', '71', '', '', '', '0', '63', '', '54', '48', '51', '34', '8', '23', '72', '84'],
-        ['Anti-MOG', 'Autoinmune', '21', '59', '6', '', '', '', '', '37', '75', '', '', '', '0', '68', '', '5', '64', '32', '', '8', '20', '83', '43'],
-    ];
 
     // Síntomas que el clínico puede marcar. «mental» y «psiq» leen la misma columna de la hoja
     // (Alt_Mental_Psq), que en la Fig. 2C es «alteración del estado mental» y en la 3B «psiquiátrico».
@@ -122,7 +109,7 @@
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
     // ---------------- Arranque ----------------
-    let FILAS = [], FUENTE = 'hoja';
+    let FILAS = [];
     window.iniciarEncephMatch = async function () {
         const box = $('modalData'); if (!box) return;
         box.innerHTML = '<div class="em-loading">Sincronizando base de datos clínica…</div>';
@@ -131,8 +118,11 @@
             const res = await fetch('https://psqaldia.com/?sheet=encefalitisDD');
             const data = await res.json();
             if (res.ok && data && Array.isArray(data.values) && data.values.length) rows = data.values;
-        } catch (e) { console.warn('Enceph-Match: hoja no disponible, se usan los datos de respaldo', e); }
-        if (!rows) { rows = RESPALDO; FUENTE = 'respaldo'; }
+        } catch (e) { console.error('Enceph-Match: no se pudo leer la hoja encefalitisDD', e); }
+        if (!rows) {
+            box.innerHTML = '<div class="em-loading" style="color:#dc2626"><i class="fas fa-exclamation-triangle" style="font-size:1.6rem"></i><br><b>Error de comunicación</b><br>No se pudieron cargar los datos de la herramienta. Inténtalo de nuevo en unos segundos.</div>';
+            return;
+        }
         const cab = String((rows[0] || [])[0] || '').toUpperCase().trim();
         FILAS = rows.slice(cab === 'ETIOLOGIA' || cab === 'ETIOLOGÍA' ? 1 : 0).filter(r => r && r[COL.ETIOLOGIA]);
         pintarUI();
@@ -228,7 +218,7 @@
 
             <div class="em-res" id="em-res" aria-live="polite"></div>
 
-            <div class="em-note"><b>Nota metodológica:</b> el paso 1 recoge las señales que el Seminar usa para distinguir encefalitis infecciosa y autoinmune (figura 1 y texto); no es una probabilidad. El paso 2 compara el perfil del paciente, por similitud de coseno ajustada por edad y sexo, con los porcentajes de las figuras 2C (cinco virus más frecuentes) y 3B (cuatro autoanticuerpos más frecuentes), cada grupo por separado: los porcentajes son relativos dentro de cada grupo y suman 100 aunque la causa real no esté en la lista. No sustituye al juicio clínico ni a la confirmación por PCR y autoanticuerpos en suero y LCR.${FUENTE === 'respaldo' ? ' <b>Aviso:</b> no se pudo leer la hoja de datos y se están usando los datos de respaldo.' : ''}</div>
+            <div class="em-note"><b>Nota metodológica:</b> el paso 1 recoge las señales que el Seminar usa para distinguir encefalitis infecciosa y autoinmune (figura 1 y texto); no es una probabilidad. El paso 2 compara el perfil del paciente, por similitud de coseno ajustada por edad y sexo, con los porcentajes de las figuras 2C (cinco virus más frecuentes) y 3B (cuatro autoanticuerpos más frecuentes), cada grupo por separado: los porcentajes son relativos dentro de cada grupo y suman 100 aunque la causa real no esté en la lista. No sustituye al juicio clínico ni a la confirmación por PCR y autoanticuerpos en suero y LCR.</div>
         </div>`;
         document.querySelectorAll('#modalData .em-seg').forEach(g => g.addEventListener('click', e => {
             const b = e.target.closest('button'); if (!b) return;
@@ -383,5 +373,5 @@
     };
 
     // Para pruebas automáticas
-    window.__encephMatch = { ranking, señales, set filas(v) { FILAS = v; }, RESPALDO };
+    window.__encephMatch = { ranking, señales, set filas(v) { FILAS = v; } };
 })();
