@@ -127,7 +127,7 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
         es: {
             noData: "Sin pauta específica.",
             suspend: "Suspender",
-            reduce: "Reducir",
+            reduce: "Reducir a",
             startTarget: "Iniciar dosis objetivo de",
             startDirect: "Iniciar directamente con la dosis objetivo de",
             titrate: "Desde este día, titular progresivamente hasta alcanzar",
@@ -157,43 +157,33 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
     const t = isEn ? i18n.en : i18n.es;
     if (!raw || raw.trim() === '') return `<span style="color:var(--text-muted);">${t.noData}</span>`;
     
-    // 1) Se resuelven las condiciones IF_ACTUAL_ según la dosis actual.
-    // 2) Los pasos se ordenan por día; dentro del mismo día se respeta el orden de la hoja.
-    const pasos = [];
-    raw.split('|').map(b => b.trim()).filter(Boolean).forEach((bloque, orden) => {
-        let texto = bloque;
-        if (texto.startsWith('IF_ACTUAL_')) {
-            const m = texto.match(/^IF_ACTUAL_(<=|>=|<|>|=)\s*([\d.,]+)\s*(?:mg)?\s*:(.*)$/i);
-            if (!m) return;
-            const lim = parseFloat(m[2].replace(',', '.'));
-            const cumple = { '<': dosisActual < lim, '<=': dosisActual <= lim, '>': dosisActual > lim, '>=': dosisActual >= lim, '=': dosisActual === lim }[m[1]];
-            if (!cumple) return;
-            texto = m[3];
-        }
-        const p = texto.split(':').map(s => s.trim());
-        if (p.length < 3) return;
-        const dia = parseFloat(p[0].replace(/^D/i, ''));
-        pasos.push({ p, dia: isNaN(dia) ? 0 : dia, orden });
-    });
-    pasos.sort((a, b) => a.dia - b.dia || a.orden - b.orden);
-
+    const bloques = raw.split('|').map(b => b.trim()).filter(Boolean);
     let html = '';
     let objetivoAlcanzado = false;
-    let nuevoIniciado = false;
-    let actualSuspendido = false;
+    let nuevoIniciado = false; 
 
-    pasos.forEach(({ p }) => {
-        const diaNum = p[0].replace(/^D/i, '');
+    bloques.forEach(bloque => {
+        if (objetivoAlcanzado) return;
+
+        let texto = bloque;
+        if (texto.startsWith('IF_ACTUAL_')) {
+            const match = texto.match(/IF_ACTUAL_([<>]=?)(\d+)mg?:(.*)/);
+            if (match) {
+                const cumple = eval(`${dosisActual} ${match[1] === '=' ? '==' : match[1]} ${match[2]}`);
+                if (!cumple) return;
+                texto = match[3];
+            }
+        }
+
+        const p = texto.split(':').map(s => s.trim());
+        if (p.length < 3) return;
+        
+        const diaNum = p[0].replace('D', '');
         const sujeto = p[1], accion = p[2], valor = p.slice(3).join(':');
-        // Alcanzada la dosis objetivo del fármaco nuevo, se omiten sus pasos posteriores,
-        // pero NO los del fármaco actual: su reducción y suspensión deben seguir apareciendo.
-        if (objetivoAlcanzado && sujeto !== 'ACTUAL') return;
-        // Una vez suspendido el fármaco actual no tiene sentido ningún paso más sobre él.
-        if (actualSuspendido && sujeto === 'ACTUAL') return;
         let desc = '';
 
         if (sujeto === 'ACTUAL') {
-            if (accion === 'STOP') { desc = `${t.suspend} ${nombreOrig}.`; actualSuspendido = true; }
+            if (accion === 'STOP') desc = `${t.suspend} ${nombreOrig}.`;
             else if (accion === 'REDUCIR') {
                 const dosisCalc = (dosisActual * parseFloat(valor) / 100).toFixed(1);
                 desc = isEn ? `${t.reduce} ${nombreOrig} to <b>${dosisCalc} mg</b>.` : `${t.reduce} ${nombreOrig} a <b>${dosisCalc} mg</b>.`;
