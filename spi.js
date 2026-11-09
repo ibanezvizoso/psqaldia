@@ -180,11 +180,13 @@ window.iniciarSPI = async function() {
         const json = await response.json();
         const rows = json.values ? json.values : json;
 
-        window.ToolSPI.db = rows.slice(1).filter(row => row[0] && row[1]).map((row, index) => ({
+        // El Worker ya entrega la hoja desde la fila 2; solo se descarta la cabecera si llegara incluida
+        const datos = rows.filter(row => row[0] && row[1] && !/^categor/i.test(String(row[0]).trim()));
+        window.ToolSPI.db = datos.map((row, index) => ({
             id: index,
             color: row[6] || '#e0e0e0',
-            es: { cat: row[0], nombre: row[1], desc: row[2] },
-            en: { cat: row[3] || 'Misc', nombre: row[4], desc: row[5] }
+            es: { cat: String(row[0]).trim(), nombre: String(row[1]).trim(), desc: row[2] },
+            en: { cat: String(row[3] || 'Misc').trim(), nombre: String(row[4] || '').trim(), desc: row[5] }
         }));
 
         await spi_cargarChartJS();
