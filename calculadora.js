@@ -44,6 +44,16 @@ window.iniciarInterfazCalculadora = async function() {
             .step-txt { font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
             .btn-copiar { margin-top: 1rem; width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.5); border: 1px solid var(--border); border-radius: 1rem; cursor: pointer; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-main); transition: all 0.2s; }
             .btn-copiar:hover { background: white; border-color: var(--primary); }
+
+            /* Vistas de la pauta: por días o por fármaco */
+            .vista-toggle { display: flex; background: var(--border); border-radius: 0.8rem; padding: 2px; gap: 2px; margin-bottom: 1.2rem; }
+            .vista-btn { flex: 1; padding: 6px 10px; border-radius: 0.6rem; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 800; background: transparent; color: var(--text-muted); transition: all 0.2s; }
+            .vista-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .pauta-vistas[data-vista="dias"] .vista-farmaco, .pauta-vistas[data-vista="farmaco"] .vista-dias { display: none; }
+            .grupo-farm { margin-bottom: 1.4rem; }
+            .grupo-farm-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 0.8rem; }
+            .grupo-farm-head .tag-farm { margin-bottom: 0; }
+            .grupo-farm-head small { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
         `;
         document.head.appendChild(styleTag);
     }
@@ -136,7 +146,11 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
             increase: "Subir",
             copy: "COPIAR PAUTA",
             copied: "¡COPIADO!",
-            strategy: "Estrategia Sugerida"
+            strategy: "Estrategia Sugerida",
+            byDay: "Por días",
+            byDrug: "Por fármaco",
+            current: "fármaco actual",
+            newDrug: "fármaco nuevo"
         },
         en: {
             noData: "No specific instructions.",
@@ -150,7 +164,11 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
             increase: "Increase",
             copy: "COPY STRATEGY",
             copied: "COPIED!",
-            strategy: "Suggested Strategy"
+            strategy: "Suggested Strategy",
+            byDay: "By day",
+            byDrug: "By drug",
+            current: "current drug",
+            newDrug: "new drug"
         }
     };
 
@@ -177,7 +195,7 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
     });
     pasos.sort((a, b) => a.dia - b.dia || a.orden - b.orden);
 
-    let html = '';
+    const items = [];
     let objetivoAlcanzado = false;
     let nuevoIniciado = false;
     let actualSuspendido = false;
@@ -224,21 +242,51 @@ window.traducirPasos = function(raw, dosisActual, dosisObjetivo, nombreOrig, nom
             }
         }
 
-        const tagNombre = (sujeto === 'NUEVO' ? nombreDest : nombreOrig);
-        const tagClase = (sujeto === 'NUEVO' ? 'tag-dest' : 'tag-orig');
+        items.push({ diaNum, actual: sujeto === 'ACTUAL', desc });
+    });
 
-        html += `
+    const paso = (it, conEtiqueta) => `
             <div class="pauta-step">
-                <div class="step-idx">D. ${diaNum}</div>
+                <div class="step-idx">D. ${it.diaNum}</div>
                 <div class="step-body">
-                    <span class="tag-farm ${tagClase}">${tagNombre}</span>
-                    <div class="step-txt">${desc}</div>
+                    ${conEtiqueta ? `<span class="tag-farm ${it.actual ? 'tag-orig' : 'tag-dest'}">${it.actual ? nombreOrig : nombreDest}</span>` : ''}
+                    <div class="step-txt">${it.desc}</div>
                 </div>
             </div>`;
-    });
+    const grupo = (actual) => {
+        const lista = items.filter(it => it.actual === actual);
+        if (!lista.length) return '';
+        return `
+            <div class="grupo-farm" data-farmaco="${actual ? nombreOrig : nombreDest}">
+                <div class="grupo-farm-head"><span class="tag-farm ${actual ? 'tag-orig' : 'tag-dest'}">${actual ? nombreOrig : nombreDest}</span><small>${actual ? t.current : t.newDrug}</small></div>
+                ${lista.map(it => paso(it, false)).join('')}
+            </div>`;
+    };
+    const vista = window.vistaPauta();
+
+    let html = `
+        <div class="vista-toggle" role="group">
+            <button type="button" class="vista-btn ${vista === 'dias' ? 'active' : ''}" data-vista="dias" onclick="setVistaPauta('dias')">${t.byDay}</button>
+            <button type="button" class="vista-btn ${vista === 'farmaco' ? 'active' : ''}" data-vista="farmaco" onclick="setVistaPauta('farmaco')">${t.byDrug}</button>
+        </div>
+        <div class="pauta-vistas" data-vista="${vista}">
+            <div class="vista-dias">${items.map(it => paso(it, true)).join('')}</div>
+            <div class="vista-farmaco">${grupo(true)}${grupo(false)}</div>
+        </div>`;
 
     html += `<button class="btn-copiar" onclick="copiarEstrategia()"><i class="far fa-copy"></i> ${t.copy}</button>`;
     return html;
+};
+
+// Vista elegida para la pauta («dias» o «farmaco»); se recuerda en este navegador
+window.vistaPauta = function() {
+    try { const v = localStorage.getItem('psq_vista_pauta'); if (v === 'dias' || v === 'farmaco') return v; } catch (e) {}
+    return 'dias';
+};
+window.setVistaPauta = function(v) {
+    try { localStorage.setItem('psq_vista_pauta', v); } catch (e) {}
+    document.querySelectorAll('.pauta-vistas').forEach(el => { el.dataset.vista = v; });
+    document.querySelectorAll('.vista-btn').forEach(b => b.classList.toggle('active', b.dataset.vista === v));
 };
 
 window.ejecutarCalculo = function() {
@@ -313,17 +361,27 @@ window.FUENTE_PAUTAS = {
 
 window.copiarEstrategia = function() {
     const isEn = window.currentLang === 'en';
-    const steps = document.querySelectorAll('.pauta-step');
-    if (steps.length === 0) return;
+    const cont = document.querySelector('.pauta-vistas');
+    if (!cont || !cont.querySelector('.pauta-step')) return;
 
     let texto = isEn ? "SUGGESTED SWITCH STRATEGY:\n\n" : "ESTRATEGIA DE CAMBIO SUGERIDA:\n\n";
-    steps.forEach(step => {
-        const dia = step.querySelector('.step-idx').innerText;
-        const farm = step.querySelector('.tag-farm').innerText;
-        const desc = step.querySelector('.step-txt').innerText;
-        texto += `${dia}: [${farm}] ${desc}\n`;
-    });
-    texto += `\n${window.FUENTE_PAUTAS[isEn ? 'en' : 'es']}\n`;
+    if (cont.dataset.vista === 'farmaco') {
+        cont.querySelectorAll('.vista-farmaco .grupo-farm').forEach(g => {
+            texto += `[${g.dataset.farmaco}]\n`;
+            g.querySelectorAll('.pauta-step').forEach(step => {
+                texto += `${step.querySelector('.step-idx').textContent.trim()}: ${step.querySelector('.step-txt').textContent.trim()}\n`;
+            });
+            texto += '\n';
+        });
+    } else {
+        cont.querySelectorAll('.vista-dias .pauta-step').forEach(step => {
+            const dia = step.querySelector('.step-idx').textContent.trim();
+            const farm = step.querySelector('.tag-farm').textContent.trim();
+            const desc = step.querySelector('.step-txt').textContent.trim();
+            texto += `${dia}: [${farm}] ${desc}\n`;
+        });
+    }
+    texto = texto.replace(/\n+$/, '\n') + `\n${window.FUENTE_PAUTAS[isEn ? 'en' : 'es']}\n`;
 
     navigator.clipboard.writeText(texto).then(() => {
         const btn = document.querySelector('.btn-copiar');
