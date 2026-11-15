@@ -70,6 +70,10 @@ const OPE_ESPECIALIDADES = [
       examenes: [{ año: '22', hoja: 'Ope_Uro22' }, { año: '20', hoja: 'Ope_Uro20' }] },
     { id: 'min', nombre: 'Medicina Interna', titulo: 'OPE Med. Interna', icono: 'fa-stethoscope', color: '#8b5cf6', guardado: 'psq_save_min', snack: 10,
       examenes: [{ año: '22', hoja: 'Ope_Min22' }, { año: '20', hoja: 'Ope_Min20' }] },
+    { id: 'mf', nombre: 'Medicina de Familia', titulo: 'OPE Médico/a de Familia', icono: 'fa-user-doctor', color: '#059669', guardado: 'psq_save_mf', snack: 10,
+      examenes: [{ año: '2021-2023', hoja: 'Ope_MF24' }, { año: '2019', hoja: 'Ope_MF19' }] },
+    { id: 'urg', nombre: 'Urgencias Hospitalarias', titulo: 'OPE Urgencias Hospitalarias', icono: 'fa-ambulance', color: '#dc2626', guardado: 'psq_save_urg', snack: 10,
+      examenes: [{ año: '20', hoja: 'Ope_Urg20' }] },
     { id: 'comun', nombre: 'Parte Común', titulo: 'OPE Común', icono: 'fa-gavel', color: '#d97706', guardado: 'psq_save_comun', snack: 5,
       examenes: [{ año: '2022', hoja: 'Ope_Comun', filtroAño: '2022' }, { año: '2020', hoja: 'Ope_Comun', filtroAño: '2020' }] },
 ];
