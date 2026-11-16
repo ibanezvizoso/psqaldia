@@ -80,6 +80,8 @@ const OPE_ESPECIALIDADES = [
       examenes: [{ año: '22', hoja: 'Ope_MIV22' }, { año: '20', hoja: 'Ope_MIV20' }] },
     { id: 'endo', nombre: 'Endocrinología', titulo: 'OPE Endocrinología y Nutrición', icono: 'fa-vial', color: '#ca8a04', guardado: 'psq_save_endo', snack: 10,
       examenes: [{ año: '22', hoja: 'Ope_Endo22' }, { año: '20', hoja: 'Ope_Endo20' }] },
+    { id: 'nfc', nombre: 'Neurofisiología Clínica', titulo: 'OPE Neurofisiología Clínica', icono: 'fa-wave-square', color: '#0369a1', guardado: 'psq_save_nfc', snack: 10,
+      examenes: [{ año: '20', hoja: 'Ope_NFC20' }] },
     { id: 'comun', nombre: 'Parte Común', titulo: 'OPE Común', icono: 'fa-gavel', color: '#d97706', guardado: 'psq_save_comun', snack: 5,
       examenes: [{ año: '2022', hoja: 'Ope_Comun', filtroAño: '2022' }, { año: '2020', hoja: 'Ope_Comun', filtroAño: '2020' }] },
 ];
