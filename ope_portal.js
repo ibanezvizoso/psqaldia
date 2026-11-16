@@ -74,6 +74,12 @@ const OPE_ESPECIALIDADES = [
       examenes: [{ año: '2021-2023', hoja: 'Ope_MF24' }, { año: '2019', hoja: 'Ope_MF19' }] },
     { id: 'urg', nombre: 'Urgencias Hospitalarias', titulo: 'OPE Urgencias Hospitalarias', icono: 'fa-ambulance', color: '#dc2626', guardado: 'psq_save_urg', snack: 10,
       examenes: [{ año: '20', hoja: 'Ope_Urg20' }] },
+    { id: 'geri', nombre: 'Geriatría', titulo: 'OPE Geriatría', icono: 'fa-person-cane', color: '#a16207', guardado: 'psq_save_geri', snack: 10,
+      examenes: [{ año: '22', hoja: 'Ope_Geri22' }] },
+    { id: 'miv', nombre: 'Medicina Intensiva', titulo: 'OPE Medicina Intensiva', icono: 'fa-bed-pulse', color: '#be123c', guardado: 'psq_save_miv', snack: 10,
+      examenes: [{ año: '22', hoja: 'Ope_MIV22' }, { año: '20', hoja: 'Ope_MIV20' }] },
+    { id: 'endo', nombre: 'Endocrinología', titulo: 'OPE Endocrinología y Nutrición', icono: 'fa-vial', color: '#ca8a04', guardado: 'psq_save_endo', snack: 10,
+      examenes: [{ año: '22', hoja: 'Ope_Endo22' }, { año: '20', hoja: 'Ope_Endo20' }] },
     { id: 'comun', nombre: 'Parte Común', titulo: 'OPE Común', icono: 'fa-gavel', color: '#d97706', guardado: 'psq_save_comun', snack: 5,
       examenes: [{ año: '2022', hoja: 'Ope_Comun', filtroAño: '2022' }, { año: '2020', hoja: 'Ope_Comun', filtroAño: '2020' }] },
 ];
