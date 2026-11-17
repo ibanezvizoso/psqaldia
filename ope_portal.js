@@ -71,6 +71,8 @@ const OPE_ESPECIALIDADES = [
       examenes: [{ año: '22', hoja: 'Ope_MIV22' }, { año: '20', hoja: 'Ope_MIV20' }] },
     { id: 'min', nombre: 'Medicina Interna', titulo: 'OPE Med. Interna', icono: 'fa-stethoscope', color: '#8b5cf6', guardado: 'psq_save_min', snack: 10,
       examenes: [{ año: '22', hoja: 'Ope_Min22' }, { año: '20', hoja: 'Ope_Min20' }] },
+    { id: 'neumo', nombre: 'Neumología', titulo: 'OPE Neumología', icono: 'fa-lungs', color: '#0891b2', guardado: 'psq_save_neumo', snack: 10,
+      examenes: [{ año: '22', hoja: 'Ope_Neumo22' }, { año: '20', hoja: 'Ope_Neumo20' }] },
     { id: 'nfc', nombre: 'Neurofisiología Clínica', titulo: 'OPE Neurofisiología Clínica', icono: 'fa-wave-square', color: '#0369a1', guardado: 'psq_save_nfc', snack: 10,
       examenes: [{ año: '20', hoja: 'Ope_NFC20' }] },
     { id: 'neuro', nombre: 'Neurología', titulo: 'OPE Neurología', icono: 'fa-wave-square', color: '#7c3aed', guardado: 'psq_save_neuro', snack: 10,
