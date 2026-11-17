@@ -1,0 +1,20 @@
+[
+ "opesergas/anestesia",
+ "opesergas/aparato-digestivo",
+ "opesergas/cardiologia",
+ "opesergas/endocrinologia",
+ "opesergas/geriatria",
+ "opesergas/ginecologia",
+ "opesergas/medicina-de-familia",
+ "opesergas/medicina-intensiva",
+ "opesergas/medicina-interna",
+ "opesergas/neurofisiologia-clinica",
+ "opesergas/neurologia",
+ "opesergas/pediatria",
+ "opesergas/psicologia-clinica",
+ "opesergas/psiquiatria",
+ "opesergas/traumatologia",
+ "opesergas/urgencias-hospitalarias",
+ "opesergas/urologia",
+ "opesergas/parte-comun"
+]

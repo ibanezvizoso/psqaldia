@@ -6,6 +6,9 @@
  *      Respuesta correcta (A/B/C/D o NULA) | Explicación (puede ir vacía).
  *   2. Añadir una línea { año: 'AA', hoja: 'Nombre_de_la_pestaña' } en la especialidad que toque de
  *      OPE_ESPECIALIDADES (o una especialidad nueva con el mismo formato).
+ *   3. Ejecutar `node scripts/generar-paginas-ope.js`: regenera las páginas /opesergas/<especialidad>
+ *      (las que indexa Google) y la lista de /opesergas. Sin este paso el examen funciona en el simulador
+ *      pero no tiene página propia.
  *
  * Los exámenes a medias se guardan en el navegador con las mismas claves que usaban los scripts antiguos,
  * así que se pueden continuar después de la actualización.
