@@ -130,6 +130,8 @@
     <meta name="robots" content="index, follow, max-image-preview:large">
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"Simulador de exámenes OPE SERGAS de medicina","description":"Entrena para tu examen OPE SERGAS de medicina con nuestro simulador inteligente. Exámenes oficiales, cronómetro y recuento de aciertos.","url":"https://psqaldia.com/opesergas","inLanguage":"es","publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Portal OPE","item":"https://psqaldia.com/opesergas"}]}]}</script>
     <link rel="stylesheet" href="/css/psq.css">
+    <link rel="stylesheet" href="/css/ope.css">
+    <link rel="canonical" href="https://psqaldia.com/opesergas">
     <script src="/js/tema.js"></script>
     <script src="/js/qr.js" defer></script>
     <style>
@@ -195,6 +197,31 @@
                 <p>Interfaz optimizada para hacer test cómodamente desde cualquier lugar.</p>
             </div>
         </div>
+        <!-- OPE:ESPECIALIDADES -->
+        <section class="ope-indice">
+            <h2>Exámenes por especialidad</h2>
+            <ul>
+                <li><a href="/opesergas/anestesia"><b>Anestesia</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/aparato-digestivo"><b>Aparato Digestivo</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/cardiologia"><b>Cardiología</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/endocrinologia"><b>Endocrinología</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/geriatria"><b>Geriatría</b><span>2022</span></a></li>
+                <li><a href="/opesergas/ginecologia"><b>Ginecología</b><span>2020</span></a></li>
+                <li><a href="/opesergas/medicina-de-familia"><b>Medicina de Familia</b><span>2021-2023 · 2019</span></a></li>
+                <li><a href="/opesergas/medicina-intensiva"><b>Medicina Intensiva</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/medicina-interna"><b>Medicina Interna</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/neurofisiologia-clinica"><b>Neurofisiología Clínica</b><span>2020</span></a></li>
+                <li><a href="/opesergas/neurologia"><b>Neurología</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/pediatria"><b>Pediatría</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/psicologia-clinica"><b>Psicología Clínica</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/psiquiatria"><b>Psiquiatría</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/traumatologia"><b>Traumatología</b><span>2020</span></a></li>
+                <li><a href="/opesergas/urgencias-hospitalarias"><b>Urgencias Hospitalarias</b><span>2020</span></a></li>
+                <li><a href="/opesergas/urologia"><b>Urología</b><span>2022 · 2020</span></a></li>
+                <li><a href="/opesergas/parte-comun"><b>Parte Común</b><span>2022 · 2020</span></a></li>
+            </ul>
+        </section>
+        <!-- /OPE:ESPECIALIDADES -->
     </div>
 
     <footer class="psq-footer">
@@ -214,76 +241,7 @@
         </div>
     </div>
 
-    <script src="ope_portal.js"></script>
-
-    <script>
-        let intervalTime;
-        let totalSeconds = 0;
-
-        // 1. FUNCIÓN PUENTE OBLIGATORIA PARA TU ope_portal.js
-        function cargarScript(url) {
-            return new Promise((resolve, reject) => {
-                // Evitamos cargar el mismo script dos veces si ya se pulsó antes
-                if (document.querySelector(`script[src="${url}"]`)) {
-                    resolve();
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = url;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
-
-        // 2. FUNCIÓN DE CIERRE
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-            document.getElementById('modalData').innerHTML = ''; // Limpiar portal
-            stopCronometro();
-        }
-
-        function cerrarPortal() {
-            closeModal();
-        }
-
-        // 3. SISTEMA DE CRONÓMETRO
-        function startCronometro() {
-            const cronoCont = document.getElementById('cronometro-container');
-            if(cronoCont.style.display === 'block') return; 
-            
-            cronoCont.style.display = 'block';
-            totalSeconds = 0;
-            clearInterval(intervalTime);
-            
-            intervalTime = setInterval(() => {
-                totalSeconds++;
-                const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-                const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-                const s = (totalSeconds % 60).toString().padStart(2, '0');
-                document.getElementById('cronometro').innerText = `${h}:${m}:${s}`;
-            }, 1000);
-        }
-
-        function stopCronometro() {
-            clearInterval(intervalTime);
-            document.getElementById('cronometro-container').style.display = 'none';
-            document.getElementById('cronometro').innerText = "00:00:00";
-        }
-
-        // 4. OBSERVER UNIVERSAL - LA LUPA MEJORADA
-        const observer = new MutationObserver((mutations) => {
-            // Buscamos cualquier elemento que su ID empiece por "contenedor-preguntas" (valdrá para -anest, -ped, -comun, etc)
-            const testActivo = document.querySelector('[id^="contenedor-preguntas"]');
-            
-            if (testActivo) {
-                startCronometro();
-            } else {
-                stopCronometro();
-            }
-        });
-
-        observer.observe(document.getElementById('modalData'), { childList: true, subtree: true });
-    </script>
+    <script src="/ope_portal.js"></script>
+    <script src="/js/ope-pagina.js"></script>
 </body>
 </html>
