@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversor de benzodiacepinas: dosis equivalentes | psq al día</title>
-    <meta name="description" content="Calcula la dosis equivalente al cambiar de una benzodiacepina o un fármaco Z a otro, según la tabla de Inada e Inagaki (2015) o las DDD de la OMS.">
+    <meta name="description" content="Calcula la dosis equivalente al cambiar de una benzodiacepina o un fármaco Z a otro, según el Manual de Ashton, la tabla de Inada e Inagaki (2015) o las DDD de la OMS.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://psqaldia.com/benzodiacepinas">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="psq al día">
     <meta property="og:title" content="Conversor de benzodiacepinas: dosis equivalentes">
-    <meta property="og:description" content="Dosis equivalente al cambiar de una benzodiacepina o un fármaco Z a otro, según Inada e Inagaki (2015) o las DDD de la OMS.">
+    <meta property="og:description" content="Dosis equivalente al cambiar de una benzodiacepina o un fármaco Z a otro, según Ashton, Inada e Inagaki (2015) o las DDD de la OMS.">
     <meta property="og:url" content="https://psqaldia.com/benzodiacepinas">
     <meta property="og:image" content="https://psqaldia.com/og-psq.png">
     <meta name="twitter:card" content="summary">
@@ -23,7 +23,7 @@
         .bz-main { max-width: 640px; margin: 0 auto 3rem; padding: 0 1rem; width: 100%; box-sizing: border-box; }
         .bz-card { background: var(--surface, #fff); border: 1px solid var(--border); border-radius: var(--radius, 18px); box-shadow: var(--shadow-sm); padding: 1.4rem; }
         .bz-metodo { display: flex; background: var(--border); border-radius: 14px; padding: 3px; gap: 3px; margin-bottom: 1.2rem; }
-        .bz-metodo button { flex: 1; border: none; background: transparent; border-radius: 11px; padding: .6rem .5rem; font: inherit; font-size: .85rem; font-weight: 700; color: var(--text-muted); cursor: pointer; line-height: 1.25; }
+        .bz-metodo button { flex: 1; min-width: 0; border: none; background: transparent; border-radius: 11px; padding: .6rem .5rem; font: inherit; font-size: .85rem; font-weight: 700; color: var(--text-muted); cursor: pointer; line-height: 1.25; }
         .bz-metodo button.on { background: var(--surface, #fff); color: var(--brand); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
         .bz-metodo small { display: block; font-weight: 500; font-size: .72rem; opacity: .8; }
         .bz-campo { margin-bottom: .9rem; }
@@ -59,8 +59,9 @@
     <main class="bz-main">
         <div class="bz-card">
             <div class="bz-metodo" role="group" aria-label="Método">
-                <button type="button" data-m="inada" class="on">Inada e Inagaki<small>Equivalencia clínica · 2015</small></button>
-                <button type="button" data-m="ddd">DDD de la OMS<small>Dosis diaria definida</small></button>
+                <button type="button" data-m="ashton" class="on">Ashton<small>2002</small></button>
+                <button type="button" data-m="inada">Inada<small>2015</small></button>
+                <button type="button" data-m="ddd">DDD<small>OMS</small></button>
             </div>
 
             <div class="bz-fila">
@@ -70,7 +71,7 @@
             </div>
             <div class="bz-campo"><label for="bz-dosis">Dosis actual (mg/día)</label><input id="bz-dosis" type="number" inputmode="decimal" min="0" step="any" placeholder="Ej.: 10"></div>
 
-            <div class="bz-res" id="bz-res" aria-live="polite"></div>
+            <div class="bz-res" id="bz-res" aria-live="polite"><div class="bz-vacio">Cargando datos…</div></div>
 
             <ul class="bz-aviso" id="bz-aviso"></ul>
         </div>
@@ -78,7 +79,8 @@
         <div class="bz-ref">
             <b>Fuentes</b><br>
             Inada T, Inagaki A. Psychotropic dose equivalence in Japan. <i>Psychiatry Clin Neurosci</i>. 2015;69(8):440-447. <a href="https://doi.org/10.1111/pcn.12275" target="_blank" rel="noopener noreferrer">doi:10.1111/pcn.12275</a> (tabla 6).<br>
-            WHO Collaborating Centre for Drug Statistics Methodology. ATC/DDD Index: N05BA, derivados benzodiacepínicos (DDD por vía oral). <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05BA" target="_blank" rel="noopener noreferrer">atcddd.fhi.no</a>. Consultado en noviembre de 2026.
+            Ashton CH. <i>Benzodiazepines: How They Work and How to Withdraw</i> (Manual de Ashton). Revisión de agosto de 2002, tabla 1 (dosis orales aproximadamente equivalentes).<br>
+            WHO Collaborating Centre for Drug Statistics Methodology. ATC/DDD Index, DDD por vía oral: <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05BA" target="_blank" rel="noopener noreferrer">N05BA</a> (ansiolíticos), <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CD" target="_blank" rel="noopener noreferrer">N05CD</a> (hipnóticos benzodiacepínicos) y <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CF" target="_blank" rel="noopener noreferrer">N05CF</a> (fármacos Z). Consultado en noviembre de 2026.
         </div>
     </main>
 
@@ -87,77 +89,82 @@
     </footer>
 
     <script>
-    // Dosis equivalentes (mg). Inada: dosis equivalentes a 5 mg de diazepam (tabla 6). DDD: dosis oral de la OMS.
-    const BZ = {
-        inada: {
-            ref: 'diazepam', base: 5,
-            dosis: {
-                'Alprazolam': 0.8, 'Bromazepam': 2.5, 'Brotizolam': 0.25, 'Clobazam': 10, 'Clonazepam': 0.25,
-                'Clorazepato': 7.5, 'Clordiazepóxido': 10, 'Clotiazepam': 10, 'Cloxazolam': 1.5, 'Diazepam': 5,
-                'Estazolam': 2, 'Eszopiclona': 2.5, 'Etizolam': 1.5, 'Fludiazepam': 0.5, 'Flunitrazepam': 1,
-                'Flurazepam': 15, 'Flutazolam': 15, 'Flutoprazepam': 1.67, 'Haloxazolam': 5, 'Loflazepato de etilo': 1.67,
-                'Lorazepam': 1.2, 'Lormetazepam': 1, 'Medazepam': 10, 'Mexazolam': 1.67, 'Nimetazepam': 5,
-                'Nitrazepam': 5, 'Oxazepam': 15, 'Oxazolam': 20, 'Prazepam': 12.5, 'Quazepam': 15,
-                'Rilmazafona': 2, 'Triazolam': 0.25, 'Zolpidem': 10, 'Zopiclona': 7.5
-            }
-        },
-        ddd: {
-            ref: 'diazepam', base: 10,
-            dosis: {
-                'Alprazolam': 1, 'Bentazepam': 75, 'Bromazepam': 10, 'Camazepam': 30, 'Clobazam': 20,
-                'Clorazepato': 20, 'Clordiazepóxido': 30, 'Diazepam': 10, 'Fludiazepam': 0.75, 'Halazepam': 100,
-                'Loflazepato de etilo': 2, 'Lorazepam': 2.5, 'Medazepam': 20, 'Nordazepam': 15, 'Oxazepam': 50,
-                'Prazepam': 30
-            }
-        }
+    // Datos: pestaña Data_BZ del Google Sheets (el Worker omite la fila de cabecera).
+    // Columnas: A Fármaco · B Tipo (BZ/Z) · C Inada, mg ≈ 5 mg de diazepam · D Ashton mín y E Ashton máx, mg ≈ 10 mg de diazepam
+    //           (E vacía si no hay rango) · F DDD oral de la OMS (mg)
+    const METODOS = {
+        inada:  { nombre: 'la tabla de Inada' },
+        ashton: { nombre: 'el Manual de Ashton' },
+        ddd:    { nombre: 'las DDD de la OMS' }
     };
-    const FARMACOS_Z = ['Eszopiclona', 'Zolpidem', 'Zopiclona'];
     const AVISOS = {
         inada: [
-            'Tabla basada sobre todo en ensayos realizados en Japón; los autores la presentan como valores aproximados que deben usarse con prudencia.',
+            'Tabla basada sobre todo en ensayos realizados en Japón; los autores la presentan como valores aproximados que deben usarse con prudencia.'
+        ],
+        ashton: [
+            'Equivalencias basadas en la experiencia clínica de la autora (revisión de 2002). Ella misma advierte que no coinciden con las de otros autores y que pueden variar entre personas. Cuando da un rango, el resultado es un rango.',
+            'En sus pautas, el paso a diazepam se hace de forma escalonada, sustituyendo una toma cada vez.'
         ],
         ddd: [
             'La DDD es la dosis de mantenimiento media supuesta en adultos para la indicación principal: una unidad para estudios de consumo, no una dosis de equivalencia terapéutica.',
-            'Solo incluye los ansiolíticos (grupo N05BA): no están los hipnóticos ni el clonazepam.'
+            'Incluye ansiolíticos (N05BA), hipnóticos benzodiacepínicos (N05CD) y fármacos Z (N05CF); en los hipnóticos la DDD se refiere a su uso como hipnótico. El clonazepam no tiene DDD en estos grupos.'
         ],
         comun: [
-            'Las tablas de equivalencia son orientativas y pueden diferir entre fuentes en dos o tres veces. Ajusta la dosis según la respuesta clínica.'
+            'Las tablas de equivalencia son orientativas y pueden diferir entre fuentes en dos o tres veces. Ajusta la dosis según la respuesta clínica.',
+            '<b>Comprueba que la dosis resultante no supera la dosis máxima autorizada del fármaco nuevo</b> (ficha técnica), sobre todo con dosis altas o en personas mayores.'
         ]
     };
 
-    let metodo = 'inada', ultimo = null;
+    let F = {}, metodo = 'ashton', ultimo = null;
     const $ = id => document.getElementById(id);
-    const nombreOpcion = n => n + (FARMACOS_Z.includes(n) ? ' (fármaco Z)' : '');
+    const num = v => { const x = parseFloat(String(v ?? '').replace(',', '.')); return x > 0 ? x : null; };
     const redondear = x => x >= 100 ? Math.round(x) : x >= 10 ? Math.round(x * 2) / 2 : x >= 1 ? Math.round(x * 10) / 10 : Math.round(x * 100) / 100;
     const fmt = x => String(redondear(x)).replace('.', ',');
+    const fmtR = ([a, b]) => redondear(a) === redondear(b) ? fmt(a) : `${fmt(a)}–${fmt(b)}`;
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    function cargar(filas) {
+        F = {};
+        filas.forEach(r => {
+            const n = String(r[0] || '').trim(); if (!n) return;
+            const amin = num(r[3]), amax = num(r[4]) || amin;
+            F[n] = {
+                z: String(r[1] || '').trim().toUpperCase() === 'Z',
+                inada: num(r[2]) ? [num(r[2]), num(r[2])] : null,
+                ashton: amin ? [amin, amax] : null,
+                ddd: num(r[5]) ? [num(r[5]), num(r[5])] : null
+            };
+        });
+    }
+
+    // Equivalencia como rango [mín, máx]: dosis × destino / origen, combinando los extremos de ambos rangos
+    const convertir = (dosis, o, d, m) => (F[o]?.[m] && F[d]?.[m]) ? [dosis * F[d][m][0] / F[o][m][1], dosis * F[d][m][1] / F[o][m][0]] : null;
 
     function rellenar(sel, elegido, otro) {
-        const lista = Object.keys(BZ[metodo].dosis).sort((a, b) => a.localeCompare(b, 'es'));
+        const lista = Object.keys(F).filter(n => F[n][metodo]).sort((a, b) => a.localeCompare(b, 'es'));
         // Si el fármaco no está en esta tabla, se vuelve a diazepam (o lorazepam si diazepam ya está en el otro selector)
         const reserva = ['Diazepam', 'Lorazepam'].find(n => lista.includes(n) && n !== otro) || lista.find(n => n !== otro);
-        const valor = lista.includes(elegido) ? elegido : reserva;
-        sel.innerHTML = lista.map(n => `<option value="${n}">${nombreOpcion(n)}</option>`).join('');
-        sel.value = valor;
+        sel.innerHTML = lista.map(n => `<option value="${esc(n)}">${esc(n)}${F[n].z ? ' (fármaco Z)' : ''}</option>`).join('');
+        sel.value = lista.includes(elegido) ? elegido : reserva;
     }
 
     function calcular() {
-        const o = $('bz-orig').value, d = $('bz-dest').value, dosis = parseFloat(String($('bz-dosis').value).replace(',', '.'));
-        const m = BZ[metodo], res = $('bz-res');
+        const o = $('bz-orig').value, d = $('bz-dest').value, dosis = num($('bz-dosis').value);
+        const res = $('bz-res');
         $('bz-aviso').innerHTML = [...AVISOS[metodo], ...AVISOS.comun].map(t => `<li>${t}</li>`).join('');
         ultimo = null;
-        if (!(dosis > 0)) { res.innerHTML = '<div class="bz-vacio">Escribe la dosis diaria del fármaco actual.</div>'; return; }
+        if (!dosis) { res.innerHTML = '<div class="bz-vacio">Escribe la dosis diaria del fármaco actual.</div>'; return; }
         if (o === d) { res.innerHTML = '<div class="bz-vacio">Elige dos fármacos distintos.</div>'; return; }
-        const equiv = dosis * m.dosis[d] / m.dosis[o];
-        const enDiazepam = dosis * m.base / m.dosis[o];
-        // Con el otro método, si tiene los dos fármacos
-        const otroId = metodo === 'inada' ? 'ddd' : 'inada', otro = BZ[otroId];
-        const conOtro = (otro.dosis[o] && otro.dosis[d]) ? dosis * otro.dosis[d] / otro.dosis[o] : null;
+        const equiv = convertir(dosis, o, d, metodo);
+        const lineas = [];
+        if (o !== 'Diazepam' && d !== 'Diazepam' && F.Diazepam?.[metodo]) lineas.push(`${fmt(dosis)} mg de ${esc(o.toLowerCase())} ≈ ${fmtR(convertir(dosis, o, 'Diazepam', metodo))} mg de diazepam.`);
+        const otros = Object.keys(METODOS).filter(m => m !== metodo).map(m => [m, convertir(dosis, o, d, m)]).filter(x => x[1]);
+        if (otros.length) lineas.push(otros.map(([m, r]) => `Con ${METODOS[m].nombre}: ≈ ${fmtR(r)} mg/día`).join('<br>'));
         res.innerHTML = `
-            <div class="n">≈ ${fmt(equiv)} <small>mg/día</small></div>
-            <div class="t">de ${d.toLowerCase()}</div>
-            <div class="s">${[o !== 'Diazepam' && d !== 'Diazepam' ? `${fmt(dosis)} mg de ${o.toLowerCase()} ≈ ${fmt(enDiazepam)} mg de diazepam.` : '',
-                conOtro !== null ? `Con ${otroId === 'inada' ? 'la tabla de Inada' : 'las DDD de la OMS'}: ≈ ${fmt(conOtro)} mg/día.` : ''].filter(Boolean).join('<br>')}</div>`;
-        ultimo = equiv;
+            <div class="n">≈ ${fmtR(equiv)} <small>mg/día</small></div>
+            <div class="t">de ${esc(d.toLowerCase())}</div>
+            <div class="s">${lineas.join('<br>')}</div>`;
+        ultimo = (equiv[0] + equiv[1]) / 2;
     }
 
     function cambiarMetodo(m) {
@@ -173,18 +180,28 @@
     document.querySelectorAll('.bz-metodo button').forEach(b => b.addEventListener('click', () => cambiarMetodo(b.dataset.m)));
     ['bz-orig', 'bz-dest', 'bz-dosis'].forEach(id => $(id).addEventListener('input', calcular));
     $('bz-swap').addEventListener('click', () => {
-        // Al intercambiar, la dosis pasa a ser la equivalente calculada (conversión de vuelta)
+        // Al intercambiar, la dosis pasa a ser la equivalente calculada (el punto medio si es un rango)
         const o = $('bz-orig').value; $('bz-orig').value = $('bz-dest').value; $('bz-dest').value = o;
         if (ultimo !== null) $('bz-dosis').value = redondear(ultimo);
         calcular();
     });
 
-    // Arranque: diazepam → lorazepam con el método que se usó la última vez
-    $('bz-orig').innerHTML = $('bz-dest').innerHTML = '';
-    try { const g = localStorage.getItem('psq_bz_metodo'); if (g === 'ddd' || g === 'inada') metodo = g; } catch (e) {}
-    rellenar($('bz-orig'), 'Diazepam', null);
-    rellenar($('bz-dest'), 'Lorazepam', 'Diazepam');
-    cambiarMetodo(metodo);
+    (async () => {
+        try {
+            const r = await fetch('/?sheet=Data_BZ');
+            const j = await r.json();
+            cargar(j.values || []);
+            if (!F.Diazepam) throw new Error('sin datos');
+        } catch (e) {
+            $('bz-res').innerHTML = '<div class="bz-vacio">No se pudieron cargar los datos. Recarga la página en unos segundos.</div>';
+            return;
+        }
+        // Arranque: diazepam → lorazepam con el método que se usó la última vez
+        try { const g = localStorage.getItem('psq_bz_metodo'); if (METODOS[g]) metodo = g; } catch (e) {}
+        rellenar($('bz-orig'), 'Diazepam', null);
+        rellenar($('bz-dest'), 'Lorazepam', 'Diazepam');
+        cambiarMetodo(metodo);
+    })();
     </script>
 </body>
 </html>
