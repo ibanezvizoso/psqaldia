@@ -402,3 +402,5 @@ body.psq-tool .site-bottom-info img {
    :where() no suma especificidad: los estilos propios de cada página siguen mandando. */
 :where(.site-bottom-info) { display: block; text-align: center; padding: 2rem 1rem; font-size: .85rem; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 2rem; }
 :where(.site-bottom-info img) { height: 18px; vertical-align: middle; margin-right: 8px; opacity: .5; border-radius: 5px; }
+:where(.nav-footer) { display: block; margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
+:where(.link-back) { color: var(--brand); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; text-transform: uppercase; letter-spacing: .5px; }
