@@ -1,4 +1,5 @@
 [
+ "opesergas/parte-comun",
  "opesergas/anestesia",
  "opesergas/aparato-digestivo",
  "opesergas/cardiologia",
@@ -16,6 +17,5 @@
  "opesergas/psiquiatria",
  "opesergas/traumatologia",
  "opesergas/urgencias-hospitalarias",
- "opesergas/urologia",
- "opesergas/parte-comun"
+ "opesergas/urologia"
 ]

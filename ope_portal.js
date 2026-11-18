@@ -92,6 +92,8 @@ const OPE_ESPECIALIDADES = [
     { id: 'comun', nombre: 'Parte Común', titulo: 'OPE Común', icono: 'fa-gavel', color: '#d97706', guardado: 'psq_save_comun', snack: 5,
       examenes: [{ año: '2022', hoja: 'Ope_Comun', filtroAño: '2022' }, { año: '2020', hoja: 'Ope_Comun', filtroAño: '2020' }] },
 ];
+// Orden en el portal y en las páginas: Parte Común primero y el resto por orden alfabético (las nuevas se colocan solas)
+OPE_ESPECIALIDADES.sort((a, b) => (b.id === 'comun') - (a.id === 'comun') || a.nombre.localeCompare(b.nombre, 'es'));
 window.OPE_ESPECIALIDADES = OPE_ESPECIALIDADES;
 
 /* ============================================================
@@ -135,8 +137,9 @@ function opeScrollArriba() {
     const mc = document.querySelector('.modal-content');
     if (mc) mc.scrollTo({ top: 0, behavior: 'smooth' });
 }
+// La Parte Común va destacada con su color (es común a todas las especialidades)
 const opeBotonEsp = e => `
-    <button onclick="opeAbrirEspecialidad('${e.id}')" style="padding: 1.1rem 1.2rem; border-radius: 20px; border: 2px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left; width: 100%;">
+    <button onclick="opeAbrirEspecialidad('${e.id}')" style="padding: 1.1rem 1.2rem; border-radius: 20px; border: 2px solid ${e.id === 'comun' ? e.color + '66' : 'var(--border)'}; background: ${e.id === 'comun' ? e.color + '14' : 'var(--card)'}; cursor: pointer; display: flex; align-items: center; gap: 15px; text-align: left; width: 100%;">
         <span style="background: ${e.color}1a; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             <i class="fas ${e.icono}" style="color: ${e.color};"></i>
         </span>
