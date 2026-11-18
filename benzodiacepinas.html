@@ -42,10 +42,19 @@
         .bz-aviso li { margin-bottom: .35rem; }
         .bz-ref { margin-top: 1.5rem; font-size: .8rem; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--border); padding-top: 1rem; }
         .bz-ref a { color: var(--brand); }
+        /* Tarjetas de presentación y pie, como en el resto de herramientas */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: -1rem auto 2.5rem; padding: 0 1rem; box-sizing: border-box; }
+        .feature-card { padding: 2rem; text-align: center; transition: transform .2s; }
+        .feature-card:hover { transform: translateY(-3px); }
+        .feature-icon { font-size: 2rem; width: 60px; height: 60px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+        .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 .8rem; letter-spacing: -.01em; }
+        .feature-card p { font-size: .95rem; margin: 0; line-height: 1.5; }
+        .nav-footer { margin-top: 2rem; text-align: center; padding: 2rem; }
+        .link-back { font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; text-transform: uppercase; letter-spacing: .5px; }
         @media (max-width: 420px) { .bz-fila { grid-template-columns: 1fr; } .bz-swap { justify-self: center; transform: rotate(90deg); } }
     </style>
 </head>
-<body>
+<body class="psq-tool">
     <nav class="psq-topbar">
         <a href="/" class="psq-brand"><img src="/icon-192.png" alt="" width="34" height="34"><span>psq <b>al día</b></span></a>
         <a href="/herramientas" class="psq-nav-link"><i class="fas fa-toolbox"></i><span>Herramientas</span></a>
@@ -55,6 +64,24 @@
         <h1>Conversor de benzodiacepinas</h1>
         <p>Dosis equivalente al cambiar de una benzodiacepina o un fármaco Z a otro.</p>
     </header>
+
+    <section class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-scale-balanced"></i></div>
+            <h3>Tres fuentes en un clic</h3>
+            <p>Calcula con el Manual de Ashton, la tabla de Inada e Inagaki o las DDD de la OMS, y compara al momento lo que da cada una.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-pills"></i></div>
+            <h3>Ansiolíticos, hipnóticos y fármacos Z</h3>
+            <p>Más de 40 fármacos, de diazepam y lorazepam a lormetazepam o zolpidem. Si la fuente da un rango, el resultado también.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-right-left"></i></div>
+            <h3>Ida y vuelta</h3>
+            <p>Obtén la dosis del fármaco nuevo y, con un toque, la conversión inversa para revisar el cambio antes de pautarlo.</p>
+        </div>
+    </section>
 
     <main class="bz-main">
         <div class="bz-card">
@@ -84,8 +111,12 @@
         </div>
     </main>
 
-    <footer class="psq-footer">
-        <a href="/herramientas"><i class="fas fa-arrow-left"></i> Volver a herramientas</a>
+    <footer class="nav-footer">
+        <a href="/herramientas" class="link-back"><i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS</a>
+    </footer>
+    <footer class="site-bottom-info">
+        <img src="/Logo.png" alt="PSQ AL DÍA">
+        <span>&copy; 2026 PSQ AL DÍA · Herramientas clínicas</span>
     </footer>
 
     <script>
