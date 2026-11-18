@@ -23,7 +23,9 @@
 .ope-conv-head h2 { margin: 0; font-size: 1.3rem; color: var(--text-main); }
 .ope-num { font-size: .85rem; color: var(--text-muted); font-weight: 700; }
 .ope-conv-txt { font-size: .92rem; color: var(--text-muted); line-height: 1.5; }
-.ope-link { background: none; border: none; padding: 0; color: var(--brand); font-weight: 700; cursor: pointer; text-decoration: underline; font-size: inherit; }
+.ope-conv-acciones { display: flex; flex-wrap: wrap; gap: .6rem; margin: .4rem 0 0; }
+.ope-conv-acciones .psq-btn { margin: 0; }
+.ope-preguntas[hidden] { display: none; }
 .ope-listado { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .9rem; }
 .ope-preg { background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem; }
 .ope-preg .enunciado { margin: 0 0 .6rem; font-weight: 700; color: var(--text-main); line-height: 1.45; }
@@ -43,6 +45,9 @@
 .ope-otras div { display: flex; flex-wrap: wrap; gap: .5rem; }
 .ope-otras a { font-size: .88rem; padding: .35rem .75rem; border: 1px solid var(--border); border-radius: 999px; color: var(--text-main); text-decoration: none; background: var(--surface, #fff); }
 .ope-otras a:hover { border-color: var(--brand); color: var(--brand); }
+/* Parte Común: primera y con un tono distinto */
+.ope-otras a.ope-comun { background: rgba(217, 119, 6, .08); border-color: rgba(217, 119, 6, .4); }
+.ope-indice li.ope-comun a { background: rgba(217, 119, 6, .08); border-color: rgba(217, 119, 6, .4); }
 
 .ope-indice { margin-top: 2.5rem; }
 .ope-indice ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .6rem; }

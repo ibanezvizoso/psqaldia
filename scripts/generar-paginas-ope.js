@@ -44,7 +44,7 @@ function pagina({ e, slug: s, url }) {
     const titulo = e.id === 'comun'
         ? `OPE SERGAS Parte Común: examen oficial con respuestas (${años.join(' y ')})`
         : `OPE SERGAS ${e.nombre}: examen oficial con respuestas (${años.join(' y ')})`;
-    const descripcion = `Preguntas del examen oficial de ${deNombre(e)} de la OPE del SERGAS (${unirY(años)}) con la plantilla de respuestas definitiva. Haz el test online con cronómetro y corrección automática.`;
+    const descripcion = `Preguntas del examen oficial de ${deNombre(e)} de la OPE del SERGAS (${unirY(años)}) con la plantilla de respuestas definitiva. Haz el examen online con corrección automática o lee todas las preguntas.`;
     const h1 = e.id === 'comun' ? 'OPE SERGAS: Parte Común' : `OPE SERGAS de ${e.nombre}`;
     const ld = {
         '@context': 'https://schema.org',
@@ -68,14 +68,19 @@ function pagina({ e, slug: s, url }) {
                 <h2>Examen de ${esc(deNombre(e))} · convocatoria ${esc(a)}</h2>
                 <span class="ope-num"></span>
             </div>
-            <p class="ope-conv-txt">Preguntas oficiales con la respuesta de la plantilla definitiva. Las anuladas por el tribunal aparecen indicadas.
-                <button class="ope-link" onclick="opeIniciar('${e.id}','${x.año}')">Hacer este examen con cronómetro</button></p>
-            <ol class="ope-listado" data-hoja="${esc(x.hoja)}"${x.filtroAño ? ` data-filtro="${esc(x.filtroAño)}"` : ''} data-ancla="${ancla}">
-                <li class="ope-cargando">Cargando preguntas…</li>
-            </ol>
+            <p class="ope-conv-txt">Preguntas oficiales con la respuesta de la plantilla definitiva. Las anuladas por el tribunal aparecen indicadas.</p>
+            <div class="ope-conv-acciones">
+                <button class="psq-btn" onclick="opeIniciar('${e.id}','${x.año}')"><i class="fas fa-play"></i> Hacer examen</button>
+                <button class="psq-btn ope-btn-sec ope-leer" aria-expanded="false" aria-controls="${ancla}-preguntas"><i class="fas fa-list"></i> <span>Leer todas las preguntas</span></button>
+            </div>
+            <div class="ope-preguntas" id="${ancla}-preguntas" hidden="until-found">
+                <ol class="ope-listado" data-hoja="${esc(x.hoja)}"${x.filtroAño ? ` data-filtro="${esc(x.filtroAño)}"` : ''} data-ancla="${ancla}">
+                    <li class="ope-cargando">Cargando preguntas…</li>
+                </ol>
+            </div>
         </section>`;
     }).join('');
-    const otras = paginas.filter(p => p.slug !== s).map(p => `<a href="/opesergas/${p.slug}">${esc(p.e.nombre)}</a>`).join('');
+    const otras = paginas.filter(p => p.slug !== s).map(p => `<a href="/opesergas/${p.slug}"${p.e.id === 'comun' ? ' class="ope-comun"' : ''}>${esc(p.e.nombre)}</a>`).join('');
 
     return `<!DOCTYPE html>
 <!-- Página generada por scripts/generar-paginas-ope.js a partir de ope_portal.js. No la edites a mano. -->
@@ -110,7 +115,7 @@ function pagina({ e, slug: s, url }) {
     <header class="psq-hero psq-glow">
         <p class="ope-miga"><a href="/opesergas">Portal OPE</a> › ${esc(e.nombre)}</p>
         <h1>${esc(h1)}</h1>
-        <p>Exámenes oficiales de ${unirY(años)} con la plantilla de respuestas definitiva. Practica con cronómetro, corrección automática y repaso de fallos, o consulta las preguntas abajo.</p>
+        <p>Exámenes oficiales de ${unirY(años)} con la plantilla de respuestas definitiva. Haz el examen con corrección automática y repaso de fallos, o lee todas las preguntas con su respuesta más abajo.</p>
         <div class="ope-botones">${botones}
         </div>
     </header>
@@ -161,7 +166,7 @@ const bloque = `${ini}
         <section class="ope-indice">
             <h2>Exámenes por especialidad</h2>
             <ul>${paginas.map(p => `
-                <li><a href="/opesergas/${p.slug}"><b>${esc(p.e.nombre)}</b><span>${listaAños(p.e).join(' · ')}</span></a></li>`).join('')}
+                <li${p.e.id === 'comun' ? ' class="ope-comun"' : ''}><a href="/opesergas/${p.slug}"><b>${esc(p.e.nombre)}</b><span>${listaAños(p.e).join(' · ')}</span></a></li>`).join('')}
             </ul>
         </section>
         ${fin}`;

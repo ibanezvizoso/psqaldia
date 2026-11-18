@@ -2,7 +2,8 @@
  * js/ope-pagina.js — Piezas comunes de las páginas del Portal OPE (/opesergas y /opesergas/<especialidad>).
  * Necesita /ope_portal.js cargado antes.
  *  - Ventana del simulador: cerrar, cronómetro y el observador que lo arranca al empezar un examen.
- *  - Listado de preguntas con respuesta desplegable en las páginas de especialidad (texto visible para Google).
+ *  - Listado de preguntas con respuesta desplegable en las páginas de especialidad: se carga siempre (texto para Google)
+ *    pero queda plegado tras «Leer todas las preguntas» para no mezclarlo con «Hacer examen».
  */
 
 // Las funciones del motor que cargan scripts bajo demanda la esperan en window
@@ -80,11 +81,38 @@ async function opePintarListado(el) {
                 <details><summary>Ver respuesta</summary><p>${resp}</p>${p.explicacion ? `<p>${p.explicacion}</p>` : ''}</details>
             </li>`;
         }).join('');
-        el.closest('section')?.querySelector('.ope-num')?.replaceChildren(document.createTextNode(`${filas.length} preguntas`));
+        const sec = el.closest('section');
+        sec?.querySelector('.ope-num')?.replaceChildren(document.createTextNode(`${filas.length} preguntas`));
+        const b = sec?.querySelector('.ope-leer');
+        if (b) { b.dataset.n = filas.length; opeEstadoLeer(b); }
+        // Enlace directo a una pregunta (#convocatoria-2022-15): desplegar y llevar hasta ella
+        const destino = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+        if (destino && el.contains(destino)) { opeMostrarPreguntas(b, true); destino.scrollIntoView(); }
     } catch (e) {
-        el.innerHTML = '<li class="ope-error">No se han podido cargar las preguntas. Puedes hacer el examen desde el botón de arriba.</li>';
+        el.innerHTML = '<li class="ope-error">No se han podido cargar las preguntas. Puedes hacer el examen con el botón «Hacer examen».</li>';
     }
 }
+/* --- «Leer todas las preguntas»: abre y cierra el listado --- */
+function opeEstadoLeer(b) {
+    const abierto = b.getAttribute('aria-expanded') === 'true', n = b.dataset.n;
+    b.querySelector('span').textContent = abierto ? 'Ocultar las preguntas' : (n ? `Leer las ${n} preguntas` : 'Leer todas las preguntas');
+}
+function opeMostrarPreguntas(b, mostrar) {
+    if (!b) return;
+    const caja = document.getElementById(b.getAttribute('aria-controls'));
+    if (mostrar) caja.removeAttribute('hidden'); else caja.setAttribute('hidden', 'until-found');
+    b.setAttribute('aria-expanded', String(mostrar));
+    opeEstadoLeer(b);
+}
+document.querySelectorAll('.ope-leer').forEach(b => {
+    b.addEventListener('click', () => {
+        const abrir = b.getAttribute('aria-expanded') !== 'true';
+        opeMostrarPreguntas(b, abrir);
+        if (!abrir) b.closest('section').scrollIntoView({ block: 'start' });
+    });
+    // Buscar en la página (Ctrl+F) también encuentra las preguntas plegadas y las despliega
+    document.getElementById(b.getAttribute('aria-controls'))?.addEventListener('beforematch', () => opeMostrarPreguntas(b, true));
+});
 document.querySelectorAll('ol.ope-listado[data-hoja]').forEach(opePintarListado);
 
 Object.assign(window, { cargarScript, closeModal, cerrarPortal, startCronometro, stopCronometro });
