@@ -79,7 +79,7 @@
         <div class="bz-ref">
             <b>Fuentes</b><br>
             Inada T, Inagaki A. Psychotropic dose equivalence in Japan. <i>Psychiatry Clin Neurosci</i>. 2015;69(8):440-447. <a href="https://doi.org/10.1111/pcn.12275" target="_blank" rel="noopener noreferrer">doi:10.1111/pcn.12275</a> (tabla 6).<br>
-            Ashton CH. <i>Benzodiazepines: How They Work and How to Withdraw</i> (Manual de Ashton). Revisión de agosto de 2002, tabla 1 (dosis orales aproximadamente equivalentes y semividas).<br>
+            Ashton CH. <i>Benzodiazepines: How They Work and How to Withdraw</i> (Manual de Ashton). Revisión de agosto de 2002, tabla 1 (dosis orales aproximadamente equivalentes).<br>
             WHO Collaborating Centre for Drug Statistics Methodology. ATC/DDD Index, DDD por vía oral: <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05BA" target="_blank" rel="noopener noreferrer">N05BA</a> (ansiolíticos), <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CD" target="_blank" rel="noopener noreferrer">N05CD</a> (hipnóticos benzodiacepínicos) y <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CF" target="_blank" rel="noopener noreferrer">N05CF</a> (fármacos Z). Consultado en noviembre de 2026.
         </div>
     </main>
@@ -91,7 +91,7 @@
     <script>
     // Datos: pestaña Data_BZ del Google Sheets (el Worker omite la fila de cabecera).
     // Columnas: A Fármaco · B Tipo (BZ/Z) · C Inada, mg ≈ 5 mg de diazepam · D Ashton mín y E Ashton máx, mg ≈ 10 mg de diazepam
-    //           (E vacía si no hay rango) · F DDD oral de la OMS (mg) · G Semivida según Ashton (h)
+    //           (E vacía si no hay rango) · F DDD oral de la OMS (mg)
     const METODOS = {
         inada:  { nombre: 'la tabla de Inada' },
         ashton: { nombre: 'el Manual de Ashton' },
@@ -132,8 +132,7 @@
                 z: String(r[1] || '').trim().toUpperCase() === 'Z',
                 inada: num(r[2]) ? [num(r[2]), num(r[2])] : null,
                 ashton: amin ? [amin, amax] : null,
-                ddd: num(r[5]) ? [num(r[5]), num(r[5])] : null,
-                semivida: String(r[6] || '').trim()
+                ddd: num(r[5]) ? [num(r[5]), num(r[5])] : null
             };
         });
     }
@@ -161,8 +160,6 @@
         if (o !== 'Diazepam' && d !== 'Diazepam' && F.Diazepam?.[metodo]) lineas.push(`${fmt(dosis)} mg de ${esc(o.toLowerCase())} ≈ ${fmtR(convertir(dosis, o, 'Diazepam', metodo))} mg de diazepam.`);
         const otros = Object.keys(METODOS).filter(m => m !== metodo).map(m => [m, convertir(dosis, o, d, m)]).filter(x => x[1]);
         if (otros.length) lineas.push(otros.map(([m, r]) => `Con ${METODOS[m].nombre}: ≈ ${fmtR(r)} mg/día`).join('<br>'));
-        const sv = [o, d].filter(n => F[n].semivida).map(n => `${esc(n.toLowerCase())} ${esc(F[n].semivida)} h`);
-        if (sv.length) lineas.push(`Semivida (Ashton; entre corchetes, la del metabolito activo): ${sv.join(' · ')}.`);
         res.innerHTML = `
             <div class="n">≈ ${fmtR(equiv)} <small>mg/día</small></div>
             <div class="t">de ${esc(d.toLowerCase())}</div>
