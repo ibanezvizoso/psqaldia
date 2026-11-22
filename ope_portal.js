@@ -59,6 +59,8 @@ const OPE_ESPECIALIDADES = [
       examenes: [{ año: '22', hoja: 'Ope_Dig22' }, { año: '20', hoja: 'Ope_Dig20' }] },
     { id: 'car', nombre: 'Cardiología', titulo: 'OPE Cardiología', icono: 'fa-heart-pulse', color: '#b91c1c', guardado: 'psq_save_car', snack: 10,
       examenes: [{ año: '22', hoja: 'Ope_Car22' }, { año: '20', hoja: 'Ope_Car20' }] },
+    { id: 'cirgen', nombre: 'Cirugía General', titulo: 'OPE Cirugía General y del Aparato Digestivo', icono: 'fa-scissors', color: '#475569', guardado: 'psq_save_cirgen', snack: 10,
+      examenes: [{ año: '22', hoja: 'Ope_CirGen22' }, { año: '20', hoja: 'Ope_CirGen20' }] },
     { id: 'endo', nombre: 'Endocrinología', titulo: 'OPE Endocrinología y Nutrición', icono: 'fa-vial', color: '#ca8a04', guardado: 'psq_save_endo', snack: 10,
       examenes: [{ año: '22', hoja: 'Ope_Endo22' }, { año: '20', hoja: 'Ope_Endo20' }] },
     { id: 'geri', nombre: 'Geriatría', titulo: 'OPE Geriatría', icono: 'fa-person-cane', color: '#a16207', guardado: 'psq_save_geri', snack: 10,
