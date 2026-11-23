@@ -85,6 +85,8 @@ const OPE_ESPECIALIDADES = [
       examenes: [{ año: '22', hoja: 'Ope_PsiCli22' }, { año: '20', hoja: 'Ope_PsiCli20' }] },
     { id: 'psq', nombre: 'Psiquiatría', titulo: 'OPE Psiquiatría', icono: 'fa-brain', color: '#4338ca', guardado: 'psq_save_ope', snack: 10,
       examenes: [{ año: '22', hoja: 'Ope_PSQ22' }, { año: '20', hoja: 'Ope_PSQ20' }] },
+    { id: 'reuma', nombre: 'Reumatología', titulo: 'OPE Reumatología', icono: 'fa-hand-dots', color: '#9333ea', guardado: 'psq_save_reuma', snack: 10,
+      examenes: [{ año: '22', hoja: 'Ope_Reuma22' }, { año: '20', hoja: 'Ope_Reuma20' }] },
     { id: 'cot', nombre: 'Traumatología', titulo: 'OPE Traumatología', icono: 'fa-bone', color: '#0ea5e9', guardado: 'psq_save_cot', snack: 10,
       examenes: [{ año: '20', hoja: 'Ope_Cot20' }] },
     { id: 'urg', nombre: 'Urgencias Hospitalarias', titulo: 'OPE Urgencias Hospitalarias', icono: 'fa-ambulance', color: '#dc2626', guardado: 'psq_save_urg', snack: 10,
