@@ -21,12 +21,13 @@ psqaldia.com es una plataforma para profesionales de la salud mental con conteni
 - Para que una página nueva entre en el sitemap, añádela a `paginas.json`. Cuida el título y la descripción de cada página para que Google la muestre bien.
 - Las herramientas siguen un formato común: tres tarjetas de presentación, la herramienta, las fuentes, el botón "VOLVER A HERRAMIENTAS" y la línea final "© 2026 PSQ AL DÍA · Herramientas clínicas".
 - Siempre que sea posible, las herramientas tendrán un selector de idioma español/english.
-- Antes de publicar, prueba los cambios en el navegador (móvil y escritorio) simulando los datos del Sheets. Después, comprueba la web publicada en psqaldia.com.
+- Antes de publicar, prueba los cambios en el navegador (móvil y escritorio) simulando los datos del Sheets. Después, comprueba la web publicada en psqaldia.com. Excepción: añadir un examen OPE (solo la línea en `OPE_ESPECIALIDADES` y las páginas generadas) no necesita esta prueba completa; basta con que `node scripts/generar-paginas-ope.js` termine sin errores.
 
 ## Exámenes OPE
 - Formato de cada pestaña: A pregunta · B–E opciones A–D · F respuesta correcta (A–D, o NULA si está anulada) · G explicación. En la Parte Común, la columna H lleva el año.
 - Usa siempre el examen y la plantilla de respuestas definitivos del SERGAS. Copia literal: ni resumir ni corregir el enunciado.
 - Para añadir un examen: una línea en `OPE_ESPECIALIDADES` de `ope_portal.js` y después `node scripts/generar-paginas-ope.js`.
-- La hoja entregada tiene que poder publicarse tal cual, aunque el autor no tenga tiempo de revisarla. Todas las preguntas llevan su explicación, y en la hoja no van notas internas, marcas de duda ni texto provisional.
-- Explicaciones: si la pregunta es clara, explicación directa, sin cita. Si hay un dato concreto, una cifra, un criterio, una dosis o algo que no cuadra con la plantilla, compruébalo en fuentes externas antes de escribirla. Si aun así no se puede confirmar, escribe la explicación mejor respaldada, con prudencia y sin afirmar lo que no esté claro.
+- Comprueba la columna F casilla por casilla contra la plantilla oficial; las preguntas modificadas por el tribunal (letra entre comillas) llevan la letra nueva sin comillas.
+- La hoja entregada lleva la columna G vacía, salvo en las anuladas: «Pregunta anulada por el tribunal. Motivo oficial: …» (motivo traducido de la página 2 de la plantilla). Las explicaciones las completa el autor en otra conversación. En la hoja no van notas internas, marcas de duda ni texto provisional.
+- Si te piden explicaciones: si la pregunta es clara, explicación directa, sin cita. Si hay un dato concreto, una cifra, un criterio, una dosis o algo que no cuadra con la plantilla, compruébalo en fuentes externas antes de escribirla. Si aun así no se puede confirmar, escribe la explicación mejor respaldada, con prudencia y sin afirmar lo que no esté claro.
 - Las dudas van aparte, fuera de la hoja: una lista corta con el número de pregunta y el motivo, por si el autor puede resolverlas.
