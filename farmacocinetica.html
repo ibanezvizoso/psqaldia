@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador farmacocinético de psicofármacos: inicio, retirada y cambio | psq al día</title>
-    <meta name="description" content="Simulador farmacocinético de inicio, cambio e interrupción de psicofármacos.">
+    <meta name="description" content="Simulador de niveles plasmáticos relativos de antipsicóticos, antidepresivos y benzodiacepinas: estado estacionario, retirada escalonada y cambio cruzado.">
     <link rel="canonical" href="https://psqaldia.com/farmacocinetica">
     <link rel="icon" type="image/png" href="/Logo.png">
-    
+
     <link rel="stylesheet" href="/css/all.min.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chart.js 4.6.2 (MIT) servido desde la propia web: funciona sin conexión y no depende de un CDN -->
+    <script src="/js/vendor/chart.umd.min.js"></script>
 
     <style>
         :root {
@@ -24,10 +25,10 @@
             --radius: 1.5rem;
         }
 
-        body { 
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg); 
-            color: var(--text-main); 
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
             line-height: 1.6;
             margin: 0;
             display: flex;
@@ -37,108 +38,126 @@
         }
 
         .nav-header { padding: 1.5rem 2rem; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; font-size: 1.2rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        
-        .hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(circle at top, var(--primary-light) 0%, transparent 70%); }
+
+        .hero { text-align: center; padding: 4rem 1.5rem 3rem; }
         .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; margin-top: 0; color: var(--text-main); }
-        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: auto; }
+        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 640px; margin: auto; }
 
         .main-content { padding: 0 1.5rem 5rem; max-width: 1000px; margin: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
-        /* --- GRID DE BENEFICIOS --- */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-            margin-top: -1.5rem;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
-            transition: transform 0.2s;
-        }
-
+        /* --- Tarjetas de presentación --- */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; margin-top: -1.5rem; }
+        .feature-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02); transition: transform 0.2s; }
         .feature-card:hover { transform: translateY(-3px); }
-
-        .feature-icon {
-            font-size: 2rem;
-            color: var(--primary);
-            background: var(--primary-light);
-            width: 60px; height: 60px;
-            border-radius: 12px;
-            display: inline-flex; align-items: center; justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
+        .feature-icon { font-size: 2rem; color: var(--primary); background: var(--primary-light); width: 60px; height: 60px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
         .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.8rem 0; letter-spacing: -0.01em; }
         .feature-card p { font-size: 0.95rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
-        /* Contenedor del Simulador */
-        #modalData { 
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            margin-bottom: 2rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+        /* --- Contenedor de la herramienta --- */
+        #modalData { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; margin: 0 auto 2rem; max-width: 860px; }
 
-        /* Estilos del Simulador */
-        .sss-ui { padding: 1.5rem !important; }
-        .sss-card { background: var(--bg) !important; border: 1px solid var(--border) !important; padding: 15px !important; }
-        .chart-box { padding: 15px !important; border-radius: 15px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        /* --- Simulador (la isla es siempre clara) --- */
+        .pk-ui { padding: 1.5rem; }
+        .pk-loader { padding: 4rem 1rem; text-align: center; color: var(--text-muted); }
+        .pk-loader i { color: var(--brand); }
+        .pk-loader p { margin-top: 1rem; font-weight: 700; }
+        .pk-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .pk-head h2 { font-size: 1.1rem; margin: 0; font-weight: 800; }
+        .pk-head h2 i { color: var(--brand); margin-right: 4px; }
+        .pk-lang { display: inline-flex; background: var(--surface-2); border-radius: .7rem; padding: 3px; }
+        .pk-lang button { border: 0; background: transparent; padding: 4px 10px; border-radius: .55rem; font-size: .72rem; font-weight: 800; color: var(--text-muted); cursor: pointer; }
+        .pk-lang button.on { background: #fff; color: var(--brand); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 
-        /* Sección de Info Científica */
-        .info-panel {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            margin-top: 3rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+        .pk-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--surface-2); border-radius: .9rem; padding: 4px; }
+        .pk-modes button { border: 0; background: transparent; padding: .55rem .5rem; border-radius: .7rem; font-weight: 800; font-size: .85rem; color: var(--text-muted); cursor: pointer; }
+        .pk-modes button.on { background: var(--brand); color: #fff; box-shadow: 0 4px 10px -4px rgba(37,96,149,.6); }
+        .pk-help { font-size: .82rem; color: var(--text-muted); margin: .7rem .2rem 1rem; line-height: 1.45; }
 
-        /* Footer de navegación */
+        .pk-cards { display: grid; gap: .8rem; }
+        .pk-cards.two { grid-template-columns: 1fr 1fr; }
+        .pk-card { background: var(--bg); border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: .9rem; padding: .9rem 1rem; }
+        .pk-card-h { font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; color: var(--c); margin-bottom: .5rem; }
+        .pk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+        .pk-grid1 { margin-top: .1rem; }
+        .pk-ui label { display: block; font-size: .66rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; margin: .35rem 0 2px; }
+        .pk-ui select, .pk-ui input { width: 100%; box-sizing: border-box; padding: .45rem .5rem; border: 1px solid var(--border); border-radius: .5rem; background: #fff; color: var(--text-main); font-size: .9rem; font-family: inherit; }
+        .pk-ui select:focus, .pk-ui input:focus { outline: 2px solid rgba(37,96,149,.35); border-color: var(--brand); }
+        .pk-chip { margin-top: .5rem; font-size: .75rem; color: var(--text-muted); background: #fff; border: 1px dashed var(--border); border-radius: .5rem; padding: .3rem .5rem; }
+        .pk-chip i { color: var(--c); margin-right: 3px; }
+        .pk-steps { margin-top: .6rem; border-top: 1px dashed var(--border); padding-top: .4rem; }
+        .pk-steps-h { font-size: .7rem; font-weight: 800; text-transform: uppercase; color: var(--text-main); letter-spacing: .03em; }
+        .pk-steps-h span { text-transform: none; font-weight: 600; color: var(--text-muted); letter-spacing: 0; }
+        .pk-step { display: grid; grid-template-columns: 1fr 1fr 34px; gap: .5rem; align-items: end; }
+        .pk-del { height: 34px; border: 1px solid var(--border); background: #fff; color: var(--text-muted); border-radius: .5rem; cursor: pointer; }
+        .pk-del:hover { color: #dc2626; border-color: #dc2626; }
+        .pk-add { margin-top: .5rem; border: 0; background: transparent; color: var(--c); font-weight: 800; font-size: .78rem; cursor: pointer; padding: .2rem 0; }
+
+        .pk-chartbox { margin-top: 1rem; background: #fff; border: 1px solid var(--border); border-radius: .9rem; padding: .5rem .7rem .7rem; }
+        .pk-chartbar { display: flex; justify-content: flex-end; align-items: center; gap: .4rem; }
+        .pk-chartbar label { margin: 0; }
+        .pk-chartbar select { width: auto; padding: .2rem .4rem; font-size: .8rem; }
+        .pk-canvas { position: relative; height: 300px; }
+        .pk-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: var(--text-muted); font-size: .9rem; font-weight: 600; }
+
+        .pk-msgs { margin-top: .6rem; display: grid; gap: .4rem; }
+        .pk-msg { font-size: .8rem; line-height: 1.4; padding: .5rem .7rem; border-radius: .6rem; border-left: 3px solid; }
+        .pk-msg.err { background: #fef2f2; border-color: #dc2626; color: #7f1d1d; }
+        .pk-msg.warn { background: #fffbeb; border-color: #d97706; color: #78350f; }
+        .pk-msg.hint { background: var(--brand-soft); border-color: var(--brand); color: var(--text-main); }
+
+        .pk-summary { margin-top: .8rem; display: grid; gap: .5rem; }
+        .pk-sum-h { font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
+        .pk-sum { border-left: 4px solid var(--c); background: var(--bg); border-radius: .6rem; padding: .55rem .8rem; font-size: .84rem; }
+        .pk-sum b { color: var(--c); }
+        .pk-sum ul { margin: .25rem 0 0; padding-left: 1.1rem; }
+        .pk-sum li { margin: .1rem 0; line-height: 1.45; }
+
+        .pk-read { margin-top: .8rem; font-size: .82rem; color: var(--text-muted); }
+        .pk-read summary { cursor: pointer; font-weight: 800; color: var(--brand); }
+        .pk-read ul { padding-left: 1.1rem; margin: .4rem 0 0; }
+        .pk-read li { margin: .25rem 0; line-height: 1.45; }
+
+        /* --- Fundamentos y fuentes --- */
+        .info-panel { background: white; padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border); margin: 2.5rem auto 0; max-width: 860px; box-sizing: border-box; }
+        .info-panel h2 { font-size: 1.1rem; margin: 0 0 1rem; font-weight: 700; }
+        .info-panel h3 { font-size: 1rem; margin: 1.6rem 0 .6rem; font-weight: 700; }
+        .info-panel p, .info-panel li { font-size: .9rem; line-height: 1.55; }
+        .info-panel ul { padding-left: 1.2rem; }
+        .formula { background: var(--brand-soft); padding: 1.4rem 1rem; border-radius: 1rem; margin: 1.2rem 0; color: var(--brand-strong); font-family: 'Times New Roman', serif; font-style: italic; overflow-x: auto; display: grid; gap: .8rem; justify-items: center; }
+        .formula .f1 { font-size: 1.25rem; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .formula .frac { display: inline-flex; flex-direction: column; align-items: center; font-size: .9em; }
+        .formula .frac span:first-child { border-bottom: 1px solid currentColor; padding: 0 5px; }
+        .formula .frac span:last-child { padding: 0 5px; }
+        .formula .f2 { font-size: 1.02rem; display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem 1.6rem; }
+        .formula .f2 span { white-space: nowrap; }
+        .legend { font-size: .82rem !important; color: var(--text-muted); }
+        .note { margin-top: 1.2rem; padding: 1rem; background: var(--surface-2); border-radius: .8rem; border-left: 4px solid var(--brand); font-size: .85rem; line-height: 1.5; color: var(--text-muted); }
+        .refs { font-size: .84rem; color: var(--text-muted); line-height: 1.55; }
+        .refs p { font-size: .84rem; margin: .5rem 0; }
+        .refs a { color: var(--brand); }
+
         .nav-footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border); }
         .link-back { color: var(--primary); font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Footer sutil final */
-        .site-bottom-info {
-            text-align: center;
-            padding: 2rem 1rem;
-            background: #f8fafc;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border);
-        }
-        .site-bottom-info img {
-            height: 18px;
-            vertical-align: middle;
-            margin-right: 8px;
-            opacity: 0.4;
-            filter: grayscale(100%);
-        }
+        .site-bottom-info { text-align: center; padding: 2rem 1rem; background: #f8fafc; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+        .site-bottom-info img { height: 18px; vertical-align: middle; margin-right: 8px; opacity: 0.4; filter: grayscale(100%); }
 
+        @media (max-width: 700px) {
+            .pk-cards.two { grid-template-columns: 1fr; }
+        }
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.8rem; }
             .nav-header { padding: 1rem; }
-            .sss-ui { padding: 1rem !important; }
-            .features-grid { gap: 1rem; }
+            .pk-ui { padding: 1rem; }
+            .pk-canvas { height: 250px; }
+            .info-panel { padding: 1.3rem; }
+            .formula .f1 { font-size: .98rem; gap: 5px; }
+            .formula { padding: 1.1rem .6rem; }
+            .formula .f2 { font-size: .9rem; }
         }
     </style>
     <meta name="robots" content="index, follow, max-image-preview:large">
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Simulador farmacocinético de psicofármacos: inicio, retirada y cambio","alternateName":"Farmacocinética","description":"Simulador farmacocinético de inicio, cambio e interrupción de psicofármacos.","url":"https://psqaldia.com/farmacocinetica","applicationCategory":"HealthApplication","operatingSystem":"Web","inLanguage":"es","isAccessibleForFree":true,"audience":{"@type":"MedicalAudience","audienceType":"Profesionales sanitarios"},"author":{"@type":"Person","name":"Jesús Ibáñez Vizoso"},"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Herramientas","item":"https://psqaldia.com/herramientas"},{"@type":"ListItem","position":3,"name":"Farmacocinética","item":"https://psqaldia.com/farmacocinetica"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Simulador farmacocinético de psicofármacos: inicio, retirada y cambio","alternateName":"Farmacocinética","description":"Simulador de niveles plasmáticos relativos de antipsicóticos, antidepresivos y benzodiacepinas: estado estacionario, retirada escalonada y cambio cruzado.","url":"https://psqaldia.com/farmacocinetica","applicationCategory":"HealthApplication","operatingSystem":"Web","inLanguage":["es","en"],"isAccessibleForFree":true,"audience":{"@type":"MedicalAudience","audienceType":"Profesionales sanitarios"},"author":{"@type":"Person","name":"Jesús Ibáñez Vizoso"},"publisher":{"@type":"Organization","name":"psq al día","url":"https://psqaldia.com/","logo":"https://psqaldia.com/og-psq.png"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://psqaldia.com/"},{"@type":"ListItem","position":2,"name":"Herramientas","item":"https://psqaldia.com/herramientas"},{"@type":"ListItem","position":3,"name":"Farmacocinética","item":"https://psqaldia.com/farmacocinetica"}]}]}</script>
     <link rel="stylesheet" href="/css/psq.css">
     <script src="/js/tema.js"></script>
     <script src="/js/qr.js" defer></script>
@@ -151,92 +170,87 @@
     </nav>
 
     <header class="hero psq-glow">
-        <h1>Simulador Farmacocinético</h1>
-        <p>Modelado dinámico de niveles plasmáticos relativos para asistir en el inicio, cambio o interrupción de tratamientos.</p>
+        <h1 data-i18n="hero_t">Simulador farmacocinético</h1>
+        <p data-i18n="hero_p">Niveles plasmáticos relativos al iniciar, retirar o cambiar un psicofármaco, según su semivida, su Tmax y la pauta.</p>
     </header>
 
     <main class="main-content">
-        
+
         <section class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                <h3>Steady State Visual</h3>
-                <p>Visualiza gráficamente la acumulación del fármaco hasta alcanzar el estado estacionario según su vida media y posología.</p>
+                <h3 data-i18n="c1_t">Acumulación hasta el estado estacionario</h3>
+                <p data-i18n="c1_p">Ve cómo se acumula el fármaco toma a toma según su semivida y el intervalo de dosis, y cuándo se estabiliza.</p>
             </div>
-            
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-exchange-alt"></i></div>
-                <h3>Simulación de Switches</h3>
-                <p>Simula escenarios de cambio (cross-tapering) para predecir caídas o picos de niveles plasmáticos durante la transición.</p>
+                <h3 data-i18n="c2_t">Retiradas y cambios cruzados</h3>
+                <p data-i18n="c2_p">Simula una retirada escalonada o un cambio entre dos fármacos y comprueba qué día baja uno y sube el otro.</p>
             </div>
-            
             <div class="feature-card">
-    <div class="feature-icon"><i class="fas fa-search-plus"></i></div>
-    <h3>Vista Ajustable</h3>
-    <p>Modifica la escala temporal y el zoom de la gráfica para analizar con precisión los picos y valles de concentración en cualquier fase del tratamiento.</p>
-</div>
+                <div class="feature-icon"><i class="fas fa-list-check"></i></div>
+                <h3 data-i18n="c3_t">Resumen en cifras</h3>
+                <p data-i18n="c3_p">Día en que se alcanza el 90&nbsp;% del estado estacionario, días hasta bajar del 50, 10 y 3&nbsp;% tras la última toma y fluctuación entre tomas.</p>
+            </div>
         </section>
 
         <div id="modalData" class="psq-light-island">
-            <div style="padding:4rem; text-align:center;">
-                <i class="fas fa-microchip fa-spin fa-2x" style="color:var(--primary);"></i>
-                <p style="margin-top:1rem; font-weight:700; color:var(--text-muted);">Iniciando motor SSS v2.4...</p>
+            <div class="pk-loader">
+                <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+                <p data-i18n="loading">Cargando simulador…</p>
             </div>
         </div>
 
         <section class="info-panel">
-            <h2 style="font-size: 1.1rem; margin-bottom: 1.2rem; font-weight: 700; margin-top: 0;">
-                <i class="fas fa-graduation-cap"></i> Fundamentos del Modelo
-            </h2>
-            
-            <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">
-                Este simulador emplea modelos de <b>compartimento único</b> y la <b>función de Bateman</b> para estimar la curva de niveles plasmáticos:
-            </p>
+            <h2><i class="fas fa-graduation-cap"></i> <span data-i18n="info_h">Fundamentos del modelo</span></h2>
+            <p data-i18n="info_p1">Cada toma se modela con un <b>compartimento único</b> y absorción y eliminación de primer orden (<b>función de Bateman</b>). La constante de eliminación sale de la semivida y la de absorción se calcula para que el pico de una dosis única coincida con el Tmax del fármaco. El nivel en cada momento es la suma de todas las tomas (<b>superposición</b>).</p>
 
-            <div style="background: var(--primary-light); padding: 2rem 1rem; border-radius: 1rem; margin: 1.5rem 0; color: var(--primary); border: 1px solid rgba(67, 56, 202, 0.1); display: flex; justify-content: center; align-items: center; font-family: 'Times New Roman', serif; font-style: italic; overflow-x: auto;">
-                <div style="font-size: 1.3rem; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-                    <span>C(t) = D ·</span>
-                    <div style="display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.9em;">
-                        <span style="border-bottom: 1px solid var(--primary); padding: 0 5px;">k<sub>a</sub></span>
-                        <span style="padding: 0 5px;">k<sub>a</sub> - k<sub>e</sub></span>
-                    </div>
-                    <span>· (e<sup>-k<sub>e</sub>t</sup> - e<sup>-k<sub>a</sub>t</sup>)</span>
+            <div class="formula" aria-label="C(t) = D · ka / (ka − ke) · (e^(−ke·t) − e^(−ka·t)); ke = ln 2 / t½; Tmax = ln(ka/ke) / (ka − ke); C total(t) = Σ C(t − ti)">
+                <div class="f1">
+                    <span>C(t) ∝ D ·</span>
+                    <span class="frac"><span>k<sub>a</sub></span><span>k<sub>a</sub> − k<sub>e</sub></span></span>
+                    <span>· (e<sup>−k<sub>e</sub>t</sup> − e<sup>−k<sub>a</sub>t</sup>)</span>
                 </div>
+                <div class="f2"><span>k<sub>e</sub> = ln 2 / t<sub>½</sub></span><span>T<sub>max</sub> = ln(k<sub>a</sub>/k<sub>e</sub>) / (k<sub>a</sub> − k<sub>e</sub>)</span><span>C<sub>total</sub>(t) = Σ C(t − t<sub>i</sub>)</span></div>
             </div>
+            <p class="legend" data-i18n="info_legend"><b>C(t)</b>: nivel tras una toma, en el tiempo <i>t</i> · <b>D</b>: dosis · <b>k<sub>a</sub></b>: constante de absorción · <b>k<sub>e</sub></b>: constante de eliminación · <b>t<sub>i</sub></b>: momento de cada toma</p>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1.2rem;">
-                <div style="display: flex; gap: 5px;"><b>C(t):</b> <span>Concentración en tiempo <i>t</i></span></div>
-                <div style="display: flex; gap: 5px;"><b>k<sub>a</sub>:</b> <span>Constante de absorción</span></div>
-                <div style="display: flex; gap: 5px;"><b>k<sub>e</sub>:</b> <span>Constante de eliminación</span></div>
-                <div style="display: flex; gap: 5px;"><b>D:</b> <span>Dosis relativa</span></div>
-            </div>
+            <p data-i18n="info_p2">En la retirada, y en el fármaco que se retira durante un cambio, se parte del <b>estado estacionario con la dosis actual</b>, calculado de forma exacta, como si el paciente la tomara desde hace tiempo indefinido.</p>
 
-            <div style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 0.8rem; border-left: 4px solid var(--primary); font-size: 0.85rem; line-height: 1.4; color: var(--text-muted);">
-                <i class="fas fa-info-circle" style="color: var(--primary); margin-right: 5px;"></i> 
-                <strong>Nota:</strong> Los valores son <b>relativos (%)</b>. El 100% representa el pico máximo en estado estacionario (<i>Steady State</i>).
+            <div class="note" data-i18n="info_note"><b>Valores relativos.</b> 100&nbsp;% = pico en estado estacionario con la dosis de referencia de cada fármaco: la <b>dosis actual</b> en el que se retira y la <b>dosis final de la pauta</b> en el que se inicia. Si la pauta sube por encima de esa dosis, la curva pasa del 100&nbsp;%. La biodisponibilidad y el volumen de distribución no cambian la forma de la curva relativa, por eso no intervienen. Cada fármaco se normaliza por separado: en un cambio, que las curvas se crucen no indica dosis equivalentes ni la misma ocupación de receptores.</div>
+
+            <h3 data-i18n="lim_h">Qué no tiene en cuenta</h3>
+            <ul id="pk-lim">
+                <li><b>Metabolitos activos.</b> Se usa una única semivida por fármaco; si hay metabolitos activos con otra semivida, la curva no los representa por separado.</li>
+                <li><b>Cinética no lineal.</b> El modelo es lineal: no recoge la acumulación desproporcionada con la dosis (por ejemplo, paroxetina o fluoxetina).</li>
+                <li><b>Variabilidad individual.</b> Se usan valores medios de adultos. No incluye interacciones, inducción o inhibición enzimática (por ejemplo, el tabaco con clozapina u olanzapina), farmacogenética (CYP2D6, CYP2C19), edad ni insuficiencia hepática o renal.</li>
+                <li><b>Formulaciones.</b> No es válido para inyectables de liberación prolongada.</li>
+                <li><b>Efecto clínico.</b> No representa el efecto ni la ocupación de receptores. Sirve para orientar la planificación; no sustituye a la monitorización de niveles ni al juicio clínico.</li>
+            </ul>
+
+            <h3><i class="fas fa-book-medical"></i> <span data-i18n="src_h">Fuentes</span></h3>
+            <div class="refs">
+                <p data-i18n="src_intro">Parámetros de cada fármaco (t½ y Tmax): valores medios en adultos de la base de datos de psq al día. Para contrastarlos, la sección 5.2 de la ficha técnica y las tablas del consenso AGNP.</p>
+                <p>Derendorf H, Schmidt S. <i>Rowland and Tozer's Clinical Pharmacokinetics and Pharmacodynamics: Concepts and Applications</i>. 5th ed. Philadelphia: Wolters Kluwer; 2019.</p>
+                <p>Bateman H. The solution of a system of differential equations occurring in the theory of radioactive transformations. <i>Proc Camb Philos Soc</i>. 1910;15:423-427.</p>
+                <p>Hiemke C, Bergemann N, Clement HW, et al. Consensus Guidelines for Therapeutic Drug Monitoring in Neuropsychopharmacology: Update 2017. <i>Pharmacopsychiatry</i>. 2018;51(1-2):9-62. <a href="https://doi.org/10.1055/s-0043-116492" target="_blank" rel="noopener noreferrer">doi:10.1055/s-0043-116492</a></p>
+                <p>AEMPS. Centro de Información online de Medicamentos (CIMA): fichas técnicas, sección 5.2. <a href="https://cima.aemps.es/" target="_blank" rel="noopener noreferrer">cima.aemps.es</a></p>
             </div>
         </section>
 
         <footer class="nav-footer">
-        <a href="/herramientas" class="link-back"><i class="fas fa-arrow-left"></i> VOLVER A HERRAMIENTAS</a>
-    </footer>
+            <a href="/herramientas" class="link-back"><i class="fas fa-arrow-left"></i> <span data-i18n="back">VOLVER A HERRAMIENTAS</span></a>
+        </footer>
     </main>
 
     <footer class="site-bottom-info">
-        <img src="/Logo.png" alt="PSQ AL DÍA"> 
+        <img src="/Logo.png" alt="PSQ AL DÍA">
         <span>&copy; 2026 PSQ AL DÍA · Herramientas clínicas</span>
     </footer>
 
     <script src="/farmacocinetica.js"></script>
     <script>
-        window.WORKER_URL = "https://psqaldia.com/"; 
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof window.iniciarInterfazSSS === 'function') {
-                window.iniciarInterfazSSS();
-                document.body.style.overflow = 'auto';
-            }
-        });
+        document.addEventListener('DOMContentLoaded', () => window.iniciarInterfazSSS());
     </script>
 </body>
 </html>
