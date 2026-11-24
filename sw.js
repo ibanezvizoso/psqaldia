@@ -1,5 +1,5 @@
 // Cambia este nombre cada vez que quieras forzar la renovación de la caché en los móviles
-const CACHE_NAME = 'psq-v38';
+const CACHE_NAME = 'psq-v39';
 
 // Páginas y recursos que se guardan al instalar la app.
 // IMPORTANTE: usar las URLs "limpias" (sin .html), que son las que se enlazan en la web.
@@ -20,6 +20,8 @@ const ASSETS = [
   '/ADswitch.js',
   '/hipnoticos',
   '/hipnoticosSwitch.js',
+  '/benzodiacepinas',
+  '/benzodiacepinas.js',
   '/juegos',
   '/juegos/ventana-terapeutica',
   '/juegos/cronologia',
