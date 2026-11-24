@@ -35,14 +35,14 @@
                 info_note: '<b>Valores relativos.</b> 100 % = pico en estado estacionario con la dosis de referencia de cada fármaco: la <b>dosis actual</b> en el que se retira y la <b>dosis final de la pauta</b> en el que se inicia. Si la pauta sube por encima de esa dosis, la curva pasa del 100 %. La biodisponibilidad y el volumen de distribución no cambian la forma de la curva relativa, por eso no intervienen. Cada fármaco se normaliza por separado: en un cambio, que las curvas se crucen no indica dosis equivalentes ni la misma ocupación de receptores.',
                 lim_h: 'Qué no tiene en cuenta',
                 lim: [
-                    '<b>Metabolitos activos.</b> Se usa una única semivida por fármaco; si hay metabolitos activos con otra semivida, la curva no los representa por separado.',
+                    '<b>Metabolitos activos.</b> Se usa una única semivida por fármaco (la del principio activo o la del metabolito activo más relevante); el compuesto original y sus metabolitos no se representan por separado.',
                     '<b>Cinética no lineal.</b> El modelo es lineal: no recoge la acumulación desproporcionada con la dosis (por ejemplo, paroxetina o fluoxetina).',
                     '<b>Variabilidad individual.</b> Se usan valores medios de adultos. No incluye interacciones, inducción o inhibición enzimática (por ejemplo, el tabaco con clozapina u olanzapina), farmacogenética (CYP2D6, CYP2C19), edad ni insuficiencia hepática o renal.',
                     '<b>Formulaciones.</b> No es válido para inyectables de liberación prolongada.',
                     '<b>Efecto clínico.</b> No representa el efecto ni la ocupación de receptores. Sirve para orientar la planificación; no sustituye a la monitorización de niveles ni al juicio clínico.'
                 ],
                 src_h: 'Fuentes',
-                src_intro: 'Parámetros de cada fármaco (t½ y Tmax): valores medios en adultos de la base de datos de psq al día. Para contrastarlos, la sección 5.2 de la ficha técnica y las tablas del consenso AGNP.',
+                src_intro: 'Parámetros de cada fármaco (t½ y Tmax): valores medios en adultos procedentes de las fichas técnicas y de fuentes especializadas. Se utilizan los parámetros del principio activo o, cuando es más relevante, los de su metabolito activo.',
                 back: 'VOLVER A HERRAMIENTAS'
             },
             title: 'Simulador de niveles',
@@ -106,14 +106,14 @@
                 info_note: '<b>Relative values.</b> 100% = steady-state peak at each drug\'s reference dose: the <b>current dose</b> for the drug being stopped and the <b>final dose of the schedule</b> for the drug being started. If the schedule goes above that dose, the curve exceeds 100%. Bioavailability and volume of distribution do not change the shape of the relative curve, so they are not used. Each drug is normalised separately: in a switch, crossing curves do not mean equivalent doses or equal receptor occupancy.',
                 lim_h: 'What it does not account for',
                 lim: [
-                    '<b>Active metabolites.</b> A single half-life is used per drug; active metabolites with a different half-life are not shown separately.',
+                    '<b>Active metabolites.</b> A single half-life is used per drug (that of the parent drug or of its most relevant active metabolite); the parent drug and its metabolites are not shown separately.',
                     '<b>Non-linear kinetics.</b> The model is linear: it does not capture disproportionate accumulation with dose (e.g. paroxetine or fluoxetine).',
                     '<b>Individual variability.</b> Mean adult values are used. It does not include interactions, enzyme induction or inhibition (e.g. smoking with clozapine or olanzapine), pharmacogenetics (CYP2D6, CYP2C19), age, or hepatic or renal impairment.',
                     '<b>Formulations.</b> Not valid for long-acting injectables.',
                     '<b>Clinical effect.</b> It does not represent effect or receptor occupancy. It is a planning aid; it does not replace therapeutic drug monitoring or clinical judgement.'
                 ],
                 src_h: 'Sources',
-                src_intro: 'Drug parameters (t½ and Tmax): mean adult values from the psq al día database. To check them, see section 5.2 of the Summary of Product Characteristics and the AGNP consensus tables.',
+                src_intro: 'Drug parameters (t½ and Tmax): mean adult values from the Summaries of Product Characteristics and specialised sources. The parameters of the parent drug are used or, where more relevant, those of its active metabolite.',
                 back: 'BACK TO TOOLS'
             },
             title: 'Level simulator',
