@@ -113,7 +113,10 @@
 .bz-vacio { color: var(--text-muted); font-size: .92rem; }
 .bz-aviso { margin-top: 1.2rem; font-size: .84rem; color: var(--text-muted); line-height: 1.5; }
 .bz-aviso li { margin-bottom: .35rem; }
-.bz-ref { margin-top: 1.5rem; font-size: .8rem; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--border); padding-top: 1rem; }
+.bz-ref { margin-top: 1.5rem; font-size: .85rem; color: var(--text-muted); line-height: 1.55; border-top: 1px solid var(--border); padding-top: 1.1rem; }
+.bz-ref h3 { margin: 0 0 .7rem; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+.bz-ref ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
+.bz-ref li { padding-left: .85rem; border-left: 3px solid var(--border); }
 .bz-ref a { color: var(--brand); }
 @media (max-width: 420px) { .bz-fila { grid-template-columns: 1fr; } .bz-swap { justify-self: center; transform: rotate(90deg); } }
 .bz-app { padding: 1.5rem; }
@@ -144,10 +147,12 @@
         </div>
 
         <div class="bz-ref">
-            <b>Fuentes</b><br>
-            Inada T, Inagaki A. Psychotropic dose equivalence in Japan. <i>Psychiatry Clin Neurosci</i>. 2015;69(8):440-447. <a href="https://doi.org/10.1111/pcn.12275" target="_blank" rel="noopener noreferrer">doi:10.1111/pcn.12275</a> (tabla 6).<br>
-            Ashton CH. <i>Benzodiazepines: How They Work and How to Withdraw</i> (Manual de Ashton). Revisión de agosto de 2002, tabla 1 (dosis orales aproximadamente equivalentes).<br>
-            WHO Collaborating Centre for Drug Statistics Methodology. ATC/DDD Index, DDD por vía oral: <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05BA" target="_blank" rel="noopener noreferrer">N05BA</a> (ansiolíticos), <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CD" target="_blank" rel="noopener noreferrer">N05CD</a> (hipnóticos benzodiacepínicos) y <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CF" target="_blank" rel="noopener noreferrer">N05CF</a> (fármacos Z). Consultado en noviembre de 2026.
+            <h3>Fuentes</h3>
+            <ul>
+                <li>Inada T, Inagaki A. Psychotropic dose equivalence in Japan. <i>Psychiatry Clin Neurosci</i>. 2015;69(8):440-447. <a href="https://doi.org/10.1111/pcn.12275" target="_blank" rel="noopener noreferrer">doi:10.1111/pcn.12275</a> (tabla 6).</li>
+                <li>Ashton CH. <i>Benzodiazepines: How They Work and How to Withdraw</i> (Manual de Ashton). Revisión de agosto de 2002, tabla 1 (dosis orales aproximadamente equivalentes).</li>
+                <li>WHO Collaborating Centre for Drug Statistics Methodology. ATC/DDD Index, DDD por vía oral: <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05BA" target="_blank" rel="noopener noreferrer">N05BA</a> (ansiolíticos), <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CD" target="_blank" rel="noopener noreferrer">N05CD</a> (hipnóticos benzodiacepínicos) y <a href="https://atcddd.fhi.no/atc_ddd_index/?code=N05CF" target="_blank" rel="noopener noreferrer">N05CF</a> (fármacos Z). Consultado en noviembre de 2026.</li>
+            </ul>
         </div>
     </div>`;
 
