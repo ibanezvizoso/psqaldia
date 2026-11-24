@@ -67,6 +67,8 @@ const OPE_ESPECIALIDADES = [
       examenes: [{ año: '22', hoja: 'Ope_Geri22' }] },
     { id: 'gine', nombre: 'Ginecología', titulo: 'OPE Ginecología', icono: 'fa-female', color: '#db2777', guardado: 'psq_save_gine', snack: 10,
       examenes: [{ año: '20', hoja: 'Ope_Gine20' }] },
+    { id: 'hemato', nombre: 'Hematología', titulo: 'OPE Hematología y Hemoterapia', icono: 'fa-droplet', color: '#991b1b', guardado: 'psq_save_hemato', snack: 10,
+      examenes: [{ año: '22', hoja: 'Ope_Hemato22' }, { año: '20', hoja: 'Ope_Hemato20' }] },
     { id: 'mf', nombre: 'Medicina de Familia', titulo: 'OPE Médico/a de Familia', icono: 'fa-user-doctor', color: '#059669', guardado: 'psq_save_mf', snack: 10,
       examenes: [{ año: '2021-2023', hoja: 'Ope_MF24' }, { año: '2019', hoja: 'Ope_MF19' }] },
     { id: 'miv', nombre: 'Medicina Intensiva', titulo: 'OPE Medicina Intensiva', icono: 'fa-bed-pulse', color: '#be123c', guardado: 'psq_save_miv', snack: 10,
