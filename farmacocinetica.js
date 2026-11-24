@@ -67,9 +67,12 @@
             errDose: 'La dosis debe ser mayor que 0.',
             hintStop: 'Para ver la retirada, indica desde qué día se suspende o añade un cambio a dosis 0.',
             warnBefore: 'Hay un cambio de dosis de B anterior a su inicio: se aplica desde el día de inicio.',
+            warnSame: 'A y B son el mismo fármaco. Para cambiar la dosis de un fármaco, usa «Cambios de dosis» en Iniciar o Retirar.',
+            hintViewWash: (n, d, v) => `${n} sigue por encima del 3 % al final de la vista: ${v ? `amplíala a ${v} días` : 'tarda más de 60 días'} para ver la eliminación completa (día ${d}).`,
+            hintViewSS: (n, d, v) => `${n} no alcanza el 90 % del estado estacionario dentro de la vista: ${v ? `amplíala a ${v} días` : 'tarda más de 60 días'} (día ${d}).`,
             warnTmax: (n, x) => `En ${n}, el Tmax no es compatible con su semivida en un modelo de un compartimento (exige Tmax menor que 1,44 × t½). Se usa la absorción más lenta posible (Tmax ≈ ${x} h).`,
             sumH: 'Resumen',
-            params: (t, m) => `t½ ${t} h · Tmax ${m} h`,
+            params: (t, m) => `Parámetros del modelo: t½ ${t} h · Tmax ${m} h`,
             refOut: (d, f) => `100 % = pico en estado estacionario con ${d} mg cada ${f} h (dosis actual).`,
             refIn: (d, f) => `100 % = pico en estado estacionario con ${d} mg cada ${f} h (dosis final de la pauta).`,
             fluct: v => `En estado estacionario, el valle es ≈ ${v} % del pico.`,
@@ -138,9 +141,12 @@
             errDose: 'The dose must be greater than 0.',
             hintStop: 'To see the withdrawal, enter the day the drug is stopped from or add a change to dose 0.',
             warnBefore: 'One of B\'s dose changes is before its start: it applies from the start day.',
+            warnSame: 'A and B are the same drug. To change the dose of one drug, use “Dose changes” in Start or Stop.',
+            hintViewWash: (n, d, v) => `${n} is still above 3% at the end of the view: ${v ? `widen it to ${v} days` : 'it takes more than 60 days'} to see complete elimination (day ${d}).`,
+            hintViewSS: (n, d, v) => `${n} does not reach 90% of steady state within the view: ${v ? `widen it to ${v} days` : 'it takes more than 60 days'} (day ${d}).`,
             warnTmax: (n, x) => `For ${n}, Tmax is not compatible with its half-life in a one-compartment model (Tmax must be below 1.44 × t½). The slowest possible absorption is used (Tmax ≈ ${x} h).`,
             sumH: 'Summary',
-            params: (t, m) => `t½ ${t} h · Tmax ${m} h`,
+            params: (t, m) => `Model parameters: t½ ${t} h · Tmax ${m} h`,
             refOut: (d, f) => `100% = steady-state peak at ${d} mg every ${f} h (current dose).`,
             refIn: (d, f) => `100% = steady-state peak at ${d} mg every ${f} h (final dose of the schedule).`,
             fluct: v => `At steady state, the trough is ≈ ${v}% of the peak.`,
@@ -179,7 +185,19 @@
         'Benzodiacepinas': 'Benzodiazepines', 'Hipnóticos': 'Hypnotics', 'Eutimizantes': 'Mood stabilisers',
         'Antiepilépticos': 'Antiepileptics', 'Sin familia': 'Unclassified'
     };
-    const EN_COMMENT = { 'metabolito activo': 'Active metabolite', 'metabolitos activos': 'Active metabolites' };
+    // Comentarios de la hoja (columna E) en inglés; la clave va en minúsculas. Si falta, se muestra tal cual.
+    const EN_COMMENT = {
+        'metabolito activo': 'Active metabolite',
+        'metabolitos activos': 'Active metabolites',
+        'cariprazina total (semivida efectiva)': 'Total cariprazine (effective half-life)',
+        'fracción activa (risperidona + 9-oh-risperidona)': 'Active moiety (risperidone + 9-OH-risperidone)',
+        'o-desmetilvenlafaxina (odv)': 'O-desmethylvenlafaxine (ODV)',
+        'profármaco: n-desmetildiazepam': 'Prodrug: N-desmethyldiazepam',
+        'n-desmetil metabolitos': 'N-desmethyl metabolites',
+        'norfluoxetina': 'Norfluoxetine',
+        'n-desmetilclomipramina': 'N-desmethylclomipramine',
+        'n-desmetildiazepam': 'N-desmethyldiazepam'
+    };
 
     const COLORS = {
         single: { line: '#256095', fill: 'rgba(37,96,149,0.10)' },
@@ -478,9 +496,10 @@
             if (s.role === 'out' && st.mode === 'STOP' && !s.stopped) msgs.push({ tipo: 'hint', txt: t.hintStop });
         }
         if (st.mode === 'SWITCH' && !sims.some(s => s.k === 'b') && !msgs.some(m => m.tipo === 'err')) msgs.push({ tipo: 'hint', txt: t.emptyB });
-        pintarMensajes(msgs);
+        if (st.mode === 'SWITCH' && st.a.name && st.a.name === st.b.name) msgs.push({ tipo: 'warn', txt: t.warnSame });
         pintarGrafica(sims, H);
-        pintarResumen(sims);
+        pintarResumen(sims).forEach(txt => msgs.push({ tipo: 'hint', txt }));
+        pintarMensajes(msgs);
     }
 
     function pintarMensajes(msgs) {
@@ -488,8 +507,12 @@
         $('pk-msgs').innerHTML = msgs.map(m => `<div class="pk-msg ${m.tipo}"><i class="fas ${ic[m.tipo]}"></i> <span>${m.txt}</span></div>`).join('');
     }
 
+    // Menor vista disponible que llega a las h horas indicadas (null si ninguna)
+    const vistaPara = h => [5, 12, 30, 60].find(v => v * 24 >= h) || null;
+
     function pintarResumen(sims) {
         const t = T();
+        const avisos = [];
         const bloques = sims.map(s => {
             const col = st.mode === 'SWITCH' ? COLORS[s.k].line : COLORS.single.line;
             const lineas = [];
@@ -497,18 +520,25 @@
             lineas.push(t.fluct(fmt(s.ss.trough / s.ss.peak * 100, 0)));
             if (s.stopped) {
                 const w = lavado(s);
+                const fin = w.res[3] !== undefined ? w.res[3] : w.tEnd;
+                if (fin > st.view * 24) avisos.push(t.hintViewWash(esc(drugName(s.f.farmaco)), dayFmt(fin), vistaPara(fin)));
                 const partes = w.umbrales.map(u => t.below(u, w.res[u] !== undefined ? dayFmt(w.res[u]) : t.beyond(dayFmt(w.tEnd))));
                 lineas.push(`${t.lastDose(w.last < 0 ? null : dayFmt(w.last))} ${partes.join(' · ')}.`);
             } else {
                 const cambios = s.steps.filter(x => x.h >= s.t0);
                 const tc = cambios.length ? cambios[cambios.length - 1].h : null;
                 const t12 = s.f.t12;
-                if (s.role === 'in' && tc === null) lineas.push(t.ssStart(dayFmt(s.t0 + 3.32 * t12), dayFmt(s.t0 + 5 * t12)));
-                else if (tc !== null) lineas.push(t.ssChange(dayFmt(tc + 3.32 * t12), dayFmt(tc + 5 * t12)));
+                const base = s.role === 'in' && tc === null ? s.t0 : tc;
+                if (base !== null) {
+                    lineas.push((tc === null ? t.ssStart : t.ssChange)(dayFmt(base + 3.32 * t12), dayFmt(base + 5 * t12)));
+                    const d90 = base + 3.32 * t12;
+                    if (d90 > st.view * 24) avisos.push(t.hintViewSS(esc(drugName(s.f.farmaco)), dayFmt(d90), vistaPara(d90)));
+                }
             }
             return `<div class="pk-sum" style="--c:${col}"><b>${esc(drugName(s.f.farmaco))}</b><ul>${lineas.map(l => `<li>${l}</li>`).join('')}</ul></div>`;
         });
         $('pk-summary').innerHTML = bloques.length ? `<div class="pk-sum-h">${t.sumH}</div>${bloques.join('')}` : '';
+        return avisos;
     }
 
     // Líneas verticales de eventos (inicio de B, cambios de dosis, suspensión)
