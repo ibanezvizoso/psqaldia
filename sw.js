@@ -1,5 +1,5 @@
 // Cambia este nombre cada vez que quieras forzar la renovación de la caché en los móviles
-const CACHE_NAME = 'psq-v36';
+const CACHE_NAME = 'psq-v37';
 
 // Páginas y recursos que se guardan al instalar la app.
 // IMPORTANTE: usar las URLs "limpias" (sin .html), que son las que se enlazan en la web.
@@ -28,6 +28,7 @@ const ASSETS = [
   '/js/tema.js',
   '/js/qr.js',
   '/js/vendor/qrcode.js',
+  '/js/vendor/chart.umd.min.js',
   '/Logo.png',
   '/placeholder.svg',
   '/icon-192.png'
