@@ -85,7 +85,8 @@
             read: [
                 'El día 0 es la primera toma del periodo simulado. Las líneas verticales marcan el inicio de B, los cambios de dosis y la suspensión.',
                 '100 % = pico en estado estacionario con la dosis de referencia de cada fármaco (la actual en el que se retira, la final en el que se inicia). Las curvas son relativas: no comparan concentraciones absolutas entre fármacos.',
-                'El estado estacionario se alcanza en 4–5 semividas desde el inicio o desde cada cambio de dosis. Tras la última toma, en 4–5 semividas el nivel queda por debajo del 3–6 %.'
+                'El estado estacionario se alcanza en 4–5 semividas desde el inicio o desde cada cambio de dosis. Tras la última toma, en 4–5 semividas el nivel queda por debajo del 3–6 %.',
+                'Cuando un metabolito activo es el que más pesa en la duración del efecto (por ejemplo, la norfluoxetina), la curva usa sus parámetros y la ficha del fármaco lo indica bajo el selector.'
             ],
             loadingData: 'Conectando con la base de datos…',
             loadError: 'No se han podido cargar los datos del simulador.',
@@ -159,7 +160,8 @@
             read: [
                 'Day 0 is the first dose of the simulated period. Vertical lines mark the start of B, dose changes and the stop.',
                 '100% = steady-state peak at each drug\'s reference dose (current dose for the drug being stopped, final dose for the drug being started). Curves are relative: they do not compare absolute concentrations between drugs.',
-                'Steady state is reached in 4–5 half-lives from the start or from each dose change. After the last dose, the level falls below 3–6% within 4–5 half-lives.'
+                'Steady state is reached in 4–5 half-lives from the start or from each dose change. After the last dose, the level falls below 3–6% within 4–5 half-lives.',
+                'When an active metabolite drives the duration of effect (e.g. norfluoxetine), the curve uses its parameters, as shown under the drug selector.'
             ],
             loadingData: 'Connecting to the database…',
             loadError: 'The simulator data could not be loaded.',
@@ -196,7 +198,14 @@
         'n-desmetil metabolitos': 'N-desmethyl metabolites',
         'norfluoxetina': 'Norfluoxetine',
         'n-desmetilclomipramina': 'N-desmethylclomipramine',
-        'n-desmetildiazepam': 'N-desmethyldiazepam'
+        'n-desmetildiazepam': 'N-desmethyldiazepam',
+        'norfluoxetina (metabolito activo)': 'Norfluoxetine (active metabolite)',
+        'o-desmetilvenlafaxina (metabolito activo)': 'O-desmethylvenlafaxine (active metabolite)',
+        'n-desmetilclomipramina (metabolito activo)': 'N-desmethylclomipramine (active metabolite)',
+        'n-desmetildiazepam (metabolito activo)': 'N-desmethyldiazepam (active metabolite)',
+        'n-desmetildiazepam (clorazepato es un profármaco)': 'N-desmethyldiazepam (clorazepate is a prodrug)',
+        'fracción activa: risperidona + 9-oh-risperidona': 'Active moiety: risperidone + 9-OH-risperidone',
+        'n-desmetil metabolitos (activos)': 'N-desmethyl metabolites (active)'
     };
 
     const COLORS = {
@@ -460,7 +469,7 @@
         if (!el) return;
         const f = db.find(x => x.farmaco === st[k].name);
         if (!f) { el.innerHTML = ''; el.style.display = 'none'; return; }
-        const c = f.comentario ? ` · ${esc(commentTxt(f.comentario))}` : '';
+        const c = f.comentario ? ` · <b>${esc(commentTxt(f.comentario))}</b>` : '';
         el.innerHTML = `<i class="fas fa-flask"></i> ${T().params(fmt(f.t12), fmt(f.tmax, 2))}${c}`;
         el.style.display = '';
     }
